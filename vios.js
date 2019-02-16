@@ -435,6 +435,10 @@ function fct_query(q, viewType, opt){
           console.log("View Type: " + viewType);
         }
 
+        $('#reportQueryTime').text(time);
+        $('#reportQueryTimeout').text(timeout);
+        $('#reportQueryComplete').text(complete);
+
         if(!xml.startsWith('<')) {
           var filter = xml.substring(0, xml.indexOf('<fct:facets'));
           xml = xml.substring(xml.indexOf('<fct:facets'));
@@ -1659,7 +1663,7 @@ gbcol += '<div class="clearfix">';
               gbcol += '</ul>';
             gbcol += '</div>';
           gbcol += '</div>';
-          gbcol += '<p id="resultsReport">query time: 2065, timeout: 8000, complete: yes</p>';
+          gbcol += '<p id="resultsReport">query time: <span id="reportQueryTime"></span>, timeout: <span id="reportQueryTimeout"></span>, complete: <span id="reportQueryComplete"></span></p>';
         gbcol += '</div>';
 
             gbcol += '</div>';
