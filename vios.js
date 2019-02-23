@@ -343,6 +343,7 @@ function formatDate(date) {
 
 
 function fct_query(q, viewType, opt){
+  $('[data-toggle="tooltip"]').tooltip('hide');
   fct_queryTimeout = getQueryTimeout();
   q = q.clone();
   fct_isCache = $('#isCache').is(':checked');
@@ -414,7 +415,15 @@ function fct_query(q, viewType, opt){
           jqXHR.data = settings.data;
       },
             success : function(xml) {
-              xml = xml.replaceAll('xml:lang', '');
+
+        var filter = '';
+        if(!xml.startsWith('<')) {
+          filter = xml.substring(0, xml.indexOf('<fct:facets'));
+          xml = xml.substring(xml.indexOf('<fct:facets'));
+          xml = xml.replace('fct:facets ', 'fct:facets timestamp="' + new Date().getTime() + '" ');          
+          //xml = xml.replace('fct:facets ', 'fct:facets sparql="' + sparql + '" ');
+        }
+        xml = xml.replaceAll('xml:lang', '');
         //xml = xml.replace('fct:','');
 
         /* there's a bug that causes "filter ..." to appear at the beginning of the response body, sometimes
@@ -428,6 +437,8 @@ function fct_query(q, viewType, opt){
 
           //if(!opt) opt = new Object();
           var sparql = getSparql(xml);
+          sparql = sparql.replace('} group', filter + '} group');
+
           var time = getTime(xml);
           var complete = getComplete(xml);
           var timeout = getTimeout(xml);
@@ -445,14 +456,6 @@ function fct_query(q, viewType, opt){
         $('#reportQueryTime').text(time);
         $('#reportQueryTimeout').text(timeout);
         $('#reportQueryComplete').text(complete);
-
-        if(!xml.startsWith('<')) {
-          var filter = xml.substring(0, xml.indexOf('<fct:facets'));
-          xml = xml.substring(xml.indexOf('<fct:facets'));
-          xml = xml.replace('fct:facets ', 'fct:facets timestamp="' + new Date().getTime() + '" ');          
-          //xml = xml.replace('fct:facets ', 'fct:facets sparql="' + sparql + '" ');
-          sparql = sparql.replace('} group', filter + '} group');
-        }
 
         if(complete === 'no') {
             fct_handleIncompleteResults($("fct\\:row", xml).length, opt, viewType, sparql, time, complete, timeout, dbActivity);
@@ -2017,6 +2020,8 @@ $('#notifications-dropdown-toggle').on('click', function(e){
       qSearchAllFields = null;
     }
 
+    loadGroupByMenuDefaults();
+
     preInitialized = true;
     if(fct_isPermalink) doQuery(getQueryText());    
 
@@ -2718,6 +2723,14 @@ if(!$('input').is(":focus")){
     else if(e.keyCode == '17') { // Control key
       ctrlDown = true;
     }    
+
+
+    else if(e.keyCode == '78') { // Control key
+      if(nav_type == NAV_TYPE_2) nav_type = NAV_TYPE_3;
+      else if(nav_type == NAV_TYPE_3) nav_type = NAV_TYPE_2;
+      doQuery(getQueryText());
+    }    
+
   }
 }
 if(e.keyCode == '17'){
@@ -3636,16 +3649,10 @@ function collapse(opts){
 }
 
 
+
+function loadGroupByMenuDefaults(){
+
 /*
-function loadGroupByMenu(xml){
-
-      var opts = "";
-      var result = $(xml).find("fct\\:result")[0];
-      var value, datatype, shortform, label, ct;
-      var defaultVal;
-
-
-
 
 
       $(_root.find('.'+getMainFocus().attr('class') + ' > property-of')).each(function(i) {
@@ -3677,20 +3684,41 @@ function loadGroupByMenu(xml){
           //console.log($(col[0]));
           opts += '<option defaultLabel="'+label+'" l="'+value+DELIMIT_GROUP_BY_VALUE_AND_LABEL+label+'" value="'+value+'" id="'+createId()+'">'+label+'</option>';
       });
+      */
       //console.log(rows);
 
       
           //var previousGroupBy = $('#groupByMenu :selected').attr('value');
           $('#groupByMenu').empty();
-          $('#groupByMenu').append('<option defaultLabel="'+GROUP_BY_NONE_LABEL+'" l="'+GROUP_BY_NONE_VALUE+DELIMIT_GROUP_BY_VALUE_AND_LABEL+GROUP_BY_NONE_LABEL+'"value="'+GROUP_BY_NONE_VALUE+'" id="'+createId()+'">'+GROUP_BY_NONE_LABEL+'</option>');
-          $('#groupByMenu').append('<option defaultLabel="'+GROUP_BY_TEXT_LABEL+'" l="'+GROUP_BY_TEXT_VALUE+DELIMIT_GROUP_BY_VALUE_AND_LABEL+GROUP_BY_NONE_LABEL+'"value="'+GROUP_BY_TEXT_VALUE+'" id="'+createId()+'">'+GROUP_BY_TEXT_LABEL+'</option>');
-          $('#groupByMenu').append(opts);
+
+    var opt = '';
+    var json = new Object();
+    json.label = GROUP_BY_NONE_LABEL;
+    json.iri = GROUP_BY_NONE_VALUE;
+    json.isReverse = false;
+    var v = $('#groupByMenu > option[value="'+GROUP_BY_NONE_VALUE+'"]');
+    if(!v || v.length <= 0){ // add the property if is does not exist in the groupby menu
+      opt = '<option json=\''+JSON.stringify(json)+'\' value="'+GROUP_BY_NONE_VALUE+'" id="'+createId()+'">'+GROUP_BY_NONE_LABEL+'</option>';
+      $('#groupByMenu').append(opt);
+    }
 
 
-          if(opts.length > 1) {
+    json = new Object();
+    json.label = GROUP_BY_TEXT_LABEL;
+    json.iri = GROUP_BY_TEXT_VALUE;
+    json.isReverse = false;
+    var v = $('#groupByMenu > option[value="'+GROUP_BY_TEXT_VALUE+'"]');
+    if(!v || v.length <= 0){ // add the property if is does not exist in the groupby menu
+      opt = '<option json=\''+JSON.stringify(json)+'\' value="'+GROUP_BY_TEXT_VALUE+'" id="'+createId()+'">'+GROUP_BY_TEXT_LABEL+'</option>';
+      $('#groupByMenu').append(opt);
+    }
+
+
+
+/*          if(opts.length > 1) {
               //$('#groupByMenu').val(defaultVal);
               //selectGroupBy();
-          }
+          }*/
 
 
         //$('#groupby').append(rows);
@@ -3699,7 +3727,7 @@ function loadGroupByMenu(xml){
 
 } // loadCategoriesResults
 
-*/
+
 
 
 function selectGroupBy(isPaging){
@@ -3708,9 +3736,11 @@ function selectGroupBy(isPaging){
     // update the Group By list
     var q = _root.find('query').clone();
     var gbjsonStr = $('#groupByMenu :selected').attr('json');
-    var gbjson = JSON.parse(gbjsonStr);
+    var gbjson = (gbjsonStr) ? JSON.parse(gbjsonStr) : {};
     var iri = gbjson.iri;
     var label = gbjson.label;
+    if(!iri) iri = $('#groupByMenu :selected').val();
+    if(!label) label = $('#groupByMenu :selected').text();
     if(iri == GROUP_BY_NONE_VALUE){
         //takeFocus(q, q);
       //$('#groupByHeader').text('Records');
@@ -3728,9 +3758,9 @@ function selectGroupBy(isPaging){
         // POI: user is not allowed to "add" a property-of facet (for now), instead, user must
         // manually add a field from the Roles menu, after that, the Roles field will 
         // appear in the Group by menu, if the focus has one
-        if(isReverse) prop = getFocus(q).children('property-of[iri="' +iri+ '"]');
+        if(isReverse) prop = $( getFocus(q).children('property-of[iri="' +iri+ '"]')[0] );
         else {
-          prop = getFocus(q).children('property[iri="' +iri+ '"]');
+          prop = $( getFocus(q).children('property[iri="' +iri+ '"]')[0] );
           if(!prop || prop.length == 0){
             prop = $.createElement('property');
             prop.attr('class', $('#groupByMenu :selected').attr('id'));
@@ -5151,9 +5181,20 @@ rows += '</td></tr>';
       //var breadcrumbs = $('#breadcrumbs');
       //var facetCollector = $('#facetCollector');
       //var focusCollector = $('#focusCollector');
-      var breadcrumbs = $('#angular_breadcrumbBar');
-      var facetCollector = $('#angular_facetCollector');
-      var focusCollector = $('#angular_focusCollector');
+      var breadcrumbs, facetCollector,focusCollector;
+      if(nav_type == NAV_TYPE_1){
+
+      }
+      else if(nav_type == NAV_TYPE_2){
+        breadcrumbs  = $('#angular_breadcrumbBar');
+        facetCollector = $('#angular_breadcrumbBar');
+        focusCollector = $('#angular_breadcrumbBar');
+      }
+      else if(nav_type == NAV_TYPE_3){
+        breadcrumbs  = $('#angular_breadcrumbBar');
+        facetCollector = $('#angular_facetCollector');
+        focusCollector = $('#angular_focusCollector');
+      }
       breadcrumbs.empty();
       facetCollector.empty();
       focusCollector.empty();
@@ -5205,7 +5246,7 @@ rows += '</td></tr>';
       //}
 
 
-//$('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
+$('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
 //var obj = { "show": 5000, "hide": 0 };
 //$('[data-toggle="tooltip"]').attr('data-delay',obj);
 
@@ -5445,25 +5486,42 @@ if(false){
         var bcOutline = (isEmptyValue) ? 'outline-default': 'primary';
         var bcOutlineRemove = (isEmptyValue) ? 'outline-': '';
         var of = (isPropOf && !desc.toLowerCase().endsWith('of')) ? ' of' : '';
-/*
-        var focusClass = (bcFacetType == BC_FACET_TYPE_FOCUS) ? ' current' : '';
-        $('#facetCollectorWidgetContainer').addClass('hide');
-        ret = '<li class="breadcrumb-item'+focusClass+'" id="nav'+id+'"><a  title="'+tooltip+'" data-delay=\'{ "show": "1000", "hide": "0" }\' data-toggle="tooltip" data-placement="top"><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></li>';
-*/
+
+        if(nav_type == NAV_TYPE_1){
+
+        }
+        else if(nav_type == NAV_TYPE_2){
+
+          var focusClass = (bcFacetType == BC_FACET_TYPE_FOCUS) ? ' current' : '';
+
+          if(bcFacetType == BC_FACET_TYPE_FOCUS){
+            outline = outline.replace('primary', 'info');
+            bcOutline = bcOutline.replace('primary', 'info');
+          }
+
+          $('#facetCollectorWidgetContainer').addClass('hide');
+          ret = '<li class="breadcrumb-item'+focusClass+'" id="nav'+id+'"><a  title="'+tooltip+'" data-delay=\'{ "show": "1000", "hide": "0" }\' data-toggle="tooltip" data-placement="top"><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></li>';
 
 
+        }
+        else if(nav_type == NAV_TYPE_3){
+          $('#facetCollectorWidgetContainer').removeClass('hide');
+          if(bcFacetType == BC_FACET_TYPE_FACET) {
+            ret = '<div style="padding: 0px; background-color:transparent;" class="row" title="'+tooltip+'" data-delay=\'{ "show": "'+tooltipShowDelay+'", "hide": "'+tooltipHideDelay+'" }\' data-toggle="tooltip" data-placement="top" id="nav'+id+'" '+focus+'><div style="display:inline; padding:0px;" class="text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6 style="vertical-align:bottom;margin-bottom:0px">&nbsp;<span onclick="javascript:'+action+'(\''+id+'\')" class="via" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')">' + ''+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+((len > 0) ? '</span>&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">'+len+'</span>' : '')+'</h6></div><button class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
+          }
+          else if(bcFacetType == BC_FACET_TYPE_FOCUS) {
+            ret = '<div style="padding: 0px; background-color:transparent;" class="row" title="'+tooltip+'" data-delay=\'{ "show": "'+tooltipShowDelay+'", "hide": "'+tooltipHideDelay+'" }\' data-toggle="tooltip" data-placement="top" id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')"><h3 class="fw-semi-bold" style="padding-bottom:4px" >'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</h3></div><button id="focusValue" class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
+          }
+          else { // isBreadCrumb
+            //ret = '<li class="breadcrumb-item"><div class="row" style="background-color:transparent;" title="'+tooltip+'" id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6>' + ''+desc+'</h6></div><button class="btn-rounded-f  btn btn-'+outline+'default btn-block btn-xs text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div></li>';
+    ret = '<li title="'+tooltip+'" data-delay=\'{ "show": "'+tooltipShowDelay+'", "hide": "'+tooltipHideDelay+'" }\' data-toggle="tooltip" data-placement="top" class="breadcrumb-item" id="nav'+id+'"><a><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></li>';
+  //  gbcol += '<li class="breadcrumb-item"><a  title=""><em>distributor</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-outline-default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\'0\')">'+VALUE_ANON_NODE+'</button></li>';
+          }
 
-        if(bcFacetType == BC_FACET_TYPE_FACET) {
-          ret = '<div style="padding: 0px; background-color:transparent;" class="row" title="'+tooltip+'" data-delay=\'{ "show": "1000", "hide": "0" }\' data-toggle="tooltip" data-placement="top" id="nav'+id+'" '+focus+'><div style="display:inline; padding:0px;" class="text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6 style="vertical-align:bottom;margin-bottom:0px">&nbsp;<span onclick="javascript:'+action+'(\''+id+'\')" class="via" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')">' + ''+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+((len > 0) ? '</span>&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">'+len+'</span>' : '')+'</h6></div><button class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
+
         }
-        else if(bcFacetType == BC_FACET_TYPE_FOCUS) {
-          ret = '<div style="padding: 0px; background-color:transparent;" class="row" title="'+tooltip+'" data-delay=\'{ "show": "1000", "hide": "0" }\' data-toggle="tooltip" data-placement="top" id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')"><h3 class="fw-semi-bold" style="padding-bottom:4px" >'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</h3></div><button id="focusValue" class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
-        }
-        else { // isBreadCrumb
-          //ret = '<li class="breadcrumb-item"><div class="row" style="background-color:transparent;" title="'+tooltip+'" id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6>' + ''+desc+'</h6></div><button class="btn-rounded-f  btn btn-'+outline+'default btn-block btn-xs text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div></li>';
-  ret = '<li class="breadcrumb-item" id="nav'+id+'"><a  title="'+tooltip+'" data-delay=\'{ "show": "1000", "hide": "0" }\' data-toggle="tooltip" data-placement="top"><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></li>';
-//  gbcol += '<li class="breadcrumb-item"><a  title=""><em>distributor</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-outline-default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\'0\')">'+VALUE_ANON_NODE+'</button></li>';
-        }
+
+
 
 
 /*
@@ -5478,6 +5536,22 @@ if(false){
         //console.log("bc added: " + ret);
         */
         return ret;
+    }
+
+    const NAV_TYPE_1 = 1;
+    const NAV_TYPE_2 = 2;
+    const NAV_TYPE_3 = 3;
+    var nav_type = NAV_TYPE_3;
+
+    var tooltipShowDelay = 1500;
+    var tooltipHideDelay = 0;
+
+    function setNavType(type){
+      nav_type = type;
+    }
+
+    function getNavType(){
+      return nav_type;
     }
 
     function aOrAn(word){
