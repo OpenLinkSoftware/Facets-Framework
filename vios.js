@@ -40,12 +40,9 @@ jQuery.each(json, function(i, val) {
 }
 */
 
-/** qTip **/
-/* qtip2 v3.0.3 | Plugins: tips modal viewport svg imagemap ie6 | Styles: core basic css3 | qtip2.com | Licensed MIT | Wed May 11 2016 22:31:31 */
 
-!function(a,b,c){!function(a){"use strict";"function"==typeof define&&define.amd?define(["jquery"],a):jQuery&&!jQuery.fn.qtip&&a(jQuery)}(function(d){"use strict";function e(a,b,c,e){this.id=c,this.target=a,this.tooltip=F,this.elements={target:a},this._id=S+"-"+c,this.timers={img:{}},this.options=b,this.plugins={},this.cache={event:{},target:d(),disabled:E,attr:e,onTooltip:E,lastClass:""},this.rendered=this.destroyed=this.disabled=this.waiting=this.hiddenDuringWait=this.positioning=this.triggering=E}function f(a){return a===F||"object"!==d.type(a)}function g(a){return!(d.isFunction(a)||a&&a.attr||a.length||"object"===d.type(a)&&(a.jquery||a.then))}function h(a){var b,c,e,h;return f(a)?E:(f(a.metadata)&&(a.metadata={type:a.metadata}),"content"in a&&(b=a.content,f(b)||b.jquery||b.done?(c=g(b)?E:b,b=a.content={text:c}):c=b.text,"ajax"in b&&(e=b.ajax,h=e&&e.once!==E,delete b.ajax,b.text=function(a,b){var f=c||d(this).attr(b.options.content.attr)||"Loading...",g=d.ajax(d.extend({},e,{context:b})).then(e.success,F,e.error).then(function(a){return a&&h&&b.set("content.text",a),a},function(a,c,d){b.destroyed||0===a.status||b.set("content.text",c+": "+d)});return h?f:(b.set("content.text",f),g)}),"title"in b&&(d.isPlainObject(b.title)&&(b.button=b.title.button,b.title=b.title.text),g(b.title||E)&&(b.title=E))),"position"in a&&f(a.position)&&(a.position={my:a.position,at:a.position}),"show"in a&&f(a.show)&&(a.show=a.show.jquery?{target:a.show}:a.show===D?{ready:D}:{event:a.show}),"hide"in a&&f(a.hide)&&(a.hide=a.hide.jquery?{target:a.hide}:{event:a.hide}),"style"in a&&f(a.style)&&(a.style={classes:a.style}),d.each(R,function(){this.sanitize&&this.sanitize(a)}),a)}function i(a,b){for(var c,d=0,e=a,f=b.split(".");e=e[f[d++]];)d<f.length&&(c=e);return[c||a,f.pop()]}function j(a,b){var c,d,e;for(c in this.checks)if(this.checks.hasOwnProperty(c))for(d in this.checks[c])this.checks[c].hasOwnProperty(d)&&(e=new RegExp(d,"i").exec(a))&&(b.push(e),("builtin"===c||this.plugins[c])&&this.checks[c][d].apply(this.plugins[c]||this,b))}function k(a){return V.concat("").join(a?"-"+a+" ":" ")}function l(a,b){return b>0?setTimeout(d.proxy(a,this),b):void a.call(this)}function m(a){this.tooltip.hasClass(aa)||(clearTimeout(this.timers.show),clearTimeout(this.timers.hide),this.timers.show=l.call(this,function(){this.toggle(D,a)},this.options.show.delay))}function n(a){if(!this.tooltip.hasClass(aa)&&!this.destroyed){var b=d(a.relatedTarget),c=b.closest(W)[0]===this.tooltip[0],e=b[0]===this.options.show.target[0];if(clearTimeout(this.timers.show),clearTimeout(this.timers.hide),this!==b[0]&&"mouse"===this.options.position.target&&c||this.options.hide.fixed&&/mouse(out|leave|move)/.test(a.type)&&(c||e))try{a.preventDefault(),a.stopImmediatePropagation()}catch(f){}else this.timers.hide=l.call(this,function(){this.toggle(E,a)},this.options.hide.delay,this)}}function o(a){!this.tooltip.hasClass(aa)&&this.options.hide.inactive&&(clearTimeout(this.timers.inactive),this.timers.inactive=l.call(this,function(){this.hide(a)},this.options.hide.inactive))}function p(a){this.rendered&&this.tooltip[0].offsetWidth>0&&this.reposition(a)}function q(a,c,e){d(b.body).delegate(a,(c.split?c:c.join("."+S+" "))+"."+S,function(){var a=y.api[d.attr(this,U)];a&&!a.disabled&&e.apply(a,arguments)})}function r(a,c,f){var g,i,j,k,l,m=d(b.body),n=a[0]===b?m:a,o=a.metadata?a.metadata(f.metadata):F,p="html5"===f.metadata.type&&o?o[f.metadata.name]:F,q=a.data(f.metadata.name||"qtipopts");try{q="string"==typeof q?d.parseJSON(q):q}catch(r){}if(k=d.extend(D,{},y.defaults,f,"object"==typeof q?h(q):F,h(p||o)),i=k.position,k.id=c,"boolean"==typeof k.content.text){if(j=a.attr(k.content.attr),k.content.attr===E||!j)return E;k.content.text=j}if(i.container.length||(i.container=m),i.target===E&&(i.target=n),k.show.target===E&&(k.show.target=n),k.show.solo===D&&(k.show.solo=i.container.closest("body")),k.hide.target===E&&(k.hide.target=n),k.position.viewport===D&&(k.position.viewport=i.container),i.container=i.container.eq(0),i.at=new A(i.at,D),i.my=new A(i.my),a.data(S))if(k.overwrite)a.qtip("destroy",!0);else if(k.overwrite===E)return E;return a.attr(T,c),k.suppress&&(l=a.attr("title"))&&a.removeAttr("title").attr(ca,l).attr("title",""),g=new e(a,k,c,!!j),a.data(S,g),g}function s(a){return a.charAt(0).toUpperCase()+a.slice(1)}function t(a,b){var d,e,f=b.charAt(0).toUpperCase()+b.slice(1),g=(b+" "+va.join(f+" ")+f).split(" "),h=0;if(ua[b])return a.css(ua[b]);for(;d=g[h++];)if((e=a.css(d))!==c)return ua[b]=d,e}function u(a,b){return Math.ceil(parseFloat(t(a,b)))}function v(a,b){this._ns="tip",this.options=b,this.offset=b.offset,this.size=[b.width,b.height],this.qtip=a,this.init(a)}function w(a,b){this.options=b,this._ns="-modal",this.qtip=a,this.init(a)}function x(a){this._ns="ie6",this.qtip=a,this.init(a)}var y,z,A,B,C,D=!0,E=!1,F=null,G="x",H="y",I="width",J="height",K="top",L="left",M="bottom",N="right",O="center",P="flipinvert",Q="shift",R={},S="qtip",T="data-hasqtip",U="data-qtip-id",V=["ui-widget","ui-tooltip"],W="."+S,X="click dblclick mousedown mouseup mousemove mouseleave mouseenter".split(" "),Y=S+"-fixed",Z=S+"-default",$=S+"-focus",_=S+"-hover",aa=S+"-disabled",ba="_replacedByqTip",ca="oldtitle",da={ie:function(){var a,c;for(a=4,c=b.createElement("div");(c.innerHTML="<!--[if gt IE "+a+"]><i></i><![endif]-->")&&c.getElementsByTagName("i")[0];a+=1);return a>4?a:NaN}(),iOS:parseFloat((""+(/CPU.*OS ([0-9_]{1,5})|(CPU like).*AppleWebKit.*Mobile/i.exec(navigator.userAgent)||[0,""])[1]).replace("undefined","3_2").replace("_",".").replace("_",""))||E};z=e.prototype,z._when=function(a){return d.when.apply(d,a)},z.render=function(a){if(this.rendered||this.destroyed)return this;var b=this,c=this.options,e=this.cache,f=this.elements,g=c.content.text,h=c.content.title,i=c.content.button,j=c.position,k=[];return d.attr(this.target[0],"aria-describedby",this._id),e.posClass=this._createPosClass((this.position={my:j.my,at:j.at}).my),this.tooltip=f.tooltip=d("<div/>",{id:this._id,"class":[S,Z,c.style.classes,e.posClass].join(" "),width:c.style.width||"",height:c.style.height||"",tracking:"mouse"===j.target&&j.adjust.mouse,role:"alert","aria-live":"polite","aria-atomic":E,"aria-describedby":this._id+"-content","aria-hidden":D}).toggleClass(aa,this.disabled).attr(U,this.id).data(S,this).appendTo(j.container).append(f.content=d("<div />",{"class":S+"-content",id:this._id+"-content","aria-atomic":D})),this.rendered=-1,this.positioning=D,h&&(this._createTitle(),d.isFunction(h)||k.push(this._updateTitle(h,E))),i&&this._createButton(),d.isFunction(g)||k.push(this._updateContent(g,E)),this.rendered=D,this._setWidget(),d.each(R,function(a){var c;"render"===this.initialize&&(c=this(b))&&(b.plugins[a]=c)}),this._unassignEvents(),this._assignEvents(),this._when(k).then(function(){b._trigger("render"),b.positioning=E,b.hiddenDuringWait||!c.show.ready&&!a||b.toggle(D,e.event,E),b.hiddenDuringWait=E}),y.api[this.id]=this,this},z.destroy=function(a){function b(){if(!this.destroyed){this.destroyed=D;var a,b=this.target,c=b.attr(ca);this.rendered&&this.tooltip.stop(1,0).find("*").remove().end().remove(),d.each(this.plugins,function(){this.destroy&&this.destroy()});for(a in this.timers)this.timers.hasOwnProperty(a)&&clearTimeout(this.timers[a]);b.removeData(S).removeAttr(U).removeAttr(T).removeAttr("aria-describedby"),this.options.suppress&&c&&b.attr("title",c).removeAttr(ca),this._unassignEvents(),this.options=this.elements=this.cache=this.timers=this.plugins=this.mouse=F,delete y.api[this.id]}}return this.destroyed?this.target:(a===D&&"hide"!==this.triggering||!this.rendered?b.call(this):(this.tooltip.one("tooltiphidden",d.proxy(b,this)),!this.triggering&&this.hide()),this.target)},B=z.checks={builtin:{"^id$":function(a,b,c,e){var f=c===D?y.nextid:c,g=S+"-"+f;f!==E&&f.length>0&&!d("#"+g).length?(this._id=g,this.rendered&&(this.tooltip[0].id=this._id,this.elements.content[0].id=this._id+"-content",this.elements.title[0].id=this._id+"-title")):a[b]=e},"^prerender":function(a,b,c){c&&!this.rendered&&this.render(this.options.show.ready)},"^content.text$":function(a,b,c){this._updateContent(c)},"^content.attr$":function(a,b,c,d){this.options.content.text===this.target.attr(d)&&this._updateContent(this.target.attr(c))},"^content.title$":function(a,b,c){return c?(c&&!this.elements.title&&this._createTitle(),void this._updateTitle(c)):this._removeTitle()},"^content.button$":function(a,b,c){this._updateButton(c)},"^content.title.(text|button)$":function(a,b,c){this.set("content."+b,c)},"^position.(my|at)$":function(a,b,c){"string"==typeof c&&(this.position[b]=a[b]=new A(c,"at"===b))},"^position.container$":function(a,b,c){this.rendered&&this.tooltip.appendTo(c)},"^show.ready$":function(a,b,c){c&&(!this.rendered&&this.render(D)||this.toggle(D))},"^style.classes$":function(a,b,c,d){this.rendered&&this.tooltip.removeClass(d).addClass(c)},"^style.(width|height)":function(a,b,c){this.rendered&&this.tooltip.css(b,c)},"^style.widget|content.title":function(){this.rendered&&this._setWidget()},"^style.def":function(a,b,c){this.rendered&&this.tooltip.toggleClass(Z,!!c)},"^events.(render|show|move|hide|focus|blur)$":function(a,b,c){this.rendered&&this.tooltip[(d.isFunction(c)?"":"un")+"bind"]("tooltip"+b,c)},"^(show|hide|position).(event|target|fixed|inactive|leave|distance|viewport|adjust)":function(){if(this.rendered){var a=this.options.position;this.tooltip.attr("tracking","mouse"===a.target&&a.adjust.mouse),this._unassignEvents(),this._assignEvents()}}}},z.get=function(a){if(this.destroyed)return this;var b=i(this.options,a.toLowerCase()),c=b[0][b[1]];return c.precedance?c.string():c};var ea=/^position\.(my|at|adjust|target|container|viewport)|style|content|show\.ready/i,fa=/^prerender|show\.ready/i;z.set=function(a,b){if(this.destroyed)return this;var c,e=this.rendered,f=E,g=this.options;return"string"==typeof a?(c=a,a={},a[c]=b):a=d.extend({},a),d.each(a,function(b,c){if(e&&fa.test(b))return void delete a[b];var h,j=i(g,b.toLowerCase());h=j[0][j[1]],j[0][j[1]]=c&&c.nodeType?d(c):c,f=ea.test(b)||f,a[b]=[j[0],j[1],c,h]}),h(g),this.positioning=D,d.each(a,d.proxy(j,this)),this.positioning=E,this.rendered&&this.tooltip[0].offsetWidth>0&&f&&this.reposition("mouse"===g.position.target?F:this.cache.event),this},z._update=function(a,b){var c=this,e=this.cache;return this.rendered&&a?(d.isFunction(a)&&(a=a.call(this.elements.target,e.event,this)||""),d.isFunction(a.then)?(e.waiting=D,a.then(function(a){return e.waiting=E,c._update(a,b)},F,function(a){return c._update(a,b)})):a===E||!a&&""!==a?E:(a.jquery&&a.length>0?b.empty().append(a.css({display:"block",visibility:"visible"})):b.html(a),this._waitForContent(b).then(function(a){c.rendered&&c.tooltip[0].offsetWidth>0&&c.reposition(e.event,!a.length)}))):E},z._waitForContent=function(a){var b=this.cache;return b.waiting=D,(d.fn.imagesLoaded?a.imagesLoaded():(new d.Deferred).resolve([])).done(function(){b.waiting=E}).promise()},z._updateContent=function(a,b){this._update(a,this.elements.content,b)},z._updateTitle=function(a,b){this._update(a,this.elements.title,b)===E&&this._removeTitle(E)},z._createTitle=function(){var a=this.elements,b=this._id+"-title";a.titlebar&&this._removeTitle(),a.titlebar=d("<div />",{"class":S+"-titlebar "+(this.options.style.widget?k("header"):"")}).append(a.title=d("<div />",{id:b,"class":S+"-title","aria-atomic":D})).insertBefore(a.content).delegate(".qtip-close","mousedown keydown mouseup keyup mouseout",function(a){d(this).toggleClass("ui-state-active ui-state-focus","down"===a.type.substr(-4))}).delegate(".qtip-close","mouseover mouseout",function(a){d(this).toggleClass("ui-state-hover","mouseover"===a.type)}),this.options.content.button&&this._createButton()},z._removeTitle=function(a){var b=this.elements;b.title&&(b.titlebar.remove(),b.titlebar=b.title=b.button=F,a!==E&&this.reposition())},z._createPosClass=function(a){return S+"-pos-"+(a||this.options.position.my).abbrev()},z.reposition=function(c,e){if(!this.rendered||this.positioning||this.destroyed)return this;this.positioning=D;var f,g,h,i,j=this.cache,k=this.tooltip,l=this.options.position,m=l.target,n=l.my,o=l.at,p=l.viewport,q=l.container,r=l.adjust,s=r.method.split(" "),t=k.outerWidth(E),u=k.outerHeight(E),v=0,w=0,x=k.css("position"),y={left:0,top:0},z=k[0].offsetWidth>0,A=c&&"scroll"===c.type,B=d(a),C=q[0].ownerDocument,F=this.mouse;if(d.isArray(m)&&2===m.length)o={x:L,y:K},y={left:m[0],top:m[1]};else if("mouse"===m)o={x:L,y:K},(!r.mouse||this.options.hide.distance)&&j.origin&&j.origin.pageX?c=j.origin:!c||c&&("resize"===c.type||"scroll"===c.type)?c=j.event:F&&F.pageX&&(c=F),"static"!==x&&(y=q.offset()),C.body.offsetWidth!==(a.innerWidth||C.documentElement.clientWidth)&&(g=d(b.body).offset()),y={left:c.pageX-y.left+(g&&g.left||0),top:c.pageY-y.top+(g&&g.top||0)},r.mouse&&A&&F&&(y.left-=(F.scrollX||0)-B.scrollLeft(),y.top-=(F.scrollY||0)-B.scrollTop());else{if("event"===m?c&&c.target&&"scroll"!==c.type&&"resize"!==c.type?j.target=d(c.target):c.target||(j.target=this.elements.target):"event"!==m&&(j.target=d(m.jquery?m:this.elements.target)),m=j.target,m=d(m).eq(0),0===m.length)return this;m[0]===b||m[0]===a?(v=da.iOS?a.innerWidth:m.width(),w=da.iOS?a.innerHeight:m.height(),m[0]===a&&(y={top:(p||m).scrollTop(),left:(p||m).scrollLeft()})):R.imagemap&&m.is("area")?f=R.imagemap(this,m,o,R.viewport?s:E):R.svg&&m&&m[0].ownerSVGElement?f=R.svg(this,m,o,R.viewport?s:E):(v=m.outerWidth(E),w=m.outerHeight(E),y=m.offset()),f&&(v=f.width,w=f.height,g=f.offset,y=f.position),y=this.reposition.offset(m,y,q),(da.iOS>3.1&&da.iOS<4.1||da.iOS>=4.3&&da.iOS<4.33||!da.iOS&&"fixed"===x)&&(y.left-=B.scrollLeft(),y.top-=B.scrollTop()),(!f||f&&f.adjustable!==E)&&(y.left+=o.x===N?v:o.x===O?v/2:0,y.top+=o.y===M?w:o.y===O?w/2:0)}return y.left+=r.x+(n.x===N?-t:n.x===O?-t/2:0),y.top+=r.y+(n.y===M?-u:n.y===O?-u/2:0),R.viewport?(h=y.adjusted=R.viewport(this,y,l,v,w,t,u),g&&h.left&&(y.left+=g.left),g&&h.top&&(y.top+=g.top),h.my&&(this.position.my=h.my)):y.adjusted={left:0,top:0},j.posClass!==(i=this._createPosClass(this.position.my))&&(j.posClass=i,k.removeClass(j.posClass).addClass(i)),this._trigger("move",[y,p.elem||p],c)?(delete y.adjusted,e===E||!z||isNaN(y.left)||isNaN(y.top)||"mouse"===m||!d.isFunction(l.effect)?k.css(y):d.isFunction(l.effect)&&(l.effect.call(k,this,d.extend({},y)),k.queue(function(a){d(this).css({opacity:"",height:""}),da.ie&&this.style.removeAttribute("filter"),a()})),this.positioning=E,this):this},z.reposition.offset=function(a,c,e){function f(a,b){c.left+=b*a.scrollLeft(),c.top+=b*a.scrollTop()}if(!e[0])return c;var g,h,i,j,k=d(a[0].ownerDocument),l=!!da.ie&&"CSS1Compat"!==b.compatMode,m=e[0];do"static"!==(h=d.css(m,"position"))&&("fixed"===h?(i=m.getBoundingClientRect(),f(k,-1)):(i=d(m).position(),i.left+=parseFloat(d.css(m,"borderLeftWidth"))||0,i.top+=parseFloat(d.css(m,"borderTopWidth"))||0),c.left-=i.left+(parseFloat(d.css(m,"marginLeft"))||0),c.top-=i.top+(parseFloat(d.css(m,"marginTop"))||0),g||"hidden"===(j=d.css(m,"overflow"))||"visible"===j||(g=d(m)));while(m=m.offsetParent);return g&&(g[0]!==k[0]||l)&&f(g,1),c};var ga=(A=z.reposition.Corner=function(a,b){a=(""+a).replace(/([A-Z])/," $1").replace(/middle/gi,O).toLowerCase(),this.x=(a.match(/left|right/i)||a.match(/center/)||["inherit"])[0].toLowerCase(),this.y=(a.match(/top|bottom|center/i)||["inherit"])[0].toLowerCase(),this.forceY=!!b;var c=a.charAt(0);this.precedance="t"===c||"b"===c?H:G}).prototype;ga.invert=function(a,b){this[a]=this[a]===L?N:this[a]===N?L:b||this[a]},ga.string=function(a){var b=this.x,c=this.y,d=b!==c?"center"===b||"center"!==c&&(this.precedance===H||this.forceY)?[c,b]:[b,c]:[b];return a!==!1?d.join(" "):d},ga.abbrev=function(){var a=this.string(!1);return a[0].charAt(0)+(a[1]&&a[1].charAt(0)||"")},ga.clone=function(){return new A(this.string(),this.forceY)},z.toggle=function(a,c){var e=this.cache,f=this.options,g=this.tooltip;if(c){if(/over|enter/.test(c.type)&&e.event&&/out|leave/.test(e.event.type)&&f.show.target.add(c.target).length===f.show.target.length&&g.has(c.relatedTarget).length)return this;e.event=d.event.fix(c)}if(this.waiting&&!a&&(this.hiddenDuringWait=D),!this.rendered)return a?this.render(1):this;if(this.destroyed||this.disabled)return this;var h,i,j,k=a?"show":"hide",l=this.options[k],m=this.options.position,n=this.options.content,o=this.tooltip.css("width"),p=this.tooltip.is(":visible"),q=a||1===l.target.length,r=!c||l.target.length<2||e.target[0]===c.target;return(typeof a).search("boolean|number")&&(a=!p),h=!g.is(":animated")&&p===a&&r,i=h?F:!!this._trigger(k,[90]),this.destroyed?this:(i!==E&&a&&this.focus(c),!i||h?this:(d.attr(g[0],"aria-hidden",!a),a?(this.mouse&&(e.origin=d.event.fix(this.mouse)),d.isFunction(n.text)&&this._updateContent(n.text,E),d.isFunction(n.title)&&this._updateTitle(n.title,E),!C&&"mouse"===m.target&&m.adjust.mouse&&(d(b).bind("mousemove."+S,this._storeMouse),C=D),o||g.css("width",g.outerWidth(E)),this.reposition(c,arguments[2]),o||g.css("width",""),l.solo&&("string"==typeof l.solo?d(l.solo):d(W,l.solo)).not(g).not(l.target).qtip("hide",new d.Event("tooltipsolo"))):(clearTimeout(this.timers.show),delete e.origin,C&&!d(W+'[tracking="true"]:visible',l.solo).not(g).length&&(d(b).unbind("mousemove."+S),C=E),this.blur(c)),j=d.proxy(function(){a?(da.ie&&g[0].style.removeAttribute("filter"),g.css("overflow",""),"string"==typeof l.autofocus&&d(this.options.show.autofocus,g).focus(),this.options.show.target.trigger("qtip-"+this.id+"-inactive")):g.css({display:"",visibility:"",opacity:"",left:"",top:""}),this._trigger(a?"visible":"hidden")},this),l.effect===E||q===E?(g[k](),j()):d.isFunction(l.effect)?(g.stop(1,1),l.effect.call(g,this),g.queue("fx",function(a){j(),a()})):g.fadeTo(90,a?1:0,j),a&&l.target.trigger("qtip-"+this.id+"-inactive"),this))},z.show=function(a){return this.toggle(D,a)},z.hide=function(a){return this.toggle(E,a)},z.focus=function(a){if(!this.rendered||this.destroyed)return this;var b=d(W),c=this.tooltip,e=parseInt(c[0].style.zIndex,10),f=y.zindex+b.length;return c.hasClass($)||this._trigger("focus",[f],a)&&(e!==f&&(b.each(function(){this.style.zIndex>e&&(this.style.zIndex=this.style.zIndex-1)}),b.filter("."+$).qtip("blur",a)),c.addClass($)[0].style.zIndex=f),this},z.blur=function(a){return!this.rendered||this.destroyed?this:(this.tooltip.removeClass($),this._trigger("blur",[this.tooltip.css("zIndex")],a),this)},z.disable=function(a){return this.destroyed?this:("toggle"===a?a=!(this.rendered?this.tooltip.hasClass(aa):this.disabled):"boolean"!=typeof a&&(a=D),this.rendered&&this.tooltip.toggleClass(aa,a).attr("aria-disabled",a),this.disabled=!!a,this)},z.enable=function(){return this.disable(E)},z._createButton=function(){var a=this,b=this.elements,c=b.tooltip,e=this.options.content.button,f="string"==typeof e,g=f?e:"Close tooltip";b.button&&b.button.remove(),e.jquery?b.button=e:b.button=d("<a />",{"class":"qtip-close "+(this.options.style.widget?"":S+"-icon"),title:g,"aria-label":g}).prepend(d("<span />",{"class":"ui-icon ui-icon-close",html:"&times;"})),b.button.appendTo(b.titlebar||c).attr("role","button").click(function(b){return c.hasClass(aa)||a.hide(b),E})},z._updateButton=function(a){if(!this.rendered)return E;var b=this.elements.button;a?this._createButton():b.remove()},z._setWidget=function(){var a=this.options.style.widget,b=this.elements,c=b.tooltip,d=c.hasClass(aa);c.removeClass(aa),aa=a?"ui-state-disabled":"qtip-disabled",c.toggleClass(aa,d),c.toggleClass("ui-helper-reset "+k(),a).toggleClass(Z,this.options.style.def&&!a),b.content&&b.content.toggleClass(k("content"),a),b.titlebar&&b.titlebar.toggleClass(k("header"),a),b.button&&b.button.toggleClass(S+"-icon",!a)},z._storeMouse=function(a){return(this.mouse=d.event.fix(a)).type="mousemove",this},z._bind=function(a,b,c,e,f){if(a&&c&&b.length){var g="."+this._id+(e?"-"+e:"");return d(a).bind((b.split?b:b.join(g+" "))+g,d.proxy(c,f||this)),this}},z._unbind=function(a,b){return a&&d(a).unbind("."+this._id+(b?"-"+b:"")),this},z._trigger=function(a,b,c){var e=new d.Event("tooltip"+a);return e.originalEvent=c&&d.extend({},c)||this.cache.event||F,this.triggering=a,this.tooltip.trigger(e,[this].concat(b||[])),this.triggering=E,!e.isDefaultPrevented()},z._bindEvents=function(a,b,c,e,f,g){var h=c.filter(e).add(e.filter(c)),i=[];h.length&&(d.each(b,function(b,c){var e=d.inArray(c,a);e>-1&&i.push(a.splice(e,1)[0])}),i.length&&(this._bind(h,i,function(a){var b=this.rendered?this.tooltip[0].offsetWidth>0:!1;(b?g:f).call(this,a)}),c=c.not(h),e=e.not(h))),this._bind(c,a,f),this._bind(e,b,g)},z._assignInitialEvents=function(a){function b(a){return this.disabled||this.destroyed?E:(this.cache.event=a&&d.event.fix(a),this.cache.target=a&&d(a.target),clearTimeout(this.timers.show),void(this.timers.show=l.call(this,function(){this.render("object"==typeof a||c.show.ready)},c.prerender?0:c.show.delay)))}var c=this.options,e=c.show.target,f=c.hide.target,g=c.show.event?d.trim(""+c.show.event).split(" "):[],h=c.hide.event?d.trim(""+c.hide.event).split(" "):[];this._bind(this.elements.target,["remove","removeqtip"],function(){this.destroy(!0)},"destroy"),/mouse(over|enter)/i.test(c.show.event)&&!/mouse(out|leave)/i.test(c.hide.event)&&h.push("mouseleave"),this._bind(e,"mousemove",function(a){this._storeMouse(a),this.cache.onTarget=D}),this._bindEvents(g,h,e,f,b,function(){return this.timers?void clearTimeout(this.timers.show):E}),(c.show.ready||c.prerender)&&b.call(this,a)},z._assignEvents=function(){var c=this,e=this.options,f=e.position,g=this.tooltip,h=e.show.target,i=e.hide.target,j=f.container,k=f.viewport,l=d(b),q=d(a),r=e.show.event?d.trim(""+e.show.event).split(" "):[],s=e.hide.event?d.trim(""+e.hide.event).split(" "):[];d.each(e.events,function(a,b){c._bind(g,"toggle"===a?["tooltipshow","tooltiphide"]:["tooltip"+a],b,null,g)}),/mouse(out|leave)/i.test(e.hide.event)&&"window"===e.hide.leave&&this._bind(l,["mouseout","blur"],function(a){/select|option/.test(a.target.nodeName)||a.relatedTarget||this.hide(a)}),e.hide.fixed?i=i.add(g.addClass(Y)):/mouse(over|enter)/i.test(e.show.event)&&this._bind(i,"mouseleave",function(){clearTimeout(this.timers.show)}),(""+e.hide.event).indexOf("unfocus")>-1&&this._bind(j.closest("html"),["mousedown","touchstart"],function(a){var b=d(a.target),c=this.rendered&&!this.tooltip.hasClass(aa)&&this.tooltip[0].offsetWidth>0,e=b.parents(W).filter(this.tooltip[0]).length>0;b[0]===this.target[0]||b[0]===this.tooltip[0]||e||this.target.has(b[0]).length||!c||this.hide(a)}),"number"==typeof e.hide.inactive&&(this._bind(h,"qtip-"+this.id+"-inactive",o,"inactive"),this._bind(i.add(g),y.inactiveEvents,o)),this._bindEvents(r,s,h,i,m,n),this._bind(h.add(g),"mousemove",function(a){if("number"==typeof e.hide.distance){var b=this.cache.origin||{},c=this.options.hide.distance,d=Math.abs;(d(a.pageX-b.pageX)>=c||d(a.pageY-b.pageY)>=c)&&this.hide(a)}this._storeMouse(a)}),"mouse"===f.target&&f.adjust.mouse&&(e.hide.event&&this._bind(h,["mouseenter","mouseleave"],function(a){return this.cache?void(this.cache.onTarget="mouseenter"===a.type):E}),this._bind(l,"mousemove",function(a){this.rendered&&this.cache.onTarget&&!this.tooltip.hasClass(aa)&&this.tooltip[0].offsetWidth>0&&this.reposition(a)})),(f.adjust.resize||k.length)&&this._bind(d.event.special.resize?k:q,"resize",p),f.adjust.scroll&&this._bind(q.add(f.container),"scroll",p)},z._unassignEvents=function(){var c=this.options,e=c.show.target,f=c.hide.target,g=d.grep([this.elements.target[0],this.rendered&&this.tooltip[0],c.position.container[0],c.position.viewport[0],c.position.container.closest("html")[0],a,b],function(a){return"object"==typeof a});e&&e.toArray&&(g=g.concat(e.toArray())),f&&f.toArray&&(g=g.concat(f.toArray())),this._unbind(g)._unbind(g,"destroy")._unbind(g,"inactive")},d(function(){q(W,["mouseenter","mouseleave"],function(a){var b="mouseenter"===a.type,c=d(a.currentTarget),e=d(a.relatedTarget||a.target),f=this.options;b?(this.focus(a),c.hasClass(Y)&&!c.hasClass(aa)&&clearTimeout(this.timers.hide)):"mouse"===f.position.target&&f.position.adjust.mouse&&f.hide.event&&f.show.target&&!e.closest(f.show.target[0]).length&&this.hide(a),c.toggleClass(_,b)}),q("["+U+"]",X,o)}),y=d.fn.qtip=function(a,b,e){var f=(""+a).toLowerCase(),g=F,i=d.makeArray(arguments).slice(1),j=i[i.length-1],k=this[0]?d.data(this[0],S):F;return!arguments.length&&k||"api"===f?k:"string"==typeof a?(this.each(function(){var a=d.data(this,S);if(!a)return D;if(j&&j.timeStamp&&(a.cache.event=j),!b||"option"!==f&&"options"!==f)a[f]&&a[f].apply(a,i);else{if(e===c&&!d.isPlainObject(b))return g=a.get(b),E;a.set(b,e)}}),g!==F?g:this):"object"!=typeof a&&arguments.length?void 0:(k=h(d.extend(D,{},a)),this.each(function(a){var b,c;return c=d.isArray(k.id)?k.id[a]:k.id,c=!c||c===E||c.length<1||y.api[c]?y.nextid++:c,b=r(d(this),c,k),b===E?D:(y.api[c]=b,d.each(R,function(){"initialize"===this.initialize&&this(b)}),void b._assignInitialEvents(j))}))},d.qtip=e,y.api={},d.each({attr:function(a,b){if(this.length){var c=this[0],e="title",f=d.data(c,"qtip");if(a===e&&f&&f.options&&"object"==typeof f&&"object"==typeof f.options&&f.options.suppress)return arguments.length<2?d.attr(c,ca):(f&&f.options.content.attr===e&&f.cache.attr&&f.set("content.text",b),this.attr(ca,b))}return d.fn["attr"+ba].apply(this,arguments)},clone:function(a){var b=d.fn["clone"+ba].apply(this,arguments);return a||b.filter("["+ca+"]").attr("title",function(){return d.attr(this,ca)}).removeAttr(ca),b}},function(a,b){if(!b||d.fn[a+ba])return D;var c=d.fn[a+ba]=d.fn[a];d.fn[a]=function(){return b.apply(this,arguments)||c.apply(this,arguments)}}),d.ui||(d["cleanData"+ba]=d.cleanData,d.cleanData=function(a){for(var b,c=0;(b=d(a[c])).length;c++)if(b.attr(T))try{b.triggerHandler("removeqtip")}catch(e){}d["cleanData"+ba].apply(this,arguments)}),y.version="3.0.3",y.nextid=0,y.inactiveEvents=X,y.zindex=15e3,y.defaults={prerender:E,id:E,overwrite:D,suppress:D,content:{text:D,attr:"title",title:E,button:E},position:{my:"top left",at:"bottom right",target:E,container:E,viewport:E,adjust:{x:0,y:0,mouse:D,scroll:D,resize:D,method:"flipinvert flipinvert"},effect:function(a,b){d(this).animate(b,{duration:200,queue:E})}},show:{target:E,event:"mouseenter",effect:D,delay:90,solo:E,ready:E,autofocus:E},hide:{target:E,event:"mouseleave",effect:D,delay:0,fixed:E,inactive:E,leave:"window",distance:E},style:{classes:"",widget:E,width:E,height:E,def:D},events:{render:F,move:F,show:F,hide:F,toggle:F,visible:F,hidden:F,focus:F,blur:F}};var ha,ia,ja,ka,la,ma="margin",na="border",oa="color",pa="background-color",qa="transparent",ra=" !important",sa=!!b.createElement("canvas").getContext,ta=/rgba?\(0, 0, 0(, 0)?\)|transparent|#123456/i,ua={},va=["Webkit","O","Moz","ms"];sa?(ka=a.devicePixelRatio||1,la=function(){var a=b.createElement("canvas").getContext("2d");return a.backingStorePixelRatio||a.webkitBackingStorePixelRatio||a.mozBackingStorePixelRatio||a.msBackingStorePixelRatio||a.oBackingStorePixelRatio||1}(),ja=ka/la):ia=function(a,b,c){return"<qtipvml:"+a+' xmlns="urn:schemas-microsoft.com:vml" class="qtip-vml" '+(b||"")+' style="behavior: url(#default#VML); '+(c||"")+'" />'},d.extend(v.prototype,{init:function(a){var b,c;c=this.element=a.elements.tip=d("<div />",{"class":S+"-tip"}).prependTo(a.tooltip),sa?(b=d("<canvas />").appendTo(this.element)[0].getContext("2d"),b.lineJoin="miter",b.miterLimit=1e5,b.save()):(b=ia("shape",'coordorigin="0,0"',"position:absolute;"),this.element.html(b+b),a._bind(d("*",c).add(c),["click","mousedown"],function(a){a.stopPropagation()},this._ns)),a._bind(a.tooltip,"tooltipmove",this.reposition,this._ns,this),this.create()},_swapDimensions:function(){this.size[0]=this.options.height,this.size[1]=this.options.width},_resetDimensions:function(){this.size[0]=this.options.width,this.size[1]=this.options.height},_useTitle:function(a){var b=this.qtip.elements.titlebar;return b&&(a.y===K||a.y===O&&this.element.position().top+this.size[1]/2+this.options.offset<b.outerHeight(D))},_parseCorner:function(a){var b=this.qtip.options.position.my;return a===E||b===E?a=E:a===D?a=new A(b.string()):a.string||(a=new A(a),a.fixed=D),a},_parseWidth:function(a,b,c){var d=this.qtip.elements,e=na+s(b)+"Width";return(c?u(c,e):u(d.content,e)||u(this._useTitle(a)&&d.titlebar||d.content,e)||u(d.tooltip,e))||0},_parseRadius:function(a){var b=this.qtip.elements,c=na+s(a.y)+s(a.x)+"Radius";return da.ie<9?0:u(this._useTitle(a)&&b.titlebar||b.content,c)||u(b.tooltip,c)||0},_invalidColour:function(a,b,c){var d=a.css(b);return!d||c&&d===a.css(c)||ta.test(d)?E:d},_parseColours:function(a){var b=this.qtip.elements,c=this.element.css("cssText",""),e=na+s(a[a.precedance])+s(oa),f=this._useTitle(a)&&b.titlebar||b.content,g=this._invalidColour,h=[];return h[0]=g(c,pa)||g(f,pa)||g(b.content,pa)||g(b.tooltip,pa)||c.css(pa),h[1]=g(c,e,oa)||g(f,e,oa)||g(b.content,e,oa)||g(b.tooltip,e,oa)||b.tooltip.css(e),d("*",c).add(c).css("cssText",pa+":"+qa+ra+";"+na+":0"+ra+";"),h},_calculateSize:function(a){var b,c,d,e=a.precedance===H,f=this.options.width,g=this.options.height,h="c"===a.abbrev(),i=(e?f:g)*(h?.5:1),j=Math.pow,k=Math.round,l=Math.sqrt(j(i,2)+j(g,2)),m=[this.border/i*l,this.border/g*l];return m[2]=Math.sqrt(j(m[0],2)-j(this.border,2)),m[3]=Math.sqrt(j(m[1],2)-j(this.border,2)),b=l+m[2]+m[3]+(h?0:m[0]),c=b/l,d=[k(c*f),k(c*g)],e?d:d.reverse()},_calculateTip:function(a,b,c){c=c||1,b=b||this.size;var d=b[0]*c,e=b[1]*c,f=Math.ceil(d/2),g=Math.ceil(e/2),h={br:[0,0,d,e,d,0],bl:[0,0,d,0,0,e],tr:[0,e,d,0,d,e],tl:[0,0,0,e,d,e],tc:[0,e,f,0,d,e],bc:[0,0,d,0,f,e],rc:[0,0,d,g,0,e],lc:[d,0,d,e,0,g]};return h.lt=h.br,h.rt=h.bl,h.lb=h.tr,h.rb=h.tl,h[a.abbrev()]},_drawCoords:function(a,b){a.beginPath(),a.moveTo(b[0],b[1]),a.lineTo(b[2],b[3]),a.lineTo(b[4],b[5]),a.closePath()},create:function(){var a=this.corner=(sa||da.ie)&&this._parseCorner(this.options.corner);return this.enabled=!!this.corner&&"c"!==this.corner.abbrev(),this.enabled&&(this.qtip.cache.corner=a.clone(),this.update()),this.element.toggle(this.enabled),this.corner},update:function(b,c){if(!this.enabled)return this;var e,f,g,h,i,j,k,l,m=this.qtip.elements,n=this.element,o=n.children(),p=this.options,q=this.size,r=p.mimic,s=Math.round;b||(b=this.qtip.cache.corner||this.corner),r===E?r=b:(r=new A(r),r.precedance=b.precedance,"inherit"===r.x?r.x=b.x:"inherit"===r.y?r.y=b.y:r.x===r.y&&(r[b.precedance]=b[b.precedance])),f=r.precedance,b.precedance===G?this._swapDimensions():this._resetDimensions(),e=this.color=this._parseColours(b),e[1]!==qa?(l=this.border=this._parseWidth(b,b[b.precedance]),p.border&&1>l&&!ta.test(e[1])&&(e[0]=e[1]),this.border=l=p.border!==D?p.border:l):this.border=l=0,k=this.size=this._calculateSize(b),n.css({width:k[0],height:k[1],lineHeight:k[1]+"px"}),j=b.precedance===H?[s(r.x===L?l:r.x===N?k[0]-q[0]-l:(k[0]-q[0])/2),s(r.y===K?k[1]-q[1]:0)]:[s(r.x===L?k[0]-q[0]:0),s(r.y===K?l:r.y===M?k[1]-q[1]-l:(k[1]-q[1])/2)],sa?(g=o[0].getContext("2d"),g.restore(),g.save(),g.clearRect(0,0,6e3,6e3),h=this._calculateTip(r,q,ja),i=this._calculateTip(r,this.size,ja),o.attr(I,k[0]*ja).attr(J,k[1]*ja),o.css(I,k[0]).css(J,k[1]),this._drawCoords(g,i),g.fillStyle=e[1],g.fill(),g.translate(j[0]*ja,j[1]*ja),this._drawCoords(g,h),g.fillStyle=e[0],g.fill()):(h=this._calculateTip(r),h="m"+h[0]+","+h[1]+" l"+h[2]+","+h[3]+" "+h[4]+","+h[5]+" xe",j[2]=l&&/^(r|b)/i.test(b.string())?8===da.ie?2:1:0,o.css({coordsize:k[0]+l+" "+k[1]+l,antialias:""+(r.string().indexOf(O)>-1),left:j[0]-j[2]*Number(f===G),top:j[1]-j[2]*Number(f===H),width:k[0]+l,height:k[1]+l}).each(function(a){var b=d(this);b[b.prop?"prop":"attr"]({coordsize:k[0]+l+" "+k[1]+l,path:h,fillcolor:e[0],filled:!!a,stroked:!a}).toggle(!(!l&&!a)),!a&&b.html(ia("stroke",'weight="'+2*l+'px" color="'+e[1]+'" miterlimit="1000" joinstyle="miter"'))})),a.opera&&setTimeout(function(){m.tip.css({display:"inline-block",visibility:"visible"})},1),c!==E&&this.calculate(b,k)},calculate:function(a,b){if(!this.enabled)return E;var c,e,f=this,g=this.qtip.elements,h=this.element,i=this.options.offset,j={};
-return a=a||this.corner,c=a.precedance,b=b||this._calculateSize(a),e=[a.x,a.y],c===G&&e.reverse(),d.each(e,function(d,e){var h,k,l;e===O?(h=c===H?L:K,j[h]="50%",j[ma+"-"+h]=-Math.round(b[c===H?0:1]/2)+i):(h=f._parseWidth(a,e,g.tooltip),k=f._parseWidth(a,e,g.content),l=f._parseRadius(a),j[e]=Math.max(-f.border,d?k:i+(l>h?l:-h)))}),j[a[c]]-=b[c===G?0:1],h.css({margin:"",top:"",bottom:"",left:"",right:""}).css(j),j},reposition:function(a,b,d){function e(a,b,c,d,e){a===Q&&j.precedance===b&&k[d]&&j[c]!==O?j.precedance=j.precedance===G?H:G:a!==Q&&k[d]&&(j[b]=j[b]===O?k[d]>0?d:e:j[b]===d?e:d)}function f(a,b,e){j[a]===O?p[ma+"-"+b]=o[a]=g[ma+"-"+b]-k[b]:(h=g[e]!==c?[k[b],-g[b]]:[-k[b],g[b]],(o[a]=Math.max(h[0],h[1]))>h[0]&&(d[b]-=k[b],o[b]=E),p[g[e]!==c?e:b]=o[a])}if(this.enabled){var g,h,i=b.cache,j=this.corner.clone(),k=d.adjusted,l=b.options.position.adjust.method.split(" "),m=l[0],n=l[1]||l[0],o={left:E,top:E,x:0,y:0},p={};this.corner.fixed!==D&&(e(m,G,H,L,N),e(n,H,G,K,M),j.string()===i.corner.string()&&i.cornerTop===k.top&&i.cornerLeft===k.left||this.update(j,E)),g=this.calculate(j),g.right!==c&&(g.left=-g.right),g.bottom!==c&&(g.top=-g.bottom),g.user=this.offset,o.left=m===Q&&!!k.left,o.left&&f(G,L,N),o.top=n===Q&&!!k.top,o.top&&f(H,K,M),this.element.css(p).toggle(!(o.x&&o.y||j.x===O&&o.y||j.y===O&&o.x)),d.left-=g.left.charAt?g.user:m!==Q||o.top||!o.left&&!o.top?g.left+this.border:0,d.top-=g.top.charAt?g.user:n!==Q||o.left||!o.left&&!o.top?g.top+this.border:0,i.cornerLeft=k.left,i.cornerTop=k.top,i.corner=j.clone()}},destroy:function(){this.qtip._unbind(this.qtip.tooltip,this._ns),this.qtip.elements.tip&&this.qtip.elements.tip.find("*").remove().end().remove()}}),ha=R.tip=function(a){return new v(a,a.options.style.tip)},ha.initialize="render",ha.sanitize=function(a){if(a.style&&"tip"in a.style){var b=a.style.tip;"object"!=typeof b&&(b=a.style.tip={corner:b}),/string|boolean/i.test(typeof b.corner)||(b.corner=D)}},B.tip={"^position.my|style.tip.(corner|mimic|border)$":function(){this.create(),this.qtip.reposition()},"^style.tip.(height|width)$":function(a){this.size=[a.width,a.height],this.update(),this.qtip.reposition()},"^content.title|style.(classes|widget)$":function(){this.update()}},d.extend(D,y.defaults,{style:{tip:{corner:D,mimic:E,width:6,height:6,border:D,offset:0}}});var wa,xa,ya="qtip-modal",za="."+ya;xa=function(){function a(a){if(d.expr[":"].focusable)return d.expr[":"].focusable;var b,c,e,f=!isNaN(d.attr(a,"tabindex")),g=a.nodeName&&a.nodeName.toLowerCase();return"area"===g?(b=a.parentNode,c=b.name,a.href&&c&&"map"===b.nodeName.toLowerCase()?(e=d("img[usemap=#"+c+"]")[0],!!e&&e.is(":visible")):!1):/input|select|textarea|button|object/.test(g)?!a.disabled:"a"===g?a.href||f:f}function c(a){j.length<1&&a.length?a.not("body").blur():j.first().focus()}function e(a){if(h.is(":visible")){var b,e=d(a.target),g=f.tooltip,i=e.closest(W);b=i.length<1?E:parseInt(i[0].style.zIndex,10)>parseInt(g[0].style.zIndex,10),b||e.closest(W)[0]===g[0]||c(e)}}var f,g,h,i=this,j={};d.extend(i,{init:function(){return h=i.elem=d("<div />",{id:"qtip-overlay",html:"<div></div>",mousedown:function(){return E}}).hide(),d(b.body).bind("focusin"+za,e),d(b).bind("keydown"+za,function(a){f&&f.options.show.modal.escape&&27===a.keyCode&&f.hide(a)}),h.bind("click"+za,function(a){f&&f.options.show.modal.blur&&f.hide(a)}),i},update:function(b){f=b,j=b.options.show.modal.stealfocus!==E?b.tooltip.find("*").filter(function(){return a(this)}):[]},toggle:function(a,e,j){var k=a.tooltip,l=a.options.show.modal,m=l.effect,n=e?"show":"hide",o=h.is(":visible"),p=d(za).filter(":visible:not(:animated)").not(k);return i.update(a),e&&l.stealfocus!==E&&c(d(":focus")),h.toggleClass("blurs",l.blur),e&&h.appendTo(b.body),h.is(":animated")&&o===e&&g!==E||!e&&p.length?i:(h.stop(D,E),d.isFunction(m)?m.call(h,e):m===E?h[n]():h.fadeTo(parseInt(j,10)||90,e?1:0,function(){e||h.hide()}),e||h.queue(function(a){h.css({left:"",top:""}),d(za).length||h.detach(),a()}),g=e,f.destroyed&&(f=F),i)}}),i.init()},xa=new xa,d.extend(w.prototype,{init:function(a){var b=a.tooltip;return this.options.on?(a.elements.overlay=xa.elem,b.addClass(ya).css("z-index",y.modal_zindex+d(za).length),a._bind(b,["tooltipshow","tooltiphide"],function(a,c,e){var f=a.originalEvent;if(a.target===b[0])if(f&&"tooltiphide"===a.type&&/mouse(leave|enter)/.test(f.type)&&d(f.relatedTarget).closest(xa.elem[0]).length)try{a.preventDefault()}catch(g){}else(!f||f&&"tooltipsolo"!==f.type)&&this.toggle(a,"tooltipshow"===a.type,e)},this._ns,this),a._bind(b,"tooltipfocus",function(a,c){if(!a.isDefaultPrevented()&&a.target===b[0]){var e=d(za),f=y.modal_zindex+e.length,g=parseInt(b[0].style.zIndex,10);xa.elem[0].style.zIndex=f-1,e.each(function(){this.style.zIndex>g&&(this.style.zIndex-=1)}),e.filter("."+$).qtip("blur",a.originalEvent),b.addClass($)[0].style.zIndex=f,xa.update(c);try{a.preventDefault()}catch(h){}}},this._ns,this),void a._bind(b,"tooltiphide",function(a){a.target===b[0]&&d(za).filter(":visible").not(b).last().qtip("focus",a)},this._ns,this)):this},toggle:function(a,b,c){return a&&a.isDefaultPrevented()?this:void xa.toggle(this.qtip,!!b,c)},destroy:function(){this.qtip.tooltip.removeClass(ya),this.qtip._unbind(this.qtip.tooltip,this._ns),xa.toggle(this.qtip,E),delete this.qtip.elements.overlay}}),wa=R.modal=function(a){return new w(a,a.options.show.modal)},wa.sanitize=function(a){a.show&&("object"!=typeof a.show.modal?a.show.modal={on:!!a.show.modal}:"undefined"==typeof a.show.modal.on&&(a.show.modal.on=D))},y.modal_zindex=y.zindex-200,wa.initialize="render",B.modal={"^show.modal.(on|blur)$":function(){this.destroy(),this.init(),this.qtip.elems.overlay.toggle(this.qtip.tooltip[0].offsetWidth>0)}},d.extend(D,y.defaults,{show:{modal:{on:E,effect:D,blur:D,stealfocus:D,escape:D}}}),R.viewport=function(c,d,e,f,g,h,i){function j(a,b,c,e,f,g,h,i,j){var k=d[f],s=u[a],t=v[a],w=c===Q,x=s===f?j:s===g?-j:-j/2,y=t===f?i:t===g?-i:-i/2,z=q[f]+r[f]-(n?0:m[f]),A=z-k,B=k+j-(h===I?o:p)-z,C=x-(u.precedance===a||s===u[b]?y:0)-(t===O?i/2:0);return w?(C=(s===f?1:-1)*x,d[f]+=A>0?A:B>0?-B:0,d[f]=Math.max(-m[f]+r[f],k-C,Math.min(Math.max(-m[f]+r[f]+(h===I?o:p),k+C),d[f],"center"===s?k-x:1e9))):(e*=c===P?2:0,A>0&&(s!==f||B>0)?(d[f]-=C+e,l.invert(a,f)):B>0&&(s!==g||A>0)&&(d[f]-=(s===O?-C:C)+e,l.invert(a,g)),d[f]<q[f]&&-d[f]>B&&(d[f]=k,l=u.clone())),d[f]-k}var k,l,m,n,o,p,q,r,s=e.target,t=c.elements.tooltip,u=e.my,v=e.at,w=e.adjust,x=w.method.split(" "),y=x[0],z=x[1]||x[0],A=e.viewport,B=e.container,C={left:0,top:0};return A.jquery&&s[0]!==a&&s[0]!==b.body&&"none"!==w.method?(m=B.offset()||C,n="static"===B.css("position"),k="fixed"===t.css("position"),o=A[0]===a?A.width():A.outerWidth(E),p=A[0]===a?A.height():A.outerHeight(E),q={left:k?0:A.scrollLeft(),top:k?0:A.scrollTop()},r=A.offset()||C,"shift"===y&&"shift"===z||(l=u.clone()),C={left:"none"!==y?j(G,H,y,w.x,L,N,I,f,h):0,top:"none"!==z?j(H,G,z,w.y,K,M,J,g,i):0,my:l}):C},R.polys={polygon:function(a,b){var c,d,e,f={width:0,height:0,position:{top:1e10,right:0,bottom:0,left:1e10},adjustable:E},g=0,h=[],i=1,j=1,k=0,l=0;for(g=a.length;g--;)c=[parseInt(a[--g],10),parseInt(a[g+1],10)],c[0]>f.position.right&&(f.position.right=c[0]),c[0]<f.position.left&&(f.position.left=c[0]),c[1]>f.position.bottom&&(f.position.bottom=c[1]),c[1]<f.position.top&&(f.position.top=c[1]),h.push(c);if(d=f.width=Math.abs(f.position.right-f.position.left),e=f.height=Math.abs(f.position.bottom-f.position.top),"c"===b.abbrev())f.position={left:f.position.left+f.width/2,top:f.position.top+f.height/2};else{for(;d>0&&e>0&&i>0&&j>0;)for(d=Math.floor(d/2),e=Math.floor(e/2),b.x===L?i=d:b.x===N?i=f.width-d:i+=Math.floor(d/2),b.y===K?j=e:b.y===M?j=f.height-e:j+=Math.floor(e/2),g=h.length;g--&&!(h.length<2);)k=h[g][0]-f.position.left,l=h[g][1]-f.position.top,(b.x===L&&k>=i||b.x===N&&i>=k||b.x===O&&(i>k||k>f.width-i)||b.y===K&&l>=j||b.y===M&&j>=l||b.y===O&&(j>l||l>f.height-j))&&h.splice(g,1);f.position={left:h[0][0],top:h[0][1]}}return f},rect:function(a,b,c,d){return{width:Math.abs(c-a),height:Math.abs(d-b),position:{left:Math.min(a,c),top:Math.min(b,d)}}},_angles:{tc:1.5,tr:7/4,tl:5/4,bc:.5,br:.25,bl:.75,rc:2,lc:1,c:0},ellipse:function(a,b,c,d,e){var f=R.polys._angles[e.abbrev()],g=0===f?0:c*Math.cos(f*Math.PI),h=d*Math.sin(f*Math.PI);return{width:2*c-Math.abs(g),height:2*d-Math.abs(h),position:{left:a+g,top:b+h},adjustable:E}},circle:function(a,b,c,d){return R.polys.ellipse(a,b,c,c,d)}},R.svg=function(a,c,e){for(var f,g,h,i,j,k,l,m,n,o=c[0],p=d(o.ownerSVGElement),q=o.ownerDocument,r=(parseInt(c.css("stroke-width"),10)||0)/2;!o.getBBox;)o=o.parentNode;if(!o.getBBox||!o.parentNode)return E;switch(o.nodeName){case"ellipse":case"circle":m=R.polys.ellipse(o.cx.baseVal.value,o.cy.baseVal.value,(o.rx||o.r).baseVal.value+r,(o.ry||o.r).baseVal.value+r,e);break;case"line":case"polygon":case"polyline":for(l=o.points||[{x:o.x1.baseVal.value,y:o.y1.baseVal.value},{x:o.x2.baseVal.value,y:o.y2.baseVal.value}],m=[],k=-1,i=l.numberOfItems||l.length;++k<i;)j=l.getItem?l.getItem(k):l[k],m.push.apply(m,[j.x,j.y]);m=R.polys.polygon(m,e);break;default:m=o.getBBox(),m={width:m.width,height:m.height,position:{left:m.x,top:m.y}}}return n=m.position,p=p[0],p.createSVGPoint&&(g=o.getScreenCTM(),l=p.createSVGPoint(),l.x=n.left,l.y=n.top,h=l.matrixTransform(g),n.left=h.x,n.top=h.y),q!==b&&"mouse"!==a.position.target&&(f=d((q.defaultView||q.parentWindow).frameElement).offset(),f&&(n.left+=f.left,n.top+=f.top)),q=d(q),n.left+=q.scrollLeft(),n.top+=q.scrollTop(),m},R.imagemap=function(a,b,c){b.jquery||(b=d(b));var e,f,g,h,i,j=(b.attr("shape")||"rect").toLowerCase().replace("poly","polygon"),k=d('img[usemap="#'+b.parent("map").attr("name")+'"]'),l=d.trim(b.attr("coords")),m=l.replace(/,$/,"").split(",");if(!k.length)return E;if("polygon"===j)h=R.polys.polygon(m,c);else{if(!R.polys[j])return E;for(g=-1,i=m.length,f=[];++g<i;)f.push(parseInt(m[g],10));h=R.polys[j].apply(this,f.concat(c))}return e=k.offset(),e.left+=Math.ceil((k.outerWidth(E)-k.width())/2),e.top+=Math.ceil((k.outerHeight(E)-k.height())/2),h.position.left+=e.left,h.position.top+=e.top,h};var Aa,Ba='<iframe class="qtip-bgiframe" frameborder="0" tabindex="-1" src="javascript:\'\';"  style="display:block; position:absolute; z-index:-1; filter:alpha(opacity=0); -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";"></iframe>';d.extend(x.prototype,{_scroll:function(){var b=this.qtip.elements.overlay;b&&(b[0].style.top=d(a).scrollTop()+"px")},init:function(c){var e=c.tooltip;d("select, object").length<1&&(this.bgiframe=c.elements.bgiframe=d(Ba).appendTo(e),c._bind(e,"tooltipmove",this.adjustBGIFrame,this._ns,this)),this.redrawContainer=d("<div/>",{id:S+"-rcontainer"}).appendTo(b.body),c.elements.overlay&&c.elements.overlay.addClass("qtipmodal-ie6fix")&&(c._bind(a,["scroll","resize"],this._scroll,this._ns,this),c._bind(e,["tooltipshow"],this._scroll,this._ns,this)),this.redraw()},adjustBGIFrame:function(){var a,b,c=this.qtip.tooltip,d={height:c.outerHeight(E),width:c.outerWidth(E)},e=this.qtip.plugins.tip,f=this.qtip.elements.tip;b=parseInt(c.css("borderLeftWidth"),10)||0,b={left:-b,top:-b},e&&f&&(a="x"===e.corner.precedance?[I,L]:[J,K],b[a[1]]-=f[a[0]]()),this.bgiframe.css(b).css(d)},redraw:function(){if(this.qtip.rendered<1||this.drawing)return this;var a,b,c,d,e=this.qtip.tooltip,f=this.qtip.options.style,g=this.qtip.options.position.container;return this.qtip.drawing=1,f.height&&e.css(J,f.height),f.width?e.css(I,f.width):(e.css(I,"").appendTo(this.redrawContainer),b=e.width(),1>b%2&&(b+=1),c=e.css("maxWidth")||"",d=e.css("minWidth")||"",a=(c+d).indexOf("%")>-1?g.width()/100:0,c=(c.indexOf("%")>-1?a:1*parseInt(c,10))||b,d=(d.indexOf("%")>-1?a:1*parseInt(d,10))||0,b=c+d?Math.min(Math.max(b,d),c):b,e.css(I,Math.round(b)).appendTo(g)),this.drawing=0,this},destroy:function(){this.bgiframe&&this.bgiframe.remove(),this.qtip._unbind([a,this.qtip.tooltip],this._ns)}}),Aa=R.ie6=function(a){return 6===da.ie?new x(a):E},Aa.initialize="render",B.ie6={"^content|style$":function(){this.redraw()}}})}(window,document);
-//# sourceMappingURL=jquery.qtip.min.map
+function Rainbow(){"use strict";var e=null,r=0,F=100,t=["ff0000","ffff00","00ff00","0000ff"];function n(n){if(n.length<2)throw new Error("Rainbow must have two or more colours.");var a=(F-r)/(n.length-1),i=new ColourGradient;i.setGradient(n[0],n[1]),i.setNumberRange(r,r+a),e=[i];for(var o=1;o<n.length-1;o++){var l=new ColourGradient;l.setGradient(n[o],n[o+1]),l.setNumberRange(r+a*o,r+a*(o+1)),e[o]=l}t=n}n(t),this.setSpectrum=function(){return n(arguments),this},this.setSpectrumByArray=function(e){return n(e),this},this.colourAt=function(t){if(isNaN(t))throw new TypeError(t+" is not a number");if(1===e.length)return e[0].colourAt(t);var n=(F-r)/e.length,a=Math.min(Math.floor((Math.max(t,r)-r)/n),e.length-1);return e[a].colourAt(t)},this.colorAt=this.colourAt,this.setNumberRange=function(e,a){if(!(a>e))throw new RangeError("maxNumber ("+a+") is not greater than minNumber ("+e+")");return r=e,F=a,n(t),this}}function ColourGradient(){"use strict";var e="ff0000",r="0000ff",F=0,t=100;function n(e,r,n){var a=e;a<F&&(a=F),a>t&&(a=t);var i,o=t-F,l=parseInt(r,16),u=(parseInt(n,16)-l)/o,s=Math.round(u*(a-F)+l);return 1===(i=s.toString(16)).length?"0"+i:i}function a(e){if(/^#?[0-9a-fA-F]{6}$/i.test(e))return e.substring(e.length-6,e.length);var r=e.toLowerCase();if(i.hasOwnProperty(r))return i[r];throw new Error(e+" is not a valid colour.")}this.setGradient=function(F,t){e=a(F),r=a(t)},this.setNumberRange=function(e,r){if(!(r>e))throw new RangeError("maxNumber ("+r+") is not greater than minNumber ("+e+")");F=e,t=r},this.colourAt=function(F){return n(F,e.substring(0,2),r.substring(0,2))+n(F,e.substring(2,4),r.substring(2,4))+n(F,e.substring(4,6),r.substring(4,6))};var i={aliceblue:"F0F8FF",antiquewhite:"FAEBD7",aqua:"00FFFF",aquamarine:"7FFFD4",azure:"F0FFFF",beige:"F5F5DC",bisque:"FFE4C4",black:"000000",blanchedalmond:"FFEBCD",blue:"0000FF",blueviolet:"8A2BE2",brown:"A52A2A",burlywood:"DEB887",cadetblue:"5F9EA0",chartreuse:"7FFF00",chocolate:"D2691E",coral:"FF7F50",cornflowerblue:"6495ED",cornsilk:"FFF8DC",crimson:"DC143C",cyan:"00FFFF",darkblue:"00008B",darkcyan:"008B8B",darkgoldenrod:"B8860B",darkgray:"A9A9A9",darkgreen:"006400",darkgrey:"A9A9A9",darkkhaki:"BDB76B",darkmagenta:"8B008B",darkolivegreen:"556B2F",darkorange:"FF8C00",darkorchid:"9932CC",darkred:"8B0000",darksalmon:"E9967A",darkseagreen:"8FBC8F",darkslateblue:"483D8B",darkslategray:"2F4F4F",darkslategrey:"2F4F4F",darkturquoise:"00CED1",darkviolet:"9400D3",deeppink:"FF1493",deepskyblue:"00BFFF",dimgray:"696969",dimgrey:"696969",dodgerblue:"1E90FF",firebrick:"B22222",floralwhite:"FFFAF0",forestgreen:"228B22",fuchsia:"FF00FF",gainsboro:"DCDCDC",ghostwhite:"F8F8FF",gold:"FFD700",goldenrod:"DAA520",gray:"808080",green:"008000",greenyellow:"ADFF2F",grey:"808080",honeydew:"F0FFF0",hotpink:"FF69B4",indianred:"CD5C5C",indigo:"4B0082",ivory:"FFFFF0",khaki:"F0E68C",lavender:"E6E6FA",lavenderblush:"FFF0F5",lawngreen:"7CFC00",lemonchiffon:"FFFACD",lightblue:"ADD8E6",lightcoral:"F08080",lightcyan:"E0FFFF",lightgoldenrodyellow:"FAFAD2",lightgray:"D3D3D3",lightgreen:"90EE90",lightgrey:"D3D3D3",lightpink:"FFB6C1",lightsalmon:"FFA07A",lightseagreen:"20B2AA",lightskyblue:"87CEFA",lightslategray:"778899",lightslategrey:"778899",lightsteelblue:"B0C4DE",lightyellow:"FFFFE0",lime:"00FF00",limegreen:"32CD32",linen:"FAF0E6",magenta:"FF00FF",maroon:"800000",mediumaquamarine:"66CDAA",mediumblue:"0000CD",mediumorchid:"BA55D3",mediumpurple:"9370DB",mediumseagreen:"3CB371",mediumslateblue:"7B68EE",mediumspringgreen:"00FA9A",mediumturquoise:"48D1CC",mediumvioletred:"C71585",midnightblue:"191970",mintcream:"F5FFFA",mistyrose:"FFE4E1",moccasin:"FFE4B5",navajowhite:"FFDEAD",navy:"000080",oldlace:"FDF5E6",olive:"808000",olivedrab:"6B8E23",orange:"FFA500",orangered:"FF4500",orchid:"DA70D6",palegoldenrod:"EEE8AA",palegreen:"98FB98",paleturquoise:"AFEEEE",palevioletred:"DB7093",papayawhip:"FFEFD5",peachpuff:"FFDAB9",peru:"CD853F",pink:"FFC0CB",plum:"DDA0DD",powderblue:"B0E0E6",purple:"800080",red:"FF0000",rosybrown:"BC8F8F",royalblue:"4169E1",saddlebrown:"8B4513",salmon:"FA8072",sandybrown:"F4A460",seagreen:"2E8B57",seashell:"FFF5EE",sienna:"A0522D",silver:"C0C0C0",skyblue:"87CEEB",slateblue:"6A5ACD",slategray:"708090",slategrey:"708090",snow:"FFFAFA",springgreen:"00FF7F",steelblue:"4682B4",tan:"D2B48C",teal:"008080",thistle:"D8BFD8",tomato:"FF6347",turquoise:"40E0D0",violet:"EE82EE",wheat:"F5DEB3",white:"FFFFFF",whitesmoke:"F5F5F5",yellow:"FFFF00",yellowgreen:"9ACD32"}}"undefined"!=typeof module&&(module.exports=Rainbow);
+
 
 //** FILE: fct.js **/
 
@@ -61,6 +58,7 @@ var VIEW_TYPE_TEXT = "text";
 var VIEW_TYPE_TEXT_D = "text-d";
 var VIEW_TYPE_ALPHABET = "alphabet";
 var VIEW_TYPE_GEO = "geo";
+var VIEW_TYPE_GEO_LIST = "geo-list";
 var VIEW_TYPE_YEARS = "years";
 var VIEW_TYPE_MONTHS = "months";
 var VIEW_TYPE_WEEKS = "weeks";
@@ -319,6 +317,11 @@ try{
 }
 
 function fct_removeVariableData(query){
+  query.removeAttr('label');
+  query.removeAttr('varname');
+  query.removeAttr('class');
+
+
   query.find('*').removeAttr('class');
   query.find('*').removeAttr('label');
   query.find('*').removeAttr('varname');
@@ -340,14 +343,14 @@ function formatDate(date) {
 
 
 function fct_query(q, viewType, opt){
+  fct_queryTimeout = getQueryTimeout();
+  q = q.clone();
   fct_isCache = $('#isCache').is(':checked');
   fct_isDebug = $('#isDebug').is(':checked');
-  fct_queryTimeout = getQueryTimeout();
   //console.clear();
   setViewType(viewType, q);
   //q = _root.find('query *').removeAttr('class'); // be sure semantically equivalent queries are non-unique
   //console.log('query: ' + _root.find('query').prop('outerHTML'));
-  q = q.clone();
   if(fct_isDebug) console.log("Query: " + $(q).prop('outerHTML') );
   if(q.children.length == 2 && q.find('text').text() == '') q.find('text').remove(); // POI: root query should  have missing text element rather than blank text node, the /fct returns distinct results for each
   q = fct_removeVariableData(q);
@@ -392,6 +395,9 @@ function fct_query(q, viewType, opt){
           case VIEW_TYPE_GRAPHS: {
             fct_handleGraphResults(resp, opt);
           }; break;
+          case VIEW_TYPE_GEO_LIST: {
+            fct_handleGeoListResults(resp, opt);
+          }; break;
     }
     updatePermalink();
     return;
@@ -408,6 +414,7 @@ function fct_query(q, viewType, opt){
           jqXHR.data = settings.data;
       },
             success : function(xml) {
+              xml = xml.replaceAll('xml:lang', 'lang');
         //xml = xml.replace('fct:','');
 
         /* there's a bug that causes "filter ..." to appear at the beginning of the response body, sometimes
@@ -490,6 +497,9 @@ function fct_query(q, viewType, opt){
           }; break;
           case VIEW_TYPE_GRAPHS: {
             fct_handleGraphResults(xml, opt);
+          }; break;
+          case VIEW_TYPE_GEO_LIST: {
+            fct_handleGeoListResults(xml, opt);
           }; break;
         }
                 
@@ -634,15 +644,20 @@ function fct_handleSparqlGroupByCount(xml, opt){
   });
 }
 
+function fct_handleGeoListResults(xml, opt){
+    loadGeoListResults(xml);
+    $('#showMeMenu').removeClass('loading');
+}
 
 function buildResultTableHeaders(row, row2, varNames, varCt, node){
   // the SPARQL projection items are listed in depth-first order, starting from the focus
   
-  /**/
+  /*
 if(!$(varNames[varCt]).attr('name')){
   console.log('ct: ' + varCt + ' node: ' + $(node).prop('nodeName'));
   return;
-}
+}*/
+  //console.log('ct: ' + varCt + ' node: ' + $(node).prop('nodeName'));
 
 
 
@@ -655,9 +670,13 @@ if(!$(varNames[varCt]).attr('name')){
   var outline = '';
   var val = node.children('value');
   var classes = node.children('class');
-  var isPropOf = val.prop('nodeName') === 'property-of';
-
+  var isPropOf = node.prop('nodeName').toUpperCase() == 'property-of'.toUpperCase();
+try{
       node.attr('varname', $(varNames[varCt]).attr('name').replace('?', ''));
+    }
+    catch(e){
+      console.log('err: ' + e + ', ' + varNames);
+    }
       varCt++;
 
 var valStr = VALUE_ANON_NODE;
@@ -667,7 +686,7 @@ var valStr = VALUE_ANON_NODE;
             if(id == ID_QUERY) valStr = label;
 
             else{
-                if(classes){
+                if(classes && classes.length > 0){
                   valStr = classes.attr('label');
                 }
                 else {
@@ -686,16 +705,23 @@ var valStr = VALUE_ANON_NODE;
           //col += '<div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis">';
           //colStr += '<h3 class="fw-semi-bold" style="padding-bottom:4px">';
           colStr += label;
-          colStr += ((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'');
+          colStr += ((isPropOf)?'&nbsp;of&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'');
           //colStr += '</h3>';
           //colStr += '</div>';
+
+var rainbow = new Rainbow(); 
+rainbow.setNumberRange(1, node.parents().length +1);
+rainbow.setSpectrum('#e9ecef', '#ffffff');
+col.css('background-color', '#' + rainbow.colourAt( (node.parents().length <= 2) ? 1 : node.parents().length - 1));
+
+
   col.html(colStr);
   row.append(col);
 
 
     col = $.createElement('td');
           colStr = '<button id="focusTableValue'+id+'" class="btn-rounded-f btn btn-'+outline+'default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">';
-          colStr += valStr;
+          colStr += processLabel(valStr);
           colStr += '</button>';
   col.html(colStr);
   row2.append(col);
@@ -713,6 +739,7 @@ var valStr = VALUE_ANON_NODE;
 
 }
 
+
 function fct_handleSparqlResults(xml, opt){
     $('#resultsTable > thead').empty();
     $('#resultsTable > tbody').empty();
@@ -722,6 +749,8 @@ function fct_handleSparqlResults(xml, opt){
     row = $.createElement('tr');
     row2 = $.createElement('tr');
     var variables = $("variable", xml);
+
+//labels={};
 
     var varCt = 0;
     buildResultTableHeaders(row, row2, variables, varCt);
@@ -769,7 +798,8 @@ function fct_handleSparqlResults(xml, opt){
             var datatype = $($(this).children()[0]).prop('nodeName').toLowerCase();
 
             if(datatype == 'uri'){
-              var label = processLabel(value);
+              var label = labels[value];
+              if(!label) label = processLabel(value);
               label = getFavicon(value) + '&nbsp;<a href="' + value + '">' + label + '</a>';
               value = label;
             }
@@ -895,7 +925,7 @@ function fct_handleListCountResults(xml, opt){
         $('#describe').attr('src', '');
       //  $('#'+viewType+'').empty();
 
-          var sparql = processSparql(xml);
+          var sparql = processSparql(xml, true); // POI: for now, let the table share the Record's list limit and offset
           var focus = getSparqlFocus(sparql);
           //console.log('focus: ' + focus);
           var vars = getSparqlVars(sparql);
@@ -910,6 +940,14 @@ function fct_handleListCountResults(xml, opt){
           //console.log("Sparql: " + sparql );
           sparql = setSparqlProjection(sparql, vars);
 
+    if(!$('#recordFormColumn').hasClass('hide')) {
+      if(!$('#recordFormColumn').hasClass('dont-touch')){
+      buildForm();
+      }
+      else {
+        $('#recordFormColumn').removeClass('dont-touch');
+      }
+}
         loadGroupByResults(xml, focus);
         $('#groupByHeader').removeClass('loading');
         //$('#focusHeader').removeClass('loading');
@@ -919,14 +957,16 @@ function fct_handleListCountResults(xml, opt){
         fct_sparql(getSparqlCount(sparql), opt);
 
 
-        $('#groupByTableHeader').addClass('loading');
         fct_sparql(sparql);
+
+
+        fct_query(query, VIEW_TYPE_GEO_LIST);
 
           //console.log("xml: " + xml );
       }
 }
 
-function processSparql(xml){
+function processSparql(xml, retainLimit){
   var sparql = $($(xml).find("fct\\:sparql")[0]).text().trim();
   while(sparql.indexOf('  ') > 0) sparql = sparql.replaceAll('  ', ' ');
   if(sparql.indexOf('group')>0) {
@@ -934,20 +974,20 @@ function processSparql(xml){
     if(sparql.indexOf('limit')>0){
       limit = sparql.substring(sparql.indexOf('limit'));
     }
-    sparql = sparql.substring(0, sparql.indexOf('group')) + limit;
+    sparql = sparql.substring(0, sparql.indexOf('group')) + ((retainLimit) ? limit : '');
   }
   return sparql;
 
 }
 
 function getSparqlFocus(sparql){
-  var focus = sparql.match(/select\s*\?[s|p|o|c]\d/mgi)[0]; // POI: the ?o1 var must be part of the projection, or the SPARQL engine will complain, it is referenced in the ORDER clause
+  var focus = sparql.match(/select\s*\?[s|p|o|c]\d+/mgi)[0]; // POI: the ?o1 var must be part of the projection, or the SPARQL engine will complain, it is referenced in the ORDER clause
   focus = focus.substring(focus.indexOf('select ')+'select '.length);
   return focus;
 }
 
 function getSparqlVars(sparql){
-  var vars = (sparql.match(/\s+\?([s|p|o|c]\d)|\?g\s+/mgi).sort()
+  var vars = (sparql.match(/\s+\?([s|p|o|c]\d+)|\?g\s+/mgi).sort()
              .filter(function(element, index, array) {
                  return index == array.indexOf(element) && array[index].indexOf('?c') == -1 && array[index].indexOf('?g'); // don't return duplicates and remove count vars 
              }) + '').replaceAll(',', ' ');
@@ -1125,6 +1165,8 @@ function takeMainFocus(id, silent){
 }
 
 function remove(id, silent){
+    exitGroupBy(id);
+
   // give focus to parent if hasFocus
   // remove from the query
   // remove from breadcrumbs and facetCollector
@@ -1152,6 +1194,8 @@ function remove(id, silent){
 }
 
 function removeValue(id){
+    exitGroupBy(id);
+
   var tar = _root.find('.'+id + ' > value')
   if(tar.length > 0) tar.remove();
   else{
@@ -1163,13 +1207,18 @@ function removeValue(id){
 }
 
 function removeFacet(id){
+  if(hasMainFocus(id)){
+    takeMainFocus($(_root.find('.'+id )).parent().attr('class'), true);
+  }
  // console.log('removeFacet: ' + id);
   _root.find('.'+id).remove();
   doQuery(getQueryText());
 }
 
-function setValue(id, val, valLabel, datatype){
-  val = deSanitizeIRI(val);
+function setValue(id, val, valLabel, datatype, lang){
+    exitGroupBy(id);
+
+  val = deSanitizeLabel(val);
   valLabel = deSanitizeLabel(valLabel);
   var p = getMainFocus();
 
@@ -1184,6 +1233,7 @@ function setValue(id, val, valLabel, datatype){
   v.attr('label', valLabel);
   v.text(val);
   if(datatype && datatype.length > 0 && datatype !== 'undefined') v.attr('datatype', datatype);
+  if(lang && lang.length > 0 && lang !== 'undefined') v.attr('lang', lang);
   //v.attr('same_as', 'yes');
   _root.find('.'+p.attr('class')).append(v);
   
@@ -1200,9 +1250,12 @@ function setValue(id, val, valLabel, datatype){
   //getFocus(query).append(p);
 }
 
-function setPropertyValue(id, nodeName, contextId, propIRI, propLabel, val, valLabel, datatype){
-  if(propIRI) propIRI = deSanitizeIRI(propIRI);
-  if(val) val = deSanitizeIRI(val);
+function setPropertyValue(id, nodeName, contextId, propIRI, propLabel, val, valLabel, datatype, lang){
+    exitGroupBy(id);
+
+  remove(_root.find('.'+contextId).attr('class'), true);
+  if(propIRI) propIRI = deSanitizeLabel(propIRI);
+  if(val) val = deSanitizeLabel(val);
   valLabel = deSanitizeLabel(valLabel);
   var p = $.createElement(nodeName); // nodeName is property or property-of
   p.attr('class', contextId);
@@ -1216,6 +1269,7 @@ function setPropertyValue(id, nodeName, contextId, propIRI, propLabel, val, valL
   v.attr('label', valLabel);
   v.text(val);
   if(datatype && datatype.length > 0 && datatype !== 'undefined') v.attr('datatype', datatype);
+  if(lang && lang.length > 0 && lang !== 'undefined') v.attr('lang', lang);
   p.append(v);
   getMainFocus().append(p);
 
@@ -1231,9 +1285,10 @@ function setPropertyValue(id, nodeName, contextId, propIRI, propLabel, val, valL
   //getFocus(query).append(p);
 }
 
-function addPropertyFacet(id, prop, propLabel, val, valLabel, datatype){
-  if(prop) prop = deSanitizeIRI(prop);
-  if(val) val = deSanitizeIRI(val);
+function addPropertyFacet(id, prop, propLabel, val, valLabel, datatype, lang, silent){
+  exitGroupBy(id);
+  if(prop) prop = deSanitizeLabel(prop);
+  if(val) val = deSanitizeLabel(val);
   var p = $.createElement('property');
   p.attr('class', id);
   p.attr('iri', prop);
@@ -1243,6 +1298,7 @@ function addPropertyFacet(id, prop, propLabel, val, valLabel, datatype){
       v.attr('label', valLabel);
       v.text(val);
       if(datatype && datatype.length > 0 && datatype !== 'undefined') v.attr('datatype', datatype);
+      if(lang && lang.length > 0 && lang !== 'undefined') v.attr('lang', lang);
       //v.attr('same_as', 'yes');
       p.append(v);
   }
@@ -1256,10 +1312,12 @@ function addPropertyFacet(id, prop, propLabel, val, valLabel, datatype){
   getMainFocus().append(p);
   //takeFocus(p, getFocus(query));
   //takeFocus(query, getFocus(query));
-  doQuery(getQueryText());
+  if(!silent) doQuery(getQueryText());
 }
 
-function addPropertyOfFacet(id, prop, propLabel, val, valLabel, datatype){
+function addPropertyOfFacet(id, prop, propLabel, val, valLabel, datatype, lang, silent){
+    exitGroupBy(id);
+
   if(prop) prop = deSanitizeLabel(prop);
   if(val) val = deSanitizeLabel(val);
   var p = $.createElement('property-of');
@@ -1271,6 +1329,7 @@ function addPropertyOfFacet(id, prop, propLabel, val, valLabel, datatype){
       v.attr('label', valLabel);
       v.text(val);
       if(datatype && datatype.length > 0 && datatype !== 'undefined') v.attr('datatype', datatype);
+      if(lang && lang.length > 0 && lang !== 'undefined') v.attr('lang', lang);
       //v.attr('same_as', 'yes');
       p.append(v);
   }
@@ -1284,12 +1343,14 @@ function addPropertyOfFacet(id, prop, propLabel, val, valLabel, datatype){
   getMainFocus().append(p);
   //takeFocus(p, getFocus(query));
   //takeFocus(query, getFocus(query));
-  doQuery(getQueryText());
+  if(!silent) doQuery(getQueryText());
 }
 
 function addClassFacet(id, clazz, label){
+    exitGroupBy(id);
+
   //clazz = deSanitizeLabel(clazz);
-  if(clazz) val = deSanitizeIRI(clazz);
+  if(clazz) val = deSanitizeLabel(clazz);
   var c = $.createElement('class');
   c.attr('class', id);
   c.attr('iri', clazz);
@@ -1355,7 +1416,7 @@ var TAG_GRAPH = 'g';
 
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://myopenlink.net/DAV/home/sdmonroe/poc_draft.html";
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://poc.vios.network";
-var this_endpoint = 'http://vios.dev-team.com/';
+var this_endpoint = 'http://poc.vios.network/';
 
 var qGroupBy, qShowMe, qdataSpace, qSearchAllFields;
 
@@ -1370,6 +1431,7 @@ var screenSz = screen.width;
 var SIZE_GROUP_BY = (screenSz < 1500) ? "3" : "2";
 var SIZE_SHOW_ME = (screenSz < 1500) ? "3" : "2";
 var SIZE_RECORD_VIEWER = (screenSz < 1500) ? "6" : "8";
+var SIZE_RECORD_FORM = (screenSz < 1500) ? "6" : "6";
 var SIZE_LABEL = (screenSz < 1500) ? 22 : 30; // TODO: this constant is deprecated, using text-ellipse now
 var SIZE_RESULT_SET = (screenSz < 1500) ? 15: 30;
 var SIZE_MIN_DIGITS = 7;
@@ -1377,7 +1439,11 @@ var SIZE_MAX_DIGITS = 20;
 
 var isExpandSearch = $('#isSearchAllFields').parent().hasClass('active');
 
+var labels = {};
+
+
 function init(){
+    fct_init(); // this method must be the first method called by the implementation of the fct_ framework
 
 //alert('init() screen width: ' + screen.width);
 
@@ -1396,8 +1462,8 @@ function init(){
 
 
   //$('#showMeMenu').remove();
-  $('.leftButton').remove();
-  $('.rightButton').remove();
+  $('#leftButton').remove();
+  $('#rightButton').remove();
   $('#showMeLeftButton').remove();
   $('#showMeRightButton').remove();
   //$('#keywords').remove();
@@ -1405,6 +1471,8 @@ function init(){
   $('#describe').remove();
 
   $('#isDebug').prop('checked', false);
+
+  $('select#groupByMenu').parent().removeClass('hidden');
 
   // **** TODO: comment out these lines
   //$('#lod').addClass('hide');
@@ -1433,6 +1501,36 @@ function init(){
   $('#queryTimeout').val('30000');
 
 
+
+  $('#keywords').css('padding-left', '10px');
+
+    var clearKeywords = $('span.clear-data').filter(function() {return $(this).text() === 'Keywords';});
+    var clearLibrary = $('span.clear-data').filter(function() {return $(this).text() === 'Library';});
+
+    clearKeywords.css('text-decoration', 'none');
+    clearLibrary.css('text-decoration', 'none');
+
+
+    //var ict = $.createElement('span');
+    //var icl = $.createElement('span');
+
+    //clearKeywords.replaceWith(ict);
+    //clearLibrary.replaceWith(icl);
+
+    //ict.addClass('fa');
+    //icl.addClass('fa');
+
+
+    //ict.addClass('fa-times-circle');
+    //icl.addClass('fa-times-circle');
+
+    clearKeywords.text('Clear Keywords');
+    clearLibrary.text('Clear Library');
+
+    //ict.css('font-family', 'Montserrat, sans-serif');
+    //icl.css('font-family', 'Montserrat, sans-serif');
+
+//$('[data-toggle="tooltip"]').tooltip();
 
 var newDataspacePicker = '';
 
@@ -1580,11 +1678,11 @@ gbcol += '<div class="row"><span style="padding-right:3em">thisIsAFacet</span><b
                         gbcol += '</section></div>';
 
 gbcol += '<div id="recordsListWidgetContainer" class="short-div"><section class="widget" widget>';
-gbcol += '<header id="groupByHeader" onclick="javascript:javascript:doExplore($(\'#keywords\').val())" style="cursor:pointer;">';
+gbcol += '<header id="groupByHeader" style="cursor:pointer;">';
         gbcol += '<h4><span id="groupByCount" class="badge badge-info">0/0</span> Records</h4>';
         gbcol += '<div class="widget-controls">';
-          gbcol += '<a data-target="#" class="hide leftButton" onclick="javascript:pageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
-          gbcol += '<a data-target="#" class="hide rightButton" onclick="javascript:pageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
+          gbcol += '<a data-target="#" class="hide " id="leftButton" onclick="javascript:pageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
+          gbcol += '<a data-target="#" class="hide "id="rightButton" onclick="javascript:pageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
           //gbcol += '<a data-widgster="close" data-target="#"><i class="glyphicon glyphicon-remove"></i></a>';
         gbcol += '</div>';
         gbcol += '</header>';
@@ -1616,8 +1714,8 @@ gbcol += '<header id="groupByTableHeader">';
         gbcol += '</h5>';
         gbcol += '<div class="widget-controls">';
           //gbcol += '<a href="#"><i class="glyphicon glyphicon-cog"></i></a>';
-          gbcol += '<a data-target="#" class="hide leftButton" onclick="javascript:pageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
-          gbcol += '<a data-target="#" class="hide rightButton" onclick="javascript:pageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
+         // gbcol += '<a data-target="#" class="leftButton" onclick="javascript:pageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
+         // gbcol += '<a data-target="#" class="rightButton" onclick="javascript:pageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
           gbcol += '<a data-widgster="close" onclick="undoTable()" class="btn-gray"><i class="glyphicon glyphicon-remove"></i></a>';
         gbcol += '</div>';
       gbcol += '</header>';
@@ -1646,12 +1744,12 @@ gbcol += '<br/>';
 
 gbcol += '<div class="clearfix">';
           gbcol += '<div class="pull-right">';
-            gbcol += '<button class="btn btn-default btn-sm">';
-              gbcol += 'New ...';
+            gbcol += '<button onclick="undoTable(); buildForm()" class="btn btn-default btn-sm">';
+              gbcol += 'Compose ...';
             gbcol += '</button>&nbsp;';
             gbcol += '<div class="btn-group" data-dropdown="">';
               gbcol += '<button class="btn btn-sm btn-inverse dropdown-toggle" data-toggle="dropdown" aria-expanded="false">';
-                gbcol += '&nbsp; Save As... &nbsp;';
+                gbcol += '&nbsp; Export... &nbsp;';
                 gbcol += '<i class="fa fa-caret-down"></i>';
               gbcol += '</button>';
               gbcol += '<ul class="dropdown-menu dropdown-menu-right" x-placement="top-end" style="position: absolute; transform: translate3d(-97px, -145px, 0px); top: 0px; left: 0px; will-change: transform;">';
@@ -1679,6 +1777,16 @@ gbcol += '</div>';
 
 
 $('#dataCanvas').append(gbcol);
+
+
+
+
+
+
+
+
+
+
 
 
 gbcol = '<div id="showMeColumn" class="hide col-lg-'+SIZE_SHOW_ME+' col-12"><section class="widget" widget>';
@@ -1739,7 +1847,7 @@ gbcol = '<div id="recordViewerColumn" class="hide col-lg-'+SIZE_RECORD_VIEWER+' 
 
 
 gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
-  gbcol += '<a class="navbar-brand" data-target="#">New</a>';
+  gbcol += '<a class="navbar-brand" data-target="#" onclick="javascript:buildForm()">Compose</a>';
   gbcol += '<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">';
     gbcol += '<i class="glyphicon glyphicon-tree-conifer"></i>';
     gbcol += '<i _ngcontent-c10="" class="glyphicon glyphicon-tree-conifer text-success"></i>';
@@ -1752,6 +1860,9 @@ gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Table</a>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:showMap()">Map</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item dropdown">';
         gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
@@ -1790,15 +1901,62 @@ gbcol += '<iframe id="describe" class="iframe embed-responsive-item" src="" heig
 
                         gbcol += '</section></div>';
 
-/*
-gbcol = '<div id="recordViewerColumn" class="col-lg-'+SIZE_RECORD_VIEWER+' col-12">'
 
-gbcol += '<div class="widget-body  p-0">' + getFormEditor() + '</div>';
+gbcol += '<div id="recordFormColumn" class="hide col-lg-'+SIZE_RECORD_FORM+' col-12">'
+
+gbcol += '<div class="widget-body  p-0"></div>';
                         gbcol += '</div>';
-*/
+
+
+
+
+
+gbcol += '<div id="mapResults" class="short-div hide"><section class="widget" widget>';
+
+gbcol += '<header id="mapResultsHeader">';
+        gbcol += '<div class="widget-controls">';
+          //gbcol += '<a href="#"><i class="glyphicon glyphicon-cog"></i></a>';
+         // gbcol += '<a data-target="#" class="leftButton" onclick="javascript:pageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
+         // gbcol += '<a data-target="#" class="rightButton" onclick="javascript:pageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
+          gbcol += '<a data-widgster="close" onclick="hideMap()" class="btn-gray"><i class="glyphicon glyphicon-remove"></i></a>';
+        gbcol += '</div>';
+      gbcol += '</header>';
+        gbcol += '<div class="widget-body">';
+
+
+//var apiKey = 'AIzaSyDe_oVpi9eRSN99G4o6TwVjJbFBNr58NxE';
+
+//gbcol += '<script async defer src="https://maps.googleapis.com/maps/api/js?key='+apiKey+'"> </script>';
+gbcol += '<div id="map"></div>';
+
+            gbcol += '</div>'; // widget-body
+
+
+
+gbcol += '</section></div>';
+
+
+
+gbcol += '</div>';
+
+
 
 $('#dataCanvas').append(gbcol);
 
+
+
+
+
+
+
+
+
+
+
+
+$('#notifications-dropdown-toggle').on('click', function(e){
+  solid.auth.popupLogin({ "popupUri":"http://myopenlink.net/DAV/home/sdmonroe/popup.html" });
+});
 
 
 
@@ -1819,9 +1977,13 @@ $('#dataCanvas').append(gbcol);
         link.href = 'https://fonts.googleapis.com/css?family=Source+Code+Pro';
         document.head.appendChild(link);
 
+        link = document.createElement('script');
+        link.type = 'text/javascript';
+        link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/solid-auth-client.bundle.js';
+        document.head.appendChild(link);
+
     }  
 
-    fct_init(); // this method must be the first method called by the implementation of the fct_ framework
 
 //    $('#keywords').val(VALUE_DEFAULT_KEYWORDS_TEXT);
     $('#dsroot').attr('title', fct_dataSpace);
@@ -1862,15 +2024,468 @@ $('#dataCanvas').append(gbcol);
     $('#keywords').focus();
 
 }
+//const popupUri = 'http://myopenlink.net/DAV/home/sdmonroe/popup.html';
+function buildForm(){
+  addTab(getMainFocus().attr('class'), 0);
+  $('#recordViewerColumn').addClass('hide');
+  $('#recordFormColumn').removeClass('hide');  
+}
+
+function hideForm(){
+  $('#recordFormColumn').addClass('hide');
+  $('#recordViewerColumn').removeClass('hide');
+}
+
+function showMap(){
+  //addTab(getMainFocus().attr('class'), 0);
+  $('#recordViewerColumn').addClass('hide');
+  $('#mapResults').removeClass('hide');  
+}
+
+function hideMap(){
+  $('#mapResults').addClass('hide');
+  $('#recordViewerColumn').removeClass('hide');
+}
+
+
+    function addTab(fctId, tabCounter) {
+     // tabCounter++;
+      //var label = tabTitle.val() || "Tab " + tabCounter;
+      var  id = "tabs-" + tabCounter;
+     var tabTitle = $( "#tab_title" );
+    var tabContent = $( "#tab_content" );
+ 
+ if(tabCounter == 0){
+    $('.tab-content').empty();
+    $('ul[role="tablist"]').empty();
+ }
+
+
+
+
+          var form = $.createElement('form');
+          form.attr('id', 'tabs-1');
+          form.addClass('form-horizontal');
+          form.addClass('ng-untouched');
+          form.addClass('ng-pristine');
+          form.addClass('ng-valid');
+          form.attr('novalidate', '');
+          form.attr('role', 'form');
+          form.attr('_lpchecked', '1');
+          var fieldset = $.createElement('fieldset');
+
+          //var table = $.createElement('table');
+          var buttonPanel = $.createElement('div');
+          buttonPanel.addClass('form-actions');
+
+          var rows = '';
+
+            var buttonblock = $.createElement('div');
+            buttonblock.addClass('btn-block');
+            buttonblock.addClass('text-center');
+
+
+
+var classes = $(_root.find('.'+fctId + ' > class'));
+var tabLabel = _root.find('.'+fctId).attr('label');
+
+
+if(classes && classes.length > 0){
+          rows += '<legend class="m-2"><strong>General</strong> Categories</legend>';
+
+              rows += '<div class="form-group row">';
+              rows += '<label class="col-md-4  col-form-label text-md-right" for="normal-field">';
+              rows += 'Categories';
+              rows += '</label>';
+              rows += '<div class="col-md-7 ">';
+var clazz = '';
+      classes.each(function(i) {
+        //tabTemplate.replace('class="nav-item', 'class="nav-item drop');
+       //var  ddli = $( tabTemplate.replace( /#\{id\}/g, id ).replace( /#\{label\}/g,    ( (fctId == ID_QUERY) ? (tabTitle.val() || "Record " + tabCounter) : getQuery().attr('label') )     ) );
+        //tabList.append(ddli);
+        if(i == 0) tabLabel = processLabel($(this).attr('label')); // POI: take the latest added class as the tab label
+              clazz += ((i > 0) ? ', ' : '') + processLabel($(this).attr('label'));
+
+              
+      });
+              rows += '<input class="form-control" id="normal-field" disabled="disabled" placeholder="Enter field value" value="'+clazz+'" type="text" id="'+createId()+'"/>';
+              rows += '</div>';
+              rows += '</div>';
+}
+
+
+
+
+var hasLegend = false;
+
+
+      $(_root.find('.'+fctId + ' > property')).each(function(i) {
+          /*var children = $(this).has('property');
+          var tar = (children) ? breadcrumbs : facetCollector ;*/
+
+          var label = $(this).attr('label');
+          var len = $(this).find('property').length;
+          len += $(this).find('property-of').length;
+          len += $(this).find('class').length;
+          //if(len > 0) label += ' [' + len + ']';
+          var value = $(this).find('value').text();
+          var valueLabel = $(this).find('value').attr('label');
+          var iri = $(this).attr('iri');
+          var subId = $(this).attr('class');
+          
+          //len += ', including';
+          var datatype = $(this).attr('datatype');
+
+
+          if($(this).children('property, property-of').length <= 0){
+
+        if(!hasLegend){
+          rows += '<legend class="m-2"><strong>General</strong> Fields</legend>';
+          hasLegend = true;
+
+        }
+              rows += '<div class="form-group row">';
+              rows += '<label class="col-md-4  col-form-label text-md-right" for="normal-field">';
+              rows += label;
+
+
+
+
+
+var  cls = $(_root.find('.'+fctId + ' > property[iri="'+iri+'"]')).children('class');
+
+
+if(cls && cls.length > 0){
+          rows += '<span class="help-block">';
+
+      cls.each(function(j) {
+              rows += ((j > 0) ? ', ' : '') + processLabel($(this).attr('label'));
+
+              
+      });
+              rows += '</span>';
+}
+
+
+
+
+              rows += '</label>';
+              rows += '<div class="col-md-7 ">';
+              var disabled = (value) ? ' disabled="disabled"' : '';
+              if(valueLabel) valueLabel = processLabel(valueLabel);
+              else valueLabel = '';
+              rows += '<input class="form-control" id="normal-field"'+disabled+' placeholder="Enter field value" value="'+valueLabel+'" type="text" id="'+createId()+'"/>';
+              rows += '</div>';
+              rows += '</div>';
+          }
+          else{
+            //var subTab = $(this);
+            var b = $.createElement('button');
+            b.addClass('btn');
+            b.addClass('btn-info');
+            b.attr('type', 'button');
+
+            // AddTab button: just opens the dialog
+            b.button().on( "click", function() {
+                //$('#tab_title').attr('value', );        
+                //buildForm();
+
+                addTab(subId, createId());
+                $('#recordFormColumn').addClass('dont-touch');
+                takeMainFocus(subId);
+                //$('#recordFormColumn').remmoveClass('dont-touch');
+                //$('#tabs').removeClass('hide');
+                b.remove();
+                if(buttonblock.children('button').length <= 0) {
+                  buttonblock.parent().remove();
+                }
+        //        dialog.dialog( "open" );
+            });
+
+            b.text(label);
+
+            buttonblock.append(b);
+            buttonblock.append('&nbsp;');
+         
+           }
+
+      });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+hasLegend = false;
+
+
+      $(_root.find('.'+fctId + ' > property-of')).each(function(i) {
+          /*var children = $(this).has('property');
+          var tar = (children) ? breadcrumbs : facetCollector ;*/
+
+          var label = $(this).attr('label');
+          var len = $(this).find('property').length;
+          len += $(this).find('property-of').length;
+          len += $(this).find('class').length;
+          //if(len > 0) label += ' [' + len + ']';
+          var value = $(this).find('value').text();
+          var valueLabel = $(this).find('value').attr('label');
+          var iri = $(this).attr('iri');
+          var subId = $(this).attr('class');
+          
+          //len += ', including';
+          var datatype = $(this).attr('datatype');
+
+
+          if($(this).children('property, property-of').length <= 0){
+        if(!hasLegend){
+          rows += '<legend class="m-2"><strong>General</strong> Roles</legend>';
+          hasLegend = true;
+        }
+              rows += '<div class="form-group row">';
+              rows += '<label class="col-md-4  col-form-label text-md-right" for="normal-field">';
+              rows += label + ' of';
+
+
+
+
+
+
+
+var  cls = $(_root.find('.'+fctId + ' > property-of[iri="'+iri+'"]')).children('class');
+
+
+if(cls && cls.length > 0){
+          rows += '<span class="help-block">';
+
+      cls.each(function(j) {
+              rows += ((j > 0) ? ', ' : '') + processLabel($(this).attr('label'));
+
+              
+      });
+              rows += '</span>';
+}
+
+
+
+
+
+
+
+
+              rows += '</label>';
+              rows += '<div class="col-md-7 ">';
+              var disabled = (value) ? ' disabled="disabled"' : '';
+              if(valueLabel) valueLabel = processLabel(valueLabel);
+              else valueLabel = '';
+              rows += '<input class="form-control" id="normal-field"'+disabled+' placeholder="Enter field value" value="'+valueLabel+'" type="text" id="'+createId()+'"/>';
+              rows += '</div>';
+              rows += '</div>';
+          }
+          else{
+            //var subTab = $(this);
+            var b = $.createElement('button');
+            b.addClass('btn');
+            b.addClass('btn-info');
+            b.attr('type', 'button');
+
+            // AddTab button: just opens the dialog
+            b.button().on( "click", function() {
+                //$('#tab_title').attr('value', );        
+                //takeMainFocus(subId);
+                //buildForm();
+
+                addTab(subId, createId());
+                $('#recordFormColumn').addClass('dont-touch');
+                takeMainFocus(subId);
+                //$('#recordFormColumn').remmoveClass('dont-touch');
+                //$('#tabs').removeClass('hide');
+                b.remove();
+                if(buttonblock.children('button').length <= 0) {
+                  buttonblock.parent().remove();
+                }
+
+        //        dialog.dialog( "open" );
+            });
+
+            b.text(label);
+
+            buttonblock.append(b);
+            buttonblock.append('&nbsp;');
+           }
+
+      });
+
+      //table.append(rows);
+      if(rows && rows != undefined) {
+fieldset.append(rows);
+        form.append(fieldset);
+      }
+      form.append("<br/>");
+      if(buttonblock.children('button').length > 0) {
+        buttonPanel.append(buttonblock);
+        form.append(buttonPanel);
+      }
+      //var tabs = $.createElement('ul');
+      //tabs.append('<li><a href="#tabs-1">'+getQuery().attr('label')+'</a></li>');
+
+
+    var tabTemplate = '<li class="nav-item"><a aria-controls="'+id+'" onclick="selectTab('+tabCounter+')" aria-expanded="false" class="nav-link'+((tabCounter == 0) ? ' active' : '')+'" data-toggle="tab" id="profile-tab" role="tab">'+tabLabel+'</a></li>';
+    var tabDropDownTemplate = '<a aria-controls="'+id+'" aria-expanded="true" class="dropdown-item show" data-toggle="tab" id="'+id+'-tab" role="tab" aria-selected="true">'+_root.find('.'+fctId).attr('label')+'</a>';
+      $(_root.find('.'+fctId + ' > class')).each(function(i) {
+        //tabTemplate.replace('class="nav-item', 'class="nav-item drop');
+       //var  ddli = $( tabTemplate.replace( /#\{id\}/g, id ).replace( /#\{label\}/g,    ( (fctId == ID_QUERY) ? (tabTitle.val() || "Record " + tabCounter) : getQuery().attr('label') )     ) );
+        //tabList.append(ddli);
+      });
+
+/*
+      var  li = $( tabTemplate.replace( /#\{id\}/g, id ).replace( /#\{label\}/g,    ( (fctId == ID_QUERY) ? (tabTitle.val() || "Record " + tabCounter) : getQuery().attr('label') )     ) );
+      var  tabContentHtml = form.prop('outerHTML') || "Tab " + tabCounter + " content.";
+ 
+
+*/
+
+
+$('ul[role="tablist"]').append(tabTemplate);
+
+
+      var tabPanel = $.createElement('div');
+      tabPanel.attr('aria-labelledby', id+'-tab');
+      tabPanel.attr('role', 'tabpanel');
+      tabPanel.addClass('tab-pane');
+      tabPanel.attr('id', id);
+if(tabCounter == 0 && false) {
+      tabPanel.attr('aria-expanded', 'true');
+     tabPanel.addClass('active');
+      tabPanel.addClass('in');
+      tabPanel.addClass('clearfix');
+
+
+}
+
+
+
+tabPanel.append(form);
+/*
+tabPanel.append('<div class="float-right">');
+          tabPanel.append('<button onclick="hideForm()" class="btn btn-inverse">Cancel</button>');
+          tabPanel.append('&nbsp;');
+          tabPanel.append('<button class="btn btn-primary">Save to localhost</button>');
+        tabPanel.append('</div>');
+*/
+
+var footer = '';
+
+footer += '<br/>';
+footer += '<div class="clearfix">';
+          footer += '<div class="pull-right">';
+          
+            footer += '<button onclick="hideForm()" class="btn btn-default btn-sm">';
+              footer += 'Cancel';
+            footer += '</button>&nbsp;';
+
+            footer += '<div class="btn-group" data-dropdown="">';
+              footer += '<button class="btn btn-sm btn-inverse dropdown-toggle" data-toggle="dropdown" aria-expanded="false">';
+                footer += '&nbsp; Save To... &nbsp;';
+                footer += '<i class="fa fa-caret-down"></i>';
+              footer += '</button>';
+
+              footer += '<ul class="dropdown-menu dropdown-menu-right" x-placement="top-end" style="position: absolute; transform: translate3d(-97px, -145px, 0px; top: 0px; left: 0px; will-change: transform;">';
+                footer += '<li><a class="dropdown-item" >localhost</a></li>';
+                footer += '<li><a class="dropdown-item" href="#">vios.network</a></li>';
+                footer += '<li><a class="dropdown-item" href="#">Solid POD</a></li>';
+                footer += '<li class="dropdown-divider"></li>';
+                footer += '<li><a class="dropdown-item" href="#">Save to Data Space...</a></li>';
+              footer += '</ul>';
+            footer += '</div>';
+
+
+          footer += '</div>';
+        footer += '</div>';
+
+           tabPanel.append(footer);
+
+
+
+$('.tab-content').append(tabPanel);
+
+
+
+selectTab(tabCounter);
+
+    }
+
+function selectTab(tabct){
+
+      var tab = $('a.nav-link[aria-expanded="true"]');
+        tab.attr('aria-expanded', 'false');
+     tab.removeClass('active');
+  var tabPanel = $('div.tab-pane[aria-expanded="true"]');
+        tabPanel.attr('aria-expanded', 'false');
+     tabPanel.removeClass('active');
+      tabPanel.removeClass('in');
+      tabPanel.removeClass('clearfix');
+
+      tab = $('a.nav-link[aria-controls="tabs-'+tabct+'"]');
+        tab.attr('aria-expanded', 'true');
+     tab.addClass('active');
+
+  tabPanel = $('div#tabs-'+tabct);
+        tabPanel.attr('aria-expanded', 'true');
+     tabPanel.addClass('active');
+      tabPanel.addClass('in');
+      tabPanel.addClass('clearfix');
+
+}
+
 
 var isActivated = false;
 function activate(){
   $('#groupByColumn').removeClass('hide');
   $('#showMeColumn').removeClass('hide');
   $('#recordViewerColumn').removeClass('hide');
+
+     var tabs = $( "#recordFormColumn > .widget-body" );
+
+      var tabList = $.createElement('ul');
+      tabList.addClass('nav');
+      tabList.addClass('nav-tabs');
+            tabList.addClass('float-left');
+            tabList.attr('role', 'tablist');
+
+//      $( '.nav-tabs' ).append( li );
+      //tabs.tabs( "load" , 1);
+      //$('#'+id).tabs( "option", "show", { effect: "blind", duration: 800 });
+      //tabs.tabs( "refresh" );
+      var tabBarParent = $.createElement('div');
+      tabBarParent.addClass('clearfix');
+
+      
+      tabBarParent.append(tabList);
+      tabs.append( tabBarParent );
+
+
+      var widget = $.createElement('div');
+      widget.addClass('tab-content');
+      widget.addClass('mb-lg');
+
+
+            //tabPanel.append( form );
+      //widget.append(tabPanel);
+      tabs.append( widget );
+
 }
 
   function doTable(){
+    doQuery(getQueryText());
     $('#recordViewerColumn').addClass('hide');
     $('#groupByColumn').removeClass('col-lg-'+SIZE_GROUP_BY);
     $('#groupByColumn').addClass('col-lg-'+(parseInt(SIZE_GROUP_BY)+parseInt(SIZE_RECORD_VIEWER)));
@@ -1894,6 +2509,8 @@ function activate(){
 
   }
 
+
+
 function exportTableToCSV(filename) {
     var csv = [];
     var rows = document.querySelectorAll("table#resultsTable thead tr, table#resultsTable tbody tr");
@@ -1908,7 +2525,7 @@ function exportTableToCSV(filename) {
     }
 
     // Download CSV file
-    downloadCSV(csv.join("\n"), filename);
+    downloadCSV(csv.join("\n"), filename.replace('.cvs', + '_' + createId() + '.cvs'));
 }
 
 function downloadCSV(csv, filename) {
@@ -1979,17 +2596,57 @@ console.log(e);
   }
   */
 
+
+  function showFacetCollector(){
+    $('#facetCollectorWidgetContainer').removeClass('hide');
+  }
+  function hideFacetCollector(){
+    $('#facetCollectorWidgetContainer').addClass('hide');
+  }
+  function showRecordsList(){
+    $('#recordsListWidgetContainer').removeClass('hide');
+  }
+  function hideRecordsList(){
+    $('#recordsListWidgetContainer').addClass('hide');
+  }
+  function showControlList(){
+    $('#showMeColumn').removeClass('hide');
+  }
+  function hideControlList(){
+    $('#showMeColumn').addClass('hide');
+  }
+  function isFacetCollectorVisible(){
+    return !$('#facetCollectorWidgetContainer').hasClass('hide');
+  }
+  function isRecordsListVisible(){
+    return !$('#recordsListWidgetContainer').hasClass('hide');
+  }
+  function isControlListVisible(){
+    return !$('#showMeColumn').hasClass('hide');
+  }
+
 document.onkeydown = checkKey;
+document.onkeyup = checkKeyRelease;
+
+var ctrlDown = false;
+
+function checkKeyRelease(e) {
+      e = e || window.event;
+    if (e.keyCode == '17') { // control key
+        ctrlDown = false;
+    }
+}
 
 function checkKey(e) {
+
 
     e = e || window.event;
 
     if (e.keyCode == '188') { // period key
-        if(page > 0 && !$('.leftButton').hasClass('hide')) pageLeft();
+        if(page > 0 && !$('#leftButton').hasClass('hide')) pageLeft();
     }
     else if (e.keyCode == '190') { // comma key
-        if(!$('.rightButton').hasClass('hide')) pageRight();
+        if(!$('#rightButton').hasClass('hide')) pageRight();
     }
     else if (e.keyCode == '37') { // left arrow key
        if(showMePage > 0 && !$('#showMeLeftButton').hasClass('hide')) showMePageLeft();
@@ -2002,12 +2659,43 @@ function checkKey(e) {
     }
 
 
-if(!$('#keywords').is(":focus")){
+if(!$('input').is(":focus")){
+  if(ctrlDown){
+    if (e.keyCode == '67') { // Delete key or C key
+      if(isControlListVisible()) hideControlList();
+      else showControlList();
+    }
+    else if (e.keyCode == '70') { // | key or P key
+      if(isControlListVisible()) hideControlList();
+      else showControlList();
+    }
+    else if (e.keyCode == '82') { // Return key or R key
+      if(isControlListVisible()) hideControlList();
+      else showControlList();
+    }
+    else if (e.keyCode == '84') { // T key
+      if(isControlListVisible()) hideControlList();
+      else showControlList();
+    }
+    else if (e.keyCode == '76' || e.keyCode == '71') { // Shift key or L key or G key
+      if(isControlListVisible()) hideControlList();
+      else showControlList();
+    }
+    else if (e.keyCode == '68') { // Shift key or L key or G key
+      if(isFacetCollectorVisible()) hideFacetCollector();
+      else showFacetCollector();
+    }
+    else if (e.keyCode == '88') { // Shift key or L key or G key
+      if(isRecordsListVisible()) hideRecordsList();
+      else showRecordsList();
+    }
+  }
+  else {
     if (e.keyCode == '8' || e.keyCode == '67') { // Delete key or C key
         selectMenuItem('showMeMenu', VIEW_TYPE_CLASSES);
        $('#showMeMenuSelectLabel').text($('#showMeMenu :selected').text());
     }
-    else if (e.keyCode == '220' || e.keyCode == '80' || e.keyCode == '70') { // | key or P key
+    else if (e.keyCode == '220' || e.keyCode == '80' || e.keyCode == '70') { // | key or P key or F key
         selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES);
        $('#showMeMenuSelectLabel').text($('#showMeMenu :selected').text());
     }
@@ -2026,6 +2714,8 @@ if(!$('#keywords').is(":focus")){
        $('#showMeMenuSelectLabel').text($('#showMeMenu :selected').text());
     }  
     else if(e.keyCode == '17') { // Control key
+      ctrlDown = true;
+    }    
   }
 }
 if(e.keyCode == '17'){
@@ -2082,7 +2772,7 @@ iri = decodeURIComponent(iri);
 return iri;
 }
 
-function processLabel(label, value, datatype, labelSize){
+function processLabel(label, value, datatype, lang, labelSize){
     if(!labelSize) labelSize = SIZE_LABEL;
     label = label.trim();
 
@@ -2270,6 +2960,21 @@ function doExplore(keywords){
       $('#keywords').blur();
 
 }
+
+function exitGroupBy(id){
+// TODO: controller logic must not depend on viewer state, as is implemented here
+// need to properly manage groupby state
+
+
+  if(id){
+    if(   $('#smr_' + id  ).find('span.badge-primary').length > 0    ) return; // if the CTRL is in groupby mode, do nothing
+  }
+   if(_root.find('[isGroupBy="true"]') && _root.find('[isGroupBy="true"]').length > 0){
+    takeMainFocus(_root.find('[isGroupBy="true"]').parent().attr('class'), true);
+    _root.find('[isGroupBy="true"]').removeAttr('isGroupBy');
+   }
+}
+
 var dqct = 0;
 function doQuery(keywords){
   if(!isActivated) {
@@ -2282,10 +2987,20 @@ function doQuery(keywords){
       //console.log('query 1: ' + getQuery().prop('outerHTML'));
 
       //var q = query.clone();
-      //selectMenuItem('groupByMenu', GROUP_BY_NONE_VALUE);
+
+      // POI: always exit groupby mode on each smart folder refresh/execute
+      selectMenuItem('groupByMenu', GROUP_BY_NONE_VALUE, true);
 
       // POI: groupby does not persist between canvas updates
- remove(     _root.find('[isGroupBy=true]').attr('class') , true);
+      // TODO: this removal of the groupBy property might not be needed anymore, since the new logic
+      // requires the user to add the field before the groupBy icon appears, selectGroupBy
+      // always pulls the property from the facet collector
+       //remove(     _root.find('[isGroupBy="true"]').attr('class') , true);
+      exitGroupBy();
+    
+
+      $('#groupByHeader > p.gbsub').text('');
+      $('#groupByHeader > p.gbbadge').text('');
 
       // POI: groupby is now done via the Show Me menu, items are added to the Group by menu on-demand by user
       //$('#groupByHeader').addClass('loading');
@@ -2306,6 +3021,7 @@ function doQuery(keywords){
       //if(!fct_isPermalink || preInitialized){// POI: the initial load sequence is over after three calls to doQuery (one call for each menu: showme, expand search, data space), if this fact ever changes, the groupby load from the permalink will break
         qGroupBy = undefined;
         $('#groupByHeader').addClass('loading');
+    $('#groupByTableHeader').addClass('loading');
 
     //query.attr('same-as', 'true');
         fct_query(query, VIEW_TYPE_LIST_COUNT);
@@ -2348,7 +3064,8 @@ return fct_dataSpaceLabel;
 }
 
 function getQueryTimeout(){
-  return $('#queryTimeout :selected').attr('value');
+//  return $('#queryTimeout :selected').attr('value');
+  return $('.slider-handle').attr('aria-valuenow'); // TODO: need to access the slider via id
 }
 
 //** FILE: groupby.js *****************************************************************************************************************************************************************************************/
@@ -2387,26 +3104,26 @@ function loadTextResults(xml){
       var result = $(xml).find("fct\\:result")[0];
       groupByResultsCt = $("fct\\:row", result).length;
         if(page == 0){
-          $(".leftButton").attr('disabled', 'true');
-          $(".leftButton").addClass('disabled');
-          $('.leftButton').removeAttr('title');
+          $("#leftButton").attr('disabled', 'true');
+          $("#leftButton").addClass('disabled');
+          $('#leftButton').removeAttr('title');
         }
         else{
 
-          $(".leftButton").removeAttr('disabled');
-          $(".leftButton").removeClass('disabled');
-          $('.leftButton').attr('title', 'page ' + (page));
+          $("#leftButton").removeAttr('disabled');
+          $("#leftButton").removeClass('disabled');
+          $('#leftButton').attr('title', 'page ' + (page));
 
         }
       if(groupByResultsCt < SIZE_RESULT_SET) {
-        $(".rightButton").attr('disabled', 'true');
-        $(".rightButton").addClass('disabled');
-        $('.rightButton').removeAttr('title');
+        $("#rightButton").attr('disabled', 'true');
+        $("#rightButton").addClass('disabled');
+        $('#rightButton').removeAttr('title');
       }
       else {
-        $(".rightButton").removeAttr('disabled');
-        $(".rightButton").removeClass('disabled');
-        $('.rightButton').attr('title', 'page ' + (page+2));
+        $("#rightButton").removeAttr('disabled');
+        $("#rightButton").removeClass('disabled');
+        $('#rightButton').attr('title', 'page ' + (page+2));
 
       }
 
@@ -2422,11 +3139,11 @@ function loadTextResults(xml){
               val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
               //console.log(val);
               switch(j){
-                //case 0: value = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); lang = $(this).attr('xml\\:lang'); break;
+                //case 0: value = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); lang = $(this).attr('lang'); break;
                 case 0: trank = val; break;
                 case 1: erank = val; break;
                 case 2: g = val; break;
-                case 3: value = val; datatype = $(this).attr('datatype'); break;
+                case 3: value = val; datatype = $(this).attr('datatype'); lang = $(this).attr('lang'); break;
                 case 4: label = val; break;
                 case 5: text = htmlDecode(val); break;
               }
@@ -2439,7 +3156,7 @@ function loadTextResults(xml){
               //rows += '</span></td></tr>';
           }
           else {
-              label = processLabel(label, value, datatype);
+              label = processLabel(label, value, datatype, lang);
 
               // POI: the label and values need to have the apostrophe (') char removed before insertion into the javascript functions below
               // but they need to be desanitized by the respective javascript methods before being used in a query (or else the query will fail due to value mismatch)
@@ -2449,7 +3166,7 @@ function loadTextResults(xml){
               //console.log($(col[0]));
               var id = createId();
               rows += '<tr><td class="up" id="txt1_'+id+'"><span id="'+id+'">';
-              rows += '<a onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\')">&nbsp;'+getFavicon(value)+'</a>&nbsp;';
+              rows += '<a onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')">&nbsp;'+getFavicon(value)+'</a>&nbsp;';
               label = deSanitizeLabel(label);
               rows += '<a title="'+value+'" onclick="javascript:describe(\''+value+'\');">'+label+'</a>';
               rows += '</span></td></tr>';
@@ -2520,6 +3237,22 @@ function htmlEncode(input){
 }
 */
 
+function isGrouped(){
+  return $('#groupByMenu :selected').attr('value')!==GROUP_BY_NONE_VALUE && $('#groupByMenu :selected').attr('value')!==GROUP_BY_TEXT_VALUE; 
+}
+
+function getGroupByValue(){
+  var l = $('#groupByMenu :selected').attr('l');
+    return (l) ? l.split(DELIMIT_GROUP_BY_VALUE_AND_LABEL)[0] : $('#groupByMenu :selected').val();
+
+}
+
+function getGroupByLabel(){
+  var l = $('#groupByMenu :selected').attr('l');
+    return (l) ? l.split(DELIMIT_GROUP_BY_VALUE_AND_LABEL)[1]: $('#groupByMenu :selected').text();
+
+}
+
 function loadGroupByResults(xml, focusVarName){
       $('#'+ID_GROUP_BY+'').empty();
       $('#angular_recordsList').empty();
@@ -2532,47 +3265,47 @@ function loadGroupByResults(xml, focusVarName){
       groupByResultsCt = $("fct\\:row", result).length;
 /*      
         if(page == 0){
-          $(".leftButton").attr('disabled', 'true');
-          $(".leftButton").addClass('disabled');
-          $('.leftButton').removeAttr('title');
+          $("#leftButton").attr('disabled', 'true');
+          $("#leftButton").addClass('disabled');
+          $('#leftButton').removeAttr('title');
         }
         else{
 
-          $(".leftButton").removeAttr('disabled');
-          $(".leftButton").removeClass('disabled');
-          $('.leftButton').attr('title', 'page ' + (page));
+          $("#leftButton").removeAttr('disabled');
+          $("#leftButton").removeClass('disabled');
+          $('#leftButton').attr('title', 'page ' + (page));
 
         }
       if(groupByResultsCt < SIZE_RESULT_SET) {
-        $(".rightButton").attr('disabled', 'true');
-        $(".rightButton").addClass('disabled');
-        $('.rightButton').removeAttr('title');
+        $("#rightButton").attr('disabled', 'true');
+        $("#rightButton").addClass('disabled');
+        $('#rightButton').removeAttr('title');
       }
       else {
-        $(".rightButton").removeAttr('disabled');
-        $(".rightButton").removeClass('disabled');
-        $('.rightButton').attr('title', 'page ' + (page+2));
+        $("#rightButton").removeAttr('disabled');
+        $("#rightButton").removeClass('disabled');
+        $('#rightButton').attr('title', 'page ' + (page+2));
 
       }
 
 */
         if(page == 0){
-          $(".leftButton").addClass('hide');
-          $('.leftButton').removeAttr('title');
+          $("#leftButton").addClass('hide');
+          $('#leftButton').removeAttr('title');
         }
         else{
 
-          $(".leftButton").removeClass('hide');
-          $('.leftButton').attr('title', 'page ' + (page));
+          $("#leftButton").removeClass('hide');
+          $('#leftButton').attr('title', 'page ' + (page));
 
         }
       if(groupByResultsCt < SIZE_RESULT_SET) {
-        $(".rightButton").addClass('hide');
-        $('.rightButton').removeAttr('title');
+        $("#rightButton").addClass('hide');
+        $('#rightButton').removeAttr('title');
       }
       else {
-        $(".rightButton").removeClass('hide');
-        $('.rightButton').attr('title', 'page ' + (page+2));
+        $("#rightButton").removeClass('hide');
+        $('#rightButton').attr('title', 'page ' + (page+2));
 
       }
 
@@ -2592,7 +3325,7 @@ function loadGroupByResults(xml, focusVarName){
               val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
               //console.log(val);
               switch(j){
-                case 0: value = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); lang = $(this).attr('xml\\:lang'); break;
+                case 0: value = val; shortform = $(this).attr('shortform'); datatype = $(this).attr('datatype'); lang = $(this).attr('lang'); break;
                 case 1: label = val; break;
                 case 2: ct = val; break;
               }
@@ -2613,16 +3346,21 @@ function loadGroupByResults(xml, focusVarName){
                     describe(value);
                   } 
               }
-              var propIRI = $('#groupByMenu :selected').attr('value');
-              var propLabel = $('#groupByMenu :selected').text();
+              var propIRI = getGroupByValue();
+              var propLabel = getGroupByLabel();
               var facet = false;
 
-              var groupByCriteria = getMainFocus();
-              var isGroupByCriteria = getMainFocus().attr('isGroupBy') === 'true' || $('#groupByMenu :selected').attr('isReverse'); // POI: For now, "Used As" fields are not treated as "group by", since they are not "added" from the Group by menu, but are instead added from the Used As menu
-              if(isGroupByCriteria){
-                propIRI = groupByCriteria.attr('iri');
-                propLabel = groupByCriteria.attr('label');
-              }
+              //var groupByCriteria = getMainFocus();
+              var isGroupByCriteria = isGrouped(); // POI: For now, "Used As" fields are not treated as "group by", since they are not "added" from the Group by menu, but are instead added from the Used As menu
+              //if(isGroupByCriteria){
+                //propIRI = groupByCriteria.attr('iri');
+                //propLabel = groupByCriteria.attr('label');
+    //var l = $('#groupByMenu :selected').attr('l');
+
+    //propIRI = (l) ? l.split(DELIMIT_GROUP_BY_VALUE_AND_LABEL)[0] : $('#groupByMenu :selected').val();
+    //propLabel = (l) ? l.split(DELIMIT_GROUP_BY_VALUE_AND_LABEL)[1]: $('#groupByMenu :selected').text();
+
+              //}
 
               _root.find('.' + getMainFocus().attr('class') + ' > property[iri=\''+propIRI+'\'] > value').each(function(k){
                 if(!facet && $(this).text() === value) {
@@ -2632,7 +3370,8 @@ function loadGroupByResults(xml, focusVarName){
               var checked = (facet) ? ' checked="checked"': '';
               var active = (facet) ? 'active': '';
 
-              label = processLabel(label, value, datatype);
+              label = processLabel(label, value, datatype, lang);
+              labels[value] = label;
 
               // POI: the label and values need to have the apostrophe (') char removed before insertion into the javascript functions below
               // but they need to be desanitized by the respective javascript methods before being used in a query (or else the query will fail due to value mismatch)
@@ -2648,7 +3387,7 @@ function loadGroupByResults(xml, focusVarName){
               opts.childrenId = opts.tag + opts.parentId;
 
 var color = 'success';
-
+var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'primary' : 'info';
 
 /*
 
@@ -2699,17 +3438,18 @@ if(true){
               if(isGroupByCriteria) {
                 var isReverse = $('#groupByMenu :selected').attr('isReverse') && $('#groupByMenu :selected').attr('isReverse').length > 0;
               //if(propIRI != GROUP_BY_NONE_VALUE && propIRI != GROUP_BY_TEXT_VALUE) {
-                var propOrPropOf = (isReverse) ? "addPropertyOfFacet" : "addPropertyFacet";
+                var addPropOrPropOf = (isReverse) ? "addPropertyOfFacet" : "addPropertyFacet";
+                var propOrPropOf = (isReverse) ? "property-of" : "property";
                 //rows += '<a class="count" onclick="javascript: remove(\''+getMainFocus().attr('class')+'\', true); '+propOrPropOf+'(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\'); selectMenuItem(\''+id+'\', \''+propIRI+'\');">'+ct+'</a>&nbsp;-&nbsp;';
-                rows +=  '<span style="cursor:pointer" _ngcontent-c9="" class="badge badge-pill badge-info" onclick="javascript: remove(\''+getMainFocus().attr('class')+'\', true); '+propOrPropOf+'(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\'); selectMenuItem(\''+id+'\', \''+propIRI+'\');">'+ct+'</span>';
+                rows +=  '<span style="cursor:pointer" _ngcontent-c9="" class="badge badge-pill badge-'+badgeColor+'" onclick="javascript: removeEmptyFacet(\''+propOrPropOf+'\',\''+propIRI+'\', true); '+addPropOrPropOf+'(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\', \''+lang+'\'); selectMenuItem(\''+id+'\', \''+propIRI+'\');">'+ct+'</span>';
               }
               else {
                 if(datatype=='uri') {
-                  rows += '<img style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\')" alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
+                  rows += '<img style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
                                     rows +=  '<i class="status status-bottom bg-'+color+'"></i>';
                 }
                 else {
-                  rows += '<span style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\')" class="glyphicon glyphicon-tag"></span>';
+                  rows += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="glyphicon glyphicon-tag"></span>';
                 }
               }
                                 rows +=  '</span>';
@@ -2720,8 +3460,9 @@ if(true){
 
               label = deSanitizeLabel(label);
               var labelLink = (datatype=='uri') ? 'title="'+value+'" onclick="javascript:describe(\''+value+'\');"' : '';
-              rows +=  '<h6 style="cursor:pointer" class="text-ellipsis m-0" '+labelLink+'>'+label+'</h6>';
-              rows +=  '<p class="help-block text-ellipsis m-0"></p>';
+              rows +=  '<h6 class="text-ellipsis m-0" '+labelLink+'>';
+              rows+=label;
+              //rows +=  '<p class="help-block text-ellipsis m-0"></p>';
 
               //rows += '</span></td><td style="white-space:nowrap; vertical-align:top;">';          
 
@@ -2730,16 +3471,16 @@ if(true){
                  // rows += 'Right way'
                   //rows += '</label>';
           rows += '<div class="form-check-inline abc-checkbox abc-checkbox-primary">';
-          rows += '<input class="form-check-input" id="checkbox2" type="checkbox"/><input class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: remove(\''+getMainFocus().attr('class')+'\', true); addPropertyFacet(\''+createId()+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\')" />';
+          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: removeEmptyFacet(\''+propOrPropOf+'\',\''+propIRI+'\', true); '+addPropOrPropOf+'(\''+createId()+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\', \''+lang+'\')" />&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
 //                 rows += '<img title="click to drop-down" class="count" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
                  // rows += '<a title="click to drop-down" class="count" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"><img width="16" height="16"/>&nbsp;&nbsp;</a>&nbsp;';
-          rows += '<i title="acts as \''+propLabel+'\' of these things" class="expand la la-bars" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i title="acts as \''+propLabel+'\' of these things" class="expand la la-bars" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\')"></i>';
               }
              // rows += '</td></tr>';
 
-
+rows+='</h6>';
             rows +=  '</div>';
 
           rows +=  '</a>';
@@ -2774,7 +3515,7 @@ function addSubResults(opt){
     $('#'+opt.parentId+'').after(table);
 }
 
-function expand(propVal, datatype, optsStr){
+function expand(propVal, datatype, lang, optsStr){
     var opts = toJSONObject(optsStr);
     var childrenId = opts.childrenId;
     var parentId = opts.parentId;
@@ -2806,7 +3547,7 @@ function expand(propVal, datatype, optsStr){
     getFocus(q).find('view').attr('offset', 0);
 
     //var id = $('#groupByMenu :selected').attr('id');
-    var propIRI = $('#groupByMenu :selected').attr('value');
+    var propIRI = getGroupByValue();
     var isReverse = $('#groupByMenu :selected').attr('isReverse') === 'true';
 
 
@@ -2815,10 +3556,10 @@ function expand(propVal, datatype, optsStr){
     // the focus (as asserted by the UI) is under each of those smart folders, thus, the groupby query criteria is never displayed in the facet
     // collector, it is only displayed in the groupby menu. If the groupby criteria is no longer present in the Group by list, then it is removed
     // from the query criteria on loadGroupByMenu()
-    var prop = getFocus(q); // = (isReverse) ? q.find('.'+getFocus(q).attr('class') + ' > property-of[class="' +id+ '"]') : q.find('.'+getFocus(q).attr('class') + ' > property[class="' +id+ '"]');
-    takeFocus(prop.parent(), q);
+    //var prop = getFocus(q); // = (isReverse) ? q.find('.'+getFocus(q).attr('class') + ' > property-of[class="' +id+ '"]') : q.find('.'+getFocus(q).attr('class') + ' > property[class="' +id+ '"]');
+    //takeFocus(prop.parent(), q);
     //prop.attr('iri', groupByIRI);
-/*
+
     if(isReverse) prop = q.find('.'+getFocus(q).attr('class') + ' > property-of[iri="' +propIRI+ '"]');
     else {
       prop = q.find('.'+getFocus(q).attr('class') + ' > property[iri="' +propIRI+ '"]');
@@ -2832,11 +3573,12 @@ function expand(propVal, datatype, optsStr){
       }
     }
 
-*/
+
 
     var val = $.createElement('value');
     val.text(propVal);
     if(datatype && datatype.length > 0 && datatype !== 'undefined') val.attr('datatype', datatype);
+    if(lang && lang.length > 0 && lang !== 'undefined') val.attr('lang', lang);
     //val.attr('op', '=');
     //val.attr('same_as', 'yes');
     prop.append(val);
@@ -2949,13 +3691,15 @@ function loadGroupByMenu(xml){
 
 
 
+
 function selectGroupBy(isPaging){
       $('#groupByHeader > p.gbsub').text('');
       $('#groupByHeader > p.gbbadge').text('');
     // update the Group By list
-    var q = _root.find('query');//.clone();
-    var iri = $('#groupByMenu :selected').attr('l').split(DELIMIT_GROUP_BY_VALUE_AND_LABEL)[0];
-    var label = $('#groupByMenu :selected').attr('l').split(DELIMIT_GROUP_BY_VALUE_AND_LABEL)[1];
+    var q = _root.find('query').clone();
+    var l = $('#groupByMenu :selected').attr('l');
+    var iri = (l) ? l.split(DELIMIT_GROUP_BY_VALUE_AND_LABEL)[0] : $('#groupByMenu :selected').val();
+    var label = (l) ? l.split(DELIMIT_GROUP_BY_VALUE_AND_LABEL)[1]: $('#groupByMenu :selected').text();
     if(iri == GROUP_BY_NONE_VALUE){
         //takeFocus(q, q);
       //$('#groupByHeader').text('Records');
@@ -2970,33 +3714,39 @@ function selectGroupBy(isPaging){
         var prop;
 
         // POI: user is not allowed to "add" a property-of facet (for now), instead, user must
-        // manually add a field from the Used As menu, after that, the Used As field will 
-        // appear in the Group by, if the focus has one
-        if(isReverse) prop = q.find('.'+getFocus(q).attr('class') + ' > property-of[iri="' +iri+ '"]');
+        // manually add a field from the Roles menu, after that, the Roles field will 
+        // appear in the Group by menu, if the focus has one
+        if(isReverse) prop = getFocus(q).children('property-of[iri="' +iri+ '"]');
         else {
-          prop = q.find('.'+getFocus(q).attr('class') + ' > property[iri="' +iri+ '"]');
+          prop = getFocus(q).children('property[iri="' +iri+ '"]');
           if(!prop || prop.length == 0){
             prop = $.createElement('property');
             prop.attr('class', $('#groupByMenu :selected').attr('id'));
             prop.attr('iri', iri);
             prop.attr('label', label);
-            prop.attr('isGroupBy', 'true');
             getFocus(q).append(prop);
           }
         }
+        prop.attr('isGroupBy', 'true');
         takeFocus(prop, getFocus(q));
+        //takeMainFocus(prop.attr('class'), true);
         var sub = $.createElement('p');
         sub.addClass('help-block');
         sub.addClass('m-0');
         sub.addClass('text-ellipsis');
         sub.addClass('gbsub');
         sub.text('Grouped by ');
-        var badge = $.createElement('p');
+        $('#groupByHeader > h4').after(sub);
+
+var badge;
+if(isReverse){
+        badge = $.createElement('p');
         badge.addClass('badge');
+        //badge.addClass('badge-pill');
         badge.addClass('badge-default');
         badge.addClass('gbbadge');
         badge.css('display', 'inline');
-        badge.text(label + ' ');
+        badge.text( 'role' );
         //var removeLink = $.createElement('a');
         //removeLink.text('x');
         //badge.append(removeLink);
@@ -3005,8 +3755,27 @@ function selectGroupBy(isPaging){
         });
         //sub.addClass('float-right');
        //<p class="help-block text-ellipsis m-0"></p>
-        $('#groupByHeader > h4').after(sub);
         sub.append(badge);
+        sub.append('&nbsp;');
+}
+
+        badge = $.createElement('p');
+        badge.addClass('badge');
+        badge.addClass('badge-primary');
+        badge.addClass('gbbadge');
+        badge.css('display', 'inline');
+        badge.text( label +  ( (isReverse) ? ' of' : '') );
+        //var removeLink = $.createElement('a');
+        //removeLink.text('x');
+        //badge.append(removeLink);
+        badge.on('click', function (e){
+          selectMenuItem('groupByMenu', GROUP_BY_NONE_VALUE);
+        });
+        //sub.addClass('float-right');
+       //<p class="help-block text-ellipsis m-0"></p>
+        sub.append(badge);
+
+
     }
 
 
@@ -3017,6 +3786,7 @@ function selectGroupBy(isPaging){
     }
 
     $('#groupByHeader').addClass('loading');
+    $('#groupByTableHeader').addClass('loading');
     if(getQueryText().length > 0 && iri == GROUP_BY_TEXT_VALUE){
         fct_query(q, VIEW_TYPE_TEXT);
     }
@@ -3169,8 +3939,8 @@ rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">'
 //          rows +=  '</a>';
 
 
-  var color = 'info';
   var ckcolor = 'primary';
+var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'primary' : 'info';
 
 if(true){
 
@@ -3181,9 +3951,11 @@ if(true){
           var facet = getMainFocus().children('class[iri=\''+uri+'\']');
           if((!facet || facet.length) <= 0 && getMainFocus().children('value') && getMainFocus().children('value').length > 0) facet = align;
           var checked = (facet && facet.length > 0) ? ' checked="checked"': '';
+          var focusTarget = (getMainFocus().attr('class') == ID_QUERY+"") ? 'focusHeader' : 'focusValue';
+          var focusTargetClass = (getMainFocus().attr('class') == ID_QUERY+"") ? 'queryFocus' : 'queryFocusValue';
           //rows += '<tr  id="rw'+id+'" onmouseover="javascript:showControls(\''+id+'\')" onmouseout="javascript:hideControls(\''+id+'\')"><td class="up" id="'+opts.parentId+'">';
 
-          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+color+'" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addClassFacet(\''+id+'\', \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</span>';
+          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onmouseover="javascript:$(\'#'+focusTarget+'\').addClass(\''+focusTargetClass+'\')" onmouseout="javascript:$(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\')" onclick="javascript: addClassFacet(\''+id+'\', \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</span>';
 //          rows += '<a class="count" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addClassFacet(\''+id+'\', \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</a>&nbsp;-&nbsp;';
           //rows += '<a title="'+uri+'" onclick="javascript:describe(\''+uri+'\');">'+ spaceCamelCase(label) +'</a>&nbsp;';
                                 rows +=  '</span>';
@@ -3358,7 +4130,7 @@ function loadPropertiesResults(xml){
           //label = processLabel(label, uri, datatype);
           //var id = createId();
           //console.log($(col[0]));
-          propLabel = processLabel(propLabel, propIRI, datatype);
+          propLabel = processLabel(propLabel, propIRI, datatype, undefined);
           //console.log($(col[0]));
           var id = createId();
           var opts = new Object();
@@ -3370,8 +4142,9 @@ function loadPropertiesResults(xml){
           opts.propLabel = propLabel;
 
 
-          var color = ( $('#showMeMenu :selected').attr('value') == VIEW_TYPE_TEXT_PROPERTIES ) ? 'warning' : 'info';
+          //var color = ( $('#showMeMenu :selected').attr('value') == VIEW_TYPE_TEXT_PROPERTIES ) ? 'warning' : 'info';
           var ckcolor = 'primary';
+var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'primary' : 'info';
 
 
 
@@ -3404,7 +4177,7 @@ if(true){
           //rows += '<tr id="'+id+'" onmouseover="javascript:showControls(\''+id+'\')" onmouseout="javascript:hideControls(\''+id+'\')"><td class="up" id="'+opts.parentId+'"><span id="'+id+'">';
           //var propIRI = $('#groupByMenu :selected').attr('value');
           //var propLabel = $('#groupByMenu :selected').text();
-          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+color+'" onclick="javascript: addPropertyFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\');">'+ct+'</span>';
+          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onclick="javascript: addPropertyFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\');">'+ct+'</span>';
                                 rows +=  '</span>';
             rows +=  '<div>';
 //          rows += '<a class="count" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addPropertyFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\');">'+ct+'</a>&nbsp;-&nbsp;';
@@ -3451,18 +4224,24 @@ if(true){
 
 
 function doGroup(id, iri, label, isPropOf){
-  var v = $('#groupByMenu > option[value="'+iri+'"]');
-  if(!v || v.length <= 0){
-          if(isPropOf){
-addPropertyOfFacet(id, iri, label);
-          }
-          else {
-addPropertyFacet(id, iri, label);
-          }
-          var opt = '<option defaultLabel="'+label+'" l="'+iri+DELIMIT_GROUP_BY_VALUE_AND_LABEL+label+'" value="'+iri+'" id="'+createId()+'">'+label+'</option>';
-          $('#groupByMenu').append(opt);
+  //vcfexitGroupBy(id);
+
+    var opt = '';
+    var appendIri = iri;
+    if(isPropOf){
+      //addPropertyOfFacet(id, iri, label, undefined, undefined, undefined, true);
+      appendIri = iri+DELIMIT_GROUP_BY_REVERSE_PROPERTY;
+      opt = '<option defaultLabel="'+label+'" l="'+iri+DELIMIT_GROUP_BY_VALUE_AND_LABEL+label+'" isReverse="true" value="'+appendIri+'" id="'+createId()+'">'+label+'</option>';
+    }
+    else {
+      //addPropertyFacet(id, iri, label, undefined, undefined, undefined, true);
+      opt = '<option defaultLabel="'+label+'" l="'+iri+DELIMIT_GROUP_BY_VALUE_AND_LABEL+label+'" value="'+iri+'" id="'+createId()+'">'+label+'</option>';
+    }
+  var v = $('#groupByMenu > option[value="'+appendIri+'"]');
+  if(!v || v.length <= 0){ // add the property if is does not exist in the groupby menu
+    $('#groupByMenu').append(opt);
   }
-    selectMenuItem('groupByMenu', iri);
+  selectMenuItem('groupByMenu', appendIri);
     //selectGroupBy();
 }
 
@@ -3561,26 +4340,27 @@ rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">'
           //var propIRI = $('#groupByMenu :selected').attr('value');
           //var propLabel = $('#groupByMenu :selected').text();
 //          rows += '<a class="count" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addPropertyOfFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\')">'+ct+'</a>&nbsp;-&nbsp;';
+var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'primary' : 'info';
 
-          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-info" onclick="javascript: addPropertyOfFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\')">'+ct+'</span>';
+var ckcolor = 'primary';
+ 
+          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onclick="javascript: addPropertyOfFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\')">'+ct+'</span>';
                                 rows +=  '</span>';
             rows +=  '<div>';
           rows +=  '<h6 class="text-ellipsis m-0" title="'+propIRI+'" onclick="javascript:describe(\''+propIRI+'\');">';
 
-var color = 'info';
-var ckcolor = 'primary';
- 
+
 
             rows += propLabel;
           //rows += '</span></td><td id="ctrl'+id+'" class="hideCtrl" style="white-space:nowrap; vertical-align:top;">';          
           if(propIRI != GROUP_BY_NONE_VALUE){
-          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-'+color+'">';
+          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
           rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{addPropertyOfFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\');}"/>&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
           rows += '<i title="view values" class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
               //rows += '<img title="shows up in the \''+propLabel+'\' field of these records" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
-          if((facet && facet.length > 0))rows += '<i title="group the record list by role: \''+propLabel+'\'" class="group la la-compress" onclick="javascript:doGroup(\''+id+'\', \''+propIRI+DELIMIT_GROUP_BY_REVERSE_PROPERTY+'\', \''+propLabel+'\', true)" ></i>';
+          if((facet && facet.length > 0))rows += '<i title="group the record list by role: \''+propLabel+'\'" class="group la la-compress" onclick="javascript:doGroup(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\', true)" ></i>';
           }
 
           rows +='</h6>';
@@ -3692,7 +4472,7 @@ function loadGraphResults(xml){
 
 
 rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
-                                rows +=  '<span class="thumb-sm float-left mr">';
+                               // rows +=  '<span class="thumb-sm float-left mr">';
 
 
 
@@ -3763,7 +4543,71 @@ var ckcolor = 'primary';
 } // loadPropertiesResults
 
 
+
+function loadGeoListResults(xml){
+      //var mapId = '';
+      //$('#'+mapId+'').empty();
+      var rows = "";
+      var result = $(xml).find("fct\\:result")[0];
+      var locations = new Array();
+
+      $("fct\\:row", result).each(function(i) {
+          //console.log($(this).html());
+          var col = $(this).find("fct\\:column");
+
+          // shortform can be used in lieu of the label for URI values
+          var geoIRI, datatype, shortform, geoLabel, long, lat;
+          $("fct\\:column", this).each(function(j) {
+              // can't figure out how to access CDATA value of the element, tried many combinations of accessors, none worked
+              val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
+              //console.log(val);
+              switch(j){
+                case 0: geoIRI = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); break;
+                case 1: geoLabel = val; break;
+                case 2: long = val; break;
+                case 3: lat = val; break;
+              }
+          });
+          geoLabel = processLabel(geoLabel, geoIRI, datatype);
+          var id = createId();
+          var opts = new Object();
+          rows += '';
+          locations.push({"lat":parseInt(long), "lng":parseInt(lat)});
+      });
+
+      // call Map function, pass the location array
+      //if(locations.length > 0) initMap(locations);
+} // loadGeoListResults
+
+
+function initMap(results) {
+  $('#map').empty();
+  if(!google) return;
+  //const results = [{lat: 51.5, lng: -0.1}, {lat: 51.54, lng: -0.122}, {lat: 51.52, lng: -0.11}];
+  var map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 8,
+    center: new google.maps.LatLng(results[0].lat, results[0].lng),
+    mapTypeId: 'terrain'
+  });
+
+  // Create a <script> tag and set the USGS URL as the source.
+  //var script = document.createElement('script');
+  // This example uses a local copy of the GeoJSON stored at
+  // http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojsonp
+  
+  for (var i = 0; i < results.length; i++) {
+    var coords = results[i];
+    var latLng = new google.maps.LatLng(coords.lat, coords.lng);
+    var marker = new google.maps.Marker({
+      position: latLng,
+      map: map
+    });
+  }
+}
+
 function selectShowMe(isPaging){
+exitGroupBy();
+
     var showMeType = $('#showMeMenu :selected').attr('value');
     hideAlignButton();
     if(showMeType == VIEW_TYPE_TEXT_PROPERTIES){
@@ -3857,11 +4701,22 @@ function expandShowMe(v, datatype, optsStr){
 
 }
 
+function removeFacetValue(propertyType, iri, value, silent){
+  getMainFocus().find(propertyType+'[iri=\''+iri+'\'] > value').filter(function() {return $(this).text() === value;}).remove();
+  if(!silent) doQuery(getQueryText());
+}
+
+function removeEmptyFacet(propertyType, iri, silent){
+  getMainFocus().find(propertyType+'[iri=\''+iri+'\']:not("value")').remove();
+  //getMainFocus().find('property[iri=\''+iri+'\'] > value').filter(function() {return $(this).text().length <= 0;}).remove();
+  if(!silent) doQuery(getQueryText());
+}
+
 
 function loadPropertyValues(xml, opts){
       var rows = "";
       var result = $(xml).find("fct\\:result")[0];
-      var value, datatype, shortform, label, ct;
+      var value, datatype, lang, shortform, label, ct;
       var loadedUri = false;
       $("fct\\:row", result).each(function(i) {
           //console.log($(this).html());
@@ -3872,12 +4727,12 @@ function loadPropertyValues(xml, opts){
               val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
               //console.log(val);
               switch(j){
-                case 0: value = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); break;
+                case 0: value = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); lang = $(this).attr('lang'); break;
                 case 1: label = val; break;
                 case 2: ct = val; break;
               }
           });
-          label = processLabel(label, value, datatype);
+          label = processLabel(label, value, datatype, lang);
           var id = createId();
           //console.log($(col[0]));
 
@@ -3893,11 +4748,11 @@ rows += '<tr><td>';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 if(datatype == 'uri'){
-                  rows += '<img style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\'); takeMainFocus(\''+opts.contextId+'\')" src="'+getFaviconUrl(value)+'">';
+                  rows += '<img style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\'); takeMainFocus(\''+opts.contextId+'\')" src="'+getFaviconUrl(value)+'">';
                                     rows +=  '<i class="status status-bottom bg-success"></i>';
 }
                 else {
-                  rows += '<span style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\')" class="glyphicon glyphicon-tag"></span>';
+                  rows += '<span style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="glyphicon glyphicon-tag"></span>';
                 }
 rows += '</span>';
 //rows += '</a>';
@@ -3918,10 +4773,13 @@ return;
             });
 
           } 
+                var isReverse = $('#groupByMenu :selected').attr('isReverse') && $('#groupByMenu :selected').attr('isReverse').length > 0;
+              //if(propIRI != GROUP_BY_NONE_VALUE && propIRI != GROUP_BY_TEXT_VALUE) {
+                var propOrPropOf = (isReverse) ? "property-of" : "property";
 
 
           rows += '<div class="form-check-inline abc-checkbox abc-checkbox-primary">';
-          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' onclick="if(!$(this).is(\':checked\')) {remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\');}else{javascript:setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\')}"/>&nbsp;';
+          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' onclick="javascript:if(!$(this).is(\':checked\')) {removeFacetValue(\''+propOrPropOf+'\',\''+opts.propIRI+'\', \''+value+'\');}else{setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')}"/>&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
 
@@ -3990,7 +4848,7 @@ rows += '<tr><td>';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
-                  rows += '<img style="cursor:pointer" onclick="javascript:setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY_OF+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\'); takeMainFocus(\''+opts.contextId+'\')" src="'+getFaviconUrl(value)+'">';
+                  rows += '<img style="cursor:pointer" onclick="javascript:setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY_OF+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\'); takeMainFocus(\''+opts.contextId+'\')" src="'+getFaviconUrl(value)+'">';
                                     rows +=  '<i class="status status-bottom bg-success"></i>';
 rows += '</span>';
 //rows += '</a>';
@@ -4009,10 +4867,13 @@ return;
             });
 
           } 
+                var isReverse = $('#groupByMenu :selected').attr('isReverse') && $('#groupByMenu :selected').attr('isReverse').length > 0;
+              //if(propIRI != GROUP_BY_NONE_VALUE && propIRI != GROUP_BY_TEXT_VALUE) {
+                var propOrPropOf = (isReverse) ? "property-of" : "property";
 
 
           rows += '<div class="form-check-inline abc-checkbox abc-checkbox-primary">';
-          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' onclick="if(!$(this).is(\':checked\')) {remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\');}else{javascript:setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY_OF+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\')}"/>&nbsp;';
+          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' onclick="javascript:if(!$(this).is(\':checked\')) {removeFacetValue(\''+propOrPropOf+'\',\''+opts.propIRI+'\', \''+value+'\');}else{setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY_OF+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')}"/>&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
 rows +='</h6>';
@@ -4041,7 +4902,7 @@ rows += '</td></tr>';
 function loadClassInstances(xml, opts){
       var rows = "";
       var result = $(xml).find("fct\\:result")[0];
-      var value, datatype, shortform, label, ct;
+      var value, datatype, lang, shortform, label, ct;
 
 
 var loadedUri = false;      
@@ -4054,7 +4915,7 @@ var loadedUri = false;
               val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
               //console.log(val);
               switch(j){
-                case 0: value = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); break;
+                case 0: value = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); lang = $(this).attr('lang'); break;
                 case 1: label = val; break;
                 case 2: ct = val; break;
               }
@@ -4072,12 +4933,14 @@ var loadedUri = false;
               }
 
 
+          var focusTarget = 'focusValue';
+          var focusTargetClass = 'queryFocusValue';
 
 rows += '<tr><td>';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
-                  rows += '<img style="cursor:pointer" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\')" src="'+getFaviconUrl(value)+'">';
+                  rows += '<img style="cursor:pointer" onmouseover="javascript:$(\'#'+focusTarget+'\').addClass(\''+focusTargetClass+'\')" onmouseout="javascript:$(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" src="'+getFaviconUrl(value)+'">';
                                     rows +=  '<i class="status status-bottom bg-success"></i>';
 rows += '</span>';
 //rows += '</a>';
@@ -4179,7 +5042,7 @@ function linkOut(){
 function loadInstances(xml, opts){
       var rows = "";
       var result = $(xml).find("fct\\:result")[0];
-      var value, datatype, shortform, label, ct;
+      var value, datatype, lang, shortform, label, ct;
       var loadedUri = false;
       $("fct\\:row", result).each(function(i) {
           //console.log($(this).html());
@@ -4190,7 +5053,7 @@ function loadInstances(xml, opts){
               val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
               //console.log(val);
               switch(j){
-                case 0: value = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); break;
+                case 0: value = val; shortform = $(this).attr('shortform'); datatype = $(this).attr('datatype'); lang = $(this).attr('lang'); break;
                 case 1: label = val; break;
                 case 2: ct = val; break;
               }
@@ -4206,18 +5069,34 @@ function loadInstances(xml, opts){
                   } 
               }
 
+              var propIRI = $('#groupByMenu :selected').attr('value');
+              var propLabel = $('#groupByMenu :selected').text();
+              var contextId = $('#groupByMenu :selected').attr('id');
+
+              var color = 'success';
 
 rows += '<tr><td>';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
-                  rows += '<img onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\')" src="'+getFaviconUrl(value)+'">';
-                                    rows +=  '<i class="status status-bottom bg-success"></i>';
+                if(datatype=='uri') {
+                  rows += '<img style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:remove('+getMainFocus().attr('class')+', true);setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
+                                    rows +=  '<i class="status status-bottom bg-'+color+'"></i>';
+                }
+                else {
+                  rows += '<span style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:remove('+getMainFocus().attr('class')+', true);setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="glyphicon glyphicon-tag"></span>';
+                }
+
 rows += '</span>';
 //rows += '</a>';
 
-          rows +=  '<h6 title="'+value+'" onclick="javascript:describe(\''+value+'\');">'+label+'</h6>';
+          rows +=  '<h6  style="cursor:pointer" title="'+value+'" onclick="javascript:describe(\''+value+'\');">'+label+'</h6>';
 rows += '</td></tr>';
+
+
+
+
+
 
 /*
 
@@ -4315,9 +5194,16 @@ rows += '</td></tr>';
 
       //}
 
+
+//$('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
+//var obj = { "show": 5000, "hide": 0 };
+//$('[data-toggle="tooltip"]').attr('data-delay',obj);
+
     }
 
     function buildNavigationNode(ele, desc, bcFacetType, len){
+
+      //if($(ele).attr('isGroupBy') == 'true') return;
 
         var id = $(ele).attr('class');
         var label = (id == ID_QUERY) ? $(ele).find('text').text() : $(ele).text();
@@ -4544,19 +5430,28 @@ if(false){
 
 }
 
-        var outline = (val === VALUE_ANON_NODE) ? 'outline-': '';
-        var bcOutline = (val === VALUE_ANON_NODE) ? 'outline-default': 'primary';
-        var bcOutlineRemove = (val === VALUE_ANON_NODE) ? 'outline-danger': 'danger';
+        var isEmptyValue = val === VALUE_ANON_NODE;
+        var outline = (isEmptyValue) ? 'outline-default': 'default';
+        var bcOutline = (isEmptyValue) ? 'outline-default': 'primary';
+        var bcOutlineRemove = (isEmptyValue) ? 'outline-': '';
+        var of = (isPropOf && !desc.toLowerCase().endsWith('of')) ? ' of' : '';
+/*
+        var focusClass = (bcFacetType == BC_FACET_TYPE_FOCUS) ? ' current' : '';
+        $('#facetCollectorWidgetContainer').addClass('hide');
+        ret = '<li class="breadcrumb-item'+focusClass+'" id="nav'+id+'"><a  title="'+tooltip+'" data-delay=\'{ "show": "1000", "hide": "0" }\' data-toggle="tooltip" data-placement="top"><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></li>';
+*/
+
+
 
         if(bcFacetType == BC_FACET_TYPE_FACET) {
-          ret = '<div style="padding: 0px; background-color:transparent;" class="row" title="'+tooltip+'" id="nav'+id+'" '+focus+'><div style="display:inline; padding:0px;" class="text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6 style="vertical-align:bottom;margin-bottom:0px">&nbsp;<span onclick="javascript:'+action+'(\''+id+'\')" class="via">' + ''+desc+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+((len > 0) ? '</span>&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">'+len+'</span>' : '')+'</h6></div><button class="btn-rounded-f btn btn-'+outline+'default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
+          ret = '<div style="padding: 0px; background-color:transparent;" class="row" title="'+tooltip+'" data-delay=\'{ "show": "1000", "hide": "0" }\' data-toggle="tooltip" data-placement="top" id="nav'+id+'" '+focus+'><div style="display:inline; padding:0px;" class="text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6 style="vertical-align:bottom;margin-bottom:0px">&nbsp;<span onclick="javascript:'+action+'(\''+id+'\')" class="via" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')">' + ''+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+((len > 0) ? '</span>&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">'+len+'</span>' : '')+'</h6></div><button class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
         }
         else if(bcFacetType == BC_FACET_TYPE_FOCUS) {
-          ret = '<div style="padding: 0px; background-color:transparent;" class="row" title="'+tooltip+'" id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h3 class="fw-semi-bold" style="padding-bottom:4px">'+desc+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</h3></div><button id="focusValue" class="btn-rounded-f btn btn-'+outline+'default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
+          ret = '<div style="padding: 0px; background-color:transparent;" class="row" title="'+tooltip+'" data-delay=\'{ "show": "1000", "hide": "0" }\' data-toggle="tooltip" data-placement="top" id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')"><h3 class="fw-semi-bold" style="padding-bottom:4px" >'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</h3></div><button id="focusValue" class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
         }
         else { // isBreadCrumb
           //ret = '<li class="breadcrumb-item"><div class="row" style="background-color:transparent;" title="'+tooltip+'" id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6>' + ''+desc+'</h6></div><button class="btn-rounded-f  btn btn-'+outline+'default btn-block btn-xs text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div></li>';
-  ret = '<li class="breadcrumb-item" id="nav'+id+'"><a  title="'+tooltip+'"><em onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></li>';
+  ret = '<li class="breadcrumb-item" id="nav'+id+'"><a  title="'+tooltip+'" data-delay=\'{ "show": "1000", "hide": "0" }\' data-toggle="tooltip" data-placement="top"><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></li>';
 //  gbcol += '<li class="breadcrumb-item"><a  title=""><em>distributor</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-outline-default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\'0\')">'+VALUE_ANON_NODE+'</button></li>';
         }
 
@@ -4582,15 +5477,17 @@ if(false){
     }
 
 
-
-function mouseOverFacet(id, outline, bcOutlineRemove){
-  $('#nav'+id).find('button').removeClass('btn-'+outline);
-  $('#nav'+id).find('button').addClass('btn-'+bcOutlineRemove);
+function mouseOverFacet(id, decorateBtn, remove, isEmptyValue){
+  $('#nav'+id).find('button').removeClass('btn-'+decorateBtn);
+  $('#nav'+id).find('button').addClass('btn-'+remove + 'danger');
+  //console.log('btn-'+decorateBtn + ', '+ 'btn-'+remove + 'danger')
+  if(!isEmptyValue) $('#nav'+id).find('button').addClass('removeFacetValue');
 }
 
-function mouseOutFacet(id, outline, bcOutlineRemove){
-  $('#nav'+id).find('button').removeClass('btn-'+bcOutlineRemove);
-  $('#nav'+id).find('button').addClass('btn-'+outline);
+function mouseOutFacet(id, decorateBtn, remove, isEmptyValue){
+  if(!isEmptyValue) $('#nav'+id).find('button').removeClass('removeFacetValue');
+  $('#nav'+id).find('button').removeClass('btn-'+remove+ 'danger');
+  $('#nav'+id).find('button').addClass('btn-'+decorateBtn);
 }
 
 
@@ -4600,7 +5497,7 @@ var ret = '';
 
 //ret += '<div id="formEditor" class="tab-content mb-lg col-lg-'+SIZE_RECORD_VIEWER+' col-12" id="myTabContent">';
 ret += '<div class="clearfix"> <ul class="nav nav-tabs float-left" id="myTab" role="tablist"> <li class="nav-item"> <a aria-controls="basic" aria-expanded="true" class="nav-link active" data-toggle="tab" href="#basic" id="home-tab" role="tab">Basic</a> </li> <li class="nav-item"> <a aria-controls="assumtion" aria-expanded="false" class="nav-link" data-toggle="tab" href="#assumtion" id="profile-tab" role="tab">Assumtion</a> </li> <li class="nav-item dropdown"> <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"> Dropdown <b class="caret"></b> </a> <div class="dropdown-menu"> <a aria-controls="dropdown1" aria-expanded="false" class="dropdown-item" data-toggle="tab" href="#dropdown1" id="dropdown1-tab" role="tab">@fat</a> <a aria-controls="dropdown2" aria-expanded="false" class="dropdown-item" data-toggle="tab" href="#dropdown2" id="dropdown2-tab" role="tab">@mdo</a> </div> </li> </ul> </div>';
-      ret += '<div class="tab-content" id="myTabContent"> <div aria-expanded="true" aria-labelledby="basic-tab" class="tab-pane active in clearfix" id="basic" role="tabpanel"> <h3>Tabs-enabled widget</h3> <p>You will never know exactly how something will go until you try it.</p> <p>You can think three hundred times and still have no precise result. If you see attractive girl all you need to do is to go and ask her to give you her phone. You don’t need to think about HOW it can turn out. All you have to do is to GO and DO IT. It should be super-fast and easy. No hesitation. You ask me: “What to do with these fearful thoughts preventing me from doing that?” The answer is to ignore them, because they can’t disappear immediately.</p> <p>The same thing is for startups and ideas. If you have an idea right away after it appears in your mind you should go and make a first step to implement it. </p> <div class="float-right"> <button class="btn btn-inverse">Cancel</button> <button class="btn btn-primary">Some button</button> </div> </div> <div aria-expanded="false" aria-labelledby="assumtion-tab" class="tab-pane" id="assumtion" role="tabpanel"> <p>Why dont use Lore Ipsum? I think if some one says dont use lore ipsum its very controversial point. I think the opposite actually. Everyone knows what is lore ipsum - it is easy to understand if text is lore ipsum.</p> <div class="clearfix"> <div class="btn-toolbar"> <a class="btn btn-default" href="#">&nbsp;&nbsp;Check&nbsp;&nbsp;</a> <a class="btn btn-primary" href="#">&nbsp;&nbsp;Dance?&nbsp;&nbsp;</a> </div> </div> </div> <div aria-expanded="false" aria-labelledby="dropdown1-tab" class="tab-pane" id="dropdown1" role="tabpanel"> <p> If you will think too much it will sink in the swamp of never implemented plans and ideas or will just go away or will be implemented by someone else.</p> <p><strong>5 months of doing everything to achieve nothing.</strong></p> <p>Youll automatically skip - because you know - its just non-informative stub. But what if there some text like this one?</p> </div> <div aria-expanded="false" aria-labelledby="dropdown2-tab" class="tab-pane" id="dropdown2" role="tabpanel"> <blockquote class="blockquote-sm blockquote mb-xs"> Plan it? Make it! </blockquote> <p>The same thing is for startups and ideas. If you have an idea right away after it appears in your mind you should go and make a first step to implement it.</p> </div> </div>';
+      ret += '<div class="tab-content" id="myTabContent"> <div aria-expanded="true" aria-labelledby="basic-tab" class="tab-pane active in clearfix" id="basic" role="tabpanel"> <h3>Tabs-enabled widget</h3> <p>You will never know exactly how something will go until you try it.</p> <p>You can think three hundred times and still have no precise result. If you see attractive girl all you need to do is to go and ask her to give you her phone. You don’t need to think about HOW it can turn out. All you have to do is to GO and DO IT. It should be super-fast and easy. No hesitation. You ask me: “What to do with these fearful thoughts preventing me from doing that?” The answer is to ignore them, because they can’t disappear immediately.</p> <p>The same thing is for startups and ideas. If you have an idea right away after it appears in your mind you should go and make a first step to implement it. </p> <div class="float-right"> <button onclick="javascript:hideForm()" class="btn btn-inverse">Cancel</button> <button class="btn btn-primary">Some button</button> </div> </div> <div aria-expanded="false" aria-labelledby="assumtion-tab" class="tab-pane" id="assumtion" role="tabpanel"> <p>Why dont use Lore Ipsum? I think if some one says dont use lore ipsum its very controversial point. I think the opposite actually. Everyone knows what is lore ipsum - it is easy to understand if text is lore ipsum.</p> <div class="clearfix"> <div class="btn-toolbar"> <a class="btn btn-default" href="#">&nbsp;&nbsp;Check&nbsp;&nbsp;</a> <a class="btn btn-primary" href="#">&nbsp;&nbsp;Dance?&nbsp;&nbsp;</a> </div> </div> </div> <div aria-expanded="false" aria-labelledby="dropdown1-tab" class="tab-pane" id="dropdown1" role="tabpanel"> <p> If you will think too much it will sink in the swamp of never implemented plans and ideas or will just go away or will be implemented by someone else.</p> <p><strong>5 months of doing everything to achieve nothing.</strong></p> <p>Youll automatically skip - because you know - its just non-informative stub. But what if there some text like this one?</p> </div> <div aria-expanded="false" aria-labelledby="dropdown2-tab" class="tab-pane" id="dropdown2" role="tabpanel"> <blockquote class="blockquote-sm blockquote mb-xs"> Plan it? Make it! </blockquote> <p>The same thing is for startups and ideas. If you have an idea right away after it appears in your mind you should go and make a first step to implement it.</p> </div> </div>';
 
 return ret;
 
