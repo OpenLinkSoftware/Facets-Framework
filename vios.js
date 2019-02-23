@@ -414,7 +414,7 @@ function fct_query(q, viewType, opt){
           jqXHR.data = settings.data;
       },
             success : function(xml) {
-              xml = xml.replaceAll('xml:lang', 'lang');
+              xml = xml.replaceAll('xml:lang', '');
         //xml = xml.replace('fct:','');
 
         /* there's a bug that causes "filter ..." to appear at the beginning of the response body, sometimes
@@ -1054,15 +1054,17 @@ function fct_handlePropertiesResults(xml, opt){
     var showme = $('#showMeMenu :selected').attr('value');
     if(opt == OPT_SEND_TO_GROUP_BY){
       // $('#'+viewType+'').empty();
-        loadGroupByMenu(xml);
-        $('#groupByHeader').removeClass('loading');
+        //loadGroupByMenu(xml);
+        //$('#groupByHeader').removeClass('loading');
 
         if(qGroupBy && qGroupBy.length > 0){
             var qgb = decodeURIComponent(qGroupBy);
-            if(qgb.endsWith(DELIMIT_GROUP_BY_REVERSE_PROPERTY)){
+           /* if(qgb.endsWith(DELIMIT_GROUP_BY_REVERSE_PROPERTY)){
               qgb = GROUP_BY_NONE_VALUE;
-            }
-            selectMenuItem('groupByMenu', qgb);
+            }*/
+            var gbjson = JSON.parse(qgb);
+            //selectMenuItem('groupByMenu', qgb.iri);
+            doGroup(gbjson.iri, gbjson.label, gbjson.isReverse);
             //selectGroupBy(true);
             //if(isDebug) console.log('groupByLoaded: ' + qgb + ', old value:' + qGroupBy);
             //doQuery(keywords);
@@ -1416,9 +1418,9 @@ var TAG_GRAPH = 'g';
 
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://myopenlink.net/DAV/home/sdmonroe/poc_draft.html";
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://poc.vios.network";
-var this_endpoint = 'http://poc.vios.network/';
+var this_endpoint = 'http://poc.vios.network';
 
-var qGroupBy, qShowMe, qdataSpace, qSearchAllFields;
+var qGroupBy, qShowMe, qdataSpace, qSearchAllFields, qTimeout;
 
 var icon_folder_black = 'http://icon-park.com/imagefiles/folder_icon_black.png';
 var icon_file = 'http://myopenlink.net/DAV/home/sdmonroe/img/blank-file-xxl.png';
@@ -1993,14 +1995,19 @@ $('#notifications-dropdown-toggle').on('click', function(e){
     qShowMe = fct_getUrlParameter('showMe');
     qdataSpace = fct_getUrlParameter('dataSpace');
     qSearchAllFields = fct_getUrlParameter('searchAllFields');
+    qTimeout = fct_getUrlParameter('timeout');
 
     if(qdataSpace && qdataSpace.length > 0){
-      selectMenuItem('dataSpaceMenu', qdataSpace);
+      selectMenuItem('dataSpaceMenu', qdataSpace, true);
       qdataSpace = null;
     }
     if(qShowMe && qShowMe.length > 0) {
       selectMenuItem('showMeMenu', qShowMe);
       qShowMe = null;
+    }
+    if(qTimeout && qTimeout.length > 0) {
+      setQueyTimeout(qTimeout);
+      qTimeout = null;
     }
     if(qSearchAllFields && qSearchAllFields.length > 0 && qSearchAllFields.toLowerCase() == 'true'){
       isExpandSearch = true;
@@ -2693,25 +2700,20 @@ if(!$('input').is(":focus")){
   else {
     if (e.keyCode == '8' || e.keyCode == '67') { // Delete key or C key
         selectMenuItem('showMeMenu', VIEW_TYPE_CLASSES);
-       $('#showMeMenuSelectLabel').text($('#showMeMenu :selected').text());
     }
     else if (e.keyCode == '220' || e.keyCode == '80' || e.keyCode == '70') { // | key or P key or F key
         selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES);
-       $('#showMeMenuSelectLabel').text($('#showMeMenu :selected').text());
     }
     else if (e.keyCode == '13' || e.keyCode == '82') { // Return key or R key
         selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES_IN);
-       $('#showMeMenuSelectLabel').text($('#showMeMenu :selected').text());
     }
     else if (e.keyCode == '84') { // T key
       if(isExpandSearch){
           selectMenuItem('showMeMenu', VIEW_TYPE_TEXT_PROPERTIES);
-         $('#showMeMenuSelectLabel').text($('#showMeMenu :selected').text());
       }
     }
     else if (e.keyCode == '16' || e.keyCode == '76' || e.keyCode == '71') { // Shift key or L key or G key
         selectMenuItem('showMeMenu', VIEW_TYPE_GRAPHS);
-       $('#showMeMenuSelectLabel').text($('#showMeMenu :selected').text());
     }  
     else if(e.keyCode == '17') { // Control key
       ctrlDown = true;
@@ -2843,15 +2845,16 @@ function beep() {
 function updatePermalink(){
     $('#permalink').attr('href', this_endpoint + '?' + 
       '&dataSpace=' + encodeURIComponent( $('#dataSpaceMenu :selected').attr('value') ) + 
-      '&groupBy=' + encodeURIComponent( $('#groupByMenu :selected').attr('value') ) + 
+      '&groupBy=' + encodeURIComponent( $('#groupByMenu :selected').attr('json') ) + 
       '&showMe=' + $('#showMeMenu :selected').attr('value') + 
       '&searchAllFields=' + isExpandSearch + 
+      '&timeout=' + getQueryTimeout() + 
       '&qxml=' + encodeURIComponent(_root.find('query').prop('outerHTML'))
     ); //+ '&idCt=' + idCt
 
     // TODO: this only works in HTML5 compatible browsers, need to support older browsers also
 
-    if(!fct_isDebug && false){
+    if(!fct_isDebug){
       
       history.pushState(
         {}, 
@@ -2973,31 +2976,19 @@ function exitGroupBy(id){
     takeMainFocus(_root.find('[isGroupBy="true"]').parent().attr('class'), true);
     _root.find('[isGroupBy="true"]').removeAttr('isGroupBy');
    }
+
+
 }
 
 var dqct = 0;
 function doQuery(keywords){
-  if(!isActivated) {
-    activate();
-    isActivated = true;
-  }
+      if(!isActivated) {
+        activate();
+        isActivated = true;
+      }
       //console.log("keywords:" + keywords);
       setQueryText(keywords);
 
-      //console.log('query 1: ' + getQuery().prop('outerHTML'));
-
-      //var q = query.clone();
-
-      // POI: always exit groupby mode on each smart folder refresh/execute
-      selectMenuItem('groupByMenu', GROUP_BY_NONE_VALUE, true);
-
-      // POI: groupby does not persist between canvas updates
-      // TODO: this removal of the groupBy property might not be needed anymore, since the new logic
-      // requires the user to add the field before the groupBy icon appears, selectGroupBy
-      // always pulls the property from the facet collector
-       //remove(     _root.find('[isGroupBy="true"]').attr('class') , true);
-      exitGroupBy();
-    
 
       $('#groupByHeader > p.gbsub').text('');
       $('#groupByHeader > p.gbbadge').text('');
@@ -3018,10 +3009,46 @@ function doQuery(keywords){
       //console.log('ct doQuery: ' + dqct);
       //var chk = qdataSpace == null && qShowMe == null && qSearchAllFields == null;
       if(dqct = 3 || !fct_isPermalink){ 
-      //if(!fct_isPermalink || preInitialized){// POI: the initial load sequence is over after three calls to doQuery (one call for each menu: showme, expand search, data space), if this fact ever changes, the groupby load from the permalink will break
-        qGroupBy = undefined;
+
+      //console.log('query 1: ' + getQuery().prop('outerHTML'));
+
+      //var q = query.clone();
+
+if(!fct_isPermalink){
         $('#groupByHeader').addClass('loading');
-    $('#groupByTableHeader').addClass('loading');
+        $('#groupByTableHeader').addClass('loading');
+        // POI: always exit groupby mode on each smart folder refresh/execute
+        selectMenuItem('groupByMenu', GROUP_BY_NONE_VALUE, true);
+
+        // POI: groupby does not persist between canvas updates
+        // TODO: this removal of the groupBy property might not be needed anymore, since the new logic
+        // requires the user to add the field before the groupBy icon appears, selectGroupBy
+        // always pulls the property from the facet collector
+        //remove(     _root.find('[isGroupBy="true"]').attr('class') , true);
+        exitGroupBy();
+        //if(!fct_isPermalink || preInitialized){// POI: the initial load sequence is over after three calls to doQuery (one call for each menu: showme, expand search, data space), if this fact ever changes, the groupby load from the permalink will break
+        qGroupBy = undefined;
+}
+else {
+          if(qGroupBy && qGroupBy.length > 0 && qGroupBy !== 'undefined'){
+            var qgb = decodeURIComponent(qGroupBy);
+           /* if(qgb.endsWith(DELIMIT_GROUP_BY_REVERSE_PROPERTY)){
+              qgb = GROUP_BY_NONE_VALUE;
+            }*/
+            var gbjson = JSON.parse(qgb);
+            //selectMenuItem('groupByMenu', qgb.iri);
+            doGroup(gbjson.iri, gbjson.label, gbjson.isReverse);
+            //selectGroupBy(true);
+            //if(isDebug) console.log('groupByLoaded: ' + qgb + ', old value:' + qGroupBy);
+            //doQuery(keywords);
+            //selectGroupBy();
+        }
+        else {
+            //if(isDebug) console.log('groupByNotLoaded: ' + qgb + ', old value:' + qGroupBy);
+        }
+
+  fct_isPermalink = false;
+}
 
     //query.attr('same-as', 'true');
         fct_query(query, VIEW_TYPE_LIST_COUNT);
@@ -3044,6 +3071,9 @@ function doQuery(keywords){
 function selectMenuItem(id, value, silent){
 //  $('#'+id+' option[value=\''+ value +'\']').prop('selected', true); // POI: use escapeSelector if id=groupByMenu, since the values are URIs, which contain special chars
   var menu = $('#'+id).val(value);
+  if(id == 'showMeMenu'){
+    $('#showMeMenuSelectLabel').text($('#showMeMenu :selected').text());
+  }
   if(!silent) menu.change(); // POI: use escapeSelector if id=groupByMenu, since the values are URIs, which contain special chars
 }
 
@@ -3066,6 +3096,11 @@ return fct_dataSpaceLabel;
 function getQueryTimeout(){
 //  return $('#queryTimeout :selected').attr('value');
   return $('.slider-handle').attr('aria-valuenow'); // TODO: need to access the slider via id
+}
+
+function setQueyTimeout(timeout){
+  $('.slider-handle').attr('aria-valuenow', timeout); // TODO: need to access the slider via id
+  $('.slider-handle').slider('setValue', timeout); // TODO: need to access the slider via id
 }
 
 //** FILE: groupby.js *****************************************************************************************************************************************************************************************/
@@ -3242,15 +3277,17 @@ function isGrouped(){
 }
 
 function getGroupByValue(){
-  var l = $('#groupByMenu :selected').attr('l');
-    return (l) ? l.split(DELIMIT_GROUP_BY_VALUE_AND_LABEL)[0] : $('#groupByMenu :selected').val();
-
+  var gbjStr = $('#groupByMenu :selected').attr('json');
+  if(!gbjStr) return GROUP_BY_NONE_VALUE;
+  var gbjson = JSON.parse( gbjStr ) ;
+  return gbjson.iri;
 }
 
 function getGroupByLabel(){
-  var l = $('#groupByMenu :selected').attr('l');
-    return (l) ? l.split(DELIMIT_GROUP_BY_VALUE_AND_LABEL)[1]: $('#groupByMenu :selected').text();
-
+  var gbjStr = $('#groupByMenu :selected').attr('json');
+  if(!gbjStr) return GROUP_BY_NONE_LABEL;
+  var gbjson = JSON.parse( gbjStr ) ;
+  return gbjson.label;
 }
 
 function loadGroupByResults(xml, focusVarName){
@@ -3436,7 +3473,8 @@ if(true){
               //rows += '<tr><td class="up" id="'+opts.parentId+'"><span id="'+id+'">';
 
               if(isGroupByCriteria) {
-                var isReverse = $('#groupByMenu :selected').attr('isReverse') && $('#groupByMenu :selected').attr('isReverse').length > 0;
+                var gbjson = JSON.parse( $('#groupByMenu :selected').attr('json') ) ;
+                var isReverse = (!gbjson) ? false :  gbjson.isReverse;
               //if(propIRI != GROUP_BY_NONE_VALUE && propIRI != GROUP_BY_TEXT_VALUE) {
                 var addPropOrPropOf = (isReverse) ? "addPropertyOfFacet" : "addPropertyFacet";
                 var propOrPropOf = (isReverse) ? "property-of" : "property";
@@ -3548,7 +3586,8 @@ function expand(propVal, datatype, lang, optsStr){
 
     //var id = $('#groupByMenu :selected').attr('id');
     var propIRI = getGroupByValue();
-    var isReverse = $('#groupByMenu :selected').attr('isReverse') === 'true';
+                var gbjson = JSON.parse( $('#groupByMenu :selected').attr('json') ) ;
+                var isReverse = (!gbjson) ? false :  gbjson.isReverse;
 
 
     // POI: need to investigate this more, but basically, when a field is selected in the Group by list, it becomes the focus of the main query
@@ -3597,7 +3636,7 @@ function collapse(opts){
 }
 
 
-
+/*
 function loadGroupByMenu(xml){
 
       var opts = "";
@@ -3610,8 +3649,6 @@ function loadGroupByMenu(xml){
 
 
       $(_root.find('.'+getMainFocus().attr('class') + ' > property-of')).each(function(i) {
-          /*var children = $(this).has('property');
-          var tar = (children) ? breadcrumbs : facetCollector ;*/
           label = $(this).attr('label');
           value = $(this).attr('iri');
           var id = $(this).attr('class');
@@ -3649,34 +3686,7 @@ function loadGroupByMenu(xml){
           $('#groupByMenu').append('<option defaultLabel="'+GROUP_BY_TEXT_LABEL+'" l="'+GROUP_BY_TEXT_VALUE+DELIMIT_GROUP_BY_VALUE_AND_LABEL+GROUP_BY_NONE_LABEL+'"value="'+GROUP_BY_TEXT_VALUE+'" id="'+createId()+'">'+GROUP_BY_TEXT_LABEL+'</option>');
           $('#groupByMenu').append(opts);
 
-          // TODO: not fully implemented
-          /*
-          var groupByCriteria = _root.find('.' + getMainFocus().attr('class') + ' > property[isGroupBy="true"]');
-          var propIRI = _root.find('.' + getMainFocus().attr('class') + ' > property[isGroupBy="true"]').attr('iri');
-          if(groupByCriteria == groupByCriteria.length > 0){
-            //groupByCriteria = _root.find('.' + getMainFocus().attr('class') + ' > property-of[isGroupBy="true"]');
-            //propIRI = _root.find('.' + getMainFocus().attr('class') + ' > property-of[isGroupBy="true"]').attr('iri');
-          }
-          if(groupByCriteria == groupByCriteria.length > 0){
-            var groupByMenuItem = $('#groupByMenu').find('option[value="' + propIRI + '"]');
-            if(!groupByMenuItem || groupByMenuItem.length <= 0){
-              //groupByCriteria.remove();
-              //selectMenuItem('groupByMenu', GROUP_BY_NONE_VALUE);
-            }
-          }
-          else{
-            //takeMainFocus(_root.find('.' + getMainFocus().attr('class') + ' > property[isGroupBy="true"]').attr('class'), true);
-              //selectMenuItem('groupByMenu', propIRI);
-          }
-          */
 
-/*
-          // allow user to remain in "text result mode"
-          if(previousGroupBy == GROUP_BY_TEXT_VALUE){
-              $('#groupByMenu').val(previousGroupBy);
-              selectGroupBy(true);
-          }
-*/
           if(opts.length > 1) {
               //$('#groupByMenu').val(defaultVal);
               //selectGroupBy();
@@ -3689,7 +3699,7 @@ function loadGroupByMenu(xml){
 
 } // loadCategoriesResults
 
-
+*/
 
 
 function selectGroupBy(isPaging){
@@ -3697,9 +3707,10 @@ function selectGroupBy(isPaging){
       $('#groupByHeader > p.gbbadge').text('');
     // update the Group By list
     var q = _root.find('query').clone();
-    var l = $('#groupByMenu :selected').attr('l');
-    var iri = (l) ? l.split(DELIMIT_GROUP_BY_VALUE_AND_LABEL)[0] : $('#groupByMenu :selected').val();
-    var label = (l) ? l.split(DELIMIT_GROUP_BY_VALUE_AND_LABEL)[1]: $('#groupByMenu :selected').text();
+    var gbjsonStr = $('#groupByMenu :selected').attr('json');
+    var gbjson = JSON.parse(gbjsonStr);
+    var iri = gbjson.iri;
+    var label = gbjson.label;
     if(iri == GROUP_BY_NONE_VALUE){
         //takeFocus(q, q);
       //$('#groupByHeader').text('Records');
@@ -3709,7 +3720,8 @@ function selectGroupBy(isPaging){
     }
     else{
         //$('#groupByMenu :selected').text('Records (by ' + label + ')');
-        var isReverse = $('#groupByMenu :selected').attr('isReverse') == 'true';
+                //var gbjson = JSON.parse( $('#groupByMenu :selected').attr('json') ) ;
+                var isReverse = (!gbjson) ? false :  gbjson.isReverse;
         //var prop = (isReverse) ? $.createElement('property-of') : $.createElement('property');
         var prop;
 
@@ -4196,7 +4208,7 @@ if(true){
               //rows += '<img title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
           rows += '<i title="view values" class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
 //              rows += '<a title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>&nbsp;';
-          if((facet && facet.length > 0))rows += '<i title="group the record list by \''+propLabel+'\'" class="group la la-compress" onclick="javascript:doGroup(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\')" ></i>';
+          if((facet && facet.length > 0))rows += '<i title="group the record list by \''+propLabel+'\'" class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\')" ></i>';
           }
           rows +='</h6>';
             rows +=  '</div>';
@@ -4222,26 +4234,21 @@ if(true){
         //return total;
 } // loadPropertiesResults
 
-
-function doGroup(id, iri, label, isPropOf){
-  //vcfexitGroupBy(id);
+function doGroup(iri, label, isPropOf){
+  //exitGroupBy(id);
 
     var opt = '';
     var appendIri = iri;
-    if(isPropOf){
-      //addPropertyOfFacet(id, iri, label, undefined, undefined, undefined, true);
-      appendIri = iri+DELIMIT_GROUP_BY_REVERSE_PROPERTY;
-      opt = '<option defaultLabel="'+label+'" l="'+iri+DELIMIT_GROUP_BY_VALUE_AND_LABEL+label+'" isReverse="true" value="'+appendIri+'" id="'+createId()+'">'+label+'</option>';
+    var json = new Object();
+    json.label = label;
+    json.iri = iri;
+    json.isReverse = isPropOf;
+    var v = $('#groupByMenu > option[value="'+iri+'"]');
+    if(!v || v.length <= 0){ // add the property if is does not exist in the groupby menu
+      opt = '<option json=\''+JSON.stringify(json)+'\' value="'+iri+'" id="'+createId()+'">'+label+'</option>';
+      $('#groupByMenu').append(opt);
     }
-    else {
-      //addPropertyFacet(id, iri, label, undefined, undefined, undefined, true);
-      opt = '<option defaultLabel="'+label+'" l="'+iri+DELIMIT_GROUP_BY_VALUE_AND_LABEL+label+'" value="'+iri+'" id="'+createId()+'">'+label+'</option>';
-    }
-  var v = $('#groupByMenu > option[value="'+appendIri+'"]');
-  if(!v || v.length <= 0){ // add the property if is does not exist in the groupby menu
-    $('#groupByMenu').append(opt);
-  }
-  selectMenuItem('groupByMenu', appendIri);
+    selectMenuItem('groupByMenu', iri);
     //selectGroupBy();
 }
 
@@ -4360,7 +4367,7 @@ var ckcolor = 'primary';
           rows += '</div>';
           rows += '<i title="view values" class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
               //rows += '<img title="shows up in the \''+propLabel+'\' field of these records" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
-          if((facet && facet.length > 0))rows += '<i title="group the record list by role: \''+propLabel+'\'" class="group la la-compress" onclick="javascript:doGroup(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\', true)" ></i>';
+          if((facet && facet.length > 0))rows += '<i title="group the record list by role: \''+propLabel+'\'" class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\', true)" ></i>';
           }
 
           rows +='</h6>';
@@ -4773,7 +4780,9 @@ return;
             });
 
           } 
-                var isReverse = $('#groupByMenu :selected').attr('isReverse') && $('#groupByMenu :selected').attr('isReverse').length > 0;
+
+                var gbjson = JSON.parse( $('#groupByMenu :selected').attr('json') ) ;
+                var isReverse = (!gbjson) ? false :  gbjson.isReverse;
               //if(propIRI != GROUP_BY_NONE_VALUE && propIRI != GROUP_BY_TEXT_VALUE) {
                 var propOrPropOf = (isReverse) ? "property-of" : "property";
 
@@ -4867,7 +4876,8 @@ return;
             });
 
           } 
-                var isReverse = $('#groupByMenu :selected').attr('isReverse') && $('#groupByMenu :selected').attr('isReverse').length > 0;
+                var gbjson = JSON.parse( $('#groupByMenu :selected').attr('json') ) ;
+                var isReverse = (!gbjson) ? false :  gbjson.isReverse;
               //if(propIRI != GROUP_BY_NONE_VALUE && propIRI != GROUP_BY_TEXT_VALUE) {
                 var propOrPropOf = (isReverse) ? "property-of" : "property";
 
