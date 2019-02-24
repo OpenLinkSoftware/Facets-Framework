@@ -40,6 +40,7 @@
     .incompleteComponentAlert{
       border: 1px solid #f55d5d; /* #B02B2C;*/
       padding: 4px 4px;
+    border-radius: 0.25rem;      
     }
 
     .resultTableCell{
@@ -213,7 +214,13 @@ color:#ffc247;
   /* background-color: #6BBA70;#547fff; #3abf94; #ffc247;*/
 /*background-color: white;*/
 background-color:#ffc247;
+/*
 color:white;
+
+*/
+        color: #29323a;
+/*    background-color: #ffb521; */
+    border-color: #ffb114;
 }
 
 #isSearchAllFields.focus{
@@ -287,7 +294,7 @@ color:white;
 .steps li {
   float: left;
   margin-left: 0;
-  min-width: 150px; /* 100 / number of steps */
+  min-width: 150px; /*set min-width instead of width, to allow nodes to stretch as needed */ /* 100 / number of steps */
   height: 70px; /* total height */
   list-style-type: none;
   padding: 5px 5px 5px 30px; /* padding around text, last should include arrow width */
@@ -341,26 +348,67 @@ color:white;
 .steps li::after { border-left-color: #547fff; /* #547fff #7C8437; */ }
 
 /* Current */
-.steps li.current { background-color: #C36615; }
-.steps li.current::after { border-left-color: #C36615; }
+.steps li.current { background-color: #9964e3 /*#C36615;*/ }
+.steps li.current::after { border-left-color: #9964e3;  /* #C36615; */ }
+
+.steps li.current button { background-color: #9964e3; border-color: #9964e3; /*#C36615;*/ }
+/*.steps li.current button:hover { background-color: #8444dd; border-color: #7d39db; } */ /*#C36615;*/ 
+.steps li.current button.btn-outline-default { background-color: #9964e3; border-color: #eee; /*#C36615;*/ }
+/*.steps li.current button.btn-outline-default:hover { background-color: #8444dd; border-color: #eee; } */ /*#C36615;*/ 
+
 
 /* Following */
-.steps li.current ~ li { background-color: #EBEBEB; }
-.steps li.current ~ li::after { border-left-color: #EBEBEB; }
+.steps li.current ~ li { background-color: #d7daddff; /*#dee2e6 #EBEBEB;*/ }
+.steps li.current ~ li::after { border-left-color: #d7daddff; /*#dee2e6 #EBEBEB;*/ }
+.steps li.current ~ li button.btn-outline-default { border-color: #fff; /*#C36615;*/ }
+.steps li.current ~ li button.btn-primary { background-color: transparent; border-color: transparent; /*#C36615;*/ }
+
+.steps li.current ~ li button.btn-primary:active {  
+    
+    background-color: #fff;
+/*    color: #29323a;
+border-color: rgba(0, 0, 0, 0.15); */
+    border-color: #fff;
+    color:#dae0e5;
+}
+
+.steps li.current ~ li button.btn-outline-default:active {  
+    
+    background-color: #fff;
+/*    color: #29323a;
+border-color: rgba(0, 0, 0, 0.15); */
+    border-color: #fff;
+    color:#dae0e5;
+}
+.steps li.current ~ li button.btn-outline-default:hover {  
+    
+    background-color: #fff;
+/*    color: #29323a;
+border-color: rgba(0, 0, 0, 0.15); */
+    border-color: #fff;
+    color:transparent;
+}
+.steps li.current ~ li::after button.btn-outline-default { background-color:#fff; border-color: #fff; /*#C36615;*/ }
+.steps li.current ~ li::after button.btn-default { background-color: #f8f9fa; border-color: #f8f9fa; /*#C36615;*/ }
+.steps li.current ~ li::after button.btn-primary { background-color: transparent; border-color: transparent; /*#C36615;*/ }
 
 /* Hover for completed and current */
-.steps li:hover {background-color: #547fff; /* #f55d5d; #696 */}
-.steps li:hover::after {border-left-color: #547fff; /* #f55d5d; #696*/}
+.steps li:hover {/*background-color: #547fff;*/ /* #f55d5d; #696 */}
+.steps li:hover::after {/*border-left-color: #547fff;*/ /* #f55d5d; #696*/}
 
 
+.padTextField{
+  padding:4px 4px 4px 4px;
+}
 
 
-
+.removeFacetValue{
+  text-decoration: line-through;
+}
 
 
 .disabled{
   color: #transparent;
-  cursor:default;
   /*background: #ccc;*/
 }
 
@@ -378,4 +426,19 @@ button.disabled, a.disabled{
   cursor:default;
   border:0px solid transparent;
   display:none;
+}
+
+#map {
+   height: 500px;
+   width: 1000px;
+}
+
+#angular_recordsList h6 div {
+top: 10px;
+}
+
+/*widget shadows interfer with the breadcrumbs*/
+.widget{
+-webkit-box-shadow: 0 0 0px transparent;
+box-shadow: 0 0 0px transparent;  
 }

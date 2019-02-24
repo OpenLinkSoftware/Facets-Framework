@@ -1446,6 +1446,14 @@ var isExpandSearch = $('#isSearchAllFields').parent().hasClass('active');
 
 var labels = {};
 
+    const NAV_TYPE_1 = 1;
+    const NAV_TYPE_2 = 2;
+    const NAV_TYPE_3 = 3;
+    var nav_type = NAV_TYPE_2;
+
+    var tooltipShowDelay = 1500;
+    var tooltipHideDelay = 0;
+
 
 function init(){
     fct_init(); // this method must be the first method called by the implementation of the fct_ framework
@@ -1638,7 +1646,7 @@ gbcol += '</app-navbar>';
 
 
 
-gbcol = '<div class="col-lg-12 col-12"><ul class="steps steps-5" id="angular_breadcrumbBar">';
+gbcol = '<div class="col-lg-12 col-12"><ul class="steps" id="angular_breadcrumbBar">';
 
 
 /*
@@ -1949,20 +1957,133 @@ gbcol += '</div>';
 $('#dataCanvas').append(gbcol);
 
 
+var hideHelpOnEnter = localStorage.getItem('hideHelpOnEnter');
+
+if(!hideHelpOnEnter){
+
+gbcol += '<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">';
+  gbcol += '<div class="modal-dialog" role="document">';
+    gbcol += '<div class="modal-content">';
+      gbcol += '<div class="modal-header">';
+        gbcol += '<h5 class="modal-title" id="exampleModalLabel">VIOS Command Modes</h5>';
+        gbcol += '<button type="button" class="close" data-dismiss="modal" aria-label="Close">';
+          gbcol += '<span aria-hidden="true">&times;</span>';
+        gbcol += '</button>';
+      gbcol += '</div>';
+      gbcol += '<div class="modal-body">';
+      gbcol += '  <p>Press the <i>ctrl</i> key to toggle Command and Edit Modes';
+      gbcol += '  </p><p>';
+      gbcol += '  In Commmand Mode:';
+      gbcol += '  </p><p>';
+      gbcol += '  Press <i>N</i> key to toggle navigation types';
+      gbcol += '  </p><p>';
+      gbcol += '  Press <i>C</i>, <i>T</i>, <i>F</i>, <i>R</i> or <i>L</i> keys to switch CTRL lists';
+      gbcol += '  </p>';
+      gbcol += '  </p><p>';
+      gbcol += '  See <a href="https://medium.com/@sdmonroe/vios-network-99488f5bf29d">this article</a> for more tips';
+      gbcol += '  </p>';
+
+      
+      gbcol += '</div>';
+      gbcol += '<div class="modal-footer">';
+        gbcol += '<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>';
+        gbcol += '<button data-dismiss="modal" onclick="javascript:try{localStorage.setItem(\'hideHelpOnEnter\', true);}catch(e){}" type="button" class="btn btn-primary">Don\'t show again</button>';
+      gbcol += '</div>';
+    gbcol += '</div>';
+  gbcol += '</div>';
+gbcol += '</div>';
+
+$('#dataCanvas').append(gbcol);
+$('#exampleModal').modal({});
+
+}
 
 
 
+gbcol = '<app-notifications class="dropdown-menu dropdown-menu-right animated animated-last ladeInUp" _nghost-c1="" style="left: auto; right: 0px;">';
+gbcol += '<section _ngcontent-c1="" class="card notifications">';
+gbcol += '<header _ngcontent-c1="" class="card-header">';
+gbcol += '<div _ngcontent-c1="" class="text-center mb-sm">';
+gbcol += '<strong _ngcontent-c1="">You have 13 notifications</strong>';
+gbcol += '</div>';
+gbcol += '<div _ngcontent-c1="" class="btn-group btn-group-sm" data-toggle="buttons" id="notifications-toggle">';
+gbcol += '<label _ngcontent-c1="" class="btn btn-default active">';
+gbcol += '<input _ngcontent-c1="" data-ajax-load="assets/demo/notifications/notifications.html" data-ajax-target="#notifications-list" data-ajax-trigger="change" notification-load="" type="radio"> Solid </label>';
+gbcol += '<label _ngcontent-c1="" class="btn btn-default">';
+gbcol += '<input _ngcontent-c1="" data-ajax-load="assets/demo/notifications/messages.html" data-ajax-target="#notifications-list" data-ajax-trigger="change" notification-load="" type="radio"> Arkane </label>';
+gbcol += '<label _ngcontent-c1="" class="btn btn-default">';
+gbcol += '<input _ngcontent-c1="" data-ajax-load="assets/demo/notifications/progress.html" data-ajax-target="#notifications-list" data-ajax-trigger="change" notification-load="" type="radio"> Others </label>';
+gbcol += '</div>';
+gbcol += '</header>';
+gbcol += '<div _ngcontent-c1="" class="list-group thin-scroll" id="notifications-list">';
+gbcol += '<div _ngcontent-c1="" class="list-group-item"><span _ngcontent-c1="" class="thumb-sm float-left mr clearfix"><img _ngcontent-c1="" alt="..." class="rounded-circle" src="assets/img/people/a3.jpg">';
+gbcol += '</span>';
+gbcol += '<p _ngcontent-c1="" class="m-0 overflow-hidden"> 1 new user just signed up! Visit <a _ngcontent-c1="" href="#">Monica Smith</a>\'s dataspace. <time _ngcontent-c1="" class="help-block m-0"> 2 mins ago </time></p>';
+gbcol += '</div>';
+gbcol += '<a _ngcontent-c1="" class="list-group-item" href="#">';
+gbcol += '<span _ngcontent-c1="" class="thumb-sm float-left mr"><i _ngcontent-c1="" class="glyphicon glyphicon-upload fa-lg"></i>';
+gbcol += '</span>';
+gbcol += '<p _ngcontent-c1="" class="text-ellipsis m-0"> 2.1.0-pre-alpha just released. </p><time _ngcontent-c1="" class="help-block m-0"> 5h ago </time>';
+gbcol += '</a>';
+gbcol += '<a _ngcontent-c1="" class="list-group-item" href="#">';
+gbcol += '<span _ngcontent-c1="" class="thumb-sm float-left mr"><i _ngcontent-c1="" class="fa fa-bolt fa-lg"></i></span><p _ngcontent-c1="" class="text-ellipsis m-0"> Server load limited. </p><time _ngcontent-c1="" class="help-block m-0"> 7h ago </time>';
+gbcol += '</a>';
+gbcol += '<div _ngcontent-c1="" class="list-group-item"><span _ngcontent-c1="" class="thumb-sm float-left mr clearfix"><img _ngcontent-c1="" alt="..." class="rounded-circle" src="assets/img/people/a5.jpg">';
+gbcol += '</span>';
+gbcol += '<p _ngcontent-c1="" class="m-0 overflow-hidden">User <a _ngcontent-c1="" href="#">Jeff</a> added you &nbsp;&nbsp; <button _ngcontent-c1="" class="btn btn-xs btn-success">Allow</button>&nbsp;<button _ngcontent-c1="" class="btn btn-xs btn-danger">Deny</button><time _ngcontent-c1="" class="help-block m-0"> 12:18 AM </time>';
+gbcol += '</p>';
+gbcol += '</div>';
+gbcol += '<div _ngcontent-c1="" class="list-group-item">';
+gbcol += '<span _ngcontent-c1="" class="thumb-sm float-left mr"><i _ngcontent-c1="" class="fa fa-shield fa-lg"></i></span>';
+gbcol += '<p _ngcontent-c1="" class="m-0 overflow-hidden"> Instructions for changing your OpenLink POD password. Please check your account <a _ngcontent-c1="" href="#">security page</a>. <time _ngcontent-c1="" class="help-block m-0"> 12:18 AM </time></p>';
+gbcol += '</div>';
+gbcol += '<a _ngcontent-c1="" class="list-group-item" href="#"><span _ngcontent-c1="" class="thumb-sm float-left mr"><span _ngcontent-c1="" class="rounded bg-primary rounded-lg"><i _ngcontent-c1="" class="fa fa-facebook text-white"></i>';
+gbcol += '</span>';
+gbcol += '</span>';
+gbcol += '<p _ngcontent-c1="" class="text-ellipsis m-0"> New <strong _ngcontent-c1="">76</strong> facebook likes received.</p><time _ngcontent-c1="" class="help-block m-0"> 15 Apr 2014 </time></a>';
+gbcol += '<a _ngcontent-c1="" class="list-group-item" href="#"><span _ngcontent-c1="" class="thumb-sm float-left mr"><span _ngcontent-c1="" class="circle circle-lg bg-gray-dark"><i _ngcontent-c1="" class="fa fa-circle-o text-white"></i>';
+gbcol += '</span>';
+gbcol += '</span>';
+gbcol += '<p _ngcontent-c1="" class="text-ellipsis m-0"> Dark matter detected.</p><time _ngcontent-c1="" class="help-block m-0"> 15 Apr 2014 </time></a>';
+gbcol += '</div>';
+gbcol += '<footer _ngcontent-c1="" class="card-footer text-sm"><button _ngcontent-c1="" appnotificationsload="" class="btn btn-xs btn-link float-right btn-notifications-reload" data-ajax-load="assets/demo/notifications/notifications.php" data-ajax-target="#notifications-list" data-loading-text="<i class=\'fa fa-refresh fa-spin mr-xs\'></i> Loading..." id="load-notifications-btn"><i _ngcontent-c1="" class="fa fa-refresh"></i></button>';
+gbcol += '<span _ngcontent-c1="" class="fs-mini">Synced at: 21 Feb 2019 18:36</span>';
+gbcol += '</footer>';
+gbcol += '</section>';
+gbcol += '</app-notifications>';
+$('.avatar').parent().parent().append(gbcol);
 
+//widget shadows interfer with the breadcrumbs
+$('.widget').css('box-shadow', '');
+$('.widget').css('-webkit-box-shadow', '');
 
-
-
-
-
-
-$('#notifications-dropdown-toggle').on('click', function(e){
-  solid.auth.popupLogin({ "popupUri":"http://myopenlink.net/DAV/home/sdmonroe/popup.html" });
+$('.avatar').parent().children('.small').attr('id', 'profileName');
+$('.avatar').parent().children('.circle').attr('id', 'profileManagerPreview');
+$('.avatar').parent().children('.circle').text('2');
+$('.avatar').parent().children('.circle').after('<b class="caret"></b>');
+$('.avatar').parent().children('.circle').on('click', function(e){
+  var isProfileManagerOpen = $('.avatar').parent().parent().hasClass('open');
+  if(isProfileManagerOpen){
+    $('.avatar').parent().parent().removeClass('open');
+    $('.avatar').parent().parent().removeClass('show');
+    $('.avatar').parent().attr('aria-expanded', 'false');
+    $('app-notifications').removeClass('show');
+    $('app-notifications').css('top', '');
+    $('app-notifications').css('transform', '');
+    $('app-notifications').css('bottom', '');
+  }
+  else {
+    $('.avatar').parent().parent().addClass('open');
+    $('.avatar').parent().parent().addClass('show');
+    $('.avatar').parent().attr('aria-expanded', 'true');
+    $('app-notifications').addClass('show');
+    $('app-notifications').css('left', 'auto');
+    $('app-notifications').css('right', '0px');
+    $('app-notifications').css('top', '100%');
+    $('app-notifications').css('transform', 'traslateY(0px)');
+    $('app-notifications').css('bottom', 'auto');
+  }
 });
-
 
 
 //************************************//
@@ -1982,12 +2103,81 @@ $('#notifications-dropdown-toggle').on('click', function(e){
         link.href = 'https://fonts.googleapis.com/css?family=Source+Code+Pro';
         document.head.appendChild(link);
 
+    }  
+
         link = document.createElement('script');
         link.type = 'text/javascript';
         link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/solid-auth-client.bundle.js';
         document.head.appendChild(link);
 
-    }  
+        link = document.createElement('script');
+        link.type = 'text/javascript';
+        link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/rdflib.min.js';
+        document.head.appendChild(link);
+
+        link = document.createElement('script');
+        link.type = 'text/javascript';
+        link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/rdflib.min.js.map';
+        document.head.appendChild(link);
+
+        link = document.createElement('script');
+        link.type = 'text/javascript';
+        link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/md5.min.js';
+        document.head.appendChild(link);
+
+$('#profileName').on('click', function(e){
+  solid.auth.popupLogin({ "popupUri":"http://myopenlink.net/DAV/home/sdmonroe/popup.html" });
+
+
+const FOAF = $rdf.Namespace('http://xmlns.com/foaf/0.1/');
+
+
+// Update components to match the user's login status
+solid.auth.trackSession(session => {
+  const loggedIn = !!session;
+  //$('#login').toggle(!loggedIn);
+  //$('#logout').toggle(loggedIn);
+  if (loggedIn) {
+
+    $('.avatar').parent().children('.small').empty();
+
+
+$('.avatar').parent().children('.circle').each(async (i) => {
+  if(i > 0) return;
+  // Set up a local data store and associated data fetcher
+  const store = $rdf.graph();
+  const fetcher = new $rdf.Fetcher(store);
+
+  // Load the person's data into the store
+  const person = session.webId;
+  await fetcher.load(person);
+
+  // Display their details
+  const fullName = store.any($rdf.sym(person), FOAF('name'));
+  const email = store.any($rdf.sym(person), FOAF('mbox'));
+//  alert('email: ' + email.value);
+  //$('#fullName').text(fullName && fullName.value);
+
+
+
+    //$('.avatar').parent().children('.small').text(session.webId);
+    $('.avatar').parent().children('.small').text(fullName.value);
+
+    //alert('email: ' + email);
+
+    $('.avatar').children('img').attr('src', 'http://www.gravatar.com/avatar/' + md5(email));
+
+  });
+    // Use the user's WebID as default profile
+    //if (!$('#profile').val())
+    //  $('#profile').val(session.webId);
+  } // is logged in
+
+
+
+});
+
+});
 
 
 //    $('#keywords').val(VALUE_DEFAULT_KEYWORDS_TEXT);
@@ -1999,6 +2189,8 @@ $('#notifications-dropdown-toggle').on('click', function(e){
     qdataSpace = fct_getUrlParameter('dataSpace');
     qSearchAllFields = fct_getUrlParameter('searchAllFields');
     qTimeout = fct_getUrlParameter('timeout');
+    qPage = fct_getUrlParameter('page');
+    qshowMePage = fct_getUrlParameter('ctrlPage');
 
     if(qdataSpace && qdataSpace.length > 0){
       selectMenuItem('dataSpaceMenu', qdataSpace, true);
@@ -2012,6 +2204,14 @@ $('#notifications-dropdown-toggle').on('click', function(e){
       setQueyTimeout(qTimeout);
       qTimeout = null;
     }
+    if(qPage && qPage.length > 0) {
+      page = qPage;
+      qPage = null;
+    }
+    if(qshowMePage && qshowMePage.length > 0) {
+      showMePage = qshowMePage;
+      qshowMePage = null;
+    }
     if(qSearchAllFields && qSearchAllFields.length > 0 && qSearchAllFields.toLowerCase() == 'true'){
       isExpandSearch = true;
       $('#isSearchAllFields').prop('checked', true);
@@ -2021,6 +2221,13 @@ $('#notifications-dropdown-toggle').on('click', function(e){
     }
 
     loadGroupByMenuDefaults();
+
+    try{
+      setNavType(localStorage.getItem('navType'));
+    }
+    catch(e){
+
+    }
 
     preInitialized = true;
     if(fct_isPermalink) doQuery(getQueryText());    
@@ -2503,7 +2710,7 @@ function activate(){
     $('#groupByColumn').addClass('col-lg-'+(parseInt(SIZE_GROUP_BY)+parseInt(SIZE_RECORD_VIEWER)));
     $('#tabularResults').removeClass('hide');
     $('#recordsListWidgetContainer').addClass('hide');
-    $('#facetCollectorWidgetContainer').addClass('hide');
+    if(nav_type == NAV_TYPE_3) $('#facetCollectorWidgetContainer').addClass('hide');
 
 
 
@@ -2515,10 +2722,7 @@ function activate(){
     $('#groupByColumn').addClass('col-lg-'+SIZE_GROUP_BY);
     $('#tabularResults').addClass('hide');
     $('#recordsListWidgetContainer').removeClass('hide');
-    $('#facetCollectorWidgetContainer').removeClass('hide');
-
-
-
+    if(nav_type == NAV_TYPE_3) $('#facetCollectorWidgetContainer').removeClass('hide');
   }
 
 
@@ -2728,6 +2932,12 @@ if(!$('input').is(":focus")){
     else if(e.keyCode == '78') { // Control key
       if(nav_type == NAV_TYPE_2) nav_type = NAV_TYPE_3;
       else if(nav_type == NAV_TYPE_3) nav_type = NAV_TYPE_2;
+      try{
+        localStorage.setItem('navType', nav_type);
+      }
+      catch(e){
+
+      }
       doQuery(getQueryText());
     }    
 
@@ -2845,7 +3055,11 @@ function processLabel(label, value, datatype, lang, labelSize){
     return label.trim();
 }
 
-var snd = new Audio("data:audio/wav;base64,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qJrx4KOQjahZxWbcZgztj2c49nKmkId44S71j0c8eV9yDK6uPRzx5X18eDvjvQ6yKo9ZSS6l//8elePK/Lf//IInrOF/FvDoADYAGBMGb7FtErm5MXMlmPAJQVgWta7Zx2go+8xJ0UiCb8LHHdftWyLJE0QIAIsI+UbXu67dZMjmgDGCGl1H+vpF4NSDckSIkk7Vd+sxEhBQMRU8j/12UIRhzSaUdQ+rQU5kGeFxm+hb1oh6pWWmv3uvmReDl0UnvtapVaIzo1jZbf/pD6ElLqSX+rUmOQNpJFa/r+sa4e/pBlAABoAAAAA3CUgShLdGIxsY7AUABPRrgCABdDuQ5GC7DqPQCgbbJUAoRSUj+NIEig0YfyWUho1VBBBA//uQZB4ABZx5zfMakeAAAAmwAAAAF5F3P0w9GtAAACfAAAAAwLhMDmAYWMgVEG1U0FIGCBgXBXAtfMH10000EEEEEECUBYln03TTTdNBDZopopYvrTTdNa325mImNg3TTPV9q3pmY0xoO6bv3r00y+IDGid/9aaaZTGMuj9mpu9Mpio1dXrr5HERTZSmqU36A3CumzN/9Robv/Xx4v9ijkSRSNLQhAWumap82WRSBUqXStV/YcS+XVLnSS+WLDroqArFkMEsAS+eWmrUzrO0oEmE40RlMZ5+ODIkAyKAGUwZ3mVKmcamcJnMW26MRPgUw6j+LkhyHGVGYjSUUKNpuJUQoOIAyDvEyG8S5yfK6dhZc0Tx1KI/gviKL6qvvFs1+bWtaz58uUNnryq6kt5RzOCkPWlVqVX2a/EEBUdU1KrXLf40GoiiFXK///qpoiDXrOgqDR38JB0bw7SoL+ZB9o1RCkQjQ2CBYZKd/+VJxZRRZlqSkKiws0WFxUyCwsKiMy7hUVFhIaCrNQsKkTIsLivwKKigsj8XYlwt/WKi2N4d//uQRCSAAjURNIHpMZBGYiaQPSYyAAABLAAAAAAAACWAAAAApUF/Mg+0aohSIRobBAsMlO//Kk4soosy1JSFRYWaLC4qZBYWFRGZdwqKiwkNBVmoWFSJkWFxX4FFRQWR+LsS4W/rFRb/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU=");  
+//var beep1Str = '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qJrx4KOQjahZxWbcZgztj2c49nKmkId44S71j0c8eV9yDK6uPRzx5X18eDvjvQ6yKo9ZSS6l//8elePK/Lf//IInrOF/FvDoADYAGBMGb7FtErm5MXMlmPAJQVgWta7Zx2go+8xJ0UiCb8LHHdftWyLJE0QIAIsI+UbXu67dZMjmgDGCGl1H+vpF4NSDckSIkk7Vd+sxEhBQMRU8j/12UIRhzSaUdQ+rQU5kGeFxm+hb1oh6pWWmv3uvmReDl0UnvtapVaIzo1jZbf/pD6ElLqSX+rUmOQNpJFa/r+sa4e/pBlAABoAAAAA3CUgShLdGIxsY7AUABPRrgCABdDuQ5GC7DqPQCgbbJUAoRSUj+NIEig0YfyWUho1VBBBA//uQZB4ABZx5zfMakeAAAAmwAAAAF5F3P0w9GtAAACfAAAAAwLhMDmAYWMgVEG1U0FIGCBgXBXAtfMH10000EEEEEECUBYln03TTTdNBDZopopYvrTTdNa325mImNg3TTPV9q3pmY0xoO6bv3r00y+IDGid/9aaaZTGMuj9mpu9Mpio1dXrr5HERTZSmqU36A3CumzN/9Robv/Xx4v9ijkSRSNLQhAWumap82WRSBUqXStV/YcS+XVLnSS+WLDroqArFkMEsAS+eWmrUzrO0oEmE40RlMZ5+ODIkAyKAGUwZ3mVKmcamcJnMW26MRPgUw6j+LkhyHGVGYjSUUKNpuJUQoOIAyDvEyG8S5yfK6dhZc0Tx1KI/gviKL6qvvFs1+bWtaz58uUNnryq6kt5RzOCkPWlVqVX2a/EEBUdU1KrXLf40GoiiFXK///qpoiDXrOgqDR38JB0bw7SoL+ZB9o1RCkQjQ2CBYZKd/+VJxZRRZlqSkKiws0WFxUyCwsKiMy7hUVFhIaCrNQsKkTIsLivwKKigsj8XYlwt/WKi2N4d//uQRCSAAjURNIHpMZBGYiaQPSYyAAABLAAAAAAAACWAAAAApUF/Mg+0aohSIRobBAsMlO//Kk4soosy1JSFRYWaLC4qZBYWFRGZdwqKiwkNBVmoWFSJkWFxX4FFRQWR+LsS4W/rFRb/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU=';
+//var snd = new Audio("data:audio/wav;base64,"+beep1Str);  
+
+var snd = new Audio('http://www.soundjay.com/button/beep-24.wav');
+
 function beep() {
     try{
       snd.play();
@@ -2862,6 +3076,8 @@ function updatePermalink(){
       '&showMe=' + $('#showMeMenu :selected').attr('value') + 
       '&searchAllFields=' + isExpandSearch + 
       '&timeout=' + getQueryTimeout() + 
+      '&page=' + page + 
+      '&ctrlPage=' + showMePage + 
       '&qxml=' + encodeURIComponent(_root.find('query').prop('outerHTML'))
     ); //+ '&idCt=' + idCt
 
@@ -3011,7 +3227,6 @@ function doQuery(keywords){
       //fct_query(query, VIEW_TYPE_PROPERTIES, OPT_SEND_TO_GROUP_BY);
       //console.log('query 1: ' + getQuery().prop('outerHTML'));
   
-      selectShowMe(false);
       //console.log('query 2: ' + getQuery().prop('outerHTML'));
 
 
@@ -3028,6 +3243,8 @@ function doQuery(keywords){
       //var q = query.clone();
 
 if(!fct_isPermalink){
+        selectShowMe(false);
+
         $('#groupByHeader').addClass('loading');
         $('#groupByTableHeader').addClass('loading');
         // POI: always exit groupby mode on each smart folder refresh/execute
@@ -3043,8 +3260,12 @@ if(!fct_isPermalink){
         qGroupBy = undefined;
 }
 else {
+
           if(qGroupBy && qGroupBy.length > 0 && qGroupBy !== 'undefined'){
-            var qgb = decodeURIComponent(qGroupBy);
+          selectShowMe(true);
+
+
+          var qgb = decodeURIComponent(qGroupBy);
            /* if(qgb.endsWith(DELIMIT_GROUP_BY_REVERSE_PROPERTY)){
               qgb = GROUP_BY_NONE_VALUE;
             }*/
@@ -4887,7 +5108,7 @@ rows += '<tr><td>';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
-                  rows += '<img style="cursor:pointer" onclick="javascript:setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY_OF+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\'); takeMainFocus(\''+opts.contextId+'\')" src="'+getFaviconUrl(value)+'">';
+                  rows += '<img style="cursor:pointer" onclick="javascript:setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY_OF+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\'); takeMainFocus(\''+opts.contextId+'\')" src="'+getFaviconUrl(value)+'">';
                                     rows +=  '<i class="status status-bottom bg-success"></i>';
 rows += '</span>';
 //rows += '</a>';
@@ -4913,7 +5134,7 @@ return;
 
 
           rows += '<div class="form-check-inline abc-checkbox abc-checkbox-primary">';
-          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' onclick="javascript:if(!$(this).is(\':checked\')) {removeFacetValue(\''+propOrPropOf+'\',\''+opts.propIRI+'\', \''+value+'\');}else{setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY_OF+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')}"/>&nbsp;';
+          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' onclick="javascript:if(!$(this).is(\':checked\')) {removeFacetValue(\''+propOrPropOf+'\',\''+opts.propIRI+'\', \''+value+'\');}else{setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY_OF+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\')}"/>&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
 rows +='</h6>';
@@ -5183,14 +5404,17 @@ rows += '</td></tr>';
       //var focusCollector = $('#focusCollector');
       var breadcrumbs, facetCollector,focusCollector;
       if(nav_type == NAV_TYPE_1){
+        $('#facetCollectorWidgetContainer').addClass('hide');
 
       }
       else if(nav_type == NAV_TYPE_2){
+        $('#facetCollectorWidgetContainer').addClass('hide');
         breadcrumbs  = $('#angular_breadcrumbBar');
         facetCollector = $('#angular_breadcrumbBar');
         focusCollector = $('#angular_breadcrumbBar');
       }
       else if(nav_type == NAV_TYPE_3){
+        $('#facetCollectorWidgetContainer').removeClass('hide');
         breadcrumbs  = $('#angular_breadcrumbBar');
         facetCollector = $('#angular_facetCollector');
         focusCollector = $('#angular_focusCollector');
@@ -5300,7 +5524,7 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
                 if(ttd.indexOf('[') > 0) ttd = ttd.substring(0, ttd.lastIndexOf('[')); 
                 ttd = ttd.trim();
             }
-            var tooltip = 'and what for what does it act as ' + ttd;        
+            var tooltip = 'and for what does it act as ' + ttd;        
             if(ttd.endsWith(' to') || ttd.endsWith('To')){
                 tooltip = 'and what ' + ttd + ' it';
             }
@@ -5394,7 +5618,7 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
                 desc += '@'+getQueryGraph();
               }
               if(getQueryText() && getQueryText().length){
-                tooltip = 'what ' + tooltip + ' '+searchLabel+': \'' + getQueryText() + '\'';
+                tooltip = tooltip + ' '+searchLabel+': \'' + getQueryText() + '\'';
               }
           }
           else if(val){
@@ -5499,13 +5723,11 @@ if(false){
             bcOutline = bcOutline.replace('primary', 'info');
           }
 
-          $('#facetCollectorWidgetContainer').addClass('hide');
-          ret = '<li class="breadcrumb-item'+focusClass+'" id="nav'+id+'"><a  title="'+tooltip+'" data-delay=\'{ "show": "1000", "hide": "0" }\' data-toggle="tooltip" data-placement="top"><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></li>';
+          ret = '<li title="'+tooltip+'" data-delay=\'{ "show": "'+tooltipShowDelay+'", "hide": "'+tooltipHideDelay+'" }\' data-toggle="tooltip" data-placement="top" class="breadcrumb-item'+focusClass+'" id="nav'+id+'"><a ><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></li>';
 
 
         }
         else if(nav_type == NAV_TYPE_3){
-          $('#facetCollectorWidgetContainer').removeClass('hide');
           if(bcFacetType == BC_FACET_TYPE_FACET) {
             ret = '<div style="padding: 0px; background-color:transparent;" class="row" title="'+tooltip+'" data-delay=\'{ "show": "'+tooltipShowDelay+'", "hide": "'+tooltipHideDelay+'" }\' data-toggle="tooltip" data-placement="top" id="nav'+id+'" '+focus+'><div style="display:inline; padding:0px;" class="text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6 style="vertical-align:bottom;margin-bottom:0px">&nbsp;<span onclick="javascript:'+action+'(\''+id+'\')" class="via" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')">' + ''+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+((len > 0) ? '</span>&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">'+len+'</span>' : '')+'</h6></div><button class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
           }
@@ -5538,16 +5760,8 @@ if(false){
         return ret;
     }
 
-    const NAV_TYPE_1 = 1;
-    const NAV_TYPE_2 = 2;
-    const NAV_TYPE_3 = 3;
-    var nav_type = NAV_TYPE_3;
-
-    var tooltipShowDelay = 1500;
-    var tooltipHideDelay = 0;
-
     function setNavType(type){
-      nav_type = type;
+      if(type) nav_type = type;
     }
 
     function getNavType(){
