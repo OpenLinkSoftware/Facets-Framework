@@ -423,7 +423,7 @@ function fct_query(q, viewType, opt){
           xml = xml.replace('fct:facets ', 'fct:facets timestamp="' + new Date().getTime() + '" ');          
           //xml = xml.replace('fct:facets ', 'fct:facets sparql="' + sparql + '" ');
         }
-        xml = xml.replaceAll('xml:lang', '');
+        xml = xml.replaceAll('xml:lang', 'lang');
         //xml = xml.replace('fct:','');
 
         /* there's a bug that causes "filter ..." to appear at the beginning of the response body, sometimes
