@@ -2116,12 +2116,14 @@ gbcol += '<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" 
       gbcol += '  <p>Press the <i>ctrl</i> key to toggle Command and Edit Modes';
       gbcol += '  </p><p>';
       gbcol += '  In Commmand Mode:';
-      gbcol += '  </p><p>';
+      gbcol += '  <ul><li>';
       gbcol += '  Press <i>N</i> key to toggle navigation types';
-      gbcol += '  </p><p>';
+      gbcol += '  </li><li>';
       gbcol += '  Press <i>C</i>, <i>T</i>, <i>F</i>, <i>R</i> or <i>L</i> keys to switch CTRL lists';
-      gbcol += '  </p>';
-      gbcol += '  </p><p>';
+      gbcol += '  </li><li>';
+      gbcol += '  Use <i>&lt;</i>, <i>&gt;</i>, <i>left arrow</i>, and <i>right arrow</i> to move through list pages';
+      gbcol += '  </li></ul>';
+      gbcol += '  <p>';
       gbcol += '  See <a href="https://medium.com/@sdmonroe/vios-network-99488f5bf29d">this article</a> for more tips';
       gbcol += '  </p>';
 

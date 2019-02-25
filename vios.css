@@ -287,7 +287,7 @@ color:white;
 }
 .steps em {
   display: block;
-  font-size: 1.1em;
+/*  font-size: 1.1em;*/
   text-align: right;
   float: right;
   /*font-weight: bold;*/
@@ -359,10 +359,10 @@ color:white;
 
 
 /* Following */
-.steps li.current ~ li { background-color: #e9ecef; color:#000; /*#dee2e6 #EBEBEB; color:rgba(0, 0, 0, 0.5)*/ }
+.steps li.current ~ li { background-color: #e9ecef; color:#29323a;/*#dee2e6 #EBEBEB; color:rgba(0, 0, 0, 0.5)*/ }
 .steps li.current ~ li::after { border-left-color: #e9ecef; /*#dee2e6 #EBEBEB;*/ }
 .steps li.current ~ li button.btn-outline-default { border-color: #fff; /*#C36615;*/ }
-.steps li.current ~ li button.btn-primary { background-color: transparent; border-color: transparent; color:#000;/*#C36615;*/ }
+.steps li.current ~ li button.btn-primary { background-color: transparent; border-color: transparent; color:#29323a;/*#C36615;*/ }
 
 .steps li.current ~ li button.btn-primary:active {  
     
