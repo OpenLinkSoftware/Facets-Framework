@@ -400,6 +400,7 @@ function fct_query(q, viewType, opt){
             fct_handleGeoListResults(resp, opt);
           }; break;
     }
+  $('[data-toggle="tooltip"]').tooltip();
     updatePermalink();
     return;
   }
@@ -506,6 +507,7 @@ function fct_query(q, viewType, opt){
           }; break;
         }
                 
+  $('[data-toggle="tooltip"]').tooltip();
       },
       error : function (xhr, ajaxOptions, thrownError){  
         if(fct_isDebug){
@@ -573,6 +575,9 @@ function fct_sparql(sparql, opt){
               else if(opt.tar == 'groupByMenu'){
                 fct_handleSparqlGroupByCount(resp, opt);
               }
+              else if(opt.tar == 'table'){
+                fct_handleSparqlTableCount(resp, opt);
+              }
             }
 
     updatePermalink();
@@ -598,6 +603,9 @@ function fct_sparql(sparql, opt){
               }
               else if(opt.tar == 'groupByMenu'){
                 fct_handleSparqlGroupByCount(xml, opt);
+              }
+              else if(opt.tar == 'table'){
+                fct_handleSparqlTableCount(xml, opt);
               }
             }
           //console.log('sparql results: ' + xml);
@@ -643,8 +651,19 @@ function fct_handleSparqlGroupByCount(xml, opt){
     x = x * SIZE_RESULT_SET;
     if(x > ct) x = ct;
     $('#groupByCount').text( x + ' / ' + ct);
-    $('#groupByTableCount').text( x + ' / ' + ct);
   });
+}
+
+function fct_handleSparqlTableCount(xml, opt){
+  var results = $(xml).find('results');
+  $('result', results).each(function(i){
+    var ct = $(this).text().trim();
+    var x = pageTable+1;
+    x = x * SIZE_RESULT_SET;
+    if(x > ct) x = ct;
+    $('#tableCount').text( x + ' / ' + ct);
+  });
+  tablePage();
 }
 
 function fct_handleGeoListResults(xml, opt){
@@ -714,7 +733,7 @@ var valStr = VALUE_ANON_NODE;
 
 var rainbow = new Rainbow(); 
 rainbow.setNumberRange(1, node.parents().length +1);
-rainbow.setSpectrum('#e9ecef', '#ffffff');
+rainbow.setSpectrum('#e9ecef', '#ffffff'); //'#e9ecef', d7daddff
 col.css('background-color', '#' + rainbow.colourAt( (node.parents().length <= 2) ? 1 : node.parents().length - 1));
 
 
@@ -742,12 +761,45 @@ col.css('background-color', '#' + rainbow.colourAt( (node.parents().length <= 2)
 
 }
 
+function tablePage(){
+//if(true) return;
+        if(pageTable == 0){
+          $("#leftTableButton").attr('disabled', 'true');
+          $("#leftTableButton").addClass('disabled');
+          $('#leftTableButton').removeAttr('title');
+        }
+        else{
+
+          $("#leftTableButton").removeAttr('disabled');
+          $("#leftTableButton").removeClass('disabled');
+          //$('#leftButton').attr('title', 'page ' + (page));
+          setTitle('leftButton', 'page ' + (pageTable), 'bottom');
+
+        }
+      if(tableResultsCt < SIZE_RESULT_SET) {
+        $("#rightTableButton").attr('disabled', 'true');
+        $("#rightTableButton").addClass('disabled');
+        $('#rightTableButton').removeAttr('title');
+      }
+      else {
+        $("#rightTableButton").removeAttr('disabled');
+        $("#rightTableButton").removeClass('disabled');
+       // $('#rightButton').attr('title', 'page ' + (page+2));
+          setTitle('rightTableButton', 'page ' + (pageTable+2), 'bottom');
+
+      }
+}
 
 function fct_handleSparqlResults(xml, opt){
     $('#resultsTable > thead').empty();
     $('#resultsTable > tbody').empty();
     //console.log('xml' + $(xml).html());
     var results = $(xml).find('results');
+
+//tableResultsCt = $("result", results).length;
+//fct_handleSparqlTableCount(xml, opt);
+
+
     var row, row2, col;
     row = $.createElement('tr');
     row2 = $.createElement('tr');
@@ -758,7 +810,7 @@ function fct_handleSparqlResults(xml, opt){
     var varCt = 0;
     buildResultTableHeaders(row, row2, variables, varCt);
 
-
+tableResultsCt = $("result", results).length;
 /*
     variables.each(function(j) {
         col = $.createElement('th');
@@ -818,6 +870,19 @@ function fct_handleSparqlResults(xml, opt){
         $('#resultsTable > tbody').append(row);
     });
     $('#groupByTableHeader').removeClass('loading');
+
+
+
+    $('#tableSaveOptions').empty();
+    var saveOptions = '';
+    saveOptions += '<li><a class="dropdown-item" onclick="exportTableToCSV(\'results.csv\')">CSV</a></li>';
+    saveOptions += '<li><a class="dropdown-item" href="#">XML</a></li>';
+    saveOptions += '<li><a class="dropdown-item" href="#">JSON</a></li>';
+    if(inbox || storage) saveOptions += '<li class="dropdown-divider"></li>';
+    if(inbox) saveOptions += '<li><a class="dropdown-item" href="'+getInbox()+'" '+buildTitle(getInbox(), 'right')+'>Save to Inbox</a></li>';
+    if(storage) saveOptions += '<li><a class="dropdown-item" href="'+getStorage()+'" '+buildTitle(getStorage(), 'right')+'>Save to Storage</a></li>';
+    $('#tableSaveOptions').append(saveOptions);
+
 }
 
 function isCachable(sz){
@@ -899,7 +964,7 @@ function fct_handleListResults(xml, opt){
 
 function fct_handleListCountResults(xml, opt){
   var showme = $('#showMeMenu :selected').attr('value');
-  if(opt != undefined){
+  if(opt && opt.tag){
     //console.log('opt:'+opt)
       if(opt.tag == TAG_PROPERTY){
           if(showme === VIEW_TYPE_PROPERTIES){
@@ -943,14 +1008,16 @@ function fct_handleListCountResults(xml, opt){
           //console.log("Sparql: " + sparql );
           sparql = setSparqlProjection(sparql, vars);
 
-    if(!$('#recordFormColumn').hasClass('hide')) {
-      if(!$('#recordFormColumn').hasClass('dont-touch')){
-      buildForm();
-      }
-      else {
-        $('#recordFormColumn').removeClass('dont-touch');
-      }
-}
+        if(!$('#recordFormColumn').hasClass('hide')) {
+          if(!$('#recordFormColumn').hasClass('dont-touch')){
+          buildForm();
+          }
+          else {
+            $('#recordFormColumn').removeClass('dont-touch');
+          }
+        }
+        if(!opt || !opt.isTablePaging) pageTable = 0;
+
         loadGroupByResults(xml, focus);
         $('#groupByHeader').removeClass('loading');
         //$('#focusHeader').removeClass('loading');
@@ -960,7 +1027,18 @@ function fct_handleListCountResults(xml, opt){
         fct_sparql(getSparqlCount(sparql), opt);
 
 
+        sparql = sparql.substring(0, sparql.lastIndexOf('}')) + sparql.substring(sparql.lastIndexOf('}') + 1);
+        sparql = sparql.replace(/offset\s+\d+/gi, 'offset ' + pageTable * SIZE_RESULT_SET);
+        sparql += '}';
+
         fct_sparql(sparql);
+
+        opt = new Object();
+        opt.tar = 'table';
+        //var sparql = processSparql(xml);
+        sparql = sparql.replace(/limit\s+\d+/gi, '');
+        sparql = sparql.replace(/offset\s+\d+/gi, '');
+        fct_sparql(getSparqlCount(sparql), opt);
 
 
         fct_query(query, VIEW_TYPE_GEO_LIST);
@@ -1019,7 +1097,7 @@ function getSparqlCount(sparql, type){
   sparql = setSparqlProjection(sparql, 'count(distinct '+ctVar+') as ?c1');
   if(sparql.match(/{\s*select.*distinct.*?{/gi)){
     sparql = sparql.substring(sparql.indexOf('select')+6);
-    sparql = sparql.substring(sparql.indexOf('select'), sparql.lastIndexOf('}') - 1);
+    sparql = sparql.substring(sparql.indexOf('select'), sparql.lastIndexOf('}'));
   }
   //if(sparql.indexOf('distinct') < 0) sparql = sparql.replace('select ', 'select distinct ');
   return sparql;
@@ -1160,6 +1238,7 @@ function takeMainFocus(id, silent){
   getFocus(query).find('view').attr('offset', 0);
   getMainFocus().find('view').attr('offset', 0);
   page = 0;
+  //pageTable = 0;
 
 
   if(!silent) doQuery(getQueryText());
@@ -1246,6 +1325,7 @@ function setValue(id, val, valLabel, datatype, lang){
   //getMainFocus().find('view').attr('offset', 0);
   getMainFocus().find('view').attr('offset', 0);
   page = 0;
+  //pageTable = 0;
 
   //if(fct_isDebug) console.log('setView query: ' + query.html());
   //query = _root.find('query');
@@ -1281,6 +1361,7 @@ function setPropertyValue(id, nodeName, contextId, propIRI, propLabel, val, valL
   //getFocus(query).find('view').attr('offset', 0);
   getMainFocus().find('view').attr('offset', 0);
   page = 0;
+  //pageTable = 0;
 
   //if(fct_isDebug) console.log('setView query: ' + query.html());
   //query = _root.find('query');
@@ -1313,6 +1394,7 @@ function addPropertyFacet(id, prop, propLabel, val, valLabel, datatype, lang, si
   //getFocus(query).find('view').attr('offset', 0);
   getMainFocus().find('view').attr('offset', 0);
   page = 0;
+  //pageTable = 0;
 
   getMainFocus().append(p);
   //takeFocus(p, getFocus(query));
@@ -1344,6 +1426,7 @@ function addPropertyOfFacet(id, prop, propLabel, val, valLabel, datatype, lang, 
   //getFocus(query).find('view').attr('offset', 0);
   getMainFocus().find('view').attr('offset', 0);
   page = 0;
+  //pageTable = 0;
 
   getMainFocus().append(p);
   //takeFocus(p, getFocus(query));
@@ -1366,6 +1449,7 @@ function addClassFacet(id, clazz, label){
   //getFocus(query).find('view').attr('offset', 0);
   getMainFocus().find('view').attr('offset', 0);
   page = 0;
+  //pageTable = 0;
 
   getMainFocus().prepend(c); // POI: 'prepend' to ensure the last one added is the first returned by $.find() 
   //takeFocus(p, getFocus(query));
@@ -1455,8 +1539,66 @@ var labels = {};
     var tooltipHideDelay = 0;
 
 
+  var storage;
+  var inbox;
+  var email = '';
+  var fullName = '';
+
+  function getStorage(){
+    return storage.value;
+  }
+
+  function getInbox(){
+    return inbox.value;
+  }
+
 function init(){
     fct_init(); // this method must be the first method called by the implementation of the fct_ framework
+
+
+
+
+
+
+//************************************//
+
+    if(!document.getElementById('id2')) {
+        var link = document.createElement('link');
+        link.id = 'id2';
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'http://myopenlink.net/DAV/home/sdmonroe/css/vios.css';
+        document.head.appendChild(link);
+
+        link = document.createElement('link');
+        link.id = 'id2';
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'https://fonts.googleapis.com/css?family=Source+Code+Pro';
+        document.head.appendChild(link);
+
+    }  
+
+        link = document.createElement('script');
+        link.type = 'text/javascript';
+        link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/solid-auth-client.bundle.js';
+        document.head.appendChild(link);
+
+        link = document.createElement('script');
+        link.type = 'text/javascript';
+        link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/rdflib.min.js';
+        document.head.appendChild(link);
+
+        link = document.createElement('script');
+        link.type = 'text/javascript';
+        link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/rdflib.min.js.map';
+        document.head.appendChild(link);
+
+        link = document.createElement('script');
+        link.type = 'text/javascript';
+        link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/md5.min.js';
+        document.head.appendChild(link);
+
 
 //alert('init() screen width: ' + screen.width);
 
@@ -1694,8 +1836,8 @@ gbcol += '<div id="recordsListWidgetContainer" class="short-div"><section class=
 gbcol += '<header id="groupByHeader" style="cursor:pointer;">';
         gbcol += '<h4><span id="groupByCount" class="badge badge-info">0/0</span> Records</h4>';
         gbcol += '<div class="widget-controls">';
-          gbcol += '<a data-target="#" class="hide " id="leftButton" onclick="javascript:pageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
-          gbcol += '<a data-target="#" class="hide "id="rightButton" onclick="javascript:pageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
+          gbcol += '<a data-target="#" class="hide " '+buildTitle('')+' id="leftButton" onclick="javascript:pageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
+          gbcol += '<a data-target="#" class="hide " '+buildTitle('')+' id="rightButton" onclick="javascript:pageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
           //gbcol += '<a data-widgster="close" data-target="#"><i class="glyphicon glyphicon-remove"></i></a>';
         gbcol += '</div>';
         gbcol += '</header>';
@@ -1723,12 +1865,12 @@ gbcol += '<div id="tabularResults" class="short-div hide"><section class="widget
 
 gbcol += '<header id="groupByTableHeader">';
         gbcol += '<h5>';
-          gbcol += '<h4><span id="groupByTableCount" class="badge badge-info">0/0</span> Records</h4>';
+          gbcol += '<h4><span id="tableCount" class="badge badge-info">0/0</span> Records</h4>';
         gbcol += '</h5>';
         gbcol += '<div class="widget-controls">';
           //gbcol += '<a href="#"><i class="glyphicon glyphicon-cog"></i></a>';
-         // gbcol += '<a data-target="#" class="leftButton" onclick="javascript:pageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
-         // gbcol += '<a data-target="#" class="rightButton" onclick="javascript:pageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
+          gbcol += '<a data-target="#" disabled="true" class="disabled" id="leftTableButton" onclick="javascript:pageTableLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
+          gbcol += '<a data-target="#" disabled="true" class="disabled" id="rightTableButton" onclick="javascript:pageTableRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
           gbcol += '<a data-widgster="close" onclick="undoTable()" class="btn-gray"><i class="glyphicon glyphicon-remove"></i></a>';
         gbcol += '</div>';
       gbcol += '</header>';
@@ -1765,7 +1907,7 @@ gbcol += '<div class="clearfix">';
                 gbcol += '&nbsp; Export... &nbsp;';
                 gbcol += '<i class="fa fa-caret-down"></i>';
               gbcol += '</button>';
-              gbcol += '<ul class="dropdown-menu dropdown-menu-right" x-placement="top-end" style="position: absolute; transform: translate3d(-97px, -145px, 0px); top: 0px; left: 0px; will-change: transform;">';
+              gbcol += '<ul id="tableSaveOptions" class="dropdown-menu dropdown-menu-right" x-placement="top-end" style="position: absolute; transform: translate3d(-97px, -145px, 0px); top: 0px; left: 0px; will-change: transform;">';
                 gbcol += '<li><a class="dropdown-item" onclick="exportTableToCSV(\'results.csv\')">CSV</a></li>';
                 gbcol += '<li><a class="dropdown-item" href="#">XML</a></li>';
                 gbcol += '<li><a class="dropdown-item" href="#">JSON</a></li>';
@@ -1810,9 +1952,9 @@ gbcol += '<header id="showMeHeader">';
 
         gbcol += '<div class="widget-controls">';
           //gbcol += '<a data-target="#"><i class="fa fa-refresh"></i></a>';
-          gbcol += '<a data-target="#" id="alignButton" class="disabled" ><i class="glyphicon glyphicon-filter text-secondary" title="Align this subject to its parent smart folders"></i></a>';
-          gbcol += '<a data-target="#" id="showMeLeftButton" class="hide" onclick="javascript:showMePageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
-          gbcol += '<a data-target="#" id="showMeRightButton" class="hide" onclick="javascript:showMePageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
+          gbcol += '<a data-target="#" id="alignButton" class="disabled" ><i class="glyphicon glyphicon-filter text-secondary" '+buildTitle('Align this subject to its parent smart folders')+'></i></a>';
+          gbcol += '<a data-target="#" id="showMeLeftButton" '+buildTitle('')+' class="hide" onclick="javascript:showMePageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
+          gbcol += '<a data-target="#" id="showMeRightButton" '+buildTitle('')+' class="hide" onclick="javascript:showMePageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
 //          gbcol += '<a data-widgster="close" data-target="#"><i class="glyphicon glyphicon-remove"></i></a>';
         gbcol += '</div>';
         gbcol += '</header>';
@@ -1965,7 +2107,7 @@ gbcol += '<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" 
   gbcol += '<div class="modal-dialog" role="document">';
     gbcol += '<div class="modal-content">';
       gbcol += '<div class="modal-header">';
-        gbcol += '<h5 class="modal-title" id="exampleModalLabel">VIOS Command Modes</h5>';
+        gbcol += '<h5 class="modal-title" id="exampleModalLabel">Quick Reference</h5>';
         gbcol += '<button type="button" class="close" data-dismiss="modal" aria-label="Close">';
           gbcol += '<span aria-hidden="true">&times;</span>';
         gbcol += '</button>';
@@ -2056,80 +2198,32 @@ $('.avatar').parent().parent().append(gbcol);
 //widget shadows interfer with the breadcrumbs
 $('.widget').css('box-shadow', '');
 $('.widget').css('-webkit-box-shadow', '');
+    $('.avatar').parent().children('.small').text('Login');
+    $('.avatar').children('img').attr('src', 'http://www.gravatar.com/avatar/' + ('info@vios.network'));
+    $('.avatar').parent().children('.circle').addClass('hide');
 
 $('.avatar').parent().children('.small').attr('id', 'profileName');
 $('.avatar').parent().children('.circle').attr('id', 'profileManagerPreview');
-$('.avatar').parent().children('.circle').text('2');
-$('.avatar').parent().children('.circle').after('<b class="caret"></b>');
+$('.avatar').parent().children('.circle').text('8');
+$('.avatar').parent().children('.circle').after('<b class="caret hide"></b>');
 $('.avatar').parent().children('.circle').on('click', function(e){
-  var isProfileManagerOpen = $('.avatar').parent().parent().hasClass('open');
-  if(isProfileManagerOpen){
-    $('.avatar').parent().parent().removeClass('open');
-    $('.avatar').parent().parent().removeClass('show');
-    $('.avatar').parent().attr('aria-expanded', 'false');
-    $('app-notifications').removeClass('show');
-    $('app-notifications').css('top', '');
-    $('app-notifications').css('transform', '');
-    $('app-notifications').css('bottom', '');
-  }
-  else {
-    $('.avatar').parent().parent().addClass('open');
-    $('.avatar').parent().parent().addClass('show');
-    $('.avatar').parent().attr('aria-expanded', 'true');
-    $('app-notifications').addClass('show');
-    $('app-notifications').css('left', 'auto');
-    $('app-notifications').css('right', '0px');
-    $('app-notifications').css('top', '100%');
-    $('app-notifications').css('transform', 'traslateY(0px)');
-    $('app-notifications').css('bottom', 'auto');
-  }
+
+  showProfileManagerPreview();
+
 });
+$('.avatar').parent().children('.caret').on('click', function(e){
 
+  showProfileManagerPreview();
 
-//************************************//
-
-    if(!document.getElementById('id2')) {
-        var link = document.createElement('link');
-        link.id = 'id2';
-        link.rel = 'stylesheet';
-        link.type = 'text/css';
-        link.href = 'http://myopenlink.net/DAV/home/sdmonroe/css/vios.css';
-        document.head.appendChild(link);
-
-        link = document.createElement('link');
-        link.id = 'id2';
-        link.rel = 'stylesheet';
-        link.type = 'text/css';
-        link.href = 'https://fonts.googleapis.com/css?family=Source+Code+Pro';
-        document.head.appendChild(link);
-
-    }  
-
-        link = document.createElement('script');
-        link.type = 'text/javascript';
-        link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/solid-auth-client.bundle.js';
-        document.head.appendChild(link);
-
-        link = document.createElement('script');
-        link.type = 'text/javascript';
-        link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/rdflib.min.js';
-        document.head.appendChild(link);
-
-        link = document.createElement('script');
-        link.type = 'text/javascript';
-        link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/rdflib.min.js.map';
-        document.head.appendChild(link);
-
-        link = document.createElement('script');
-        link.type = 'text/javascript';
-        link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/md5.min.js';
-        document.head.appendChild(link);
+});
 
 $('#profileName').on('click', function(e){
   solid.auth.popupLogin({ "popupUri":"http://myopenlink.net/DAV/home/sdmonroe/popup.html" });
 
 
 const FOAF = $rdf.Namespace('http://xmlns.com/foaf/0.1/');
+const PIM = $rdf.Namespace('http://www.w3.org/ns/pim/space#');
+const LDP = $rdf.Namespace('http://www.w3.org/ns/ldp#');
 
 
 // Update components to match the user's login status
@@ -2153,9 +2247,11 @@ $('.avatar').parent().children('.circle').each(async (i) => {
   await fetcher.load(person);
 
   // Display their details
-  const fullName = store.any($rdf.sym(person), FOAF('name'));
-  const email = store.any($rdf.sym(person), FOAF('mbox'));
-//  alert('email: ' + email.value);
+  fullName = store.any($rdf.sym(person), FOAF('name'));
+  email = store.any($rdf.sym(person), FOAF('mbox'));
+  storage = store.any($rdf.sym(person), PIM('storage'));
+  inbox = store.any($rdf.sym(person), LDP('inbox'));
+  //alert('inbox: ' + inbox.value + ' storage: ' + storage.value);
   //$('#fullName').text(fullName && fullName.value);
 
 
@@ -2166,6 +2262,12 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     //alert('email: ' + email);
 
     $('.avatar').children('img').attr('src', 'http://www.gravatar.com/avatar/' + md5(email));
+
+        $('.avatar').parent().children('.circle').removeClass('hide');
+        $('.avatar').parent().children('.caret').removeClass('hide');
+
+    $('.avatar').parent().parent().removeClass('open');
+    $('.avatar').parent().parent().removeClass('show');
 
   });
     // Use the user's WebID as default profile
@@ -2242,6 +2344,30 @@ $('.avatar').parent().children('.circle').each(async (i) => {
 
     $('#keywords').focus();
 
+}
+
+function showProfileManagerPreview(){
+  var isProfileManagerOpen = $('.avatar').parent().parent().hasClass('open');
+  if(isProfileManagerOpen){
+    $('.avatar').parent().parent().removeClass('open');
+    $('.avatar').parent().parent().removeClass('show');
+    $('.avatar').parent().attr('aria-expanded', 'false');
+    $('app-notifications').removeClass('show');
+    $('app-notifications').css('top', '');
+    $('app-notifications').css('transform', '');
+    $('app-notifications').css('bottom', '');
+  }
+  else {
+    $('.avatar').parent().parent().addClass('open');
+    $('.avatar').parent().parent().addClass('show');
+    $('.avatar').parent().attr('aria-expanded', 'true');
+    $('app-notifications').addClass('show');
+    $('app-notifications').css('left', 'auto');
+    $('app-notifications').css('right', '0px');
+    $('app-notifications').css('top', '100%');
+    $('app-notifications').css('transform', 'traslateY(0px)');
+    $('app-notifications').css('bottom', 'auto');
+  }
 }
 //const popupUri = 'http://myopenlink.net/DAV/home/sdmonroe/popup.html';
 function buildForm(){
@@ -2618,11 +2744,14 @@ footer += '<div class="clearfix">';
               footer += '</button>';
 
               footer += '<ul class="dropdown-menu dropdown-menu-right" x-placement="top-end" style="position: absolute; transform: translate3d(-97px, -145px, 0px; top: 0px; left: 0px; will-change: transform;">';
-                footer += '<li><a class="dropdown-item" >localhost</a></li>';
-                footer += '<li><a class="dropdown-item" href="#">vios.network</a></li>';
-                footer += '<li><a class="dropdown-item" href="#">Solid POD</a></li>';
-                footer += '<li class="dropdown-divider"></li>';
-                footer += '<li><a class="dropdown-item" href="#">Save to Data Space...</a></li>';
+                if(inbox) footer += '<li><a href="'+getInbox()+'" '+buildTitle(getInbox(), 'right')+' class="dropdown-item" >Inbox</a></li>';
+                if(storage) footer += '<li><a href="'+getStorage()+'" '+buildTitle(getStorage(), 'right')+' class="dropdown-item" >Storage</a></li>';
+                //footer += '<li><a class="dropdown-item" href="#">vios.network</a></li>';
+                //footer += '<li><a class="dropdown-item" href="#">Solid POD</a></li>';
+                if(!inbox && !storage) {
+//                  footer += '<li class="dropdown-divider"></li>';
+                  footer += '<li><a class="dropdown-item" href="#">Save to Data Space...</a></li>';
+                }
               footer += '</ul>';
             footer += '</div>';
 
@@ -2639,7 +2768,7 @@ $('.tab-content').append(tabPanel);
 
 
 selectTab(tabCounter);
-
+$('[data-toggle="tooltip"]').tooltip();
     }
 
 function selectTab(tabct){
@@ -2704,6 +2833,7 @@ function activate(){
 }
 
   function doTable(){
+    setNavType(NAV_TYPE_2);
     doQuery(getQueryText());
     $('#recordViewerColumn').addClass('hide');
     $('#groupByColumn').removeClass('col-lg-'+SIZE_GROUP_BY);
@@ -2723,6 +2853,10 @@ function activate(){
     $('#tabularResults').addClass('hide');
     $('#recordsListWidgetContainer').removeClass('hide');
     if(nav_type == NAV_TYPE_3) $('#facetCollectorWidgetContainer').removeClass('hide');
+  }
+
+  function isTableShowing(){
+    return !$('#tabularResults').hasClass('hide');
   }
 
 
@@ -2929,16 +3063,18 @@ if(!$('input').is(":focus")){
     }    
 
 
-    else if(e.keyCode == '78') { // Control key
-      if(nav_type == NAV_TYPE_2) nav_type = NAV_TYPE_3;
-      else if(nav_type == NAV_TYPE_3) nav_type = NAV_TYPE_2;
-      try{
-        localStorage.setItem('navType', nav_type);
-      }
-      catch(e){
+    else if(e.keyCode == '78') { // Control keyn
+      if(!isTableShowing()){
+        if(nav_type == NAV_TYPE_2) nav_type = NAV_TYPE_3;
+        else if(nav_type == NAV_TYPE_3) nav_type = NAV_TYPE_2;
+        try{
+          localStorage.setItem('navType', nav_type);
+        }
+        catch(e){
 
+        }
+        doQuery(getQueryText());
       }
-      doQuery(getQueryText());
     }    
 
   }
@@ -3338,7 +3474,37 @@ function setQueyTimeout(timeout){
 }
 
 //** FILE: groupby.js *****************************************************************************************************************************************************************************************/
+var pageTable = 0;
+var tableResultsCt = 0;
 
+
+function resetTablePaging(){
+  pageTable = 0;
+}
+
+function pageTableRight(){
+  //setViewOffset(getViewOffset() + SIZE_RESULT_SET);
+  pageTable++;
+  tableResultsCt = 0;
+  //fct_query(query, VIEW_TYPE_LIST_COUNT);
+  //selectGroupBy(true);
+  var opt = new Object();
+  opt.isTablePaging = true;
+  fct_query(getQuery(), VIEW_TYPE_LIST_COUNT, opt);
+  tablePage();
+}
+
+function pageTableLeft(){
+  //setViewOffset(getViewOffset() - SIZE_RESULT_SET);
+  pageTable--;
+  tableResultsCt = 0;
+  //fct_query(query, VIEW_TYPE_LIST_COUNT);
+  //selectGroupBy(true);
+  var opt = new Object();
+  opt.isTablePaging = true;
+  fct_query(getQuery(), VIEW_TYPE_LIST_COUNT, opt);
+  tablePage();
+}
 
 var page = 0;
 
@@ -3381,7 +3547,8 @@ function loadTextResults(xml){
 
           $("#leftButton").removeAttr('disabled');
           $("#leftButton").removeClass('disabled');
-          $('#leftButton').attr('title', 'page ' + (page));
+          //$('#leftButton').attr('title', 'page ' + (page));
+          setTitle('leftButton', 'page ' + (page), 'bottom');
 
         }
       if(groupByResultsCt < SIZE_RESULT_SET) {
@@ -3392,7 +3559,8 @@ function loadTextResults(xml){
       else {
         $("#rightButton").removeAttr('disabled');
         $("#rightButton").removeClass('disabled');
-        $('#rightButton').attr('title', 'page ' + (page+2));
+       // $('#rightButton').attr('title', 'page ' + (page+2));
+          setTitle('rightButton', 'page ' + (page+2), 'bottom');
 
       }
 
@@ -3437,7 +3605,7 @@ function loadTextResults(xml){
               rows += '<tr><td class="up" id="txt1_'+id+'"><span id="'+id+'">';
               rows += '<a onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')">&nbsp;'+getFavicon(value)+'</a>&nbsp;';
               label = deSanitizeLabel(label);
-              rows += '<a title="'+value+'" onclick="javascript:describe(\''+value+'\');">'+label+'</a>';
+              rows += '<a '+buildTitle(value)+' onclick="javascript:describe(\''+value+'\');">'+label+'</a>';
               rows += '</span></td></tr>';
               rows += '<tr><td class="txt" id="txt2_'+id+'"><span id="'+id+'">';
               rows += text;
@@ -3567,7 +3735,8 @@ function loadGroupByResults(xml, focusVarName){
         else{
 
           $("#leftButton").removeClass('hide');
-          $('#leftButton').attr('title', 'page ' + (page));
+         //$('#leftButton').attr('title', 'page ' + (page));
+          setTitle('leftButton', 'page ' + (page), 'bottom');
 
         }
       if(groupByResultsCt < SIZE_RESULT_SET) {
@@ -3576,7 +3745,8 @@ function loadGroupByResults(xml, focusVarName){
       }
       else {
         $("#rightButton").removeClass('hide');
-        $('#rightButton').attr('title', 'page ' + (page+2));
+//        $('#rightButton').attr('title', 'page ' + (page+2));
+        setTitle('rightButton', 'page ' + (page+2), 'bottom');
 
       }
 
@@ -3731,7 +3901,7 @@ if(true){
 
 
               label = deSanitizeLabel(label);
-              var labelLink = (datatype=='uri') ? 'title="'+value+'" onclick="javascript:describe(\''+value+'\');"' : '';
+              var labelLink = (datatype=='uri') ? ''+buildTitle(value)+' onclick="javascript:describe(\''+value+'\');"' : '';
               rows +=  '<h6 class="text-ellipsis m-0" '+labelLink+'>';
               rows+=label;
               //rows +=  '<p class="help-block text-ellipsis m-0"></p>';
@@ -3748,7 +3918,7 @@ if(true){
           rows += '</div>';
 //                 rows += '<img title="click to drop-down" class="count" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
                  // rows += '<a title="click to drop-down" class="count" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"><img width="16" height="16"/>&nbsp;&nbsp;</a>&nbsp;';
-          rows += '<i title="acts as \''+propLabel+'\' of these things" class="expand la la-bars" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('acts as \''+propLabel+'\' of these things')+' class="expand la la-bars" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\')"></i>';
               }
              // rows += '</td></tr>';
 
@@ -4046,6 +4216,7 @@ if(isReverse){
       getFocus(q).find('view').attr('offset', 0);
       getMainFocus().find('view').attr('offset', 0);
       page = 0;
+      //pageTable = 0;
     }
 
     $('#groupByHeader').addClass('loading');
@@ -4147,7 +4318,8 @@ function loadCategoriesResults(xml){
         else{
 
           $("#showMeLeftButton").removeClass('hide');
-          $('#showMeLeftButton').attr('title', 'page ' + (showMePage));
+//          $('#showMeLeftButton').attr('title', 'page ' + (showMePage));
+          setTitle('showMeLeftButton', 'page ' + (showMePage), 'bottom');
 
         }
       if(showMeResultsCt < SIZE_RESULT_SET) {
@@ -4156,8 +4328,9 @@ function loadCategoriesResults(xml){
       }
       else {
         $("#showMeRightButton").removeClass('hide');
-        $('#showMeRightButton').attr('title', 'page ' + (showMePage+2));
+//        $('#showMeRightButton').attr('title', 'page ' + (showMePage+2));
 
+          setTitle('showMeRightButton', 'page ' + (showMePage+2), 'bottom');
       }
 
 
@@ -4203,7 +4376,7 @@ rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">'
 
 
   var ckcolor = 'primary';
-var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'primary' : 'info';
+var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'info' : 'info';
 
 if(true){
 
@@ -4235,7 +4408,7 @@ if(true){
           //rows += '<img title="view instances" class="count" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
 //          rows += '<a title="view instances" class="count" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>';
           //rows += '</td></tr>';
-          rows += '<i title="acts as \''+label+'\' field of these records" class="expand la la-bars" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('acts as \''+label+'\' field of these records')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
 
           rows +='</h6>';
             rows +=  '</div>';
@@ -4358,8 +4531,9 @@ function loadPropertiesResults(xml){
         else{
 
           $("#showMeLeftButton").removeClass('hide');
-          $('#showMeLeftButton').attr('title', 'page ' + (showMePage));
+//          $('#showMeLeftButton').attr('title', 'page ' + (showMePage));
 
+          setTitle('showMeRightButton', 'page ' + (showMePage), 'bottom');
         }
       if(showMeResultsCt < SIZE_RESULT_SET) {
         $("#showMeRightButton").addClass('hide');
@@ -4367,8 +4541,9 @@ function loadPropertiesResults(xml){
       }
       else {
         $("#showMeRightButton").removeClass('hide');
-        $('#showMeRightButton').attr('title', 'page ' + (showMePage+2));
+//        $('#showMeRightButton').attr('title', 'page ' + (showMePage+2));
 
+          setTitle('showMeRightButton', 'page ' + (showMePage+2), 'bottom');
       }
 
       // POI: demo code
@@ -4407,7 +4582,7 @@ function loadPropertiesResults(xml){
 
           //var color = ( $('#showMeMenu :selected').attr('value') == VIEW_TYPE_TEXT_PROPERTIES ) ? 'warning' : 'info';
           var ckcolor = 'primary';
-var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'primary' : 'info';
+var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'info' : 'info';
 
 
 
@@ -4445,7 +4620,7 @@ if(true){
             rows +=  '<div>';
 //          rows += '<a class="count" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addPropertyFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\');">'+ct+'</a>&nbsp;-&nbsp;';
 //          if(datatype=='uri') {
-          rows +=  '<h6 class="text-ellipsis m-0" title="'+propIRI+'" onclick="javascript:describe(\''+propIRI+'\');">';
+          rows +=  '<h6 class="text-ellipsis m-0" '+buildTitle(propIRI)+' onclick="javascript:describe(\''+propIRI+'\');">';
             //rows += '<a title="'+propIRI+'" onclick="javascript:describe(\''+propIRI+'\');">';
             rows += propLabel;
             //rows += '</a>&nbsp;';
@@ -4459,7 +4634,7 @@ if(true){
               //rows += '<img title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
           rows += '<i title="view values" class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
 //              rows += '<a title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>&nbsp;';
-          if((facet && facet.length > 0))rows += '<i title="group the record list by \''+propLabel+'\'" class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\')" ></i>';
+          if((facet && facet.length > 0))rows += '<i '+buildTitle('group the record list by \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\')" ></i>';
           }
           rows +='</h6>';
             rows +=  '</div>';
@@ -4541,8 +4716,9 @@ function loadPropertiesInResults(xml){
         else{
 
           $("#showMeLeftButton").removeClass('hide');
-          $('#showMeLeftButton').attr('title', 'page ' + (showMePage));
+         // $('#showMeLeftButton').attr('title', 'page ' + (showMePage));
 
+          setTitle('showMeLeftButton', 'page ' + (showMePage), 'bottom');
         }
       if(showMeResultsCt < SIZE_RESULT_SET) {
         $("#showMeRightButton").addClass('hide');
@@ -4550,8 +4726,9 @@ function loadPropertiesInResults(xml){
       }
       else {
         $("#showMeRightButton").removeClass('hide');
-        $('#showMeRightButton').attr('title', 'page ' + (showMePage+2));
+        //$('#showMeRightButton').attr('title', 'page ' + (showMePage+2));
 
+          setTitle('showMeRightButton', 'page ' + (showMePage+2), 'bottom');
       }
 
       $("fct\\:row", result).each(function(i) {
@@ -4598,14 +4775,14 @@ rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">'
           //var propIRI = $('#groupByMenu :selected').attr('value');
           //var propLabel = $('#groupByMenu :selected').text();
 //          rows += '<a class="count" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addPropertyOfFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\')">'+ct+'</a>&nbsp;-&nbsp;';
-var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'primary' : 'info';
+var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'info' : 'info';
 
 var ckcolor = 'primary';
  
           rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onclick="javascript: addPropertyOfFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\')">'+ct+'</span>';
                                 rows +=  '</span>';
             rows +=  '<div>';
-          rows +=  '<h6 class="text-ellipsis m-0" title="'+propIRI+'" onclick="javascript:describe(\''+propIRI+'\');">';
+          rows +=  '<h6 class="text-ellipsis m-0" '+buildTitle(propIRI)+' onclick="javascript:describe(\''+propIRI+'\');">';
 
 
 
@@ -4618,7 +4795,7 @@ var ckcolor = 'primary';
           rows += '</div>';
           rows += '<i title="view values" class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
               //rows += '<img title="shows up in the \''+propLabel+'\' field of these records" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
-          if((facet && facet.length > 0))rows += '<i title="group the record list by role: \''+propLabel+'\'" class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\', true)" ></i>';
+          if((facet && facet.length > 0))rows += '<i '+buildTitle('group the record list by role: \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\', true)" ></i>';
           }
 
           rows +='</h6>';
@@ -4680,8 +4857,9 @@ function loadGraphResults(xml){
         else{
 
           $("#showMeLeftButton").removeClass('hide');
-          $('#showMeLeftButton').attr('title', 'page ' + (showMePage));
+          //$('#showMeLeftButton').attr('title', 'page ' + (showMePage));
 
+          setTitle('showMeLeftButton', 'page ' + (showMePage), 'bottom');
         }
       if(showMeResultsCt < SIZE_RESULT_SET) {
         $("#showMeRightButton").addClass('hide');
@@ -4689,7 +4867,8 @@ function loadGraphResults(xml){
       }
       else {
         $("#showMeRightButton").removeClass('hide');
-        $('#showMeRightButton').attr('title', 'page ' + (showMePage+2));
+        //$('#showMeRightButton').attr('title', 'page ' + (showMePage+2));
+          setTitle('showMeRightButton', 'page ' + (showMePage+2), 'bottom');
 
       }
 
@@ -4770,7 +4949,7 @@ var ckcolor = 'primary';
             else rows += '<a href="#'+id+'" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\')"><img src="https://cdn3.iconfinder.com/data/icons/linecons-free-vector-icons-pack/32/tag-512.png" width="16" height="16" /></a>&nbsp;';
           }*/
           // a property is always a uri datatype
-          rows +=  '<h6 class="text-ellipsis m-0" title="'+graphIRI+'" onclick="javascript:describe(\''+graphIRI+'\');">';
+          rows +=  '<h6 class="text-ellipsis m-0" '+buildTitle(graphIRI)+' onclick="javascript:describe(\''+graphIRI+'\');">';
           //if(datatype=='uri') {
             //rows += '<a title="'+graphIRI+'" onclick="javascript:describe(\''+graphIRI+'\');">'
             rows+=graphLabel;
@@ -5018,7 +5197,7 @@ rows += '</span>';
 var link = '';
 if(datatype=='uri') link = 'style="cursor:pointer" onclick="javascript:describe(\''+value+'\');"';
 
-          rows +=  '<h6 title="'+value+'" '+link+'>'+label
+          rows +=  '<h6 '+buildTitle(value)+' '+link+'>'+label
 
           var facet = _root.find('.' + getMainFocus().attr('class') + ' > property[iri=\''+opts.propIRI+'\'] > value');
           var checked = false;
@@ -5113,7 +5292,7 @@ rows += '<tr><td>';
 rows += '</span>';
 //rows += '</a>';
 
-          rows +=  '<h6 style="cursor:pointer" title="'+value+'" onclick="javascript:describe(\''+value+'\');">'+label;
+          rows +=  '<h6 style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+value+'\');">'+label;
 
 
           var facet = _root.find('.' + getMainFocus().attr('class') + ' > property-of[iri=\''+opts.propIRI+'\'] > value');
@@ -5206,7 +5385,7 @@ rows += '<tr><td>';
 rows += '</span>';
 //rows += '</a>';
 
-          rows +=  '<h6 style="cursor:pointer" title="'+value+'" onclick="javascript:describe(\''+value+'\');">'+label+'</h6>';
+          rows +=  '<h6 style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+value+'\');">'+label+'</h6>';
 rows += '</td></tr>';
 /*
           rows += '<tr><td class="instance" id="'+id+'"><span id="'+id+'">';
@@ -5351,7 +5530,7 @@ rows += '<tr><td>';
 rows += '</span>';
 //rows += '</a>';
 
-          rows +=  '<h6  style="cursor:pointer" title="'+value+'" onclick="javascript:describe(\''+value+'\');">'+label+'</h6>';
+          rows +=  '<h6  style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+value+'\');">'+label+'</h6>';
 rows += '</td></tr>';
 
 
@@ -5679,7 +5858,7 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
         }
 
         // update root
-        getQuery().attr('label', tooltip);
+        getQuery().attr('label', desc);
 
         //var slash = (!isFacet) ? '/' : '';
 
@@ -5723,20 +5902,20 @@ if(false){
             bcOutline = bcOutline.replace('primary', 'info');
           }
 
-          ret = '<li title="'+tooltip+'" data-delay=\'{ "show": "'+tooltipShowDelay+'", "hide": "'+tooltipHideDelay+'" }\' data-toggle="tooltip" data-placement="top" class="breadcrumb-item'+focusClass+'" id="nav'+id+'"><a ><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></li>';
+          ret = '<li '+buildTitle(tooltip)+' class="breadcrumb-item'+focusClass+'" id="nav'+id+'"><a ><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></li>';
 
 
         }
         else if(nav_type == NAV_TYPE_3){
           if(bcFacetType == BC_FACET_TYPE_FACET) {
-            ret = '<div style="padding: 0px; background-color:transparent;" class="row" title="'+tooltip+'" data-delay=\'{ "show": "'+tooltipShowDelay+'", "hide": "'+tooltipHideDelay+'" }\' data-toggle="tooltip" data-placement="top" id="nav'+id+'" '+focus+'><div style="display:inline; padding:0px;" class="text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6 style="vertical-align:bottom;margin-bottom:0px">&nbsp;<span onclick="javascript:'+action+'(\''+id+'\')" class="via" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')">' + ''+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+((len > 0) ? '</span>&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">'+len+'</span>' : '')+'</h6></div><button class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
+            ret = '<div style="padding: 0px; background-color:transparent;" class="row" '+buildTitle(tooltip)+' id="nav'+id+'" '+focus+'><div style="display:inline; padding:0px;" class="text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6 style="vertical-align:bottom;margin-bottom:0px">&nbsp;<span onclick="javascript:'+action+'(\''+id+'\')" class="via" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')">' + ''+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+((len > 0) ? '</span>&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">'+len+'</span>' : '')+'</h6></div><button class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
           }
           else if(bcFacetType == BC_FACET_TYPE_FOCUS) {
-            ret = '<div style="padding: 0px; background-color:transparent;" class="row" title="'+tooltip+'" data-delay=\'{ "show": "'+tooltipShowDelay+'", "hide": "'+tooltipHideDelay+'" }\' data-toggle="tooltip" data-placement="top" id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')"><h3 class="fw-semi-bold" style="padding-bottom:4px" >'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</h3></div><button id="focusValue" class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
+            ret = '<div style="padding: 0px; background-color:transparent;" class="row" '+buildTitle(tooltip)+' id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')"><h3 class="fw-semi-bold" style="padding-bottom:4px" >'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</h3></div><button id="focusValue" class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
           }
           else { // isBreadCrumb
             //ret = '<li class="breadcrumb-item"><div class="row" style="background-color:transparent;" title="'+tooltip+'" id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6>' + ''+desc+'</h6></div><button class="btn-rounded-f  btn btn-'+outline+'default btn-block btn-xs text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div></li>';
-    ret = '<li title="'+tooltip+'" data-delay=\'{ "show": "'+tooltipShowDelay+'", "hide": "'+tooltipHideDelay+'" }\' data-toggle="tooltip" data-placement="top" class="breadcrumb-item" id="nav'+id+'"><a><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></li>';
+    ret = '<li '+buildTitle(tooltip)+' class="breadcrumb-item" id="nav'+id+'"><a><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></li>';
   //  gbcol += '<li class="breadcrumb-item"><a  title=""><em>distributor</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-outline-default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\'0\')">'+VALUE_ANON_NODE+'</button></li>';
           }
 
@@ -5758,6 +5937,22 @@ if(false){
         //console.log("bc added: " + ret);
         */
         return ret;
+    }
+
+    function buildTitle(title, placement){
+      if(!placement) placement = 'top';
+      return ' title="'+title+'" data-delay=\'{ "show": "'+tooltipShowDelay+'", "hide": "'+tooltipHideDelay+'" }\' data-toggle="tooltip" data-placement="'+placement+'" ';      
+    }
+
+    function setTitle(id, title, placement){
+      $('#'+id).attr('title', title);
+      if( !$('#'+id).attr('data-delay')  ){
+        $('#'+id).attr('data-delay', '{ "show": "'+tooltipShowDelay+'", "hide": "'+tooltipHideDelay+'" }');
+        $('#'+id).attr('data-toggle', 'tooltip');
+        $('#'+id).attr('data-placement', placement);
+      }
+        $('#'+id).removeAttr('data-original-title');
+      //$('#'+id).tooltip();
     }
 
     function setNavType(type){
