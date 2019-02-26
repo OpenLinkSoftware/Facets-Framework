@@ -284,8 +284,8 @@ function getDbActivity(xml){
 
 //var fct_sparql, fct_time, fct_complete, fct_timeout, fct_dbActivity;
 
-var fct_dataSpace = "http://lod.openlinksw.com/fct/service";
-var fct_dataSpaceSparql = "http://lod.openlinksw.com/sparql";
+var fct_dataSpace = "http://poc.vios.network/proxy/-start-http://lod.openlinksw.com-end-/fct/service";
+var fct_dataSpaceSparql = "http://poc.vios.network/proxy/-start-http://lod.openlinksw.com-end-/sparql";
 var fct_dataSpaceLabel = "LOD Cloud";
 //var fct_dataSpace = "http://myopenlink.net/fct/service";
 
@@ -659,7 +659,7 @@ function fct_handleSparqlTableCount(xml, opt){
   $('result', results).each(function(i){
     var ct = $(this).text().trim();
     var x = pageTable+1;
-    x = x * SIZE_RESULT_SET;
+    x = x * SIZE_TABLE_RESULT_SET;
     if(x > ct) x = ct;
     $('#tableCount').text( x + ' / ' + ct);
   });
@@ -671,23 +671,23 @@ function fct_handleGeoListResults(xml, opt){
     $('#showMeMenu').removeClass('loading');
 }
 
-var showMatrix = true;
-var matrixProperty;
+var showChart = true;
+var chartProperty;
 
-function isMatrix(){
-  return showMatrix;
+function isChart(){
+  return showChart;
 }
-function setMatrix(b){
-  showMatrix = b;
+function setChart(b){
+  showChart = b;
 }
-function getMatrixProperty(){
-  return matrixProperty;
+function getChartProperty(){
+  return chartProperty;
 }
-function setMatrixProperty(prop){
-  matrixProperty = prop;
+function setChartProperty(prop){
+  chartProperty = prop;
 }
 
-function buildResultTableHeaders(row, row2, varNames, varCt, node){
+function buildResultTableHeaders(r1, r2, varNames, varCt, node){
   // the SPARQL projection items are listed in depth-first order, starting from the focus
   
   /*
@@ -757,7 +757,8 @@ col.css('background-color', '#' + rainbow.colourAt( (node.parents().length <= 2)
 
 
   col.html(colStr);
-  row.append(col);
+//  row.append(col);
+  r1.value += col;
 
 
     col = $.createElement('td');
@@ -765,19 +766,17 @@ col.css('background-color', '#' + rainbow.colourAt( (node.parents().length <= 2)
           colStr += processLabel(valStr);
           colStr += '</button>';
   col.html(colStr);
-  row2.append(col);
+//  row2.append(col);
+  r2.value += col;
           //ret += '</div>';
 
 
 
   node.children('property, property-of').each(function (i){
-    buildResultTableHeaders(row, row2, varNames, varCt, $(this));
+    buildResultTableHeaders(r1, r2, varNames, varCt, $(this));
   });
-  return row;
 
-
-
-
+  r1.count++;
 }
 
 function tablePage(){
@@ -795,7 +794,7 @@ function tablePage(){
           setTitle('leftButton', 'page ' + (pageTable), 'bottom');
 
         }
-      if(tableResultsCt < SIZE_RESULT_SET) {
+      if(tableResultsCt < SIZE_TABLE_RESULT_SET) {
         $("#rightTableButton").attr('disabled', 'true');
         $("#rightTableButton").addClass('disabled');
         $('#rightTableButton').removeAttr('title');
@@ -815,6 +814,9 @@ function fct_handleSparqlResults(xml, opt){
     //console.log('xml' + $(xml).html());
     var results = $(xml).find('results');
 
+    if(isChart()) $('#tableType').text('Chart');
+    else $('#tableType').text('Table');
+
 //tableResultsCt = $("result", results).length;
 //fct_handleSparqlTableCount(xml, opt);
 
@@ -827,10 +829,18 @@ function fct_handleSparqlResults(xml, opt){
 //labels={};
 
     var varCt = 0;
-    buildResultTableHeaders(row, row2, variables, varCt);
-    var colCount = row.children('th').length;
+    var r1 = new Object();
+    var r2 = new Object();
+    r1.value = '';
+    r1.count = 0;
+    r2.value = '';
+    r2.count = 0;
+    buildResultTableHeaders(r1, r2, variables, varCt);
+    if(!isChart()) row.append(r1.value);
+    if(!isChart()) row2.append(r2.value);
+    var colCount = r1.count;// row.children('th').length;
 
-tableResultsCt = $("result", results).length;
+    tableResultsCt = $("result", results).length;
 /*
     variables.each(function(j) {
         col = $.createElement('th');
@@ -858,8 +868,11 @@ tableResultsCt = $("result", results).length;
     var matrixValues = new Array();
     //var matrixColumnIndex = 0;
 
-    $('#resultsTable > thead').append(row);
-    $('#resultsTable > thead').append(row2);
+    if(!isChart()) $('#resultsTable > thead').append(row);
+    if(!isChart()) $('#resultsTable > thead').append(row2);
+
+
+    var rows = '';
     $("result", results).each(function(i) {
         row = $.createElement('tr');
         var cols = {};
@@ -881,7 +894,7 @@ tableResultsCt = $("result", results).length;
 
             $(this).attr('label', $( $('#resultsTable > thead > tr > th')[j] ) .attr('label') );
             // matrix logic
-            if(isMatrix() ){
+            if(isChart() ){
               if(j == 0) {
                 matrixKey = $(this);
                 if(matrixKeys.indexOfText(matrixKey.text()) < 0) {
@@ -911,64 +924,89 @@ tableResultsCt = $("result", results).length;
             col = cols[header];
             if(col){
                 col.append("<span>"+value+"</span>");
-                row.append(col);
+                if(!isChart()) row.append(col);
             }
         });
 
-        $('#resultsTable > tbody').append(row);
+       if(!isChart()) rows += row;
+
     });
+    if(!isChart()) $('#resultsTable > tbody').append(rows);
 
 
     // matrix logic
-    if(isMatrix()){
+    if(isChart()){
       $('#resultsTable > thead').empty();
       $('#resultsTable > tbody').empty();
       $('#resultsTable').addClass('table-header-rotated');
 
       // build headers
       row = $.createElement('tr');
+      r1 = new Object();
+      r1.value = '';
+      r1.value += '<tr>';
       for(i = 0; i < matrixValues.length; i++){
         if(i == 0){
-          row.append('<th><div></div></th>');
+          r1.value += '<th><div></div></th>';
         }
         var value = matrixValues[i].text();
         var label = (value) ? labels[value] : '';
         if(!label) label = processLabel(value);
-        //var str = 'onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')"';
-        row.append('<th class="rotate"><div><span>'+label+'</span></div></th>');
-      }
-      $('#resultsTable > thead').append(row);
+        var h = matrixValues[i].attr("name");
+        var v = matrixValues[i].text();
+        var d = (matrixValues[i].children().length > 0) ? $(matrixValues[i].children()[0]).prop('nodeName').toLowerCase() : '';
+        var str = '';
+        if(getMainFocus().children('property, property-of').length > 0){
+          var propIRI = $( getMainFocus().children('property, property-of')[0] ).attr('iri');
+          var propLabel = $( getMainFocus().children('property, property-of')[0] ).attr('label');
+          var rand = Math.random(); //createId(); // 'mtxhd' + i;
+          var contextId = undefined;// $( getMainFocus().children('property, property-of')[0] ).attr('class');
+          str = ' onclick="javascript: setPropertyValue(\''+rand+'\', \''+NODE_TYPE_PROPERTY+'\', '+((contextId)?'\''+contextId+'\'':'undefined')+', \''+propIRI+'\', \''+propLabel+'\', \''+v+'\', \''+sanitizeLabel(label)+'\', \''+d+'\', \'\')" ';
+        }
+        r1.value += '<th style="vertical-align:middle;text-align:center;cursor:pointer;" '+str+' class="rotate"><div><span>'+label+'</span></div></th>';
+      }      
+      r1.value += '</tr>';
+      $('#resultsTable > thead').append(r1.value);
 
       // add rows
+      r1 = new Object();
+      r1.value = '';
       for(i = 0; i < matrixKeys.length; i++){
-        row = $.createElement('tr');
         //var valueComp = (matrixMap[matrixKeys[i].attr('id')]) ? matrixMap[matrixKeys[i].attr('id')].text() : '';
         //var labelComp = (valueComp) ? labels[valueComp] : '';
         //if(!labelComp) labelComp = processLabel(valueComp);
 
 
+        r1.value += '<tr>';
         var valueKey = matrixKeys[i].text();
         var labelKey = (valueKey) ? labels[valueKey] : '';
-        if(!labelKey) labelKey = processLabel(valueKey);
+        if(!labelKey) {
+          labelKey = processLabel(valueKey);
+        }
         for(j = 0; j < matrixValues.length; j++){
           var h = matrixKeys[i].attr("name");
           var v = matrixKeys[i].text();
           var d = (matrixKeys[i].children().length > 0) ? $(matrixKeys[i].children()[0]).prop('nodeName').toLowerCase() : '';
           if(j == 0){
             //var mcolId = createId();
-            row.append('<td style="cursor:pointer;" onclick="javascript:setValue(\'mtxcol-'+i+'-'+j+'\', \''+v+'\', \''+labelKey+'\', \''+d+'\', \'\')">'+labelKey+'</td>');
+            r1.value += '<td style="cursor:pointer;" onclick="javascript:setValue(\'mtxcola-'+i+'-'+j+'\', \''+v+'\', \''+sanitizeLabel(labelKey)+'\', \''+d+'\', \'\')">'+labelKey+'</td>';
 //            var str = '<td onclick="javascript:setValue(\''+createId()+'\', \''+v+'\', \''+labelKey+'\', \''+d+'\', \'\')">'+labelKey+'</td>';
             //row.append('<td>'+labelKey+'</td>');
           }
           var value = matrixValues[j].text();
           var label = (value) ? labels[value] : '';
-          if(!label) label = processLabel(value);
+          //var sanitizedLabel = label;
+          if(!label) {
+            label = processLabel(value);
+            //sanitizedLabel = sanitizeLabel(sanitizedLabel);
+          }
 
           var cellVal = (matrixMap[matrixKeys[i].text()] && matrixMap[matrixKeys[i].text()].indexOfText(value) >= 0) ? '<span class="glyphicon glyphicon-ok"></span>' : '';
-          row.append('<td style="cursor:pointer;" onclick="javascript:setValue(\'mtxcol-'+i+'-'+j+'\', \''+v+'\', \''+labelKey+'\', \''+d+'\', \'\')">'+cellVal+'</td>');
+          r1.value += '<td style="vertical-align:middle;text-align:center;cursor:pointer;" onclick="javascript:setValue(\'mtxcolb-'+i+'-'+j+'\', \''+sanitizeLabel(v)+'\', \''+sanitizeLabel(labelKey)+'\', \''+d+'\', \'\')">'+cellVal+'</td>';
         }
-        $('#resultsTable > tbody').append(row);
+        r1.value += '</tr>';
       }
+      $('#resultsTable > tbody').append(r1.value);
     }
 
 
@@ -1132,11 +1170,13 @@ function fct_handleListCountResults(xml, opt){
 
 
         sparql = sparql.substring(0, sparql.lastIndexOf('}')) + sparql.substring(sparql.lastIndexOf('}') + 1);
-        sparql = sparql.replace(/offset\s+\d+/gi, 'offset ' + pageTable * SIZE_RESULT_SET);
+        sparql = sparql.replace(/offset\s+\d+/gi, 'offset ' + pageTable * SIZE_TABLE_RESULT_SET);
+        sparql = sparql.replace(/limit\s+\d+/gi, 'limit ' + SIZE_TABLE_RESULT_SET);
         sparql += '}';
 
-        if(isMatrix()){
-          //sparql = sparql.replace(/limit\s+\d+/gi, '');
+        if(isChart()){
+          sparql = sparql.replace(/limit\s+\d+/gi, 'limit ' + SIZE_MATRIX_RESULT_SET);
+          sparql = sparql.replace(/offset\s+\d+/gi, 'offset ' + pageTable * SIZE_MATRIX_RESULT_SET);
           //sparql = sparql.replace(/offset\s+\d+/gi, '');
         }
 
@@ -1447,13 +1487,14 @@ function setValue(id, val, valLabel, datatype, lang){
 function setPropertyValue(id, nodeName, contextId, propIRI, propLabel, val, valLabel, datatype, lang){
     exitGroupBy(id);
 
-  remove(_root.find('.'+contextId).attr('class'), true);
   if(propIRI) propIRI = deSanitizeLabel(propIRI);
   if(val) val = deSanitizeLabel(val);
   valLabel = deSanitizeLabel(valLabel);
   var p = $.createElement(nodeName); // nodeName is property or property-of
+  if(contextId) remove(_root.find('.'+contextId).attr('class'), true);
+  else contextId = createId();
   p.attr('class', contextId);
-  p.attr('iri', propIRI);
+  p.attr('iri', deSanitizeLabel(propIRI));
   p.attr('label', propLabel);
 
   if(contextId == ID_QUERY) clearKeywords();
@@ -1505,7 +1546,8 @@ function addPropertyFacet(id, prop, propLabel, val, valLabel, datatype, lang, si
   page = 0;
   //pageTable = 0;
 
-  getMainFocus().append(p);
+  if(isAKeyDown()) getMainFocus().prepend(p);
+  else getMainFocus().append(p);
   //takeFocus(p, getFocus(query));
   //takeFocus(query, getFocus(query));
   if(!silent) doQuery(getQueryText());
@@ -1537,7 +1579,8 @@ function addPropertyOfFacet(id, prop, propLabel, val, valLabel, datatype, lang, 
   page = 0;
   //pageTable = 0;
 
-  getMainFocus().append(p);
+  if(isAKeyDown()) getMainFocus().prepend(p);
+  else getMainFocus().append(p);
   //takeFocus(p, getFocus(query));
   //takeFocus(query, getFocus(query));
   if(!silent) doQuery(getQueryText());
@@ -1632,6 +1675,8 @@ var SIZE_RECORD_VIEWER = (screenSz < 1500) ? "6" : "8";
 var SIZE_RECORD_FORM = (screenSz < 1500) ? "6" : "6";
 var SIZE_LABEL = (screenSz < 1500) ? 22 : 30; // TODO: this constant is deprecated, using text-ellipse now
 var SIZE_RESULT_SET = (screenSz < 1500) ? 15: 30;
+var SIZE_TABLE_RESULT_SET = (screenSz < 1500) ? 15: 30;
+var SIZE_MATRIX_RESULT_SET = (screenSz < 1500) ? 1000: 500;
 var SIZE_MIN_DIGITS = 7;
 var SIZE_MAX_DIGITS = 20;
 
@@ -1660,6 +1705,9 @@ var labels = {};
   function getInbox(){
     return inbox.value;
   }
+
+
+
 
 function init(){
     fct_init(); // this method must be the first method called by the implementation of the fct_ framework
@@ -1717,6 +1765,11 @@ function init(){
         link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/md5.min.js';
         document.head.appendChild(link);
 
+        link = document.createElement('script');
+        link.type = 'text/javascript';
+        link.src = 'http://data.vios.network/DAV/home/vios/js/jquery.capslockstate.js';
+        document.head.appendChild(link);
+
 
 //alert('init() screen width: ' + screen.width);
 
@@ -1732,7 +1785,7 @@ function init(){
 // Q&D data canvas ******************//
 
 
-
+  //$('body').attr('oncontextmenu', 'return false;');
 
   //$('#showMeMenu').remove();
   $('#leftButton').remove();
@@ -1984,13 +2037,14 @@ gbcol += '<div id="tabularResults" class="short-div hide"><section class="widget
 
 gbcol += '<header id="groupByTableHeader">';
         gbcol += '<h5>';
-          gbcol += '<h4><span id="tableCount" class="badge badge-info">0/0</span> '+GROUP_BY_NONE_LABEL+' - <span class="fw-semi-bold">Table</span></h4>';
+          gbcol += '<h4><span id="tableCount" class="badge badge-info">0/0</span> '+GROUP_BY_NONE_LABEL+' - <span id="tableType" class="fw-semi-bold">Table</span></h4>';
         gbcol += '</h5>';
         gbcol += '<div class="widget-controls">';
           //gbcol += '<a href="#"><i class="glyphicon glyphicon-cog"></i></a>';
+          gbcol += '<a data-target="#" data-widgster="close" class="text-secondary" id="tableTypeButton"><i class="glyphicon glyphicon-th-list"></i></a>';
           gbcol += '<a data-target="#" disabled="true" class="disabled" id="leftTableButton" onclick="javascript:pageTableLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
           gbcol += '<a data-target="#" disabled="true" class="disabled" id="rightTableButton" onclick="javascript:pageTableRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
-          gbcol += '<a data-widgster="close" onclick="undoTable()" class="btn-gray"><i class="glyphicon glyphicon-remove"></i></a>';
+          gbcol += '<a data-target="#" data-widgster="close" onclick="undoTable()" class="text-secondary"><i class="glyphicon glyphicon-remove"></i></a>';
         gbcol += '</div>';
       gbcol += '</header>';
         gbcol += '<div class="widget-body">';
@@ -2243,6 +2297,8 @@ gbcol += '<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" 
       gbcol += '  Press <i>C</i>, <i>T</i>, <i>F</i>, <i>R</i> or <i>L</i> keys to switch CTRL lists';
       gbcol += '  </li><li>';
       gbcol += '  Use <i>&lt;</i>, <i>&gt;</i>, <i>left arrow</i>, and <i>right arrow</i> to move through list pages';
+      gbcol += '  </li><li>';
+      gbcol += '  Hold down <i>A</i> key, then click Field checkbox to prepend Field to filter collector;'
       gbcol += '  </li></ul>';
       gbcol += '  <p>';
       gbcol += '  See <a href="https://medium.com/@sdmonroe/vios-network-99488f5bf29d">this article</a> for more tips';
@@ -2928,6 +2984,7 @@ function selectTab(tabct){
 
 var isActivated = false;
 function activate(){
+
   $('#groupByColumn').removeClass('hide');
   $('#showMeColumn').removeClass('hide');
   $('#recordViewerColumn').removeClass('hide');
@@ -3110,11 +3167,21 @@ document.onkeydown = checkKey;
 document.onkeyup = checkKeyRelease;
 
 var ctrlDown = false;
+var aKeyDown = false;
+function isCTRLKeyDown(){
+  return ctrlDown;
+}
+function isAKeyDown(){
+  return aKeyDown;
+}
 
 function checkKeyRelease(e) {
       e = e || window.event;
     if (e.keyCode == '17') { // control key
         ctrlDown = false;
+    }
+    else if (e.keyCode == '65') { // A KEY
+        aKeyDown = false;
     }
 }
 
@@ -3123,7 +3190,10 @@ function checkKey(e) {
 
     e = e || window.event;
 
-    if (e.keyCode == '188') { // period key
+    if (e.keyCode == '65') {
+      aKeyDown = true;
+    }
+    else if (e.keyCode == '188') { // period key
         if(page > 0 && !$('#leftButton').hasClass('hide')) pageLeft();
     }
     else if (e.keyCode == '190') { // comma key
