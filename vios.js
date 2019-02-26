@@ -671,6 +671,22 @@ function fct_handleGeoListResults(xml, opt){
     $('#showMeMenu').removeClass('loading');
 }
 
+var showMatrix = true;
+var matrixProperty;
+
+function isMatrix(){
+  return showMatrix;
+}
+function setMatrix(b){
+  showMatrix = b;
+}
+function getMatrixProperty(){
+  return matrixProperty;
+}
+function setMatrixProperty(prop){
+  matrixProperty = prop;
+}
+
 function buildResultTableHeaders(row, row2, varNames, varCt, node){
   // the SPARQL projection items are listed in depth-first order, starting from the focus
   
@@ -686,7 +702,10 @@ if(!$(varNames[varCt]).attr('name')){
   if(!node) node = getMainFocus();
   var id = node.attr('class');
   var label = node.attr('label');
+  var iri = node.attr('iri');
   var col = $.createElement('th');
+  col.attr('iri', iri);
+  col.attr('label', label);
 
   var action = 'remove';
   var outline = '';
@@ -809,6 +828,7 @@ function fct_handleSparqlResults(xml, opt){
 
     var varCt = 0;
     buildResultTableHeaders(row, row2, variables, varCt);
+    var colCount = row.children('th').length;
 
 tableResultsCt = $("result", results).length;
 /*
@@ -832,6 +852,12 @@ tableResultsCt = $("result", results).length;
 
 */
 
+
+    var matrixMap = {};
+    var matrixKeys = new Array();
+    var matrixValues = new Array();
+    //var matrixColumnIndex = 0;
+
     $('#resultsTable > thead').append(row);
     $('#resultsTable > thead').append(row2);
     $("result", results).each(function(i) {
@@ -847,7 +873,28 @@ tableResultsCt = $("result", results).length;
             //console.log('fcthsr: header: ' + header);
         });
         //console.log($(this).html());
+
+        var matrixKey;
         $("binding", this).each(function(j) {
+            if(j >= colCount) return; // POI: this only works because the resultset is listed properly, and this is due to the structure of the SPARQL returned from FCT
+
+
+            $(this).attr('label', $( $('#resultsTable > thead > tr > th')[j] ) .attr('label') );
+            // matrix logic
+            if(isMatrix() ){
+              if(j == 0) {
+                matrixKey = $(this);
+                if(matrixKeys.indexOfText(matrixKey.text()) < 0) {
+                  matrixKeys.push(matrixKey);
+                  matrixMap[matrixKey.text()] = new Array();
+                }
+              }
+              else if(j == 1) { // POI: the compare table compares the first property listed for the focus
+                if(matrixMap[matrixKey.text()].indexOfText($(this).text()) < 0) matrixMap[matrixKey.text()].push( $(this) );
+                if(matrixValues.indexOfText($(this).text()) < 0) matrixValues.push($(this));
+              }
+            }
+
             var header = $(this).attr("name");
             var value = $(this).text();
             var datatype = $($(this).children()[0]).prop('nodeName').toLowerCase();
@@ -867,8 +914,65 @@ tableResultsCt = $("result", results).length;
                 row.append(col);
             }
         });
+
         $('#resultsTable > tbody').append(row);
     });
+
+
+    // matrix logic
+    if(isMatrix()){
+      $('#resultsTable > thead').empty();
+      $('#resultsTable > tbody').empty();
+      $('#resultsTable').addClass('table-header-rotated');
+
+      // build headers
+      row = $.createElement('tr');
+      for(i = 0; i < matrixValues.length; i++){
+        if(i == 0){
+          row.append('<th><div></div></th>');
+        }
+        var value = matrixValues[i].text();
+        var label = (value) ? labels[value] : '';
+        if(!label) label = processLabel(value);
+        //var str = 'onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')"';
+        row.append('<th class="rotate"><div><span>'+label+'</span></div></th>');
+      }
+      $('#resultsTable > thead').append(row);
+
+      // add rows
+      for(i = 0; i < matrixKeys.length; i++){
+        row = $.createElement('tr');
+        //var valueComp = (matrixMap[matrixKeys[i].attr('id')]) ? matrixMap[matrixKeys[i].attr('id')].text() : '';
+        //var labelComp = (valueComp) ? labels[valueComp] : '';
+        //if(!labelComp) labelComp = processLabel(valueComp);
+
+
+        var valueKey = matrixKeys[i].text();
+        var labelKey = (valueKey) ? labels[valueKey] : '';
+        if(!labelKey) labelKey = processLabel(valueKey);
+        for(j = 0; j < matrixValues.length; j++){
+          var h = matrixKeys[i].attr("name");
+          var v = matrixKeys[i].text();
+          var d = (matrixKeys[i].children().length > 0) ? $(matrixKeys[i].children()[0]).prop('nodeName').toLowerCase() : '';
+          if(j == 0){
+            //var mcolId = createId();
+            row.append('<td style="cursor:pointer;" onclick="javascript:setValue(\'mtxcol-'+i+'-'+j+'\', \''+v+'\', \''+labelKey+'\', \''+d+'\', \'\')">'+labelKey+'</td>');
+//            var str = '<td onclick="javascript:setValue(\''+createId()+'\', \''+v+'\', \''+labelKey+'\', \''+d+'\', \'\')">'+labelKey+'</td>';
+            //row.append('<td>'+labelKey+'</td>');
+          }
+          var value = matrixValues[j].text();
+          var label = (value) ? labels[value] : '';
+          if(!label) label = processLabel(value);
+
+          var cellVal = (matrixMap[matrixKeys[i].text()] && matrixMap[matrixKeys[i].text()].indexOfText(value) >= 0) ? '<span class="glyphicon glyphicon-ok"></span>' : '';
+          row.append('<td style="cursor:pointer;" onclick="javascript:setValue(\'mtxcol-'+i+'-'+j+'\', \''+v+'\', \''+labelKey+'\', \''+d+'\', \'\')">'+cellVal+'</td>');
+        }
+        $('#resultsTable > tbody').append(row);
+      }
+    }
+
+
+
     $('#groupByTableHeader').removeClass('loading');
 
 
@@ -1030,6 +1134,11 @@ function fct_handleListCountResults(xml, opt){
         sparql = sparql.substring(0, sparql.lastIndexOf('}')) + sparql.substring(sparql.lastIndexOf('}') + 1);
         sparql = sparql.replace(/offset\s+\d+/gi, 'offset ' + pageTable * SIZE_RESULT_SET);
         sparql += '}';
+
+        if(isMatrix()){
+          //sparql = sparql.replace(/limit\s+\d+/gi, '');
+          //sparql = sparql.replace(/offset\s+\d+/gi, '');
+        }
 
         fct_sparql(sparql);
 
@@ -1474,7 +1583,7 @@ var LABEL_ROOT = "Root";
 var LABEL_RECORD_NAME = 'name';
 var LABEL_KEYWORDS = 'keywords';
 
-var GROUP_BY_NONE_LABEL = "Records";
+var GROUP_BY_NONE_LABEL = "Contents";
 var GROUP_BY_NONE_VALUE = "GROUPBY-NONE";
 
 var GROUP_BY_TEXT_LABEL = "Text Matches";
@@ -1577,6 +1686,15 @@ function init(){
         link.href = 'https://fonts.googleapis.com/css?family=Source+Code+Pro';
         document.head.appendChild(link);
 
+
+
+        $('link[src="http://myopenlink.net/DAV/home/sdmonroe/css/vios.css"]').remove();
+        link = document.createElement('link');
+        link.id = 'id2';
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'http://data.vios.network/DAV/home/vios/css/vios.css';
+        document.head.appendChild(link);
     }  
 
         link = document.createElement('script');
@@ -1655,6 +1773,7 @@ function init(){
   $('dashboard').append('<div class="row" id="dataCanvas"></div>');
   $('#queryTimeout').val('30000');
 
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').prepend('<li><a id="lovDataSpace" class="dropdown-item" onclick="selectdataSpace(\'http://52.34.77.62:8890\', \'LOV Dataspace\')">LOV Dataspace</a></li>');
 
 
   $('#keywords').css('padding-left', '10px');
@@ -1834,7 +1953,7 @@ gbcol += '<div class="row"><span style="padding-right:3em">thisIsAFacet</span><b
 
 gbcol += '<div id="recordsListWidgetContainer" class="short-div"><section class="widget" widget>';
 gbcol += '<header id="groupByHeader" style="cursor:pointer;">';
-        gbcol += '<h4><span id="groupByCount" class="badge badge-info">0/0</span> Records</h4>';
+        gbcol += '<h4><span id="groupByCount" class="badge badge-info">0/0</span> '+GROUP_BY_NONE_LABEL+'</h4>';
         gbcol += '<div class="widget-controls">';
           gbcol += '<a data-target="#" class="hide " '+buildTitle('')+' id="leftButton" onclick="javascript:pageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
           gbcol += '<a data-target="#" class="hide " '+buildTitle('')+' id="rightButton" onclick="javascript:pageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
@@ -1865,7 +1984,7 @@ gbcol += '<div id="tabularResults" class="short-div hide"><section class="widget
 
 gbcol += '<header id="groupByTableHeader">';
         gbcol += '<h5>';
-          gbcol += '<h4><span id="tableCount" class="badge badge-info">0/0</span> Records</h4>';
+          gbcol += '<h4><span id="tableCount" class="badge badge-info">0/0</span> '+GROUP_BY_NONE_LABEL+' - <span class="fw-semi-bold">Table</span></h4>';
         gbcol += '</h5>';
         gbcol += '<div class="widget-controls">';
           //gbcol += '<a href="#"><i class="glyphicon glyphicon-cog"></i></a>';
@@ -2016,9 +2135,11 @@ gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Table</a>';
       gbcol += '</li>';
+/*
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:showMap()">Map</a>';
       gbcol += '</li>';
+*/      
       gbcol += '<li class="nav-item dropdown">';
         gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
           gbcol += 'Pair';
@@ -2202,8 +2323,10 @@ $('.widget').css('box-shadow', '');
 $('.widget').css('-webkit-box-shadow', '');
     $('.avatar').parent().children('.small').text('Login');
     $('.avatar').children('img').attr('src', 'http://www.gravatar.com/avatar/' + ('info@vios.network'));
+    $('.avatar').children('img').attr('width', '16');
+    $('.avatar').children('img').attr('height', '16');
     $('.avatar').parent().children('.circle').addClass('hide');
-
+    $('.avatar').removeClass('mr-2');
 $('.avatar').parent().children('.small').attr('id', 'profileName');
 $('.avatar').parent().children('.circle').attr('id', 'profileManagerPreview');
 $('.avatar').parent().children('.circle').text('8');
@@ -2322,6 +2445,12 @@ $('.avatar').parent().children('.circle').each(async (i) => {
       $('#isSearchAllFields').parent().addClass('active');
       $('#isSearchAllFields').parent().attr('aria-pressed','true');
       qSearchAllFields = null;
+    }
+
+    if(getQueryText()){
+      $('#keywords').val(getQueryText());
+      $('#keywords').focus(); 
+      $('#keywords').select();
     }
 
     loadGroupByMenuDefaults();
@@ -3450,6 +3579,8 @@ function selectMenuItem(id, value, silent){
 }
 
 function selectdataSpace(uri, label){
+//  uri = 'http://52.34.77.62:8890';
+//  label = 'LOV Dataspace';
   //fct_dataSpace = uri;
   fct_dataSpaceLabel = label;
   //fct_dataSpace = $('#dataSpaceMenu :selected').attr('value') + '/fct/service';
@@ -3668,6 +3799,13 @@ String.prototype.replaceAll = function(search, replacement) {
     var target = this;
     return target.split(search).join(replacement);
 };
+
+Array.prototype.indexOfText = function(txt) {
+    for (var i = 0; i < this.length; i++)
+        if (this[i].text() === txt)
+            return i;
+    return -1;
+}
 /*
 function htmlEncode(input){
   var e = document.createElement('div');
