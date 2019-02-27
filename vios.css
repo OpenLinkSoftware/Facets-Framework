@@ -453,48 +453,45 @@ box-shadow: 0 0 0px transparent;
  
 .table-header-rotated {
   border-collapse: collapse;
-  .csstransforms & td {
-    width: 30px;
-  }
-  .no-csstransforms & th {
-    padding: 5px 10px;
-  }
-  td {
-    text-align: center;
-    padding: 10px 5px;
-    border: 1px solid #ccc;
-  }
-  .csstransforms & th.rotate {
-    height: 140px;
-    white-space: nowrap;
-    /* Firefox needs the extra DIV for some reason, otherwise the text disappears if you rotate  */
-    > div {
-      transform: 
-        // Magic Numbers
-        translate(25px, 51px)
-        // 45 is really 360-45
-        rotate(315deg);
-      width: 30px;
-    }
-    > div > span {
-      border-bottom: 1px solid #ccc;
-      padding: 5px 10px;
-    }
-  }
-  /*
-  th.row-header {
-    padding: 0 10px;
-    border-bottom: 1px solid #ccc;
-  }
-  */
+}
+.table-header-rotated td {
+ /* width: 30px;*/
 }
 
-.content{
-border-left:1px solid rgba(0,0,0,.125);
-padding: 60px 40px 40px 15px;
+.table-header-rotated td {
+  text-align: center;
+  padding: 10px 5px;
+  border: 1px solid #ccc;
+}
+.table-header-rotated th {
+  text-align: center;
+  padding: 50px 5px;
+  border: 1px solid transparent;
+  background-color: transparent;
+  
+}
+.table-header-rotated th.rotate {
+  height: 140px;
+  white-space: nowrap;
+  font-size:smaller;
 }
 
+.table-header-rotated th.rotate > div > span:hover {
+background-color: rgb(233, 236, 239);
+}
+.table-header-rotated th.rotate > div {
+  -webkit-transform: translate(25px, 51px) rotate(315deg);
+          transform: translate(25px, 51px) rotate(315deg);
+  width: 30px;
+}
+.table-header-rotated th.rotate > div > span {
+  border-bottom: 1px solid #ccc;
+  padding: 5px 10px;
+}
 
+.table-bordered { /*this border was causing a box to appear above the focus column*/
+    border: 0px solid transparent!important;
+}
 
 .navbar-dashboard{
 background-color: #fff;
@@ -505,6 +502,11 @@ padding-top:1em;
 
 }
 
+
+.content{
+border-left:1px solid rgba(0,0,0,.125);
+padding: 60px 40px 40px 15px;
+}
 
 #dataSpaceLabel{
   padding-right:4px;

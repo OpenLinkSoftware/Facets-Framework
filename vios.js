@@ -674,6 +674,12 @@ function fct_handleGeoListResults(xml, opt){
 
 var showChart = false;
 var chartProperty;
+var verticalChartHeaders = false;
+
+function toggleChartHeaders(){
+  verticalChartHeaders = !verticalChartHeaders;
+  doQuery(getQueryText());
+}
 
 function toggleTableType(){
   if(showChart){
@@ -832,6 +838,7 @@ function tablePage(){
 function fct_handleSparqlResults(xml, opt){
     $('#resultsTable > thead').empty();
     $('#resultsTable > tbody').empty();
+      $('#resultsTable').removeClass('table-header-rotated');
     //console.log('xml' + $(xml).html());
     var results = $(xml).find('results');
 
@@ -891,6 +898,8 @@ function fct_handleSparqlResults(xml, opt){
 
     if(!isChart()) $('#resultsTable > thead').append(row);
     if(!isChart()) $('#resultsTable > thead').append(row2);
+    //if(!isChart()) $('#resultsTableFocus > thead').append(row);
+    //if(!isChart()) $('#resultsTableFocus > thead').append(row2);
 
 
     var rows = '';
@@ -959,16 +968,21 @@ function fct_handleSparqlResults(xml, opt){
     if(isChart()){
       $('#resultsTable > thead').empty();
       $('#resultsTable > tbody').empty();
-      $('#resultsTable').addClass('table-header-rotated');
+      //$('#resultsTableFocus > thead').empty();
+      //$('#resultsTableFocus > tbody').empty();
+      if(verticalChartHeaders) $('#resultsTable').addClass('table-header-rotated');
+      //$('#resultsTableFocus').addClass('table-header-rotated');
 
       // build headers
       row = $.createElement('tr');
       r1 = new Object();
       r1.value = '';
       r1.value += '<tr>';
+      //r2.value = '';
+      //r2.value += '<tr >';
       for(i = 0; i < matrixValues.length; i++){
         if(i == 0){
-          r1.value += '<th><div></div></th>';
+          r1.value += '<th  style="vertical-align:bottom;text-align:center;cursor:pointer;" class="rotate"><div></div></th>';
         }
         var value = matrixValues[i].text();
         var label = (value) ? labels[value] : '';
@@ -984,14 +998,19 @@ function fct_handleSparqlResults(xml, opt){
           var contextId = undefined;// $( getMainFocus().children('property, property-of')[0] ).attr('class');
           str = ' onclick="javascript: setPropertyValue(\''+rand+'\', \''+NODE_TYPE_PROPERTY+'\', '+((contextId)?'\''+contextId+'\'':'undefined')+', \''+propIRI+'\', \''+propLabel+'\', \''+v+'\', \''+sanitizeLabel(label)+'\', \''+d+'\', \'\')" ';
         }
+        if(label.length >= 40) label = label.substring(0, 23) + ' ...';
         r1.value += '<th style="vertical-align:middle;text-align:center;cursor:pointer;" '+str+' class="rotate"><div><span>'+label+'</span></div></th>';
       }      
       r1.value += '</tr>';
+      //r2.value += '</tr>';
       $('#resultsTable > thead').append(r1.value);
+      //$('#resultsTableFocus > thead').append(r2.value);
 
       // add rows
       r1 = new Object();
       r1.value = '';
+      //r2 = new Object();
+      //r2.value = '';
       for(i = 0; i < matrixKeys.length; i++){
         //var valueComp = (matrixMap[matrixKeys[i].attr('id')]) ? matrixMap[matrixKeys[i].attr('id')].text() : '';
         //var labelComp = (valueComp) ? labels[valueComp] : '';
@@ -999,6 +1018,7 @@ function fct_handleSparqlResults(xml, opt){
 
 
         r1.value += '<tr>';
+        //r2.value += '<tr>';
         var valueKey = matrixKeys[i].text();
         var labelKey = (valueKey) ? labels[valueKey] : '';
         if(!labelKey) {
@@ -1010,7 +1030,7 @@ function fct_handleSparqlResults(xml, opt){
           var d = (matrixKeys[i].children().length > 0) ? $(matrixKeys[i].children()[0]).prop('nodeName').toLowerCase() : '';
           if(j == 0){
             //var mcolId = createId();
-            r1.value += '<td style="cursor:pointer;" onclick="javascript:setValue(\'mtxcola-'+i+'-'+j+'\', \''+v+'\', \''+sanitizeLabel(labelKey)+'\', \''+d+'\', \'\')">'+labelKey+'</td>';
+            r1.value += '<td style="vertical-align:middle;text-align:left;cursor:pointer;" class="text-nowrap" onclick="javascript:setValue(\'mtxcola-'+i+'-'+j+'\', \''+v+'\', \''+sanitizeLabel(labelKey)+'\', \''+d+'\', \'\')"><img src="'+getFaviconUrl(value)+'">&nbsp;<a href="#">'+labelKey+'</a></td>';
 //            var str = '<td onclick="javascript:setValue(\''+createId()+'\', \''+v+'\', \''+labelKey+'\', \''+d+'\', \'\')">'+labelKey+'</td>';
             //row.append('<td>'+labelKey+'</td>');
           }
@@ -1022,16 +1042,22 @@ function fct_handleSparqlResults(xml, opt){
             //sanitizedLabel = sanitizeLabel(sanitizedLabel);
           }
 
-          var cellVal = (matrixMap[matrixKeys[i].text()] && matrixMap[matrixKeys[i].text()].indexOfText(value) >= 0) ? '<span class="glyphicon glyphicon-ok"></span>' : '';
-          r1.value += '<td style="vertical-align:middle;text-align:center;cursor:pointer;" onclick="javascript:setValue(\'mtxcolb-'+i+'-'+j+'\', \''+sanitizeLabel(v)+'\', \''+sanitizeLabel(labelKey)+'\', \''+d+'\', \'\')">'+cellVal+'</td>';
+          var cellVal = (matrixMap[matrixKeys[i].text()] && matrixMap[matrixKeys[i].text()].indexOfText(value) >= 0) ? '<span class="la la-check"></span>' : ''; // glyphicon glyphicon-ok
+          var noLeftBorder = '';
+          if(j == 0) noLeftBorder = 'border-left:0px solid transparent; ';
+          r1.value += '<td style="'+noLeftBorder+'vertical-align:middle;text-align:center;cursor:pointer;" onclick="javascript:setValue(\'mtxcolb-'+i+'-'+j+'\', \''+sanitizeLabel(v)+'\', \''+sanitizeLabel(labelKey)+'\', \''+d+'\', \'\')">'+cellVal+'</td>';
         }
         r1.value += '</tr>';
+        //r2.value += '</tr>';
       }
       $('#resultsTable > tbody').append(r1.value);
+      //$('#resultsTableFocus > tbody').append(r2.value);
       $('#groupByTableHeader').removeClass('loading');
     }
 
-
+    if($('#resultsTable > tbody').children().length <= 0 || $('#resultsTable > tbody > tr').children().length <= 0){
+      $($('#resultsTable > tbody > tr')[0] ).append('<td><i class="fa fa-exclamation-circle p-2"></i>Add a Field or Role to compare the contents of this folder</td>');
+    }
 
     if(!isChart()) $('#groupByTableHeader').removeClass('loading');
 
@@ -1712,10 +1738,10 @@ var SIZE_GROUP_BY = (screenSz < 1500) ? "3" : "2";
 var SIZE_SHOW_ME = (screenSz < 1500) ? "3" : "2";
 var SIZE_RECORD_VIEWER = (screenSz < 1500) ? "6" : "8";
 var SIZE_RECORD_FORM = (screenSz < 1500) ? "6" : "6";
-var SIZE_LABEL = (screenSz < 1500) ? 22 : 30; // TODO: this constant is deprecated, using text-ellipse now
+var SIZE_LABEL = (screenSz < 1500) ? 22 : 30; // TODO: this constant is deprecated, using text-ellipsis now
 var SIZE_RESULT_SET = (screenSz < 1500) ? 15: 30;
-var SIZE_TABLE_RESULT_SET = (screenSz < 1500) ? 15: 30;
-var SIZE_MATRIX_RESULT_SET = (screenSz < 1500) ? 15: 30;
+var SIZE_TABLE_RESULT_SET = (screenSz < 1500) ? 150: 75;
+var SIZE_MATRIX_RESULT_SET = (screenSz < 1500) ? 150: 75;
 var SIZE_MIN_DIGITS = 7;
 var SIZE_MAX_DIGITS = 20;
 
@@ -1786,22 +1812,22 @@ function init(){
 
         link = document.createElement('script');
         link.type = 'text/javascript';
-        link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/solid-auth-client.bundle.js';
+        link.src = 'http://data.vios.network/DAV/home/vios/js/solid-auth-client.bundle.js';
         document.head.appendChild(link);
 
         link = document.createElement('script');
         link.type = 'text/javascript';
-        link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/rdflib.min.js';
+        link.src = 'http://data.vios.network/DAV/home/vios/js/rdflib.min.js';
         document.head.appendChild(link);
 
         link = document.createElement('script');
         link.type = 'text/javascript';
-        link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/rdflib.min.js.map';
+        link.src = 'http://data.vios.network/DAV/home/vios/js/rdflib.min.js.map';
         document.head.appendChild(link);
 
         link = document.createElement('script');
         link.type = 'text/javascript';
-        link.src = 'http://myopenlink.net/DAV/home/sdmonroe/js/md5.min.js';
+        link.src = 'http://data.vios.network/DAV/home/vios/js/md5.min.js';
         document.head.appendChild(link);
 
         link = document.createElement('script');
@@ -1838,6 +1864,9 @@ function init(){
   $('#isDebug').prop('checked', false);
 
   $('select#groupByMenu').parent().removeClass('hidden');
+
+  $('.input-group-text > i').removeClass('la-search');
+  $('.input-group-text > i').addClass('la-refresh');
 
   // **** TODO: comment out these lines
   //$('#lod').addClass('hide');
@@ -2086,31 +2115,75 @@ gbcol += '<header id="groupByTableHeader">';
           gbcol += '<a data-target="#" data-widgster="close" onclick="undoTable()" class="text-secondary"><i class="glyphicon glyphicon-remove"></i></a>';
         gbcol += '</div>';
       gbcol += '</header>';
-        gbcol += '<div class="widget-body">';
+        gbcol += '<div class="widget-body table-responsive" >';
 
-
-gbcol += '<table id="resultsTable" class="table table-hover table-bordered table-lg mt-lg mb-0">';
+/*
+gbcol += '<table width="100%"><tr><td style="padding:0px" align="right">';
+gbcol += '<table width="100%" id="resultsTableFocus" class=" table table-hover table-bordered table-sm mb-0" style="display:inline;" width="100%">';
 gbcol += '<thead>';
 gbcol += '<tr>';
-gbcol += '<th>test';
+gbcol += '<th>';
 gbcol += '</th>';
 gbcol += '</tr>';
 gbcol += '</thead>';
 
 gbcol += '<tbody>';
 gbcol += '<tr>';
-gbcol += '<td>value';
+gbcol += '<td >';
 gbcol += '</td>';
 gbcol += '</tr>';
 
 gbcol += '</tbody>';
 gbcol += '</table>';
+gbcol += '</td><td style="padding:0px">';
+
+gbcol += '<div class="table-responsive" ><table id="resultsTable" class="table table-hover table-bordered table-sm mb-0" style="display:inline;">';
+gbcol += '<thead>';
+gbcol += '<tr>';
+gbcol += '<th>';
+gbcol += '</th>';
+gbcol += '</tr>';
+gbcol += '</thead>';
+
+gbcol += '<tbody>';
+gbcol += '<tr>';
+gbcol += '<td>';
+gbcol += '</td>';
+gbcol += '</tr>';
+
+gbcol += '</tbody>';
+gbcol += '</table></div>';
+gbcol += '</td></tr></table>';
+
+*/
+
+gbcol += '<table id="resultsTable" class="table table-hover table-bordered table-sm mb-0" width="100%">';
+gbcol += '<thead>';
+gbcol += '<tr>';
+gbcol += '<th>';
+gbcol += '</th>';
+gbcol += '</tr>';
+gbcol += '</thead>';
+
+gbcol += '<tbody>';
+gbcol += '<tr>';
+gbcol += '<td>';
+gbcol += '</td>';
+gbcol += '</tr>';
+
+gbcol += '</tbody>';
+gbcol += '</table>';
+
+
 gbcol += '<br/>';
 
 
 
-gbcol += '<div class="clearfix">';
+gbcol += '<div class="clearfix" style="padding-bottom:2em; padding-top:2em;">';
           gbcol += '<div class="pull-right">';
+            gbcol += '<button onclick="toggleChartHeaders();" class="btn btn-default btn-sm">';
+              gbcol += 'Toggle Headers';
+            gbcol += '</button>&nbsp;';
             gbcol += '<button onclick="undoTable(); buildForm()" class="btn btn-default btn-sm">';
               gbcol += 'Compose ...';
             gbcol += '</button>&nbsp;';
@@ -5890,7 +5963,7 @@ rows += '</td></tr>';
       focusCollector.empty();
       
       var isRootWithoutProps = true;
-      $(_root.find('.'+getMainFocus().attr('class') + ' > property')).each(function(i) {
+      $(getMainFocus().children('property, property-of')).each(function(i) {
           isRootWithoutProps = false;
           /*var children = $(this).has('property');
           var tar = (children) ? breadcrumbs : facetCollector ;*/
@@ -5903,10 +5976,9 @@ rows += '</td></tr>';
           facetCollector.append( buildNavigationNode(this, label, BC_FACET_TYPE_FACET, len) );
       });
       
+      /*
       $(_root.find('.'+getMainFocus().attr('class') + ' > property-of')).each(function(i) {
           isRootWithoutProps = false;
-          /*var children = $(this).has('property');
-          var tar = (children) ? breadcrumbs : facetCollector ;*/
           var label = $(this).attr('label');
           var len = $(this).find('property').length;
           len += $(this).find('property-of').length;
@@ -5915,7 +5987,7 @@ rows += '</td></tr>';
           //len += ', including';
           facetCollector.append( buildNavigationNode(this, label, BC_FACET_TYPE_FACET, len) );
       });
-
+*/
       // when node.attr('class'), there are no more parents
       var isFocus = true;
       for(node = $(getMainFocus()); $(node).attr('class') && node.attr('class') != ID_QUERY; node = $(node).parent()){
