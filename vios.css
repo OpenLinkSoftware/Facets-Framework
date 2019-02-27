@@ -489,6 +489,22 @@ box-shadow: 0 0 0px transparent;
   */
 }
 
+.content{
+border-left:1px solid rgba(0,0,0,.125);
+padding: 60px 40px 40px 15px;
+}
+
+
+
+.navbar-dashboard{
+background-color: #fff;
+border-bottom:1px solid rgba(0,0,0,.125);
+border-left:1px solid rgba(0,0,0,.125);
+padding-bottom:1em;
+padding-top:1em;
+
+}
+
 
 #dataSpaceLabel{
   padding-right:4px;

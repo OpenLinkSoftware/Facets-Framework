@@ -284,10 +284,11 @@ function getDbActivity(xml){
 
 //var fct_sparql, fct_time, fct_complete, fct_timeout, fct_dbActivity;
 
-var fct_dataSpace = "http://poc.vios.network/proxy/-start-http://lod.openlinksw.com-end-/fct/service";
-var fct_dataSpaceSparql = "http://poc.vios.network/proxy/-start-http://lod.openlinksw.com-end-/sparql";
-var fct_dataSpaceLabel = "LOD Cloud";
-//var fct_dataSpace = "http://myopenlink.net/fct/service";
+var dataspace = 'http://poc.vios.network/proxy/-start-http://lod.openlinksw.com-end-';
+var service_fct = dataspace + "/ct/service";
+var service_sparql = dataspace + "/sparql";
+var service_fct_label = "LOD Cloud";
+//var service_fct = "http://myopenlink.net/fct/service";
 
 // returns a Java hashCode, see here: https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
 String.prototype.hashCode = function(){
@@ -356,7 +357,7 @@ function fct_query(q, viewType, opt){
   if(q.children.length == 2 && q.find('text').text() == '') q.find('text').remove(); // POI: root query should  have missing text element rather than blank text node, the /fct returns distinct results for each
   q = fct_removeVariableData(q);
   var qstr = q.prop('outerHTML');
-  var id = (qstr) ? (fct_dataSpace+qstr).hashCode() : 0;
+  var id = (qstr) ? (service_fct+qstr).hashCode() : 0;
   q.attr('timeout', fct_queryTimeout); // add all neccessary variable data back to the query
   var resp;
   if(fct_isCache){
@@ -405,7 +406,7 @@ function fct_query(q, viewType, opt){
     return;
   }
   var req = $.ajax({
-      url: fct_dataSpace,
+      url: service_fct,
       data: $(q).prop('outerHTML'), 
       type: 'POST',
       contentType: "text/xml",
@@ -548,7 +549,7 @@ function fct_sparql(sparql, opt){
   //q = fct_removeVariableData(q);
   //var qstr = q.prop('outerHTML');
   //var qstr = q.prop('outerHTML');
-  var id = sparql ? (fct_dataSpace + sparql).hashCode() : 0;
+  var id = sparql ? (service_fct + sparql).hashCode() : 0;
   //q.attr('timeout', fct_queryTimeout);
   var resp;
   if(fct_isCache){
@@ -584,7 +585,7 @@ function fct_sparql(sparql, opt){
     return;
   }
   var req = $.ajax({
-      url: fct_dataSpaceSparql + "?query=" + encodeURIComponent(sparql),
+      url: service_sparql + "?query=" + encodeURIComponent(sparql),
       type: 'GET',
       headers: {Accept: "application/sparql-results+xml"},
       dataType: "text", // POI: can't do dataType: xml, since the service sometimes returns malformed XML
@@ -1405,7 +1406,15 @@ function takeFocus(tar, q){
   $(q).find('view').appendTo(tar);
 }
 
-function takeMainFocus(id, silent){
+function takeMainFocus(id, silent, lastFocus){
+
+  // POI: clicking the root node if the focus is already root takes user back to default view type
+  if(isTableShowing() || isFormShowing()){
+    if(lastFocus == id){
+      if(isTableShowing()) undoTable();
+      else if(isFormShowing()) hideForm(); 
+    }
+  }
 
   //if(id == ID_TEXT) id = ID_QUERY;
   var query = getQuery();
@@ -1687,7 +1696,7 @@ var TAG_GRAPH = 'g';
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://poc.vios.network";
 var this_endpoint = 'http://poc.vios.network';
 
-var qGroupBy, qShowMe, qdataSpace, qSearchAllFields, qTimeout, qViewType, qIsChart;
+var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qTimeout, qViewType, qIsChart;
 
 var icon_folder_black = 'http://icon-park.com/imagefiles/folder_icon_black.png';
 var icon_file = 'http://myopenlink.net/DAV/home/sdmonroe/img/blank-file-xxl.png';
@@ -2494,12 +2503,13 @@ $('.avatar').parent().children('.circle').each(async (i) => {
 
 
 //    $('#keywords').val(VALUE_DEFAULT_KEYWORDS_TEXT);
-    $('#dsroot').attr('title', fct_dataSpace);
+    $('#dsroot').attr('title', service_fct);
     getQuery().attr('label', LABEL_ROOT);
 
     qGroupBy = fct_getUrlParameter('groupBy'); // the loading of gGroupBy is done in doQuery
     qShowMe = fct_getUrlParameter('showMe');
     qdataSpace = fct_getUrlParameter('dataSpace');
+    qdataSpaceLabel = fct_getUrlParameter('dataSpaceLabel');
     qSearchAllFields = fct_getUrlParameter('searchAllFields');
     qTimeout = fct_getUrlParameter('timeout');
     qPage = fct_getUrlParameter('page');
@@ -2508,8 +2518,9 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     qIsChart = fct_getUrlParameter('isChart');
 
     if(qdataSpace && qdataSpace.length > 0){
-      selectMenuItem('dataSpaceMenu', qdataSpace, true);
+      selectdataSpace(qdataSpace, qdataSpaceLabel);
       qdataSpace = null;
+      qdataSpaceLabel = null;
     }
     if(qShowMe && qShowMe.length > 0) {
       selectMenuItem('showMeMenu', qShowMe);
@@ -2563,6 +2574,8 @@ $('.avatar').parent().children('.circle').each(async (i) => {
         doTable();
       }
       else if(qViewType == 'form') buildForm();
+      qViewType = null;
+      qIsChart = null;
     }
 
 
@@ -3465,7 +3478,8 @@ function updatePermalink(){
     if(isTableShowing()) canvasViewType = 'table';
     else if(isFormShowing()) canvasViewType = 'form';
     $('#permalink').attr('href', this_endpoint + '?' + 
-      '&dataSpace=' + encodeURIComponent( fct_dataSpace ) + 
+      '&dataSpace=' + encodeURIComponent( dataspace ) + 
+      '&dataSpaceLabel=' + encodeURIComponent( getDataspaceLabel() ) + 
       '&groupBy=' + encodeURIComponent( $('#groupByMenu :selected').attr('json') ) + 
       '&showMe=' + $('#showMeMenu :selected').attr('value') + 
       '&searchAllFields=' + isExpandSearch + 
@@ -3708,15 +3722,16 @@ function selectMenuItem(id, value, silent){
 }
 
 function selectdataSpace(uri, label){
-  console.log('datasapce selected: ' + uri);
+  //console.log('datasapce selected: ' + uri);
 //  uri = 'http://52.34.77.62:8890';
 //  label = 'LOV Dataspace';
-  //fct_dataSpace = uri;
-  fct_dataSpaceLabel = label;
-  //fct_dataSpace = $('#dataSpaceMenu :selected').attr('value') + '/fct/service';
-  //fct_dataSpaceSparql = $('#dataSpaceMenu :selected').attr('value') + '/sparql';
-  fct_dataSpace = uri + '/fct/service';
-  fct_dataSpaceSparql = uri + '/sparql';
+  //service_fct = uri;
+  dataspace = uri;
+  service_fct_label = label;
+  //service_fct = $('#dataSpaceMenu :selected').attr('value') + '/fct/service';
+  //service_sparql = $('#dataSpaceMenu :selected').attr('value') + '/sparql';
+  service_fct = uri + '/fct/service';
+  service_sparql = uri + '/sparql';
   LABEL_ROOT = getDataspaceLabel().toUpperCase(); //<i class="fa fa-home" style="padding-bottom:4px;padding-right:2px;"></i>
 
   $('#dataSpaceLabel').text(LABEL_ROOT );
@@ -3724,8 +3739,8 @@ function selectdataSpace(uri, label){
 }
 
 function getDataspaceLabel(){
-  if(!fct_dataSpaceLabel || fct_dataSpaceLabel.length <= 0) return LABEL_ROOT;
-return fct_dataSpaceLabel;
+  if(!service_fct_label || service_fct_label.length <= 0) return LABEL_ROOT;
+return service_fct_label;
 }
 
 function getQueryTimeout(){
@@ -6174,7 +6189,7 @@ if(false){
             bcOutline = bcOutline.replace('primary', 'info');
           }
 
-          ret = '<li '+buildTitle(tooltip)+' class="breadcrumb-item'+focusClass+'" id="nav'+id+'"><a ><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></li>';
+          ret = '<li '+buildTitle(tooltip)+' class="breadcrumb-item'+focusClass+'" id="nav'+id+'"><a ><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
 
 
         }
@@ -6187,7 +6202,7 @@ if(false){
           }
           else { // isBreadCrumb
             //ret = '<li class="breadcrumb-item"><div class="row" style="background-color:transparent;" title="'+tooltip+'" id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6>' + ''+desc+'</h6></div><button class="btn-rounded-f  btn btn-'+outline+'default btn-block btn-xs text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div></li>';
-    ret = '<li '+buildTitle(tooltip)+' class="breadcrumb-item" id="nav'+id+'"><a><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></li>';
+    ret = '<li '+buildTitle(tooltip)+' class="breadcrumb-item" id="nav'+id+'"><a><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
   //  gbcol += '<li class="breadcrumb-item"><a  title=""><em>distributor</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-outline-default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\'0\')">'+VALUE_ANON_NODE+'</button></li>';
           }
 
