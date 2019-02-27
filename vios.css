@@ -450,7 +450,7 @@ box-shadow: 0 0 0px transparent;
 
 
 
-
+ 
 .table-header-rotated {
   border-collapse: collapse;
   .csstransforms & td {
@@ -489,3 +489,7 @@ box-shadow: 0 0 0px transparent;
   */
 }
 
+
+#dataSpaceLabel{
+  padding-right:4px;
+}

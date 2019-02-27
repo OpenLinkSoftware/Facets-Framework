@@ -356,7 +356,7 @@ function fct_query(q, viewType, opt){
   if(q.children.length == 2 && q.find('text').text() == '') q.find('text').remove(); // POI: root query should  have missing text element rather than blank text node, the /fct returns distinct results for each
   q = fct_removeVariableData(q);
   var qstr = q.prop('outerHTML');
-  var id = (qstr) ? (qstr).hashCode() : 0;
+  var id = (qstr) ? (fct_dataSpace+qstr).hashCode() : 0;
   q.attr('timeout', fct_queryTimeout); // add all neccessary variable data back to the query
   var resp;
   if(fct_isCache){
@@ -548,7 +548,7 @@ function fct_sparql(sparql, opt){
   //q = fct_removeVariableData(q);
   //var qstr = q.prop('outerHTML');
   //var qstr = q.prop('outerHTML');
-  var id = sparql ? sparql.hashCode() : 0;
+  var id = sparql ? (fct_dataSpace + sparql).hashCode() : 0;
   //q.attr('timeout', fct_queryTimeout);
   var resp;
   if(fct_isCache){
@@ -671,8 +671,28 @@ function fct_handleGeoListResults(xml, opt){
     $('#showMeMenu').removeClass('loading');
 }
 
-var showChart = true;
+var showChart = false;
 var chartProperty;
+
+function toggleTableType(){
+  if(showChart){
+    $('#tableTypeButton > i').removeClass('glyphicon');
+    $('#tableTypeButton > i').removeClass('glyphicon-th-list');
+
+    $('#tableTypeButton > i').addClass('glyphicon');
+    $('#tableTypeButton > i').addClass('glyphicon-th-large');
+  }
+  else {
+    $('#tableTypeButton > i').removeClass('glyphicon');
+    $('#tableTypeButton > i').removeClass('glyphicon-th-large');
+
+    $('#tableTypeButton > i').addClass('glyphicon');
+    $('#tableTypeButton > i').addClass('glyphicon-th-list');
+  }
+  showChart = !showChart;
+  $('#groupByTableHeader').addClass('loading');
+  doQuery(getQueryText());
+}
 
 function isChart(){
   return showChart;
@@ -758,7 +778,7 @@ col.css('background-color', '#' + rainbow.colourAt( (node.parents().length <= 2)
 
   col.html(colStr);
 //  row.append(col);
-  r1.value += col;
+  r1.value += col.prop('outerHTML');
 
 
     col = $.createElement('td');
@@ -767,7 +787,7 @@ col.css('background-color', '#' + rainbow.colourAt( (node.parents().length <= 2)
           colStr += '</button>';
   col.html(colStr);
 //  row2.append(col);
-  r2.value += col;
+  r2.value += col.prop('outerHTML');
           //ret += '</div>';
 
 
@@ -814,8 +834,8 @@ function fct_handleSparqlResults(xml, opt){
     //console.log('xml' + $(xml).html());
     var results = $(xml).find('results');
 
-    if(isChart()) $('#tableType').text('Chart');
-    else $('#tableType').text('Table');
+    if(isChart()) $('#tableType').text(TABLE_HEADER_LABEL_CHART);
+    else $('#tableType').text(TABLE_HEADER_LABEL_TABLE);
 
 //tableResultsCt = $("result", results).length;
 //fct_handleSparqlTableCount(xml, opt);
@@ -893,7 +913,7 @@ function fct_handleSparqlResults(xml, opt){
 
 
             $(this).attr('label', $( $('#resultsTable > thead > tr > th')[j] ) .attr('label') );
-            // matrix logic
+            // char logic
             if(isChart() ){
               if(j == 0) {
                 matrixKey = $(this);
@@ -928,13 +948,13 @@ function fct_handleSparqlResults(xml, opt){
             }
         });
 
-       if(!isChart()) rows += row;
+       if(!isChart()) rows += row.prop('outerHTML');
 
     });
     if(!isChart()) $('#resultsTable > tbody').append(rows);
 
 
-    // matrix logic
+    // chart logic
     if(isChart()){
       $('#resultsTable > thead').empty();
       $('#resultsTable > tbody').empty();
@@ -1007,11 +1027,12 @@ function fct_handleSparqlResults(xml, opt){
         r1.value += '</tr>';
       }
       $('#resultsTable > tbody').append(r1.value);
+      $('#groupByTableHeader').removeClass('loading');
     }
 
 
 
-    $('#groupByTableHeader').removeClass('loading');
+    if(!isChart()) $('#groupByTableHeader').removeClass('loading');
 
 
 
@@ -1180,6 +1201,19 @@ function fct_handleListCountResults(xml, opt){
           //sparql = sparql.replace(/offset\s+\d+/gi, '');
         }
 
+        mainQuerySparql = sparql;
+
+        if(isTableShowing()) loadTable(sparql);
+
+        fct_query(query, VIEW_TYPE_GEO_LIST);
+
+          //console.log("xml: " + xml );
+      }
+}
+
+var mainQuerySparql;
+function loadTable(sparql){
+  if(!sparql) return;
         fct_sparql(sparql);
 
         opt = new Object();
@@ -1188,12 +1222,6 @@ function fct_handleListCountResults(xml, opt){
         sparql = sparql.replace(/limit\s+\d+/gi, '');
         sparql = sparql.replace(/offset\s+\d+/gi, '');
         fct_sparql(getSparqlCount(sparql), opt);
-
-
-        fct_query(query, VIEW_TYPE_GEO_LIST);
-
-          //console.log("xml: " + xml );
-      }
 }
 
 function processSparql(xml, retainLimit){
@@ -1659,12 +1687,14 @@ var TAG_GRAPH = 'g';
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://poc.vios.network";
 var this_endpoint = 'http://poc.vios.network';
 
-var qGroupBy, qShowMe, qdataSpace, qSearchAllFields, qTimeout;
+var qGroupBy, qShowMe, qdataSpace, qSearchAllFields, qTimeout, qViewType, qIsChart;
 
 var icon_folder_black = 'http://icon-park.com/imagefiles/folder_icon_black.png';
 var icon_file = 'http://myopenlink.net/DAV/home/sdmonroe/img/blank-file-xxl.png';
 var icon_expand = "http://myopenlink.net/DAV/home/sdmonroe/img/expand.png";
 
+var TABLE_HEADER_LABEL_CHART = 'Chart';
+var TABLE_HEADER_LABEL_TABLE = 'Details';
 
 var preInitialized = false;
 
@@ -1676,7 +1706,7 @@ var SIZE_RECORD_FORM = (screenSz < 1500) ? "6" : "6";
 var SIZE_LABEL = (screenSz < 1500) ? 22 : 30; // TODO: this constant is deprecated, using text-ellipse now
 var SIZE_RESULT_SET = (screenSz < 1500) ? 15: 30;
 var SIZE_TABLE_RESULT_SET = (screenSz < 1500) ? 15: 30;
-var SIZE_MATRIX_RESULT_SET = (screenSz < 1500) ? 1000: 500;
+var SIZE_MATRIX_RESULT_SET = (screenSz < 1500) ? 15: 30;
 var SIZE_MIN_DIGITS = 7;
 var SIZE_MAX_DIGITS = 20;
 
@@ -2037,11 +2067,11 @@ gbcol += '<div id="tabularResults" class="short-div hide"><section class="widget
 
 gbcol += '<header id="groupByTableHeader">';
         gbcol += '<h5>';
-          gbcol += '<h4><span id="tableCount" class="badge badge-info">0/0</span> '+GROUP_BY_NONE_LABEL+' - <span id="tableType" class="fw-semi-bold">Table</span></h4>';
+          gbcol += '<h4><span id="tableCount" class="badge badge-info">0/0</span> '+GROUP_BY_NONE_LABEL+' - <span id="tableType" class="fw-semi-bold">'+((isChart()) ? TABLE_HEADER_LABEL_CHART : TABLE_HEADER_LABEL_TABLE)+'</span></h4>';
         gbcol += '</h5>';
         gbcol += '<div class="widget-controls">';
           //gbcol += '<a href="#"><i class="glyphicon glyphicon-cog"></i></a>';
-          gbcol += '<a data-target="#" data-widgster="close" class="text-secondary" id="tableTypeButton"><i class="glyphicon glyphicon-th-list"></i></a>';
+          gbcol += '<a data-target="#" data-widgster="close" onclick="toggleTableType()" class="text-secondary" id="tableTypeButton"><i class="glyphicon glyphicon-th-list"></i></a>';
           gbcol += '<a data-target="#" disabled="true" class="disabled" id="leftTableButton" onclick="javascript:pageTableLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
           gbcol += '<a data-target="#" disabled="true" class="disabled" id="rightTableButton" onclick="javascript:pageTableRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
           gbcol += '<a data-target="#" data-widgster="close" onclick="undoTable()" class="text-secondary"><i class="glyphicon glyphicon-remove"></i></a>';
@@ -2298,7 +2328,7 @@ gbcol += '<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" 
       gbcol += '  </li><li>';
       gbcol += '  Use <i>&lt;</i>, <i>&gt;</i>, <i>left arrow</i>, and <i>right arrow</i> to move through list pages';
       gbcol += '  </li><li>';
-      gbcol += '  Hold down <i>A</i> key, then click Field checkbox to prepend Field to filter collector;'
+      gbcol += '  Hold down <i>A</i> key, then click Field checkbox to prepend Field to filter collector';
       gbcol += '  </li></ul>';
       gbcol += '  <p>';
       gbcol += '  See <a href="https://medium.com/@sdmonroe/vios-network-99488f5bf29d">this article</a> for more tips';
@@ -2474,6 +2504,8 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     qTimeout = fct_getUrlParameter('timeout');
     qPage = fct_getUrlParameter('page');
     qshowMePage = fct_getUrlParameter('ctrlPage');
+    qViewType = fct_getUrlParameter('viewType');
+    qIsChart = fct_getUrlParameter('isChart');
 
     if(qdataSpace && qdataSpace.length > 0){
       selectMenuItem('dataSpaceMenu', qdataSpace, true);
@@ -2509,6 +2541,8 @@ $('.avatar').parent().children('.circle').each(async (i) => {
       $('#keywords').select();
     }
 
+    $('#dataSpaceMenu').prepend('<span id="dataSpaceLabel">'+getDataspaceLabel()+'</span>');
+    
     loadGroupByMenuDefaults();
 
     try{
@@ -2520,6 +2554,17 @@ $('.avatar').parent().children('.circle').each(async (i) => {
 
     preInitialized = true;
     if(fct_isPermalink) doQuery(getQueryText());    
+
+    if(qViewType && qViewType.length > 0) {
+      if(qViewType == 'table') {
+        if(qIsChart && qIsChart.length > 0) {
+          setChart(qIsChart == 'true');
+        }
+        doTable();
+      }
+      else if(qViewType == 'form') buildForm();
+    }
+
 
     /* TODO: use qTip for tooltips
     var api = $('[title!=""]').qtip('api');
@@ -2560,13 +2605,19 @@ function showProfileManagerPreview(){
 function buildForm(){
   addTab(getMainFocus().attr('class'), 0);
   $('#recordViewerColumn').addClass('hide');
-  $('#recordFormColumn').removeClass('hide');  
+  $('#recordFormColumn').removeClass('hide');
+  updatePermalink();
+  //doQuery(getQueryText());
 }
 
 function hideForm(){
   $('#recordFormColumn').addClass('hide');
   $('#recordViewerColumn').removeClass('hide');
 }
+
+  function isFormShowing(){
+    return !$('#recordFormColumn').hasClass('hide');
+  }
 
 function showMap(){
   //addTab(getMainFocus().attr('class'), 0);
@@ -3030,7 +3081,7 @@ function activate(){
     $('#recordsListWidgetContainer').addClass('hide');
     if(nav_type == NAV_TYPE_3) $('#facetCollectorWidgetContainer').addClass('hide');
 
-
+    loadTable(mainQuerySparql);
 
   }
 
@@ -3041,6 +3092,8 @@ function activate(){
     $('#tabularResults').addClass('hide');
     $('#recordsListWidgetContainer').removeClass('hide');
     if(nav_type == NAV_TYPE_3) $('#facetCollectorWidgetContainer').removeClass('hide');
+
+    doQuery(getQueryText());
   }
 
   function isTableShowing(){
@@ -3407,14 +3460,20 @@ function beep() {
 }
 
 function updatePermalink(){
+
+    var canvasViewType = 'default';
+    if(isTableShowing()) canvasViewType = 'table';
+    else if(isFormShowing()) canvasViewType = 'form';
     $('#permalink').attr('href', this_endpoint + '?' + 
-      '&dataSpace=' + encodeURIComponent( $('#dataSpaceMenu :selected').attr('value') ) + 
+      '&dataSpace=' + encodeURIComponent( fct_dataSpace ) + 
       '&groupBy=' + encodeURIComponent( $('#groupByMenu :selected').attr('json') ) + 
       '&showMe=' + $('#showMeMenu :selected').attr('value') + 
       '&searchAllFields=' + isExpandSearch + 
       '&timeout=' + getQueryTimeout() + 
       '&page=' + page + 
       '&ctrlPage=' + showMePage + 
+      '&viewType=' + canvasViewType + 
+      '&isChart=' + isChart() + 
       '&qxml=' + encodeURIComponent(_root.find('query').prop('outerHTML'))
     ); //+ '&idCt=' + idCt
 
@@ -3649,6 +3708,7 @@ function selectMenuItem(id, value, silent){
 }
 
 function selectdataSpace(uri, label){
+  console.log('datasapce selected: ' + uri);
 //  uri = 'http://52.34.77.62:8890';
 //  label = 'LOV Dataspace';
   //fct_dataSpace = uri;
@@ -3658,6 +3718,8 @@ function selectdataSpace(uri, label){
   fct_dataSpace = uri + '/fct/service';
   fct_dataSpaceSparql = uri + '/sparql';
   LABEL_ROOT = getDataspaceLabel().toUpperCase(); //<i class="fa fa-home" style="padding-bottom:4px;padding-right:2px;"></i>
+
+  $('#dataSpaceLabel').text(LABEL_ROOT );
   doQuery(getQueryText());
 }
 
