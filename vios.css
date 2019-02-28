@@ -337,7 +337,7 @@ color:white;
 
 /* colored arrow to the right */
 .steps li.current ~ li::after {
-  border-left: 25px solid #7c8437; /* width: arrow width */
+  border-left: 0px solid #7c8437; /* width: arrow width */
   right: 0px; /* arrow width (negated) */
   z-index: -1;
 }
@@ -355,7 +355,7 @@ color:white;
   padding-right:0px;
 }
 
-.steps li.current ~ li::first-child {
+.steps li.current + li::before {
   border-left: 25px solid white; /* width: arrow width, color: background of document */
 }
 /* Setup colors (both the background and the arrow) */
