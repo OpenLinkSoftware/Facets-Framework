@@ -285,7 +285,7 @@ function getDbActivity(xml){
 //var fct_sparql, fct_time, fct_complete, fct_timeout, fct_dbActivity;
 
 var dataspace = 'http://poc.vios.network/proxy/-start-http://lod.openlinksw.com-end-';
-var service_fct = dataspace + "/ct/service";
+var service_fct = dataspace + "/fct/service";
 var service_sparql = dataspace + "/sparql";
 var service_fct_label = "LOD Cloud";
 //var service_fct = "http://myopenlink.net/fct/service";
@@ -998,7 +998,7 @@ function fct_handleSparqlResults(xml, opt){
           var contextId = undefined;// $( getMainFocus().children('property, property-of')[0] ).attr('class');
           str = ' onclick="javascript: setPropertyValue(\''+rand+'\', \''+NODE_TYPE_PROPERTY+'\', '+((contextId)?'\''+contextId+'\'':'undefined')+', \''+propIRI+'\', \''+propLabel+'\', \''+v+'\', \''+sanitizeLabel(label)+'\', \''+d+'\', \'\')" ';
         }
-        if(label.length >= 40) label = label.substring(0, 23) + ' ...';
+        //if(label.length >= 40) label = label.substring(0, 23) + ' ...';
         r1.value += '<th style="vertical-align:middle;text-align:center;cursor:pointer;" '+str+' class="rotate"><div><span>'+label+'</span></div></th>';
       }      
       r1.value += '</tr>';
@@ -1030,7 +1030,7 @@ function fct_handleSparqlResults(xml, opt){
           var d = (matrixKeys[i].children().length > 0) ? $(matrixKeys[i].children()[0]).prop('nodeName').toLowerCase() : '';
           if(j == 0){
             //var mcolId = createId();
-            r1.value += '<td style="vertical-align:middle;text-align:left;cursor:pointer;" class="text-nowrap" onclick="javascript:setValue(\'mtxcola-'+i+'-'+j+'\', \''+v+'\', \''+sanitizeLabel(labelKey)+'\', \''+d+'\', \'\')"><img src="'+getFaviconUrl(value)+'">&nbsp;<a href="#">'+labelKey+'</a></td>';
+            r1.value += '<td style="vertical-align:middle;text-align:left;cursor:pointer;" class="text-nowrap" onclick="javascript:setValue(\'mtxcola-'+i+'-'+j+'\', \''+v+'\', \''+sanitizeLabel(labelKey)+'\', \''+d+'\', \'\')"><img src="'+getFaviconUrl(v)+'">&nbsp;<a href="#">'+labelKey+'</a></td>';
 //            var str = '<td onclick="javascript:setValue(\''+createId()+'\', \''+v+'\', \''+labelKey+'\', \''+d+'\', \'\')">'+labelKey+'</td>';
             //row.append('<td>'+labelKey+'</td>');
           }
@@ -1042,7 +1042,7 @@ function fct_handleSparqlResults(xml, opt){
             //sanitizedLabel = sanitizeLabel(sanitizedLabel);
           }
 
-          var cellVal = (matrixMap[matrixKeys[i].text()] && matrixMap[matrixKeys[i].text()].indexOfText(value) >= 0) ? '<span class="la la-check"></span>' : ''; // glyphicon glyphicon-ok
+          var cellVal = (matrixMap[matrixKeys[i].text()] && matrixMap[matrixKeys[i].text()].indexOfText(value) >= 0) ? '<span class="glyphicon glyphicon-ok"></span>' : ''; // la la-check glyphicon glyphicon-ok
           var noLeftBorder = '';
           if(j == 0) noLeftBorder = 'border-left:0px solid transparent; ';
           r1.value += '<td style="'+noLeftBorder+'vertical-align:middle;text-align:center;cursor:pointer;" onclick="javascript:setValue(\'mtxcolb-'+i+'-'+j+'\', \''+sanitizeLabel(v)+'\', \''+sanitizeLabel(labelKey)+'\', \''+d+'\', \'\')">'+cellVal+'</td>';
@@ -1435,12 +1435,12 @@ function takeFocus(tar, q){
 function takeMainFocus(id, silent, lastFocus){
 
   // POI: clicking the root node if the focus is already root takes user back to default view type
-  if(isTableShowing() || isFormShowing()){
+  /*if(isTableShowing() || isFormShowing()){
     if(lastFocus == id){
       if(isTableShowing()) undoTable();
       else if(isFormShowing()) hideForm(); 
     }
-  }
+  }*/
 
   //if(id == ID_TEXT) id = ID_QUERY;
   var query = getQuery();
@@ -1784,13 +1784,13 @@ function init(){
 
 //************************************//
 
-    if(!document.getElementById('id2')) {
-        var link = document.createElement('link');
+    if(!document.getElementById('id2')) { 
+        /*var link = document.createElement('link');
         link.id = 'id2';
         link.rel = 'stylesheet';
         link.type = 'text/css';
         link.href = 'http://myopenlink.net/DAV/home/sdmonroe/css/vios.css';
-        document.head.appendChild(link);
+        document.head.appendChild(link);*/
 
         link = document.createElement('link');
         link.id = 'id2';
@@ -2589,12 +2589,6 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     qshowMePage = fct_getUrlParameter('ctrlPage');
     qViewType = fct_getUrlParameter('viewType');
     qIsChart = fct_getUrlParameter('isChart');
-
-    if(qdataSpace && qdataSpace.length > 0){
-      selectdataSpace(qdataSpace, qdataSpaceLabel);
-      qdataSpace = null;
-      qdataSpaceLabel = null;
-    }
     if(qShowMe && qShowMe.length > 0) {
       selectMenuItem('showMeMenu', qShowMe);
       qShowMe = null;
@@ -2617,6 +2611,12 @@ $('.avatar').parent().children('.circle').each(async (i) => {
       $('#isSearchAllFields').parent().addClass('active');
       $('#isSearchAllFields').parent().attr('aria-pressed','true');
       qSearchAllFields = null;
+    }
+
+    if(qdataSpace && qdataSpace.length > 0){
+      selectdataSpace(qdataSpace, qdataSpaceLabel, true);
+      qdataSpace = null;
+      qdataSpaceLabel = null;
     }
 
     if(getQueryText()){
@@ -3526,8 +3526,9 @@ function processLabel(label, value, datatype, lang, labelSize){
 
     var re = /[^0-9](?=[0-9])/g; 
     label = label.replace(re, '$& ');
-    label = label.replace('\\d{'+SIZE_MIN_DIGITS+','+SIZE_MAX_DIGITS+'}/g', '');
-    label = label.replace(/\d{5,11}/g, '');
+    try{parseInt(label)}
+    catch(e){label = label.replace('\\d{'+SIZE_MIN_DIGITS+','+SIZE_MAX_DIGITS+'}/g', '');label = label.replace(/\d{5,11}/g, '');}
+    
     return label.trim();
 }
 
@@ -3794,7 +3795,7 @@ function selectMenuItem(id, value, silent){
   if(!silent) menu.change(); // POI: use escapeSelector if id=groupByMenu, since the values are URIs, which contain special chars
 }
 
-function selectdataSpace(uri, label){
+function selectdataSpace(uri, label, silent){
   //console.log('datasapce selected: ' + uri);
 //  uri = 'http://52.34.77.62:8890';
 //  label = 'LOV Dataspace';
@@ -3807,11 +3808,15 @@ function selectdataSpace(uri, label){
   service_sparql = uri + '/sparql';
   LABEL_ROOT = getDataspaceLabel().toUpperCase(); //<i class="fa fa-home" style="padding-bottom:4px;padding-right:2px;"></i>
 
+  if(uri.indexOf('data.vios.network') >= 0) LABEL_ROOT = 'VIOS';
+
   $('#dataSpaceLabel').text(LABEL_ROOT );
-  doQuery(getQueryText());
+  if(!silent) doQuery(getQueryText());
 }
 
 function getDataspaceLabel(){
+  if(service_fct.indexOf('data.vios.network') >= 0) LABEL_ROOT = 'VIOS';
+
   if(!service_fct_label || service_fct_label.length <= 0) return LABEL_ROOT;
 return service_fct_label;
 }

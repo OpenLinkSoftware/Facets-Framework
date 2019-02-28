@@ -305,13 +305,6 @@ color:white;
 /* remove extra padding on the first object since it doesn't have an arrow to the left */
 .steps li:first-child {
   padding-left: 5px;
-    border-top-left-radius: 0.25rem;
-    border-bottom-left-radius: 0.25rem;
-}
-.steps li:last-child {
-  padding-right: 5px;
-    border-top-right-radius: 0.25rem;
-    border-bottom-right-radius: 0.25rem;
 }
 
 /* white arrow to the left to "erase" background (starting from the 2nd object) */
@@ -342,6 +335,29 @@ color:white;
   content: " ";
 }
 
+/* colored arrow to the right */
+.steps li.current ~ li::after {
+  border-left: 25px solid #7c8437; /* width: arrow width */
+  right: 0px; /* arrow width (negated) */
+  z-index: -1;
+}
+.steps li.current ~ li::before {
+  border-left: 0px solid white; /* width: arrow width, color: background of document */
+}
+.steps li.current ~ li {
+    padding-right:1em;
+  margin-right:0px;
+}
+.steps li.current ~ li:last-child::after {
+  border-left: 25px solid #e9ecef; /* width: arrow width, color: background of document */
+  right: -25px; /* arrow width (negated) */
+  z-index: 1;
+  padding-right:0px;
+}
+
+.steps li.current ~ li::first-child {
+  border-left: 25px solid white; /* width: arrow width, color: background of document */
+}
 /* Setup colors (both the background and the arrow) */
 
 /* Completed */
@@ -414,7 +430,7 @@ border-color: rgba(0, 0, 0, 0.15); */
 }
 
 #keywords.disabled{
-  background-color: #fafbff;
+  background-color: #fff; /*#fafbff;*/
   font-weight: normal;
 /*  font-size: larger;*/
 
@@ -455,7 +471,7 @@ box-shadow: 0 0 0px transparent;
   border-collapse: collapse;
 }
 .table-header-rotated td {
- /* width: 30px;*/
+width: 30px;
 }
 
 .table-header-rotated td {
