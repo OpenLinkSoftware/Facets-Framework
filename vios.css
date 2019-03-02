@@ -305,6 +305,8 @@ color:white;
 /* remove extra padding on the first object since it doesn't have an arrow to the left */
 .steps li:first-child {
   padding-left: 5px;
+  border-top-left-radius: 0.25rem;
+  border-bottom-left-radius: 0.25rem;
 }
 
 /* white arrow to the left to "erase" background (starting from the 2nd object) */
@@ -354,6 +356,8 @@ color:white;
   z-index: 1;
   padding-right:0px;
 }
+
+
 
 .steps li.current + li::before {
   border-left: 25px solid white; /* width: arrow width, color: background of document */
@@ -505,9 +509,6 @@ background-color: rgb(233, 236, 239);
   padding: 5px 10px;
 }
 
-.table-bordered { /*this border was causing a box to appear above the focus column*/
-    border: 0px solid transparent!important;
-}
 
 .navbar-dashboard{
 background-color: #fff;
@@ -527,3 +528,20 @@ padding: 60px 40px 40px 15px;
 #dataSpaceLabel{
   padding-right:4px;
 }
+
+.badge-warning {
+    color: #29323a;    background-color: #ffc247;    color: #fff;}
+
+
+    .badge-subject{
+        margin-left: auto;
+        position: absolute;
+        right: 8px;
+        border-top-right-radius: 0rem;
+        border-bottom-right-radius: 0rem;
+            }
+
+
+.table-responsive>.table-bordered {
+    border: 1px solid #d6dee5;
+}            
