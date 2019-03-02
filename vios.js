@@ -765,32 +765,8 @@ function fct_handleGeoListResults(xml, opt){
     $('#showMeMenu').removeClass('loading');
 }
 
-var showChart = false;
-var chartProperty;
-var verticalChartHeaders = false;
-
 function toggleChartHeaders(){
-  verticalChartHeaders = !verticalChartHeaders;
-  doQuery(getQueryText());
-}
-
-function toggleTableType(){
-  if(showChart){
-    $('#tableTypeButton > i').removeClass('glyphicon');
-    $('#tableTypeButton > i').removeClass('glyphicon-th-list');
-
-    $('#tableTypeButton > i').addClass('glyphicon');
-    $('#tableTypeButton > i').addClass('glyphicon-th-large');
-  }
-  else {
-    $('#tableTypeButton > i').removeClass('glyphicon');
-    $('#tableTypeButton > i').removeClass('glyphicon-th-large');
-
-    $('#tableTypeButton > i').addClass('glyphicon');
-    $('#tableTypeButton > i').addClass('glyphicon-th-list');
-  }
-  toggleChart();
-  $('#groupByTableHeader').addClass('loading');
+  setVerticalChartHeaders(!isVerticalChartHeaders());
   doQuery(getQueryText());
 }
 
@@ -799,9 +775,7 @@ function isChart(){
 }
 function setChart(b){
   showChart = b;
-}
-function toggleChart(){
-  setChart(!isChart());
+  updatePermalink();
 }
 function getChartProperty(){
   return chartProperty;
@@ -810,12 +784,13 @@ function setChartProperty(prop){
   chartProperty = prop;
 }
 
-var showRollup = false;
 function isRollup(){
   return showRollup;
 }
 function setRollup(b){
   showRollup = b;
+  updatePermalink();
+
 }
 function toggleRollup(){
   setChart(!isChart());
@@ -961,20 +936,23 @@ function fct_handleSparqlResults(xml, opt) {
         headerPrefix = (getMainFocus().children('property, property-of') && getMainFocus().children('property, property-of').length > 0 && $(getMainFocus().children('property, property-of')[0]).prop('nodeName').toLowerCase() == 'property-of') ? headerPrefix + ' Of' : headerPrefix;
         $('#tableType').text(headerPrefix + ' ' + TABLE_HEADER_LABEL_CHART);
     } 
-    if(isRollup()){
-        var headerPrefix = spaceCamelCase(getMainFocus().attr('label'));
+    else if(isRollup()){
+        var headerPrefix = (getMainFocus().children('property, property-of') && getMainFocus().children('property, property-of').length > 0) ? $(getMainFocus().children('property, property-of')[0]).attr('label') : '';
+        headerPrefix = spaceCamelCase(headerPrefix);
         headerPrefix = headerPrefix.replace(/\b\w/g, function(l) {
             return l.toUpperCase()
         });
-        headerPrefix = (getMainFocus().prop('nodeName').toLowerCase() == 'property-of') ? headerPrefix + ' Of' : headerPrefix;
+        headerPrefix = (getMainFocus().children('property, property-of') && getMainFocus().children('property, property-of').length > 0 && $(getMainFocus().children('property, property-of')[0]).prop('nodeName').toLowerCase() == 'property-of') ? headerPrefix + ' Of' : headerPrefix;
         $('#tableType').text(headerPrefix + ' ' + TABLE_HEADER_LABEL_TREE);
     }
     else {
         var headerPrefix = spaceCamelCase(getMainFocus().attr('label'));
+        if(getMainFocus().attr('class') == ID_QUERY && (headerPrefix.toLowerCase() == 'name' || headerPrefix.toLowerCase() == 'keywords')) headerPrefix = getQueryText();
+        headerPrefix = spaceCamelCase(headerPrefix);
         headerPrefix = headerPrefix.replace(/\b\w/g, function(l) {
             return l.toUpperCase()
         });
-        headerPrefix = (getMainFocus().prop('nodeName').toLowerCase() == 'property-of') ? headerPrefix + ' Of' : headerPrefix;
+        headerPrefix = (getMainFocus().prop('nodeName').toLowerCase() == 'property-of') ? headerPrefix + ' Of' : headerPrefix;       
         $('#tableType').text(headerPrefix + ' ' + TABLE_HEADER_LABEL_DETAILS);
     }
 
@@ -1094,8 +1072,12 @@ function fct_handleSparqlResults(xml, opt) {
 
                 str += '<a data-target="#">';
 
+
+                if(j == 0 && isRollup()) str += '<i class="la la-bars expand float-right"></i>';
                 str += '<span class="thumb-sm float-left mr">';
                 var onclick = 'onclick="javascript:setValue(\'' + id + '\', \'' + value + '\', \'' + label + '\', \'' + datatype + '\', \'' + lang + '\')"';
+                if(isRollup() && j == 0) onclick = 'onclick="javascript: addClassFacet(\''+id+'\', \''+sanitizeLabel($(this).text())+'\', \''+sanitizeLabel(label)+'\')"';
+
                 if (j > 0) {
                     var propCol = $($('<tr>' + r1.value + '</tr>').children('th')[j]);
                     var propIRI = propCol.attr('iri');
@@ -1104,7 +1086,7 @@ function fct_handleSparqlResults(xml, opt) {
 
                     var nodePropType = (propCol.attr('isReverse') == 'true') ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY;
 
-                    onclick = 'onclick="javascript:setPropertyValue(\'' + id + '\', \'' + nodePropType + '\', \'' + contextId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + value + '\', \'' + label + '\', \'' + datatype + '\', \'' + lang + '\')"';
+                    onclick = 'onclick="javascript:setPropertyValue(\'' + id + '\', \'' + nodePropType + '\', \'' + contextId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + sanitizeLabel($(this).text()) + '\', \'' + label + '\', \'' + datatype + '\', \'' + lang + '\')"';
                 }
 
                 if (j == 0) {
@@ -1134,6 +1116,7 @@ function fct_handleSparqlResults(xml, opt) {
 
 
                 col.append(str);
+                if(isRollup() && j > 0) col.css('text-align', 'right');
 
                 if (!isChart()) row.append(col);
             }
@@ -1151,7 +1134,7 @@ function fct_handleSparqlResults(xml, opt) {
         $('#resultsTable > tbody').empty();
         //$('#resultsTableFocus > thead').empty();
         //$('#resultsTableFocus > tbody').empty();
-        if (verticalChartHeaders) $('#resultsTable').addClass('table-header-rotated');
+        if (isVerticalChartHeaders()) $('#resultsTable').addClass('table-header-rotated');
         //$('#resultsTableFocus').addClass('table-header-rotated');
 
         // build headers
@@ -1211,7 +1194,7 @@ function fct_handleSparqlResults(xml, opt) {
                 var d = (matrixKeys[i].children().length > 0) ? $(matrixKeys[i].children()[0]).prop('nodeName').toLowerCase() : '';
                 if (j == 0) {
                     //var mcolId = createId();
-                    r1.value += '<td onclick="javascript:setValue(\'mtxcola-' + i + '-' + j + '\', \'' + v + '\', \'' + sanitizeLabel(labelKey) + '\', \'' + d + '\', \'\')"><a data-target="#"><span class="thumb-sm float-left mr"><img class="rounded-circle" src="' + getFaviconUrl(v) + '"/><i class="status status-bottom bg-success"></i></span><h6 class="text-ellipsis" ' + buildTitle(v) + '><span>' + labelKey + '</span></h6></a></td>';
+                    r1.value += '<td style="text-align:left;" onclick="javascript:setValue(\'mtxcola-' + i + '-' + j + '\', \'' + v + '\', \'' + sanitizeLabel(labelKey) + '\', \'' + d + '\', \'\')"><a data-target="#"><span class="thumb-sm float-left mr"><img class="rounded-circle" src="' + getFaviconUrl(v) + '"/><i class="status status-bottom bg-success"></i></span><h6 class="text-ellipsis" ' + buildTitle(v) + '><span>' + labelKey + '</span></h6></a></td>';
                     //            var str = '<td onclick="javascript:setValue(\''+createId()+'\', \''+v+'\', \''+labelKey+'\', \''+d+'\', \'\')">'+labelKey+'</td>';
                     //row.append('<td>'+labelKey+'</td>');
                 }
@@ -1236,7 +1219,8 @@ function fct_handleSparqlResults(xml, opt) {
     }
 
     if ($('#resultsTable > tbody').children().length <= 0 || $('#resultsTable > tbody > tr').children().length <= 0) {
-        $($('#resultsTable > tbody > tr')[0]).append('<td><i class="fa fa-exclamation-circle p-2"></i>Add a Field or Role to compare the contents of this folder</td>');
+        if(isChart()) $($('#resultsTable > tbody > tr')[0]).append('<td><i class="text-danger fa fa-exclamation-circle p-2"></i>The focus must be assigned a Field or Role in order to activate this view</td>');
+        else if(isRollup()) $($('#resultsTable > tbody')[0]).append('<tr><td><i class="text-danger fa fa-exclamation-circle p-2"></i>The focus must be assigned a Category in order to activate this view</td></t>');
     }
 
 
@@ -1438,6 +1422,12 @@ if(isRollup()){
         if(!sparql.match(/select\s+distinct/gi)){
           sparql = sparql.replace('select ', 'select distinct ');
         }
+
+        // only root classes
+        sparql = sparql.replace('a ' + focus + ' .', 'a ' + focus + ' . FILTER NOT EXISTS {'+focus+' a '+focus+'class. FILTER('+focus+'class != <http://www.w3.org/2000/01/rdf-schema#Class>)}');
+
+
+        $('#groupByTableHeader').addClass('loading');
         fct_sparql(sparql);
 
         opt = new Object();
@@ -1478,6 +1468,7 @@ else {
         }
 
         //sparqlMap[opt.focusId] = sparql;
+        $('#groupByTableHeader').addClass('loading');
         fct_sparql(sparql);
 
         opt = new Object();
@@ -2006,7 +1997,7 @@ var TAG_GRAPH = 'g';
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://poc.vios.network";
 var this_endpoint = 'http://poc.vios.network';
 
-var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qTimeout, qViewType, qIsChart;
+var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qTimeout, qSubjectBadges, qVerticalChartHeaders, qViewType, qIsChart, qIsRollup;
 
 var icon_folder_black = 'http://icon-park.com/imagefiles/folder_icon_black.png';
 var icon_file = 'http://myopenlink.net/DAV/home/sdmonroe/img/blank-file-xxl.png';
@@ -2014,7 +2005,7 @@ var icon_expand = "http://myopenlink.net/DAV/home/sdmonroe/img/expand.png";
 
 var TABLE_HEADER_LABEL_CHART = 'Chart';
 var TABLE_HEADER_LABEL_DETAILS = 'Details';
-var TABLE_HEADER_LABEL_TREE = 'Tree';
+var TABLE_HEADER_LABEL_TREE = 'Rollup Table';
 
 var preInitialized = false;
 
@@ -2047,6 +2038,14 @@ var labels = {};
   var inbox;
   var email = '';
   var fullName = '';
+
+var showSubjectBadges = false;
+
+var showChart = false;
+var chartProperty;
+var verticalChartHeaders = false;
+var showRollup = false;
+
 
   function getStorage(){
     return storage.value;
@@ -2405,7 +2404,9 @@ gbcol += '<header id="groupByTableHeader">';
         gbcol += '</h5>';
         gbcol += '<div class="widget-controls">';
           //gbcol += '<a href="#"><i class="glyphicon glyphicon-cog"></i></a>';
-          gbcol += '<a data-target="#" data-widgster="close" onclick="toggleTableType()" class="text-secondary" id="tableTypeButton"><i class="glyphicon glyphicon-th-list"></i></a>';
+          gbcol += '<a data-target="#" onclick="setRollup(false); setChart(false); doQuery(getQueryText());" class="text-secondary" id="tableButton"><i class="glyphicon glyphicon-th-list"></i></a>';
+          gbcol += '<a data-target="#" onclick="setRollup(true); setChart(false); selectMenuItem(\'showMeMenu\', VIEW_TYPE_CLASSES);" class="text-secondary" id="rollupTableButton"><i class="fa fa-sitemap"></i></a>';
+          gbcol += '<a data-target="#" onclick="setRollup(false); setChart(true); doQuery(getQueryText());" class="text-secondary" id="chartTableButton"><i class="fa fa-check"></i></a>';
           gbcol += '<a data-target="#" disabled="true" class="disabled" id="leftTableButton" onclick="javascript:pageTableLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
           gbcol += '<a data-target="#" disabled="true" class="disabled" id="rightTableButton" onclick="javascript:pageTableRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
           gbcol += '<a data-target="#" data-widgster="close" onclick="undoTable()" class="text-secondary"><i class="glyphicon glyphicon-remove"></i></a>';
@@ -2909,6 +2910,13 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     qshowMePage = fct_getUrlParameter('ctrlPage');
     qViewType = fct_getUrlParameter('viewType');
     qIsChart = fct_getUrlParameter('isChart');
+    qSubjectBadges = fct_getUrlParameter('subjectBadges');
+
+    qVerticalChartHeaders = fct_getUrlParameter('verticalChartHeaders');
+
+    qIsRollup = fct_getUrlParameter('isRollup');
+
+
     if(qShowMe && qShowMe.length > 0) {
       selectMenuItem('showMeMenu', qShowMe);
       qShowMe = null;
@@ -2932,6 +2940,19 @@ $('.avatar').parent().children('.circle').each(async (i) => {
       $('#isSearchAllFields').parent().attr('aria-pressed','true');
       qSearchAllFields = null;
     }
+    if(qSubjectBadges && qSubjectBadges.length > 0) {
+      setShowSubjectBadges(qSubjectBadges == 'true');
+      qSubjectBadges = null;
+    }
+    if(qVerticalChartHeaders && qVerticalChartHeaders.length > 0) {
+      setVerticalChartHeaders(qVerticalChartHeaders == 'true');
+      qVerticalChartHeaders = null;
+    }
+
+    //POI:
+    // ********************** IMPORTANT ****************************** //
+    // be sure to load the dataspace last, so that all the above configuration is 
+    // applied when selectDataspace() is called, since this function calls doQuery()
 
     if(qdataSpace && qdataSpace.length > 0){
       var dropdownItem = $('a#dataSpaceMenu').parent().children('.dropdown-menu > li[url="'+qdataSpace+'"]');
@@ -2970,11 +2991,15 @@ $('.avatar').parent().children('.circle').each(async (i) => {
         if(qIsChart && qIsChart.length > 0) {
           setChart(qIsChart == 'true');
         }
+        else if(qIsRollup && qIsRollup.length > 0) {
+          setChart(qIsRollup == 'true');
+        }
         doTable();
       }
       else if(qViewType == 'form') buildForm();
       qViewType = null;
       qIsChart = null;
+      qIsRollup = null;
     }
 
 
@@ -3729,17 +3754,8 @@ if(!$('input[type="text"]').is(":focus")){
     }
 
     else if(e.keyCode == '83') { // S key
-      showSubjectBadges = !showSubjectBadges;
-      if(showSubjectBadges) {
-        $('#groupByCount').removeClass('badge-info');
-        $('#groupByCount').addClass('badge-primary');
-        $('#groupByHeader > h4').addClass('text-primary');
-      }
-      else {
-        $('#groupByCount').removeClass('badge-primary');
-        $('#groupByHeader > h4').removeClass('text-primary');
-        $('#groupByCount').addClass('badge-info');
-      }
+      setShowSubjectBadges(!isShowSubjectBadges());
+
       //page--;
       selectGroupBy(true);
     }
@@ -3814,13 +3830,32 @@ if(target.id == 'keywords'){
   }
 }
 
-var showSubjectBadges = false;
+function isVerticalChartHeaders(){
+  return verticalChartHeaders;
+}
+
+function setVerticalChartHeaders(b){
+  verticalChartHeaders = b;
+  updatePermalink();
+}
+
 function isShowSubjectBadges(){
   return showSubjectBadges;
 }
 
 function setShowSubjectBadges(b){
   showSubjectBadges = b;
+  if(showSubjectBadges) {
+    $('#groupByCount').removeClass('badge-info');
+    $('#groupByCount').addClass('badge-primary');
+    $('#groupByHeader > h4').addClass('text-primary');
+  }
+  else {
+    $('#groupByCount').removeClass('badge-primary');
+    $('#groupByHeader > h4').removeClass('text-primary');
+    $('#groupByCount').addClass('badge-info');
+  }  
+  updatePermalink();
 }
 
 function clearKeywords(){
@@ -3938,6 +3973,9 @@ function updatePermalink(){
       '&page=' + page + 
       '&ctrlPage=' + showMePage + 
       '&viewType=' + canvasViewType + 
+      '&subjectBadges=' + isShowSubjectBadges() + 
+      '&verticalChartHeaders=' + isVerticalChartHeaders() + 
+      '&isRollup=' + isRollup() + 
       '&isChart=' + isChart() + 
       '&qxml=' + encodeURIComponent(_root.find('query').prop('outerHTML'))
     ); //+ '&idCt=' + idCt
@@ -4107,7 +4145,7 @@ if(!fct_isPermalink){
         selectShowMe(false);
 
         $('#groupByHeader').addClass('loading');
-        $('#groupByTableHeader').addClass('loading');
+        //$('#groupByTableHeader').addClass('loading');
         // POI: always exit groupby mode on each smart folder refresh/execute
         selectMenuItem('groupByMenu', GROUP_BY_NONE_VALUE, true);
 
@@ -5044,7 +5082,6 @@ if(isReverse){
     }
 
     $('#groupByHeader').addClass('loading');
-    $('#groupByTableHeader').addClass('loading');
     if(getQueryText().length > 0 && iri == GROUP_BY_TEXT_VALUE){
         fct_query(q, VIEW_TYPE_TEXT);
     }

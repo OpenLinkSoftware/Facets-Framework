@@ -544,4 +544,9 @@ padding: 60px 40px 40px 15px;
 
 .table-responsive>.table-bordered {
     border: 1px solid #d6dee5;
-}            
+}        
+
+
+div h6 i {
+  top: 10px;
+}    
