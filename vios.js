@@ -209,6 +209,9 @@ function setQueryText(str){
     $('#showMeMenu > option[value='+VIEW_TYPE_PROPERTIES+']').after(textOption);
   }
   query.find('text').attr('label', str.split('  ').join(' ').split(' ').join(' + '));
+
+  var clearKeywords = $('span.clear-data').filter(function() {return $(this).text().indexOf('Keywords') >= 0;});
+  clearKeywords.parent().removeClass('hide');
 }
 
 function getQueryGraph(){
@@ -226,11 +229,15 @@ function getQueryGraphLabel(){
 function setQueryGraph(g, label){
   _root.find('query').attr('graph', g);
   _root.find('query').attr(ATTR_GRAPH_LABEL, label);
+  var clearLibrary = $('span.clear-data').filter(function() {return $(this).text().indexOf('Library') >= 0;});
+  clearLibrary.parent().removeClass('hide');
 }
 
 function clearQueryGraph(){
   _root.find('query').removeAttr('graph');
   _root.find('query').removeAttr(ATTR_GRAPH_LABEL);
+  var clearLibrary = $('span.clear-data').filter(function() {return $(this).text().indexOf('Library') >= 0;});
+  clearLibrary.parent().addClass('hide');
 }
 
 function getQueryText(){
@@ -1498,13 +1505,13 @@ function processSparql(xml, retainLimit){
 }
 
 function getSparqlFocus(sparql){
-  var focus = sparql.match(/select\s*\?[s|p|ip|o|c]\d+([p|o|c|ip|textp])?\s+/mgi)[0]; // POI: the ?o1 var must be part of the projection, or the SPARQL engine will complain, it is referenced in the ORDER clause
+  var focus = sparql.match(/select\s*\?(s|p|ip|o|c)\d+(p|o|c|ip|textp)?\s+/mgi)[0]; // POI: the ?o1 var must be part of the projection, or the SPARQL engine will complain, it is referenced in the ORDER clause
   focus = focus.substring(focus.indexOf('select ')+'select '.length);
   return focus.trim();
 }
 
 function getSparqlVars(sparql){
-  var vars = (sparql.match(/\s+\?([s|p|o|c]\d+([p|o|c|ip|textp])?)|\?g\s+/mgi).sort()
+  var vars = (sparql.match(/\s+\?((s|p|ip|o|c)\d+(p|o|c|ip|textp)?)|\?g\s+/mgi).sort()
              .filter(function(element, index, array) {
                  return index == array.indexOf(element) && array[index].indexOf('?c') == -1 && array[index].indexOf('?g'); // don't return duplicates and remove count vars 
              }) + '').replaceAll(',', ' ');
@@ -1997,7 +2004,7 @@ var TAG_GRAPH = 'g';
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://poc.vios.network";
 var this_endpoint = 'http://poc.vios.network';
 
-var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qTimeout, qSubjectBadges, qVerticalChartHeaders, qViewType, qIsChart, qIsRollup;
+var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qTimeout, qNavType, qSubjectBadges, qVerticalChartHeaders, qViewType, qIsChart, qIsRollup;
 
 var icon_folder_black = 'http://icon-park.com/imagefiles/folder_icon_black.png';
 var icon_file = 'http://myopenlink.net/DAV/home/sdmonroe/img/blank-file-xxl.png';
@@ -2194,13 +2201,20 @@ function init(){
 
   $('#keywords').css('padding-left', '10px');
 
-    var clearKeywords = $('span.clear-data').filter(function() {return $(this).text() === 'Keywords';});
-    var clearLibrary = $('span.clear-data').filter(function() {return $(this).text() === 'Library';});
+    var clearKeywords = $('span.clear-data').filter(function() {return $(this).text().indexOf('Keywords') >= 0;});
+    var clearLibrary = $('span.clear-data').filter(function() {return $(this).text().indexOf('Library') >= 0;});
+
+    clearKeywords.parent().addClass('hide');
+    clearLibrary.parent().addClass('hide');
 
     clearKeywords.css('text-decoration', 'none');
     clearLibrary.css('text-decoration', 'none');
-
-
+/*
+    $('span.input-group-append > span.input-group-text > i.la-refresh').addClass('glyphicon');
+    $('span.input-group-append > span.input-group-text > i.la-refresh').addClass('glyphicon-retweet');
+    $('span.input-group-append > span.input-group-text > i.la-refresh').removeClass('la');
+    $('span.input-group-append > span.input-group-text > i.la-refresh').removeClass('la-refresh');
+*/
     //var ict = $.createElement('span');
     //var icl = $.createElement('span');
 
@@ -2214,8 +2228,8 @@ function init(){
     //ict.addClass('fa-times-circle');
     //icl.addClass('fa-times-circle');
 
-    clearKeywords.text('X Keywords');
-    clearLibrary.text('X Library');
+    clearKeywords.text('Clear Keywords');
+    clearLibrary.text('Clear Library');
 
     //ict.css('font-family', 'Montserrat, sans-serif');
     //icl.css('font-family', 'Montserrat, sans-serif');
@@ -2593,7 +2607,13 @@ gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
   gbcol += '<div class="collapse navbar-collapse" id="navbarSupportedContent">';
     gbcol += '<ul class="navbar-nav mr-auto">';
       gbcol += '<li class="nav-item active">';
-        gbcol += '<a id="www" class="nav-link" data-target="#" onclick="linkOut()">WWW <span class="sr-only">(current)</span></a>';
+        gbcol += '<a id="ggg" class="nav-link" data-target="#" onclick="doExplore($(\'.iframe\').attr(\'src\'), true)">Edit</a>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a id="ggg" class="nav-link" data-target="#" onclick="doExplore($(\'.iframe\').attr(\'src\'), true)">GGG</a>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a id="www" class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Table</a>';
@@ -2601,11 +2621,11 @@ gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#">Charts</a>';
       gbcol += '</li>';
-/*
+
       gbcol += '<li class="nav-item">';
-        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:showMap()">Map</a>';
+        gbcol += '<a class="nav-link" data-target="#">Map</a>';
       gbcol += '</li>';
-*/      
+      
       gbcol += '<li class="nav-item dropdown">';
         gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
           gbcol += 'Pair';
@@ -2906,6 +2926,7 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     qdataSpaceLabel = fct_getUrlParameter('dataSpaceLabel');
     qSearchAllFields = fct_getUrlParameter('searchAllFields');
     qTimeout = fct_getUrlParameter('timeout');
+    qNavType = fct_getUrlParameter('navType');
     qPage = fct_getUrlParameter('page');
     qshowMePage = fct_getUrlParameter('ctrlPage');
     qViewType = fct_getUrlParameter('viewType');
@@ -2924,6 +2945,10 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     if(qTimeout && qTimeout.length > 0) {
       setQueyTimeout(qTimeout);
       qTimeout = null;
+    }
+    if(qNavType && qNavType.length > 0) {
+      setNavType(qNavType);
+      qNavType = null;
     }
     if(qPage && qPage.length > 0) {
       page = qPage;
@@ -3861,6 +3886,8 @@ function setShowSubjectBadges(b){
 function clearKeywords(){
   $("#keywords").val('');
   _root.find('text').remove();
+  var clearKeywords = $('span.clear-data').filter(function() {return $(this).text().indexOf('Keywords') >= 0;});
+  clearKeywords.parent().addClass('hide');
   //text=undefined;
 }
 
@@ -3970,6 +3997,7 @@ function updatePermalink(){
       '&showMe=' + $('#showMeMenu :selected').attr('value') + 
       '&searchAllFields=' + isExpandSearch + 
       '&timeout=' + getQueryTimeout() + 
+      '&navType=' + getNavType() + 
       '&page=' + page + 
       '&ctrlPage=' + showMePage + 
       '&viewType=' + canvasViewType + 
@@ -4069,7 +4097,7 @@ function isUri(str){
   return /\w+:(\/?\/?)[^\s]+/gm.test(str);
 }
 
-function doExplore(keywords){
+function doExplore(keywords, isGGGLookup){
       if(isUri(keywords)){
       //if(keywords.startsWith('http://') || keywords.startsWith('https://')){
           //addPropertyFacet(createId(), '[rdf:type]', 'type');
@@ -4084,6 +4112,12 @@ function doExplore(keywords){
           p.attr('label', 'type');
           //getQuery().append(p);
           setValue(0, keywords, processLabel(keywords), 'uri');
+
+          if(isGGGLookup) {
+            clearKeywords();
+            getQuery().children('property, property-of, class').remove();
+            takeMainFocus(ID_QUERY);
+          }
       }
       else {
         doQuery(keywords);
@@ -4145,7 +4179,7 @@ if(!fct_isPermalink){
         selectShowMe(false);
 
         $('#groupByHeader').addClass('loading');
-        //$('#groupByTableHeader').addClass('loading');
+        $('#groupByTableHeader').addClass('loading');
         // POI: always exit groupby mode on each smart folder refresh/execute
         selectMenuItem('groupByMenu', GROUP_BY_NONE_VALUE, true);
 
@@ -6819,6 +6853,7 @@ if(false){
 
     function setNavType(type){
       if(type) nav_type = type;
+      updatePermalink();
     }
 
     function getNavType(){
