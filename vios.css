@@ -502,7 +502,7 @@ background-color: rgb(233, 236, 239);
 .table-header-rotated th.rotate > div {
   -webkit-transform: translate(25px, 51px) rotate(315deg);
           transform: translate(25px, 51px) rotate(315deg);
-  /*width: 30px;*/
+  width: 30px;
 }
 .table-header-rotated th.rotate > div > span {
   border-bottom: 1px solid #ccc;
@@ -550,3 +550,8 @@ padding: 60px 40px 40px 15px;
 div h6 i {
   top: 10px;
 }    
+
+bs-tooltip-container{
+      visibility: hidden;
+      display: none;
+}

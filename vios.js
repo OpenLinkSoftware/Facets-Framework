@@ -294,7 +294,9 @@ function getDbActivity(xml){
 var dataspace = 'http://lod.openlinksw.com';
 var service_fct = getProxyEndpoint(dataspace) + "/fct/service";
 var service_sparql = getProxyEndpoint(dataspace) + "/sparql";
-var service_fct_label = "LOD Cloud";
+var service_fct_label = "LOD Cloud Cache";
+var dataspaceAdded = false;
+
 //var service_fct = "http://myopenlink.net/fct/service";
 
 // returns a Java hashCode, see here: https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
@@ -350,8 +352,8 @@ function formatDate(date) {
 }
 
 function getProxyEndpoint(url){
-  //return 'http://poc.vios.network/proxy/-start-'+url+'-end-';
-  return url;
+  return 'http://poc.vios.network/proxy/-start-'+url+'-end-';
+  //return url;
 }
 
 function fct_query(q, viewType, opt){
@@ -371,6 +373,7 @@ function fct_query(q, viewType, opt){
   q = fct_removeVariableData(q);
   var qstr = q.prop('outerHTML');
   var id = (qstr) ? (service_fct+qstr).hashCode() : 0;
+  ha.push(id);
   q.attr('timeout', fct_queryTimeout); // add all neccessary variable data back to the query
   var resp;
   if(fct_isCache){
@@ -383,6 +386,8 @@ function fct_query(q, viewType, opt){
       if(fct_isDebug) console.log('Cache failed: ' + err);
     }
   }
+  $('#dataSpaceLabel').removeClass('text-danger');
+  $('#dataSpaceLabel').parent().children('i').removeClass('text-danger');
 
   if (resp != null) { // if exist on cache
         switch(viewType){
@@ -468,8 +473,8 @@ function fct_query(q, viewType, opt){
           console.log("View Type: " + viewType);
         }
 
-        $('#reportQueryTime').text(time);
-        $('#reportQueryTimeout').text(timeout);
+        $('#reportQueryTime').text(time + ' ms');
+        $('#reportQueryTimeout').text(timeout + ' ms');
         $('#reportQueryComplete').text(complete);
 
         if(complete === 'no') {
@@ -542,6 +547,10 @@ function fct_query(q, viewType, opt){
                 ''
         );*/
         fct_handleError(xhr, ajaxOptions, thrownError);
+        if(xhr.url == service_fct){
+          $('#dataSpaceLabel').addClass('text-danger');
+          $('#dataSpaceLabel').parent().children('i').addClass('text-danger');
+        }
       } 
   });
   updatePermalink();
@@ -575,6 +584,9 @@ function fct_sparql(sparql, opt){
       resp = fct_cache[id];
     }
   }
+
+  $('#dataSpaceLabel').removeClass('text-danger');
+  $('#dataSpaceLabel').parent().children('i').removeClass('text-danger');
 
   if (resp != null) { // if exist on cache
     //console.log('sparql results: ' + resp);
@@ -648,6 +660,10 @@ function fct_sparql(sparql, opt){
           if(xhr.status == 500) alert('Server error' + thrownError + " from " + xhr.url);
         }
         fct_handleError(xhr, ajaxOptions, thrownError);
+        if(xhr.url == service_fct){
+          $('#dataSpaceLabel').addClass('text-danger');
+          $('#dataSpaceLabel').parent().children('i').addClass('text-danger');
+        }
       } 
   });
   updatePermalink();
@@ -735,6 +751,16 @@ function fct_handleSparqlSubject(xml, opt){
       }
     });
   }
+
+  var subs = getMainFocus().parent('property[iri="http://purl.org/dc/terms/subject"], property[iri="http://www.w3.org/1999/02/22-rdf-syntax-ns#subject"]');
+  if(subs && getMainFocus().prop('nodeName').toLowerCase() == 'property-of'){
+    subs.each(function(i){
+      var vals = $(this).children('value');
+      if(vals && vals.length > 0){
+        seen.push(vals.text());
+      }
+    });
+  }  
 
   var results = $(xml).find('results');
   $('result', results).each(function(i){
@@ -940,7 +966,7 @@ function fct_handleSparqlResults(xml, opt) {
         headerPrefix = headerPrefix.replace(/\b\w/g, function(l) {
             return l.toUpperCase()
         });
-        headerPrefix = (getMainFocus().children('property, property-of') && getMainFocus().children('property, property-of').length > 0 && $(getMainFocus().children('property, property-of')[0]).prop('nodeName').toLowerCase() == 'property-of') ? headerPrefix + ' Of' : headerPrefix;
+        headerPrefix = (getMainFocus().children('property, property-of') && getMainFocus().children('property, property-of').length > 0 && $(getMainFocus().children('property, property-of')[0]).prop('nodeName').toLowerCase() == 'property-of' && !headerPrefix.toLowerCase().endsWith('of')) ? headerPrefix + ' Of' : headerPrefix;
         $('#tableType').text(headerPrefix + ' ' + TABLE_HEADER_LABEL_CHART);
     } 
     else if(isRollup()){
@@ -949,7 +975,7 @@ function fct_handleSparqlResults(xml, opt) {
         headerPrefix = headerPrefix.replace(/\b\w/g, function(l) {
             return l.toUpperCase()
         });
-        headerPrefix = (getMainFocus().children('property, property-of') && getMainFocus().children('property, property-of').length > 0 && $(getMainFocus().children('property, property-of')[0]).prop('nodeName').toLowerCase() == 'property-of') ? headerPrefix + ' Of' : headerPrefix;
+        headerPrefix = (getMainFocus().children('property, property-of') && getMainFocus().children('property, property-of').length > 0 && $(getMainFocus().children('property, property-of')[0]).prop('nodeName').toLowerCase() == 'property-of' && !headerPrefix.toLowerCase().endsWith('of')) ? headerPrefix + ' Of' : headerPrefix;
         $('#tableType').text(headerPrefix + ' ' + TABLE_HEADER_LABEL_TREE);
     }
     else {
@@ -959,7 +985,7 @@ function fct_handleSparqlResults(xml, opt) {
         headerPrefix = headerPrefix.replace(/\b\w/g, function(l) {
             return l.toUpperCase()
         });
-        headerPrefix = (getMainFocus().prop('nodeName').toLowerCase() == 'property-of') ? headerPrefix + ' Of' : headerPrefix;       
+        headerPrefix = (getMainFocus().prop('nodeName').toLowerCase() == 'property-of' && !headerPrefix.toLowerCase().endsWith('of')) ? headerPrefix + ' Of' : headerPrefix;       
         $('#tableType').text(headerPrefix + ' ' + TABLE_HEADER_LABEL_DETAILS);
     }
 
@@ -1093,7 +1119,7 @@ function fct_handleSparqlResults(xml, opt) {
 
                     var nodePropType = (propCol.attr('isReverse') == 'true') ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY;
 
-                    onclick = 'onclick="javascript:setPropertyValue(\'' + id + '\', \'' + nodePropType + '\', \'' + contextId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + sanitizeLabel($(this).text()) + '\', \'' + label + '\', \'' + datatype + '\', \'' + lang + '\')"';
+                    onclick = 'onclick="javascript:setPropertyValue(\'' + id + '\', \'' + nodePropType + '\', \'' + contextId + '\', \'' + sanitizeLabel(propIRI) + '\', \'' + sanitizeLabel(propLabel) + '\', \'' + sanitizeLabel($(this).text()) + '\', \'' + sanitizeLabel(label) + '\', \'' + datatype + '\', \'' + lang + '\')"';
                 }
 
                 if (j == 0) {
@@ -1114,8 +1140,8 @@ function fct_handleSparqlResults(xml, opt) {
 
 
                 label = deSanitizeLabel(label);
-                var labelLink = (datatype == 'uri') ? '' + buildTitle($(this).text()) + ' onclick="javascript:describe(\'' + value + '\');"' : '';
-                str += '<h6 ' + onclick + ' class="text-ellipsis" ' + labelLink + '>';
+                var labelLink = (datatype == 'uri') ? '' + buildTitle($(this).text()) : '';
+                str += '<h6 ' + onclick + ' ' + labelLink + '>';
                 str += '<span>' + label + '</span>';
 
                 str += '</h6>';
@@ -1201,7 +1227,8 @@ function fct_handleSparqlResults(xml, opt) {
                 var d = (matrixKeys[i].children().length > 0) ? $(matrixKeys[i].children()[0]).prop('nodeName').toLowerCase() : '';
                 if (j == 0) {
                     //var mcolId = createId();
-                    r1.value += '<td style="text-align:left;" onclick="javascript:setValue(\'mtxcola-' + i + '-' + j + '\', \'' + v + '\', \'' + sanitizeLabel(labelKey) + '\', \'' + d + '\', \'\')"><a data-target="#"><span class="thumb-sm float-left mr"><img class="rounded-circle" src="' + getFaviconUrl(v) + '"/><i class="status status-bottom bg-success"></i></span><h6 class="text-ellipsis" ' + buildTitle(v) + '><span>' + labelKey + '</span></h6></a></td>';
+                    //r1.value += '<td '+buildTitle(v)+' style="text-align:left;" class="text-nowrap" onclick="javascript:setValue(\'mtxcola-' + i + '-' + j + '\', \'' + v + '\', \'' + sanitizeLabel(labelKey) + '\', \'' + d + '\', \'\')"><span class="thumb-sm float-left mr"><img class="rounded-circle" src="' + getFaviconUrl(v) + '"/><i class="status status-bottom bg-success"></i></span> ' + labelKey + '</td>';
+            r1.value += '<td style="vertical-align:middle;text-align:left;cursor:pointer;" class="text-nowrap" onclick="javascript:setValue(\'mtxcola-'+i+'-'+j+'\', \''+v+'\', \''+sanitizeLabel(labelKey)+'\', \''+d+'\', \'\')"><img src="'+getFaviconUrl(v)+'">&nbsp;<span>'+labelKey+'</span></td>';
                     //            var str = '<td onclick="javascript:setValue(\''+createId()+'\', \''+v+'\', \''+labelKey+'\', \''+d+'\', \'\')">'+labelKey+'</td>';
                     //row.append('<td>'+labelKey+'</td>');
                 }
@@ -1226,8 +1253,8 @@ function fct_handleSparqlResults(xml, opt) {
     }
 
     if ($('#resultsTable > tbody').children().length <= 0 || $('#resultsTable > tbody > tr').children().length <= 0) {
-        if(isChart()) $($('#resultsTable > tbody > tr')[0]).append('<td><i class="text-danger fa fa-exclamation-circle p-2"></i>The focus must be assigned a Field or Role in order to activate this view</td>');
-        else if(isRollup()) $($('#resultsTable > tbody')[0]).append('<tr><td><i class="text-danger fa fa-exclamation-circle p-2"></i>The focus must be assigned a Category in order to activate this view</td></t>');
+        if(isChart()) $($('#resultsTable > tbody > tr')[0]).append('<td style="vertical-align:middle;text-align:left;cursor:pointer;" ><i class="text-danger fa fa-exclamation-circle p-2"></i>The focus must be assigned a Field or Role in order to activate this view</td>');
+        else if(isRollup()) $($('#resultsTable > tbody')[0]).append('<tr><td style="vertical-align:middle;text-align:left;cursor:pointer;" ><i class="text-danger fa fa-exclamation-circle p-2"></i>The focus must be assigned a Category in order to activate this view</td></t>');
     }
 
 
@@ -1450,6 +1477,7 @@ if(isRollup()){
 else {
 
     var sparql = sparqlMap[getMainFocus().attr('class')];
+  if(!sparql) return;
         var focus = getSparqlFocus(sparql);
         var vars = getSparqlVars(sparql);
         /*
@@ -1481,7 +1509,7 @@ else {
         opt = new Object();
         opt.tar = 'table';
         //var sparql = processSparql(xml);
-        sparql = sparqlCategoryMap[getMainFocus().attr('class')]; // undo alterations
+        sparql = sparqlMap[getMainFocus().attr('class')]; // undo alterations
         sparql = sparql.replace(/limit\s+\d+/gi, '');
         sparql = sparql.replace(/offset\s+\d+/gi, '');
         fct_sparql(getSparqlCount(sparql), opt);
@@ -1513,7 +1541,7 @@ function getSparqlFocus(sparql){
 function getSparqlVars(sparql){
   var vars = (sparql.match(/\s+\?((s|p|ip|o|c)\d+(p|o|c|ip|textp)?)|\?g\s+/mgi).sort()
              .filter(function(element, index, array) {
-                 return index == array.indexOf(element) && array[index].indexOf('?c') == -1 && array[index].indexOf('?g'); // don't return duplicates and remove count vars 
+                 return index == array.indexOf(element) && array[index].indexOf('?c') == -1 && array[index].indexOf('?g') == -1 && array[index].indexOf('textp') == -1; // don't return duplicates and remove count vars 
              }) + '').replaceAll(',', ' ');
   if(vars.indexOf('?o1')==-1)vars = '?o1 ' + vars; // ?o1 is required for text match
   return vars;
@@ -2065,6 +2093,19 @@ var showRollup = false;
 
 var version = 'alpha 1.8';
 
+var ha = new Array();
+var historyIndex = 0;
+
+function historyForward(){
+  historyIndex++;
+}
+
+function historyBackward(){
+  historyIndex--;
+}
+
+var ds = new Array();
+
 function init(){
     fct_init(); // this method must be the first method called by the implementation of the fct_ framework
 
@@ -2133,7 +2174,7 @@ function init(){
 
   if(window.location.href.startsWith('http://myopenlink') > 0) {
     $('body').empty();
-    $('body').append('<div>Site down for maintenance, please check back.</div>');
+    $('body').append('<div></div>');
     return;
   }
 
@@ -2196,6 +2237,7 @@ function init(){
 
 
   $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doFindDataspaces()">Find Dataspaces</a></li>');
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doRemoveDataspace()">Remove Dataspace</a></li>');
 
 
 
@@ -2419,8 +2461,8 @@ gbcol += '<header id="groupByTableHeader">';
         gbcol += '<div class="widget-controls">';
           //gbcol += '<a href="#"><i class="glyphicon glyphicon-cog"></i></a>';
           gbcol += '<a data-target="#" onclick="setRollup(false); setChart(false); doQuery(getQueryText());" class="text-secondary" id="tableButton"><i class="glyphicon glyphicon-th-list"></i></a>';
-          gbcol += '<a data-target="#" onclick="setRollup(true); setChart(false); selectMenuItem(\'showMeMenu\', VIEW_TYPE_CLASSES);" class="text-secondary" id="rollupTableButton"><i class="fa fa-sitemap"></i></a>';
           gbcol += '<a data-target="#" onclick="setRollup(false); setChart(true); doQuery(getQueryText());" class="text-secondary" id="chartTableButton"><i class="fa fa-check"></i></a>';
+          gbcol += '<a data-target="#" onclick="setRollup(true); setChart(false); selectMenuItem(\'showMeMenu\', VIEW_TYPE_CLASSES);" class="text-secondary" id="rollupTableButton"><i class="fa fa-sitemap"></i></a>';
           gbcol += '<a data-target="#" disabled="true" class="disabled" id="leftTableButton" onclick="javascript:pageTableLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
           gbcol += '<a data-target="#" disabled="true" class="disabled" id="rightTableButton" onclick="javascript:pageTableRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
           gbcol += '<a data-target="#" data-widgster="close" onclick="undoTable()" class="text-secondary"><i class="glyphicon glyphicon-remove"></i></a>';
@@ -2484,6 +2526,67 @@ gbcol += '</tr>';
 
 gbcol += '</tbody>';
 gbcol += '</table>';
+
+
+gbcol += '<br/>';
+
+
+
+gbcol += '<div class="clearfix" style="padding-bottom:2em; padding-top:2em;">';
+          gbcol += '<div class="pull-right">';
+            gbcol += '<button onclick="toggleChartHeaders();" class="btn btn-default btn-sm">';
+              gbcol += 'Toggle Headers';
+            gbcol += '</button>&nbsp;';
+            gbcol += '<button onclick="undoTable(); buildForm()" class="btn btn-default btn-sm">';
+              gbcol += 'Compose ...';
+            gbcol += '</button>&nbsp;';
+            gbcol += '<div class="btn-group" data-dropdown="">';
+              gbcol += '<button class="btn btn-sm btn-inverse dropdown-toggle" data-toggle="dropdown" aria-expanded="false">';
+                gbcol += '&nbsp; Export... &nbsp;';
+                gbcol += '<i class="fa fa-caret-down"></i>';
+              gbcol += '</button>';
+              gbcol += '<ul id="tableSaveOptions" class="dropdown-menu dropdown-menu-right" x-placement="top-end" style="position: absolute; transform: translate3d(-97px, -145px, 0px); top: 0px; left: 0px; will-change: transform;">';
+                gbcol += '<li><a class="dropdown-item" onclick="exportTableToCSV(\'results.csv\')">CSV</a></li>';
+                gbcol += '<li><a class="dropdown-item" href="#">XML</a></li>';
+                gbcol += '<li><a class="dropdown-item" href="#">JSON</a></li>';
+                gbcol += '<li class="dropdown-divider"></li>';
+                gbcol += '<li><a class="dropdown-item" href="#">Save to Data Space</a></li>';
+              gbcol += '</ul>';
+            gbcol += '</div>';
+          gbcol += '</div>';
+          gbcol += '<p id="resultsReport">query time: <span id="reportQueryTime"></span>, timeout: <span id="reportQueryTimeout"></span>, complete: <span id="reportQueryComplete"></span></p>';
+        gbcol += '</div>';
+
+            gbcol += '</div>';
+
+
+
+gbcol += '</section></div>';
+
+
+
+
+// CHARTS
+
+
+
+gbcol += '<div id="chartsResults" class="short-div hide"><section class="widget" widget>';
+
+gbcol += '<header id="chartsHeader">';
+        gbcol += '<h5>';
+          gbcol += '<h4><span id="chartsCount" class="badge badge-info">0/0</span> '+GROUP_BY_NONE_LABEL+' - <span id="tableType" class="fw-semi-bold">'+((isChart()) ? TABLE_HEADER_LABEL_CHART : TABLE_HEADER_LABEL_DETAILS)+'</span></h4>';
+        gbcol += '</h5>';
+        gbcol += '<div class="widget-controls">';
+          //gbcol += '<a href="#"><i class="glyphicon glyphicon-cog"></i></a>';
+          gbcol += '<a data-target="#" onclick="setRollup(false); setChart(false); doQuery(getQueryText());" class="text-secondary" id="tableButton"><i class="glyphicon glyphicon-th-list"></i></a>';
+          gbcol += '<a data-target="#" onclick="setRollup(false); setChart(true); doQuery(getQueryText());" class="text-secondary" id="chartTableButton"><i class="fa fa-check"></i></a>';
+          gbcol += '<a data-target="#" onclick="setRollup(true); setChart(false); selectMenuItem(\'showMeMenu\', VIEW_TYPE_CLASSES);" class="text-secondary" id="rollupTableButton"><i class="fa fa-sitemap"></i></a>';
+          gbcol += '<a data-target="#" disabled="true" class="disabled" id="leftTableButton" onclick="javascript:pageTableLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
+          gbcol += '<a data-target="#" disabled="true" class="disabled" id="rightTableButton" onclick="javascript:pageTableRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
+          gbcol += '<a data-target="#" data-widgster="close" onclick="undoTable()" class="text-secondary"><i class="glyphicon glyphicon-remove"></i></a>';
+        gbcol += '</div>';
+      gbcol += '</header>';
+        gbcol += '<div class="widget-body" >';
 
 
 gbcol += '<br/>';
@@ -2607,7 +2710,10 @@ gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
   gbcol += '<div class="collapse navbar-collapse" id="navbarSupportedContent">';
     gbcol += '<ul class="navbar-nav mr-auto">';
       gbcol += '<li class="nav-item active">';
-        gbcol += '<a id="ggg" class="nav-link" data-target="#" onclick="doExplore($(\'.iframe\').attr(\'src\'), true)">Edit</a>';
+        gbcol += '<a id="ggg" class="nav-link" data-target="#">Edit</a>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Interact</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="ggg" class="nav-link" data-target="#" onclick="doExplore($(\'.iframe\').attr(\'src\'), true)">GGG</a>';
@@ -2615,9 +2721,7 @@ gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="www" class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
       gbcol += '</li>';
-      gbcol += '<li class="nav-item">';
-        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Table</a>';
-      gbcol += '</li>';
+      /*
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#">Charts</a>';
       gbcol += '</li>';
@@ -2625,7 +2729,7 @@ gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#">Map</a>';
       gbcol += '</li>';
-      
+      */
       gbcol += '<li class="nav-item dropdown">';
         gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
           gbcol += 'Pair';
@@ -2642,8 +2746,8 @@ gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
           gbcol += 'Subscribe';
         gbcol += '</a>';
         gbcol += '<div class="dropdown-menu" aria-labelledby="navbarDropdown">';
-          gbcol += '<a class="dropdown-item" data-target="#">This Record</a>';
-          gbcol += '<a class="dropdown-item" data-target="#">This Folder</a>';
+          gbcol += '<a class="dropdown-item" data-target="#">Record</a>';
+          gbcol += '<a class="dropdown-item" data-target="#">Folder</a>';
         gbcol += '</div>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
@@ -2978,11 +3082,48 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     // ********************** IMPORTANT ****************************** //
     // be sure to load the dataspace last, so that all the above configuration is 
     // applied when selectDataspace() is called, since this function calls doQuery()
+    var idx = localStorage.getItem('dataspaceIndex'); // grab the cached dataspaceIndex before the setDataspace() calls below update the index
+
+    try{
+      ds = JSON.parse(localStorage.getItem('dataspaces'));
+      if(!ds) ds = [];
+    }
+    catch(err){
+      if(fct_isDebug) console.log('Dataspace cache retrieve failed: ' + err);
+    }
+    for(i=0; i<ds.length; i++){
+        if(i==0) $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li class="dropdown-divider"></li>');
+        $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a url="'+ds[i][0]+'" class="dropdown-item" onclick="selectDataspace(\''+ds[i][0]+'\', \''+ds[i][1]+'\')">'+ds[i][1]+'</a></li>');
+        dataspaceAdded = true;
+
+        if(i + 1 == ds.length){
+          if(!qdataSpace || qdataSpace.length <= 0){
+            selectDataspace(ds[i][0], ds[i][1], true);
+          }
+        }
+    }
+
+    addDataspace(dataspace,getDataspaceLabel(),false,true); // try to add LOD Cloud Cache
+    addDataspace('ggg.vios.network','VIOS',false,true); // try to add LOD Cloud Cache
+    addDataspace('linkeddata.uriburner.com','URI Burner',false,true); // try to add LOD Cloud Cache
+    addDataspace('demo.openlinksw.com','OpenLink Demo',false,true); // try to add LOD Cloud Cache
+    addDataspace('dbpedia.org','DBPedia',false,true); // try to add LOD Cloud Cache
+
+    try{
+      if(idx){
+        var idxInt = parseInt(idx);
+        selectDataspace(ds[idxInt][0], ds[idxInt][1], true);
+      }
+    }
+    catch(err){
+      if(fct_isDebug) console.log('Dataspace cache index retrieve failed: ' + err);
+    }
 
     if(qdataSpace && qdataSpace.length > 0){
-      var dropdownItem = $('a#dataSpaceMenu').parent().children('.dropdown-menu > li[url="'+qdataSpace+'"]');
-      if(!dropdownItem || dropdownItem.length <= 1){
-        addDataspace(qdataSpace, qdataSpaceLabel, true);
+      var dropdownItem = $('a#dataSpaceMenu').parent().children('.dropdown-menu').children('li').children('a[url="'+dataspace+'"]');
+      if((!dropdownItem || dropdownItem.length) <= 0 && ds.indexOfDataspace(qdataSpace) == -1){
+          addDataspace(qdataSpace, qdataSpaceLabel, true);
+          dataspaceAdded = true;
       }
       else {
         selectDataspace(qdataSpace, qdataSpaceLabel, true);
@@ -2990,6 +3131,7 @@ $('.avatar').parent().children('.circle').each(async (i) => {
       qdataSpace = null;
       qdataSpaceLabel = null;
     }
+
 
     if(getQueryText()){
       $('#keywords').val(getQueryText());
@@ -3038,6 +3180,20 @@ $('.avatar').parent().children('.circle').each(async (i) => {
 
     $('#keywords').focus();
 
+}
+
+function doRemoveDataspace(){
+  var idx = ds.indexOfDataspace(dataspace);
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').children('li').children('a[url="'+dataspace+'"]').remove();
+  ds.splice(idx, 1);
+  if(idx >= ds.length) idx = ds.length - 1;
+  if(idx < 0) idx = 0;  
+  if(ds.length > 0) {
+    selectDataspace(ds[idx][0], ds[idx][1]);
+  }
+  else {
+    addDataspace('lod.openlinksw.com','LOD Cloud Cache',false,false); // try to add LOD Cloud Cache
+  }
 }
 
 function showProfileManagerPreview(){
@@ -3916,7 +4072,7 @@ function processLabel(label, value, datatype, lang, labelSize){
     if(!labelSize) labelSize = SIZE_LABEL;
     label = label.trim();
 
-
+    label = label.replaceAll('&#39;', '&apos;');
 
     if(label.length <= 0){
       label = value;
@@ -4250,14 +4406,15 @@ function savePermalink(name){
 
 function doFindDataspaces(){}
 
-function addDataspace(url, label, secure, silent){
+function addDataspace(url, label, secure, silent){  
   var protocol = (secure) ? 'https://' : 'http://';
   if(url.startsWith('http')) protocol = '';
+  if(ds.indexOfDataspace(protocol+url) >= 0) return;
   var lis = $('a#dataSpaceMenu').parent().children('.dropdown-menu > li');
-  if(lis.length == 1 || fct_isPermalink){
-    $('a#dataSpaceMenu').parent().children('.dropdown-menu').prepend('<li class="dropdown-divider"></li>');    
+  if(!dataspaceAdded){
+    $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li class="dropdown-divider"></li>');  
   }
-  $('a#dataSpaceMenu').parent().children('.dropdown-menu').prepend('<li><a url="'+(protocol+url)+'" class="dropdown-item" onclick="selectDataspace(\''+protocol+url+'\', \''+label+'\')">'+label+'</a></li>');
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a url="'+(protocol+url)+'" class="dropdown-item" onclick="selectDataspace(\''+protocol+url+'\', \''+label+'\')">'+label+'</a></li>');
 
 
   if(!fct_isPermalink && false){
@@ -4284,6 +4441,16 @@ function addDataspace(url, label, secure, silent){
   }
 
   selectDataspace(protocol+url, label, silent);
+
+    ds.push([protocol+url, label]);
+    try{
+      localStorage.setItem('dataspaces', JSON.stringify(ds));
+    }
+    catch(err){
+      if(fct_isDebug) console.log('Dataspace cache failed: ' + err);
+    }
+        
+    dataspaceAdded = true;
 }
 
 function selectDataspace(url, label, silent){
@@ -4302,17 +4469,25 @@ function selectDataspace(url, label, silent){
   service_sparql = getProxyEndpoint(url) + '/sparql';
   LABEL_ROOT = getDataspaceLabel().toUpperCase(); //<i class="fa fa-home" style="padding-bottom:4px;padding-right:2px;"></i>
 
-  if(url.indexOf('data.vios.network') >= 0) LABEL_ROOT = 'VIOS';
+  //if(url.indexOf('data.vios.network') >= 0) LABEL_ROOT = 'VIOS';
 
   $('#dataSpaceLabel').text(LABEL_ROOT );
   if(!silent) doQuery(getQueryText());
+
+  try{
+    localStorage.setItem('dataspaceIndex', ds.indexOfDataspace(url));
+  }
+  catch(err){
+    if(fct_isDebug) console.log('Dataspace cache index failed: ' + err);
+  }
+
 }
 
 function getDataspaceLabel(){
-  if(service_fct.indexOf('data.vios.network') >= 0) LABEL_ROOT = 'VIOS';
+  //if(service_fct.indexOf('data.vios.network') >= 0) LABEL_ROOT = 'VIOS';
 
   if(!service_fct_label || service_fct_label.length <= 0) return LABEL_ROOT;
-return service_fct_label;
+  return service_fct_label;
 }
 
 function getQueryTimeout(){
@@ -4529,6 +4704,13 @@ String.prototype.replaceAll = function(search, replacement) {
 Array.prototype.indexOfText = function(txt) {
     for (var i = 0; i < this.length; i++)
         if (this[i].text() === txt)
+            return i;
+    return -1;
+}
+
+Array.prototype.indexOfDataspace = function(url) {
+    for (var i = 0; i < this.length; i++)
+        if (this[i][0] === url)
             return i;
     return -1;
 }
