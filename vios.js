@@ -779,6 +779,7 @@ function fct_handleSparqlSubject(xml, opt){
     badge.addClass('badge');
     badge.addClass('badge-pill');
     badge.addClass('badge-primary');
+    //badge.css('font-weight', 'normal');
     var len = subLabel.length + $('#'+opt.id).parent().children('h6').text().length;
     if(subLabel.length < 45) badge.addClass('badge-subject');
 //&nbsp;&nbsp;&nbsp;<span  class="hide badge badge-pill badge-primary" >subject</span>    
@@ -1228,7 +1229,7 @@ function fct_handleSparqlResults(xml, opt) {
                 if (j == 0) {
                     //var mcolId = createId();
                     //r1.value += '<td '+buildTitle(v)+' style="text-align:left;" class="text-nowrap" onclick="javascript:setValue(\'mtxcola-' + i + '-' + j + '\', \'' + v + '\', \'' + sanitizeLabel(labelKey) + '\', \'' + d + '\', \'\')"><span class="thumb-sm float-left mr"><img class="rounded-circle" src="' + getFaviconUrl(v) + '"/><i class="status status-bottom bg-success"></i></span> ' + labelKey + '</td>';
-            r1.value += '<td style="vertical-align:middle;text-align:left;cursor:pointer;" class="text-nowrap" onclick="javascript:setValue(\'mtxcola-'+i+'-'+j+'\', \''+v+'\', \''+sanitizeLabel(labelKey)+'\', \''+d+'\', \'\')"><img src="'+getFaviconUrl(v)+'">&nbsp;<span>'+labelKey+'</span></td>';
+                  r1.value += '<td style="vertical-align:middle;text-align:left;cursor:pointer;" class="text-nowrap" onclick="javascript:setValue(\'mtxcola-'+i+'-'+j+'\', \''+v+'\', \''+sanitizeLabel(labelKey)+'\', \''+d+'\', \'\')"><img src="'+getFaviconUrl(v)+'">&nbsp;<span>'+labelKey+'</span></td>';
                     //            var str = '<td onclick="javascript:setValue(\''+createId()+'\', \''+v+'\', \''+labelKey+'\', \''+d+'\', \'\')">'+labelKey+'</td>';
                     //row.append('<td>'+labelKey+'</td>');
                 }
@@ -2198,7 +2199,9 @@ function init(){
   $('select#groupByMenu').parent().removeClass('hidden');
 
   $('.input-group-text > i').removeClass('la-search');
+  $('.input-group-text > i').removeClass('text-warning');
   $('.input-group-text > i').addClass('la-refresh');
+  $('.input-group-text > i').addClass('text-info');
 
   // **** TODO: comment out these lines
   //$('#lod').addClass('hide');
@@ -2226,7 +2229,11 @@ function init(){
   //$('a#dataSpaceMenu').parent().children('.dropdown-menu').prepend('<li><a id="dataspace-dbp" class="dropdown-item" onclick="selectDataspace(\'http://poc.vios.network/proxyDBPedia\', \'dbpedia\')">Dbpedia</a></li>');
   //$('a#dataSpaceMenu').parent().children('.dropdown-menu').prepend('<li><a id="dataspace-vios" class="dropdown-item" onclick="selectDataspace(\'http://poc.vios.network/proxy/-start-http://data.vios.network-end-\', \'vios\')">VIOS</a></li>');
 
-
+  $('#permalink').on('mouseover', function(e){
+    get_short_url($('#permalink').attr('href'), function(short_url) {
+      $('#permalink').attr('href',  short_url); //+ '&idCt=' + idCt
+    });
+  });
 
   selectMenuItem('queryTimeout', '30000');
 
@@ -2835,12 +2842,14 @@ gbcol += '<div class="modal fade" id="helpModal" tabindex="-1" role="dialog" ari
         gbcol += '</button>';
       gbcol += '</div>';
       gbcol += '<div class="modal-body">';
-      gbcol += '  <p>Press the <i>Ctrl</i> key to toggle Command and Edit Modes';
+      gbcol += '  <p><i>Group-by</i>: Click the pinch icon <i class="la la-compress"></i> to group contents by <a href="http://bit.ly/2tRFCX8">Field</a> or <a href="http://bit.ly/2tQ29DZ">Role</a></p>';
+      gbcol += '  <p><i>Preview</i>: Click the expand icon <i class="la la-bars"></i> to preview the smart folder contents</p>';
+      gbcol += '  <p><i>UI Modes</i>: Press the <i>Ctrl</i> key to toggle Command and Edit Modes';
       gbcol += '  </p><p>';
       gbcol += '  In Commmand Mode:';
       gbcol += '  <ul><li>';
       gbcol += '  Press <i>N</i> key to toggle navigation types';
-      gbcol += '  </li><li>';
+      gbcol += '  </li><li>'; 
       gbcol += '  Press <i>C</i>, <i>T</i>, <i>F</i>, <i>R</i> or <i>L</i> keys to switch CTRL lists';
       gbcol += '  </li><li>';
       gbcol += '  Use <i>&lt;</i>, <i>&gt;</i>, <i>left arrow</i>, and <i>right arrow</i> to move through list pages';
@@ -3158,8 +3167,8 @@ $('.avatar').parent().children('.circle').each(async (i) => {
         if(qIsChart && qIsChart.length > 0) {
           setChart(qIsChart == 'true');
         }
-        else if(qIsRollup && qIsRollup.length > 0) {
-          setChart(qIsRollup == 'true');
+        if(qIsRollup && qIsRollup.length > 0) {
+          setRollup(qIsRollup == 'true');
         }
         doTable();
       }
@@ -3309,7 +3318,7 @@ var clazz = '';
 
               
       });
-              rows += '<input class="form-control" id="normal-field" disabled="disabled" placeholder="Enter field value" value="'+clazz+'" type="text" id="'+createId()+'"/>';
+              rows += '<input class="form-control" id="normal-field" disabled="disabled" placeholder="Enter category value" value="'+clazz+'" type="text" id="'+createId()+'"/>';
               rows += '</div>';
               rows += '</div>';
 }
@@ -3487,7 +3496,7 @@ if(cls && cls.length > 0){
               var disabled = (value) ? ' disabled="disabled"' : '';
               if(valueLabel) valueLabel = processLabel(valueLabel);
               else valueLabel = '';
-              rows += '<input class="form-control" id="normal-field"'+disabled+' placeholder="Enter field value" value="'+valueLabel+'" type="text" id="'+createId()+'"/>';
+              rows += '<input class="form-control" id="normal-field"'+disabled+' placeholder="Enter rolee value" value="'+valueLabel+'" type="text" id="'+createId()+'"/>';
               rows += '</div>';
               rows += '</div>';
           }
@@ -3588,6 +3597,16 @@ var footer = '';
 footer += '<br/>';
 footer += '<div class="clearfix">';
           footer += '<div class="pull-right">';
+            footer += '<button class="btn btn-default btn-sm">';
+              footer += '<i class="fa fa-plus-square text-primary"></i>&nbsp;Category';
+            footer += '</button>&nbsp;';
+            footer += '<button class="btn btn-default btn-sm">';
+              footer += '<i class="fa fa-plus-square text-primary"></i>&nbsp;Field';
+            footer += '</button>&nbsp;';
+            footer += '<button class="btn btn-default btn-sm">';
+              footer += '<i class="fa fa-plus-square text-primary"></i>&nbsp;Role';
+            footer += '</button>&nbsp;';
+            footer += '&nbsp;&nbsp;&nbsp;&nbsp;';
           
             footer += '<button onclick="hideForm()" class="btn btn-default btn-sm">';
               footer += 'Cancel';
@@ -3948,9 +3967,9 @@ if(!$('input[type="text"]').is(":focus")){
 
 
     else if(e.keyCode == '78') { // N key
-      if(!isTableShowing()){
         if(nav_type == NAV_TYPE_2) nav_type = NAV_TYPE_3;
         else if(nav_type == NAV_TYPE_3) nav_type = NAV_TYPE_2;
+        if(nav_type == NAV_TYPE_3 && isTableShowing()) undoTable();
         try{
           localStorage.setItem('navType', nav_type);
         }
@@ -3958,7 +3977,7 @@ if(!$('input[type="text"]').is(":focus")){
 
         }
         doQuery(getQueryText());
-      }
+      
     }    
 
   }
@@ -4069,6 +4088,7 @@ return iri;
 }
 
 function processLabel(label, value, datatype, lang, labelSize){
+    if(value == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type') label = 'category'; //POI: type is named Category across the UI
     if(!labelSize) labelSize = SIZE_LABEL;
     label = label.trim();
 
@@ -4121,8 +4141,18 @@ function processLabel(label, value, datatype, lang, labelSize){
 
     var re = /[^0-9](?=[0-9])/g; 
     label = label.replace(re, '$& ');
-    try{parseInt(label)}
-    catch(e){label = label.replace('\\d{'+SIZE_MIN_DIGITS+','+SIZE_MAX_DIGITS+'}/g', '');label = label.replace(/\d{5,11}/g, '');}
+    try{
+      var varInt = parseInt(label.trim());
+      if(!varInt){
+        label = label.replace('\\d{'+SIZE_MIN_DIGITS+','+SIZE_MAX_DIGITS+'}/g', '');
+        label = label.replace(/\d{5,20}/g, '');
+      }
+    }
+    catch(e){
+      label = label.replace('\\d{'+SIZE_MIN_DIGITS+','+SIZE_MAX_DIGITS+'}/g', '');
+      label = label.replace(/\d{5,20}/g, '');
+    }
+
     
     return label.trim();
 }
@@ -4146,7 +4176,9 @@ function updatePermalink(){
     var canvasViewType = 'default';
     if(isTableShowing()) canvasViewType = 'table';
     else if(isFormShowing()) canvasViewType = 'form';
-    $('#permalink').attr('href', this_endpoint + '?' + 
+
+
+    var long_url = this_endpoint + '?' + 
       '&dataSpace=' + encodeURIComponent( dataspace ) + 
       '&dataSpaceLabel=' + encodeURIComponent( getDataspaceLabel() ) + 
       '&groupBy=' + encodeURIComponent( $('#groupByMenu :selected').attr('json') ) + 
@@ -4161,8 +4193,11 @@ function updatePermalink(){
       '&verticalChartHeaders=' + isVerticalChartHeaders() + 
       '&isRollup=' + isRollup() + 
       '&isChart=' + isChart() + 
-      '&qxml=' + encodeURIComponent(_root.find('query').prop('outerHTML'))
-    ); //+ '&idCt=' + idCt
+      '&qxml=' + encodeURIComponent(_root.find('query').prop('outerHTML'));
+  
+    $('#permalink').attr('href',  long_url); // use long url by default in case of rate limit
+
+
 
     // TODO: this only works in HTML5 compatible browsers, need to support older browsers also
 
@@ -6609,7 +6644,7 @@ rows += '</span>';
 
           rows +=  '<h6  style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+value+'\');">'+label+'</h6>';
               var badgeId = createId();
-              rows +=  '<p class="text-ellipsis m-0" id="'+badgeId+'"></p><script type="text/javascript">loadSubjectBadge(\''+value+'\', \''+badgeId+'\');</script>'; //
+              rows +=  '<p style="cursor:pointer" class="text-ellipsis m-0" id="'+badgeId+'"></p><script type="text/javascript">loadSubjectBadge(\''+value+'\', \''+badgeId+'\');</script>'; //
 rows += '</td></tr>';
 
 
@@ -6751,12 +6786,17 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
         //if(isPropOf) console.log('is property-of: ' + label);
 
         var action = "removeValue";
+        var categoryAsValue = false;
         if(!val) {
           if(!cval) action = "remove";
           if(id == ID_QUERY) val = label;
           else{
               if(cval){
                 val = cval;
+                if(id != ID_QUERY) {
+                  val = 'is ' + aOrAn(val) + ' ' + val;
+                  categoryAsValue = true;
+                }
               }
               else {
                 val = VALUE_ANON_NODE;
@@ -6826,11 +6866,11 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
                 tooltip = 'and what is it ' + ttd;
             }
         }
-        if(val != VALUE_ANON_NODE && cval != val) {
+        if(val != VALUE_ANON_NODE && !categoryAsValue) {
             // TODO: this label is due to a bug in Virtuoso, the filters aren't being applied, causing the query to conform to what this label says
             // bug submitted: https://github.com/openlink/virtuoso-opensource/issues/823
             //tooltip += ', where one of them is ' + val;
-            tooltip += ' where the answer is ' + val; // the correct tooltip
+            tooltip += ' where the answer ' + (val.trim().startsWith('is ') ? '' : 'is ') + val; // the correct tooltip
         }
         if(cval){
                 var whichOrAnd = ', where';
@@ -6921,6 +6961,7 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
                 for(i = 0; i < cvals.length; i++){
                   if(i > 0 && cvals.length == 1) break;
                   var aoran = aOrAn($( cvals[i] ).attr('label').substring(0, 1));
+                  var cv = $( cvals[i] ).attr('label');
                   tooltip += ' ' + aoran + ' ' + $( cvals[i] ).attr('label');
                   if(i+1 < cvals.length) {
                     tooltip += ',';
@@ -7074,3 +7115,20 @@ ret += '<div class="clearfix"> <ul class="nav nav-tabs float-left" id="myTab" ro
 return ret;
 
     }
+
+function get_short_url(long_url, func)
+{
+    $.getJSON(
+        "http://api.bitly.com/v3/shorten?callback=?", 
+        { 
+            "format": "json",
+            "apiKey": 'R_c940e7c2050c4394b45711de1e78fe3c',
+            "login": 'o_19grlau42p',
+            "longUrl": long_url
+        },
+        function(response)
+        {
+            if(response.data.url) func(response.data.url);
+        }
+    );
+}

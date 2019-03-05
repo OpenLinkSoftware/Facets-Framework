@@ -532,7 +532,16 @@ padding: 60px 40px 40px 15px;
 .badge-warning {
     color: #29323a;    background-color: #ffc247;    color: #fff;}
 
-
+    .badge{
+      font-weight: normal;
+      font-size: 11px;
+    }
+.badge-pill {
+    padding: 2px 6px;
+}
+.text-warning {
+    color: #ffc247 !important;
+}
     .badge-subject{
         margin-left: auto;
         position: absolute;
