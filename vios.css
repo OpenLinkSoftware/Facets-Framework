@@ -539,9 +539,10 @@ padding: 60px 40px 40px 15px;
 .badge-pill {
     padding: 2px 6px;
 }
+/*
 .text-warning {
     color: #ffc247 !important;
-}
+}*/
     .badge-subject{
         margin-left: auto;
         position: absolute;

@@ -248,6 +248,24 @@ function setViewType(type, q){
   $(q).find('view').attr('type', type);
 }
 
+function setMutex(cid, type){
+  if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN){
+    $('#showMeColumn').attr('mutex', cid);
+  }
+  else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT){
+    $('#recordsListWidgetContainer').attr('mutex', cid);
+  }
+}
+
+function getMutex(type){
+  if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN){
+    return $('#showMeColumn').attr('mutex');
+  }
+  else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT){
+    return $('#recordsListWidgetContainer').attr('mutex');
+  }
+}
+
 function setViewLimit(lim){
   _root.find('view').attr('limit', lim);
 }
@@ -329,10 +347,10 @@ try{
 function fct_removeVariableData(query){
   query.removeAttr('label');
   query.removeAttr('varname');
-  query.removeAttr('class');
+  //query.removeAttr('class');
 
 
-  query.find('*').removeAttr('class');
+  //query.find('*').removeAttr('class');
   query.find('*').removeAttr('label');
   query.find('*').removeAttr('varname');
   query.find('*').removeAttr('isGroupBy');
@@ -352,7 +370,18 @@ function formatDate(date) {
 }
 
 function getProxyEndpoint(url){
-  return 'http://poc.vios.network/proxy/-start-'+url+'-end-';
+  url = url.replace('http://', 'http/');
+  url = url.replace('https://', 'https/');
+//  return 'http://poc.vios.network/proxy/-start-'+url+'-end-';
+  return 'http://poc.vios.network/proxy/'+url;
+  //return url;
+}
+
+function getURIBurnerURL(url){
+  //url = url.replace('http://', 'http/');
+  //url = url.replace('https://', 'https/');
+//  return 'http://poc.vios.network/proxy/-start-'+url+'-end-';
+  return 'http://linkeddata.uriburner.com/about/html/'+url;
   //return url;
 }
 
@@ -373,6 +402,7 @@ function fct_query(q, viewType, opt){
   q = fct_removeVariableData(q);
   var qstr = q.prop('outerHTML');
   var id = (qstr) ? (service_fct+qstr).hashCode() : 0;
+  setMutex(id, viewType);
   ha.push(id);
   q.attr('timeout', fct_queryTimeout); // add all neccessary variable data back to the query
   var resp;
@@ -435,6 +465,9 @@ function fct_query(q, viewType, opt){
           jqXHR.data = settings.data;
       },
             success : function(xml) {
+              if(getMutex(viewType) != id){
+                return;
+              }
 
         var filter = '';
         if(!xml.startsWith('<')) {
@@ -533,6 +566,7 @@ function fct_query(q, viewType, opt){
           console.log(xhr.status);          
           console.log(thrownError);
           if(xhr.status == 500) alert('Server error: ' + thrownError + ' from ' + xhr.url);
+          if(xhr.status == 400) alert('Server error: ' + thrownError + ' from ' + xhr.url);
         }
         var currentdataspace = $('#dataSpaceMenu :selected').attr('value');
         var currentdataspacelabel = $('#dataSpaceMenu :selected').text();
@@ -2203,6 +2237,14 @@ function init(){
   $('.input-group-text > i').addClass('la-refresh');
   $('.input-group-text > i').addClass('text-info');
 
+  $('#dataSpaceMenu > i').removeClass('la');
+  $('#dataSpaceMenu > i').removeClass('la-hdd-o');
+  $('#dataSpaceMenu > i').removeClass('la-lg');
+  $('#dataSpaceMenu > i').removeClass('fs-largest');
+  $('#dataSpaceMenu > i').addClass('fa');
+  $('#dataSpaceMenu > i').addClass('fa-cube');
+  $('#dataSpaceMenu > i').addClass('fs-largest');
+
   // **** TODO: comment out these lines
   //$('#lod').addClass('hide');
   //$($('.vios-body').children('div')[0]).addClass('hide');
@@ -2218,6 +2260,16 @@ function init(){
     isExpandSearch = !$('#isSearchAllFields').parent().hasClass('active');
     doQuery(getQueryText());
   });
+
+  var fastForwardButton = '';
+  fastForwardButton += '<span class="input-group-append" style="cursor:pointer;">';
+        fastForwardButton += '<span class="input-group-text">';
+          fastForwardButton += '<i class="fw-bold la la-angle-double-right text-default"></i>';
+        fastForwardButton += '</span>';
+      fastForwardButton += '</span>';
+      $('.input-group-text').parent().parent().append(fastForwardButton);
+
+
   //$('#queryTimeout').unbind('click');  
   //$('#isSearchAllFields').click(function(e){doQuery(getQueryText());});
 
@@ -2723,7 +2775,7 @@ gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Interact</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a id="ggg" class="nav-link" data-target="#" onclick="doExplore($(\'.iframe\').attr(\'src\'), true)">GGG</a>';
+        gbcol += '<a id="ggg" class="nav-link" data-target="#" onclick="selectDataspace(\'http://linkeddata.uriburner.com\', \'URI Burner\', false); doExplore( $(\'.iframe\').attr(\'src\') , true)">GGG</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="www" class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
@@ -3112,11 +3164,11 @@ $('.avatar').parent().children('.circle').each(async (i) => {
         }
     }
 
+    addDataspace('dbpedia.org','DBPedia',false,true); // try to add LOD Cloud Cache
     addDataspace(dataspace,getDataspaceLabel(),false,true); // try to add LOD Cloud Cache
     addDataspace('ggg.vios.network','VIOS',false,true); // try to add LOD Cloud Cache
     addDataspace('linkeddata.uriburner.com','URI Burner',false,true); // try to add LOD Cloud Cache
     addDataspace('demo.openlinksw.com','OpenLink Demo',false,true); // try to add LOD Cloud Cache
-    addDataspace('dbpedia.org','DBPedia',false,true); // try to add LOD Cloud Cache
 
     try{
       if(idx){
@@ -3148,7 +3200,7 @@ $('.avatar').parent().children('.circle').each(async (i) => {
       $('#keywords').select();
     }
 
-    $('#dataSpaceMenu').prepend('<span id="dataSpaceLabel">'+getDataspaceLabel()+'</span>');
+    $('#dataSpaceMenu').append('&nbsp;<span id="dataSpaceLabel">'+getDataspaceLabel()+'</span>');
     
     loadGroupByMenuDefaults();
 
@@ -3901,7 +3953,7 @@ function checkKey(e) {
 
 
 if(!$('input[type="text"]').is(":focus")){
-  if(ctrlDown){
+  if(ctrlDown && false){ // turn this off for now
     if (e.keyCode == '67') { // Delete key or C key
       if(isControlListVisible()) hideControlList();
       else showControlList();
@@ -4275,6 +4327,9 @@ function createId(){
 
 function uuid() {
     return crypto.getRandomValues(new Uint32Array(4)).join('-');
+    //return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    //(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    //);
 }
 
 function doFirstKeywords(){
@@ -4984,9 +5039,9 @@ if(true){
 
 
               label = deSanitizeLabel(label);
-              var labelLink = (datatype=='uri') ? ''+buildTitle(value)+' onclick="javascript:describe(\''+value+'\');"' : '';
+              var labelLink = (datatype=='uri') ? ' onclick="javascript:describe(\''+value+'\');"' : '';
               rows +=  '<h6 class="text-ellipsis m-0" '+labelLink+'>';
-              rows+='<span>'+label+'</span>';
+              rows+='<span '+buildTitle(value)+'>'+label+'</span>';
               //rows +=  '<p class="help-block text-ellipsis m-0"></p>';
 
 
@@ -5503,24 +5558,24 @@ if(true){
           var focusTargetClass = (getMainFocus().attr('class') == ID_QUERY+"") ? 'queryFocus' : 'queryFocusValue';
           //rows += '<tr  id="rw'+id+'" onmouseover="javascript:showControls(\''+id+'\')" onmouseout="javascript:hideControls(\''+id+'\')"><td class="up" id="'+opts.parentId+'">';
 
-          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onmouseover="javascript:$(\'#'+focusTarget+'\').addClass(\''+focusTargetClass+'\')" onmouseout="javascript:$(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\')" onclick="javascript: addClassFacet(\''+id+'\', \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</span>';
+          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onmouseover="javascript:$(\'#'+focusTarget+'\').addClass(\''+focusTargetClass+'\')" onmouseout="javascript:$(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\')" onclick="javascript: var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</span>';
 //          rows += '<a class="count" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addClassFacet(\''+id+'\', \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</a>&nbsp;-&nbsp;';
           //rows += '<a title="'+uri+'" onclick="javascript:describe(\''+uri+'\');">'+ spaceCamelCase(label) +'</a>&nbsp;';
                                 rows +=  '</span>';
             rows +=  '<div>';
           rows +=  '<h6 class="text-ellipsis m-0" onclick="javascript:describe(\''+uri+'\');">';
-          rows += label;
+          rows += '<span '+buildTitle(uri)+'>' + label + '</span>';
               //rows +=  '<p class="help-block text-ellipsis m-0"></p>';
 
           //rows += '</td><td id="ctrl'+id+'" class="hideCtrl" style="white-space:nowrap; vertical-align:top;">';
           rows += '<div class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
-          rows += '<input class="form-check-input" id="ckbx'+id+'" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{addClassFacet(\''+id+'\', \''+uri+'\', \''+sanitizeLabel(label)+'\')}" />&nbsp;';
+          rows += '<input class="form-check-input" id="ckbx'+id+'" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\')}" />&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
           //rows += '<img title="view instances" class="count" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
 //          rows += '<a title="view instances" class="count" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>';
           //rows += '</td></tr>';
-          rows += '<i '+buildTitle('acts as \''+label+'\' field of these records')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('preview category members')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
 
           rows +='</h6>';
             rows +=  '</div>';
@@ -5727,24 +5782,24 @@ if(true){
           //rows += '<tr id="'+id+'" onmouseover="javascript:showControls(\''+id+'\')" onmouseout="javascript:hideControls(\''+id+'\')"><td class="up" id="'+opts.parentId+'"><span id="'+id+'">';
           //var propIRI = $('#groupByMenu :selected').attr('value');
           //var propLabel = $('#groupByMenu :selected').text();
-          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onclick="javascript: addPropertyFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\');">'+ct+'</span>';
+          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(pid);">'+ct+'</span>';
                                 rows +=  '</span>';
             rows +=  '<div>';
 //          rows += '<a class="count" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addPropertyFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\');">'+ct+'</a>&nbsp;-&nbsp;';
 //          if(datatype=='uri') {
-          rows +=  '<h6 class="text-ellipsis m-0" '+buildTitle(propIRI)+' onclick="javascript:describe(\''+propIRI+'\');">';
+          rows +=  '<h6 class="text-ellipsis m-0" onclick="javascript:describe(\''+propIRI+'\');">';
             //rows += '<a title="'+propIRI+'" onclick="javascript:describe(\''+propIRI+'\');">';
-            rows += '<span>'+propLabel+'</span>';
+            rows += '<span '+buildTitle(propIRI)+'>'+propLabel+'</span>';
             //rows += '</a>&nbsp;';
 //          }
           //rows += '</span></td><td id="ctrl'+id+'" style="white-space:nowrap; vertical-align:top;">';          
           if(propIRI != GROUP_BY_NONE_VALUE){
           rows += '<div class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
-          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{addPropertyFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\');}" />&nbsp;';
+          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); //generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query}" />&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
               //rows += '<img title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
-          rows += '<i title="view values" class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('preview field values')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
 //              rows += '<a title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>&nbsp;';
           if((facet && facet.length > 0))rows += '<i '+buildTitle('group the record list by \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\')" ></i>';
           }
@@ -5891,21 +5946,21 @@ var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'i
 
 var ckcolor = 'primary';
  
-          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onclick="javascript: addPropertyOfFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\')">'+ct+'</span>';
+          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(pid)">'+ct+'</span>';
                                 rows +=  '</span>';
             rows +=  '<div>';
-          rows +=  '<h6 class="text-ellipsis m-0" '+buildTitle(propIRI)+' onclick="javascript:describe(\''+propIRI+'\');">';
+          rows +=  '<h6 class="text-ellipsis m-0" onclick="javascript:describe(\''+propIRI+'\');">';
 
 
 
-            rows += propLabel;
+            rows += '<span '+buildTitle(propIRI)+'>' + propLabel + '</span>';
           //rows += '</span></td><td id="ctrl'+id+'" class="hideCtrl" style="white-space:nowrap; vertical-align:top;">';          
           if(propIRI != GROUP_BY_NONE_VALUE){
           rows += '<div class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
-          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{addPropertyOfFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\');}"/>&nbsp;';
+          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\');//generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query}"/>&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
-          rows += '<i title="view values" class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('preview rolees')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
               //rows += '<img title="shows up in the \''+propLabel+'\' field of these records" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
           if((facet && facet.length > 0))rows += '<i '+buildTitle('group the record list by role: \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\', true)" ></i>';
           }
@@ -6574,6 +6629,8 @@ $(document).ready(function () {
 
 function describe(src){
     src = deSanitizeLabel(src);
+    $('#describe').attr('iri', src);
+    if(dataspace == 'http://linkeddata.uriburner.com') src = getURIBurnerURL(src);
     //$('#describePanel').addClass('loadingDescribe');
     $('#describe').attr('src', src);
     //$('#recordLabel').val(label);
@@ -6584,7 +6641,7 @@ function describe(src){
 }
 
 function linkOut(){
-    var src = $('.iframe').attr('src');
+    var src = $('.iframe').attr('iri');
     if(!src || src.length <= 0) return;
     var win = window.open(deSanitizeLabel(src), twin, 'width="'+window.outerWidth+'" height="'+window.outerHeight+'"');
     //win.blur();
@@ -6785,6 +6842,11 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
         //console.log('nodeName: ' + $(ele).prop('nodeName'));
         //if(isPropOf) console.log('is property-of: ' + label);
 
+        var isLiteralValue = false;
+        if(v && v.text() && v.text().length > 0 && v.attr('datatype') != 'uri' && id != ID_QUERY){
+          isLiteralValue = true;
+        }
+
         var action = "removeValue";
         var categoryAsValue = false;
         if(!val) {
@@ -6905,14 +6967,16 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
             searchLabel = 'contain keywords';
           }
 
+          var libdiv = '&nbsp;<i class="fa fa-chevron-right"></i>&nbsp;';
+
           if(v.attr('datatype') == 'uri'){
               tooltip = 'the record for ' + val;
               desc = 'Record';
               if(getQueryGraphLabel() && getQueryGraphLabel().length > 0) {
-                desc += '@'+ getQueryGraphLabel();
+                desc = getQueryGraphLabel() + libdiv + desc;
               }
               else if(getQueryGraph() && getQueryGraph().length > 0) {
-                desc += '@'+getQueryGraph();
+                desc = getQueryGraph() + libdiv + desc;
               }
               if(getQueryText() && getQueryText().length){
                 tooltip = tooltip + ' '+searchLabel+': \'' + getQueryText() + '\'';
@@ -6922,11 +6986,11 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
               tooltip = 'what records '+searchLabel+': ' + val;
               if(getQueryGraphLabel() && getQueryGraphLabel().length > 0) {
                 tooltip += ', in library: ' + getQueryGraphLabel();
-                desc += '@'+ getQueryGraphLabel();
+                desc = getQueryGraphLabel() + libdiv + desc;
               }
               else if(getQueryGraph() && getQueryGraph().length > 0) {
                 tooltip += ', in library: ' + getQueryGraph();
-                desc += '@'+getQueryGraph();
+                desc = getQueryGraph() + libdiv + desc;
               }
           }
           else {
@@ -6934,22 +6998,22 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
               if(!cval) {
                   if(getQueryGraphLabel() && getQueryGraphLabel().length > 0) {
                     tooltip += ', in library: ' + getQueryGraphLabel();
-                    desc += '@'+ getQueryGraphLabel();
+                    desc = getQueryGraphLabel() + libdiv + desc;
                   }
                   else if(getQueryGraph() && getQueryGraph().length > 0) {
                     tooltip += ', in library: ' + getQueryGraph();
-                    desc += '@'+getQueryGraph();
+                    desc = getQueryGraph() + libdiv + desc;
                   }
                   else desc = LABEL_ROOT;
               }
               else {
                   if(getQueryGraphLabel() && getQueryGraphLabel().length > 0) {
                     tooltip += ', in library: ' + getQueryGraphLabel();
-                    desc += '@'+ getQueryGraphLabel();
+                    desc = getQueryGraphLabel() + libdiv + desc;
                   }
                   else if(getQueryGraph() && getQueryGraph().length > 0) {
                     tooltip += ', in library: ' + getQueryGraph();
-                    desc += '@'+getQueryGraph();
+                    desc = getQueryGraph() + libdiv + desc;
                   }
               }
           }
@@ -7055,6 +7119,9 @@ if(false){
         '</tbody></table></td>';
         //console.log("bc added: " + ret);
         */
+
+        if(isLiteralValue) selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES_IN);
+
         return ret;
     }
 
@@ -7091,6 +7158,14 @@ if(false){
 
 
 function mouseOverFacet(id, decorateBtn, remove, isEmptyValue){
+  if(id == ID_QUERY){
+    var txt = $('#nav'+id).find('h3, em');
+    if(txt.text() != 'name' && txt.text() != 'keywords'){
+      txt.addClass('removeFacetValue');
+      //txt.addClass('text-danger');
+      return;
+    }
+  }
   $('#nav'+id).find('button').removeClass('btn-'+decorateBtn);
   $('#nav'+id).find('button').addClass('btn-'+remove + 'danger');
   //console.log('btn-'+decorateBtn + ', '+ 'btn-'+remove + 'danger')
@@ -7098,6 +7173,14 @@ function mouseOverFacet(id, decorateBtn, remove, isEmptyValue){
 }
 
 function mouseOutFacet(id, decorateBtn, remove, isEmptyValue){
+  if(id == ID_QUERY){
+    var txt = $('#nav'+id).find('h3, em');
+    if(txt.text() != 'name' && txt.text() != 'keywords'){
+      txt.removeClass('removeFacetValue');
+      //txt.removeClass('text-danger');
+      return;
+    }
+  }
   if(!isEmptyValue) $('#nav'+id).find('button').removeClass('removeFacetValue');
   $('#nav'+id).find('button').removeClass('btn-'+remove+ 'danger');
   $('#nav'+id).find('button').addClass('btn-'+decorateBtn);
