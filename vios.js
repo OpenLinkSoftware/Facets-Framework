@@ -3164,11 +3164,11 @@ $('.avatar').parent().children('.circle').each(async (i) => {
         }
     }
 
-    addDataspace('dbpedia.org','DBPedia',false,true); // try to add LOD Cloud Cache
-    addDataspace(dataspace,getDataspaceLabel(),false,true); // try to add LOD Cloud Cache
-    addDataspace('ggg.vios.network','VIOS',false,true); // try to add LOD Cloud Cache
-    addDataspace('linkeddata.uriburner.com','URI Burner',false,true); // try to add LOD Cloud Cache
-    addDataspace('demo.openlinksw.com','OpenLink Demo',false,true); // try to add LOD Cloud Cache
+    addDataspace('dbpedia.org','DBPedia',false,true); // try to add DBPedia
+    addDataspace('lod.openlinksw.com','LOD Cloud Cache',false,true); // try to add LOD Cloud Cache
+    addDataspace('ggg.vios.network','VIOS',false,true); // try to add VIOS
+    addDataspace('linkeddata.uriburner.com','URI Burner',false,true); // try to add URI Burner
+    addDataspace('demo.openlinksw.com','OpenLink Demo',false,true); // try to add OpenLink Demo
 
     try{
       if(idx){
@@ -4437,6 +4437,10 @@ if(!fct_isPermalink){
         exitGroupBy();
         //if(!fct_isPermalink || preInitialized){// POI: the initial load sequence is over after three calls to doQuery (one call for each menu: showme, expand search, data space), if this fact ever changes, the groupby load from the permalink will break
         qGroupBy = undefined;
+
+    //query.attr('same-as', 'true');
+        fct_query(query, VIEW_TYPE_LIST_COUNT);
+      //console.log('query 3: ' + getQuery().prop('outerHTML'));
 }
 else {
 
@@ -4462,10 +4466,6 @@ else {
 
   fct_isPermalink = false;
 }
-
-    //query.attr('same-as', 'true');
-        fct_query(query, VIEW_TYPE_LIST_COUNT);
-      //console.log('query 3: ' + getQuery().prop('outerHTML'));
       }
       else {
         dqct++;
@@ -5795,7 +5795,7 @@ if(true){
           //rows += '</span></td><td id="ctrl'+id+'" style="white-space:nowrap; vertical-align:top;">';          
           if(propIRI != GROUP_BY_NONE_VALUE){
           rows += '<div class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
-          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); //generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query}" />&nbsp;';
+          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); }" />&nbsp;'; //generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
               //rows += '<img title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
@@ -5957,7 +5957,7 @@ var ckcolor = 'primary';
           //rows += '</span></td><td id="ctrl'+id+'" class="hideCtrl" style="white-space:nowrap; vertical-align:top;">';          
           if(propIRI != GROUP_BY_NONE_VALUE){
           rows += '<div class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
-          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\');//generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query}"/>&nbsp;';
+          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\');}"/>&nbsp;';//generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
           rows += '<i '+buildTitle('preview rolees')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
