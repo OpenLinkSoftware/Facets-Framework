@@ -804,6 +804,7 @@ function fct_handleSparqlSubject(xml, opt){
     }
     var sub = $($(this).children('binding')[0]).text().trim();
     var subLabel = $($(this).children('binding')[1]).text().trim();
+    if(!subLabel || subLabel.length < 0) subLabel =  processLabel(sub);
     var subPropIRI = $($(this).children('binding')[2]).text().trim();
     if(seen.indexOf(sub) >= 0){
       return;
@@ -1390,7 +1391,7 @@ function fct_handleListCountResults(xml, opt){
   if(opt && opt.tag){
     //console.log('opt:'+opt)
       if(opt.tag == TAG_PROPERTY){
-          if(showme === VIEW_TYPE_PROPERTIES){
+          if(showme === VIEW_TYPE_PROPERTIES || showme === VIEW_TYPE_TEXT_PROPERTIES){
             loadPropertyValues(xml, opt);
           }
           $('#' + opt.parentId).removeClass('loading'); 
@@ -1620,7 +1621,9 @@ function getSparqlCount(sparql, type){
   }
   //if(sparql.indexOf('distinct') < 0) sparql = sparql.replace('select ', 'select distinct ');
   if(type == VIEW_TYPE_TEXT) {
-    sparql = sparql.substring(0, sparql.lastIndexOf('order'));
+    if(sparql.indexOf('order') > 0) sparql = sparql.substring(0, sparql.lastIndexOf('order'));
+    if(sparql.indexOf('limit') > 0) sparql = sparql.substring(0, sparql.lastIndexOf('limit'));
+    sparql = sparql.replace('define input:storage virtrdf:IRI_Rank_Storage', '');
   }
   return sparql;
 }
@@ -1803,9 +1806,7 @@ function takeMainFocus(id, silent, lastFocus){
   takeFocus( _root.find('.'+id), getFocus(query));
   //console.log('query after take focus: ' + $('query').html());
 
-  getFocus(query).find('view').attr('offset', 0);
-  getMainFocus().find('view').attr('offset', 0);
-  page = 0;
+  resetPaging();
   //pageTable = 0;
 
 
@@ -1891,8 +1892,7 @@ function setValue(id, val, valLabel, datatype, lang){
   
 
   //getMainFocus().find('view').attr('offset', 0);
-  getMainFocus().find('view').attr('offset', 0);
-  page = 0;
+  resetPaging();
   //pageTable = 0;
 
   //if(fct_isDebug) console.log('setView query: ' + query.html());
@@ -1928,8 +1928,7 @@ function setPropertyValue(id, nodeName, contextId, propIRI, propLabel, val, valL
   getMainFocus().append(p);
 
   //getFocus(query).find('view').attr('offset', 0);
-  getMainFocus().find('view').attr('offset', 0);
-  page = 0;
+  resetPaging();
   //pageTable = 0;
 
   //if(fct_isDebug) console.log('setView query: ' + query.html());
@@ -1961,8 +1960,7 @@ function addPropertyFacet(id, prop, propLabel, val, valLabel, datatype, lang, si
   //console.log('focus: ' + getFocus().attr('label'));
 
   //getFocus(query).find('view').attr('offset', 0);
-  getMainFocus().find('view').attr('offset', 0);
-  page = 0;
+  resetPaging();
   //pageTable = 0;
 
   if(isAKeyDown()) getMainFocus().prepend(p);
@@ -1994,8 +1992,7 @@ function addPropertyOfFacet(id, prop, propLabel, val, valLabel, datatype, lang, 
   //console.log('focus: ' + getFocus().attr('label'));
 
   //getFocus(query).find('view').attr('offset', 0);
-  getMainFocus().find('view').attr('offset', 0);
-  page = 0;
+  resetPaging();
   //pageTable = 0;
 
   if(isAKeyDown()) getMainFocus().prepend(p);
@@ -2018,8 +2015,7 @@ function addClassFacet(id, clazz, label){
   //console.log('focus: ' + getFocus().attr('label'));
 
   //getFocus(query).find('view').attr('offset', 0);
-  getMainFocus().find('view').attr('offset', 0);
-  page = 0;
+  resetPaging();
   //pageTable = 0;
 
   getMainFocus().prepend(c); // POI: 'prepend' to ensure the last one added is the first returned by $.find() 
@@ -2078,7 +2074,7 @@ var TAG_GRAPH = 'g';
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://poc.vios.network";
 var this_endpoint = 'http://poc.vios.network';
 
-var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qTimeout, qNavType, qSubjectBadges, qVerticalChartHeaders, qViewType, qIsChart, qIsRollup;
+var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qPage, qshowMePage, qTimeout, qNavType, qSubjectBadges, qVerticalChartHeaders, qViewType, qIsChart, qIsRollup;
 
 var icon_folder_black = 'http://icon-park.com/imagefiles/folder_icon_black.png';
 var icon_file = 'http://myopenlink.net/DAV/home/sdmonroe/img/blank-file-xxl.png';
@@ -2252,8 +2248,8 @@ function init(){
   $('#dataSpaceMenu > i').removeClass('la-hdd-o');
   $('#dataSpaceMenu > i').removeClass('la-lg');
   $('#dataSpaceMenu > i').removeClass('fs-largest');
-  $('#dataSpaceMenu > i').addClass('fa');
-  $('#dataSpaceMenu > i').addClass('fa-cube');
+  $('#dataSpaceMenu > i').addClass('glyphicon');
+  $('#dataSpaceMenu > i').addClass('glyphicon-chevron-down');
   $('#dataSpaceMenu > i').addClass('fs-largest');
 
   // **** TODO: comment out these lines
@@ -3114,10 +3110,6 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     qIsRollup = fct_getUrlParameter('isRollup');
 
 
-    if(qShowMe && qShowMe.length > 0) {
-      selectMenuItem('showMeMenu', qShowMe);
-      qShowMe = null;
-    }
     if(qTimeout && qTimeout.length > 0) {
       setQueyTimeout(qTimeout);
       qTimeout = null;
@@ -3125,14 +3117,6 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     if(qNavType && qNavType.length > 0) {
       setNavType(qNavType);
       qNavType = null;
-    }
-    if(qPage && qPage.length > 0) {
-      page = qPage;
-      qPage = null;
-    }
-    if(qshowMePage && qshowMePage.length > 0) {
-      showMePage = qshowMePage;
-      qshowMePage = null;
     }
     if(qSearchAllFields && qSearchAllFields.length > 0 && qSearchAllFields.toLowerCase() == 'true'){
       isExpandSearch = true;
@@ -3211,7 +3195,7 @@ $('.avatar').parent().children('.circle').each(async (i) => {
       $('#keywords').select();
     }
 
-    $('#dataSpaceMenu').append('&nbsp;<span id="dataSpaceLabel">'+getDataspaceLabel()+'</span>');
+    $('#dataSpaceMenu').prepend('&nbsp;<span id="dataSpaceLabel">'+getDataspaceLabel()+'</span>');
     
     loadGroupByMenuDefaults();
 
@@ -3224,6 +3208,19 @@ $('.avatar').parent().children('.circle').each(async (i) => {
 
     preInitialized = true;
     if(fct_isPermalink) doQuery(getQueryText());    
+
+    if(qPage && qPage.length > 0) {
+      page = parseInt(qPage);
+      selectMenuItem('groupByMenu', $('#groupByMenu').val(), true);
+      selectGroupBy(true);
+      qPage = null;
+    }
+    if(qshowMePage && qshowMePage.length > 0) {
+      showMePage = parseInt(qshowMePage);
+      selectMenuItem('showMeMenu', $('#showMeMenu').val(), true);
+      selectShowMe(true);
+      qshowMePage = null;
+    }
 
     if(qViewType && qViewType.length > 0) {
       if(qViewType == 'table') {
@@ -4590,7 +4587,7 @@ function selectDataspace(url, label, silent){
   //service_sparql = $('#dataSpaceMenu :selected').attr('value') + '/sparql';
   service_fct = getProxyEndpoint(url) + '/fct/service';
   service_sparql = getProxyEndpoint(url) + '/sparql';
-  LABEL_ROOT = getDataspaceLabel().toUpperCase(); //<i class="fa fa-home" style="padding-bottom:4px;padding-right:2px;"></i>
+  LABEL_ROOT = getDataspaceLabel();//.toUpperCase(); //<i class="fa fa-home" style="padding-bottom:4px;padding-right:2px;"></i>
 
   //if(url.indexOf('data.vios.network') >= 0) LABEL_ROOT = 'VIOS';
 
@@ -4673,19 +4670,25 @@ var groupByResultsCt = 0;
 function resetPaging(){
   page = 0;
   groupByResultsCt = 0;
+  getMainFocus().find('view').attr('offset', 0);
 }
 
 function pageRight(){
-  setViewOffset(getViewOffset() + SIZE_RESULT_SET);
+  //setViewOffset(getViewOffset() + SIZE_RESULT_SET);
   page++;
   //fct_query(query, VIEW_TYPE_LIST_COUNT);
   selectGroupBy(true);
 }
 
 function pageLeft(){
-  setViewOffset(getViewOffset() - SIZE_RESULT_SET);
+  //setViewOffset(getViewOffset() - SIZE_RESULT_SET);
   page--;
   //fct_query(query, VIEW_TYPE_LIST_COUNT);
+  selectGroupBy(true);
+}
+
+function setPage(p){
+  page = p;
   selectGroupBy(true);
 }
 
@@ -5123,6 +5126,7 @@ function loadGroupByResults(xml, focusVarName){
           $("fct\\:column", this).each(function(j) {
               // can't figure out how to access CDATA value of the element, tried many combinations of accessors, none worked
               val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
+              val = val.replace("&lt;![CDATA[","").replace("]]&gt;","");
               //console.log(val);
               switch(j){
                 case 0: value = val; shortform = $(this).attr('shortform'); datatype = $(this).attr('datatype'); lang = $(this).attr('lang'); break;
@@ -5602,11 +5606,10 @@ if(isReverse){
 
 
     if(!isPaging){
-      getFocus(q).find('view').attr('offset', 0);
-      getMainFocus().find('view').attr('offset', 0);
       page = 0;
-      //pageTable = 0;
     }
+    getFocus(q).find('view').attr('offset', page * SIZE_RESULT_SET);
+
 
     $('#groupByHeader').addClass('loading');
     if(getQueryText().length > 0 && iri == GROUP_BY_TEXT_VALUE){
@@ -5649,6 +5652,11 @@ function showMePageLeft(){
   setViewOffset(getViewOffset() - SIZE_RESULT_SET);
   showMePage--;
   //fct_query(query, VIEW_TYPE_LIST_COUNT);
+  selectShowMe(true);
+}
+
+function setShowMePage(p){
+  showMePage = p;
   selectShowMe(true);
 }
 
@@ -5946,6 +5954,7 @@ function loadPropertiesResults(xml){
           $("fct\\:column", this).each(function(j) {
               // can't figure out how to access CDATA value of the element, tried many combinations of accessors, none worked
               val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
+              val = val.replace("&lt;![CDATA[","").replace("]]&gt;","");
               //console.log(val);
               switch(j){
                 case 0: propIRI = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); break;
@@ -6128,6 +6137,7 @@ function loadPropertiesInResults(xml){
           $("fct\\:column", this).each(function(j) {
               // can't figure out how to access CDATA value of the element, tried many combinations of accessors, none worked
               val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
+              val = val.replace("&lt;![CDATA[","").replace("]]&gt;","");
               //console.log(val);
               switch(j){
                 case 0: propIRI = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); break;
@@ -6450,10 +6460,9 @@ exitGroupBy();
     //q.attr('same-as', 'true');
 
     if(!isPaging){
-      getFocus(q).find('view').attr('offset', 0);
-      getMainFocus().find('view').attr('offset', 0);
       showMePage = 0;
     }
+    getFocus(q).find('view').attr('offset', showMePage * SIZE_RESULT_SET);
     
     //takeFocus(q, q);
     fct_query(q, showMeType);
@@ -6550,6 +6559,7 @@ function loadPropertyValues(xml, opts){
               // can't figure out how to access CDATA value of the element, tried many combinations of accessors, none worked
               // seems like jquery is commenting out the CDATA
               val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
+              val = val.replace("&lt;![CDATA[","").replace("]]&gt;","");
               //console.log(val);
               switch(j){
                 case 0: value = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); lang = $(this).attr('lang'); break;
@@ -6652,6 +6662,7 @@ function loadPropertyOfValues(xml, opts){
               // can't figure out how to access CDATA value of the element, tried many combinations of accessors, none worked
               // seems like jquery is commenting out the CDATA
               val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
+              val = val.replace("&lt;![CDATA[","").replace("]]&gt;","");
               //console.log(val);
               switch(j){
                 case 0: value = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); break;
