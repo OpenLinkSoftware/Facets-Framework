@@ -249,19 +249,19 @@ function setViewType(type, q){
 }
 
 function setMutex(cid, type){
-  if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN){
+  if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN || type == VIEW_TYPE_GRAPHS || type == VIEW_TYPE_TEXT_PROPERTIES){
     $('#showMeColumn').attr('mutex', cid);
   }
-  else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT){
+  else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT || type == VIEW_TYPE_TEXT){
     $('#recordsListWidgetContainer').attr('mutex', cid);
   }
 }
 
 function getMutex(type){
-  if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN){
+  if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN || type == VIEW_TYPE_GRAPHS || type == VIEW_TYPE_TEXT_PROPERTIES){
     return $('#showMeColumn').attr('mutex');
   }
-  else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT){
+  else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT || type == VIEW_TYPE_TEXT){
     return $('#recordsListWidgetContainer').attr('mutex');
   }
 }
@@ -1619,6 +1619,9 @@ function getSparqlCount(sparql, type){
     sparql = sparql.substring(sparql.indexOf('select'), sparql.lastIndexOf('}'));
   }
   //if(sparql.indexOf('distinct') < 0) sparql = sparql.replace('select ', 'select distinct ');
+  if(type == VIEW_TYPE_TEXT) {
+    sparql = sparql.substring(0, sparql.lastIndexOf('order'));
+  }
   return sparql;
 }
 
@@ -1628,6 +1631,14 @@ function fct_handleTextResults(xml, opt){
     $('#groupByHeader').removeClass('loading');
     //$('#focusHeader').removeClass('loading');
     $('#groupByCount').text('');
+        var sparql = processSparql(xml, true); // POI: for now, let the table share the Record's list limit and offset
+        var focus = getSparqlFocus(sparql);
+        if(!opt) opt = new Object();
+        opt.tar = 'groupByMenu';
+//        opt.tar = 'showMeMenu';
+        //sparqlMap[opt.focusId] = sparql;
+        fct_sparql(getSparqlCount(sparql, VIEW_TYPE_TEXT), opt);
+
     /*
     var opt = new Object();
     opt.tar = 'groupByMenu';
@@ -2775,7 +2786,7 @@ gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Interact</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a id="ggg" class="nav-link" data-target="#" onclick="selectDataspace(\'http://linkeddata.uriburner.com\', \'URI Burner\', false); doExplore( $(\'.iframe\').attr(\'src\') , true)">GGG</a>';
+        gbcol += '<a id="ggg" class="nav-link" data-target="#" onclick="selectDataspace(\'http://linkeddata.uriburner.com\', \'URI Burner\', false); doExplore( $(\'.iframe\').attr(\'src\') , true)">Lookup</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="www" class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
@@ -3762,6 +3773,7 @@ function activate(){
 
   function doTable(){
     setNavType(NAV_TYPE_2);
+    selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES);
     doQuery(getQueryText());
     $('#recordViewerColumn').addClass('hide');
     $('#groupByColumn').removeClass('col-lg-'+SIZE_GROUP_BY);
@@ -3994,13 +4006,19 @@ if(!$('input[type="text"]').is(":focus")){
         selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES_IN);
     }
     else if (e.keyCode == '84') { // T key
-      if(isExpandSearch){
+      if(isExpandSearch && getMainFocus().attr('class') == ID_QUERY){
           selectMenuItem('showMeMenu', VIEW_TYPE_TEXT_PROPERTIES);
+          selectMenuItem('groupByMenu', GROUP_BY_TEXT_VALUE);
       }
     }
     else if (e.keyCode == '16' || e.keyCode == '76' || e.keyCode == '71') { // Shift key or L key or G key
         selectMenuItem('showMeMenu', VIEW_TYPE_GRAPHS);
     }  
+/*    else if (e.keyCode == '88') { // X key
+        if(isExpandSearch) {
+          selectMenuItem('groupByMenu', GROUP_BY_TEXT_VALUE);
+        }
+    }  */
     else if(e.keyCode == '17') { // Control key
       ctrlDown = true;
     }
@@ -4476,9 +4494,24 @@ else {
       buildNavPath();
       //console.log('query 4: ' + getQuery().prop('outerHTML'));
 
+        var isLiteralValue = false;
+        var v = getMainFocus().children('value');
+        if(v && v.text() && v.text().length > 0 && v.attr('datatype') != 'uri' && getMainFocus().attr('class') != ID_QUERY){
+          isLiteralValue = true;
+        }
+        if(isLiteralValue) selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES_IN);
+
+      checkTextProperties();
+
       /* TODO: use qTip for tooltips, see http://qtip2.com/api
       $('[title!=""]').qtip();
       */
+}
+
+function checkTextProperties(){
+  if(!isExpandSearch || getMainFocus() != ID_QUERY){
+    if($('#showMeMenu > option[value="'+VIEW_TYPE_TEXT_PROPERTIES+'"]')) selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES);;
+  }
 }
 
 function selectMenuItem(id, value, silent){
@@ -4657,36 +4690,36 @@ function pageLeft(){
 }
 
 function loadTextResults(xml){
-      $('#'+ID_GROUP_BY+'').empty();
+      $('#angular_recordsList').empty();
 
       var rows = "";
       var result = $(xml).find("fct\\:result")[0];
       groupByResultsCt = $("fct\\:row", result).length;
         if(page == 0){
-          $("#leftButton").attr('disabled', 'true');
-          $("#leftButton").addClass('disabled');
+          $("#leftButton").addClass('hide');
           $('#leftButton').removeAttr('title');
         }
         else{
 
-          $("#leftButton").removeAttr('disabled');
-          $("#leftButton").removeClass('disabled');
-          //$('#leftButton').attr('title', 'page ' + (page));
+          $("#leftButton").removeClass('hide');
+         //$('#leftButton').attr('title', 'page ' + (page));
           setTitle('leftButton', 'page ' + (page), 'bottom');
 
         }
       if(groupByResultsCt < SIZE_RESULT_SET) {
-        $("#rightButton").attr('disabled', 'true');
-        $("#rightButton").addClass('disabled');
+        $("#rightButton").addClass('hide');
         $('#rightButton').removeAttr('title');
       }
       else {
-        $("#rightButton").removeAttr('disabled');
-        $("#rightButton").removeClass('disabled');
-       // $('#rightButton').attr('title', 'page ' + (page+2));
-          setTitle('rightButton', 'page ' + (page+2), 'bottom');
+        $("#rightButton").removeClass('hide');
+//        $('#rightButton').attr('title', 'page ' + (page+2));
+        setTitle('rightButton', 'page ' + (page+2), 'bottom');
 
       }
+
+
+      var loadedUri = false;
+
 
       $("fct\\:row", result).each(function(i) {
           //console.log($(this).html());
@@ -4698,6 +4731,7 @@ function loadTextResults(xml){
           $("fct\\:column", this).each(function(j) {
               // can't figure out how to access CDATA value of the element, tried many combinations of accessors, none worked
               val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
+              val = val.replace("&lt;![CDATA[","").replace("]]&gt;","");
               //console.log(val);
               switch(j){
                 //case 0: value = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); lang = $(this).attr('lang'); break;
@@ -4709,6 +4743,188 @@ function loadTextResults(xml){
                 case 5: text = htmlDecode(val); break;
               }
           });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          if(!datatype) datatype = '';
+
+          if(value.length <= 0 && label.length <= 0 && ct<= 1){
+              //rows += '<tr><td class="up" id="gbr_'+id+'"><span style="font-size:smaller;font-family:Consolas,Courier New; color: #000" id="'+id+'">';
+              //rows += 'Too many results. Please filter them.';
+              //rows += '</span></td></tr>';
+          }
+          else {
+
+              if(!loadedUri) {
+                  if(datatype === 'uri'){
+                    loadedUri = true;
+                    describe(value);
+                  } 
+              }
+              var propIRI = getGroupByValue();
+              var propLabel = getGroupByLabel();
+              var facet = false;
+
+              //var groupByCriteria = getMainFocus();
+              var isGroupByCriteria = isGrouped(); // POI: For now, "Used As" fields are not treated as "group by", since they are not "added" from the Group by menu, but are instead added from the Used As menu
+              //if(isGroupByCriteria){
+                //propIRI = groupByCriteria.attr('iri');
+                //propLabel = groupByCriteria.attr('label');
+    //var l = $('#groupByMenu :selected').attr('l');
+
+    //propIRI = (l) ? l.split(DELIMIT_GROUP_BY_VALUE_AND_LABEL)[0] : $('#groupByMenu :selected').val();
+    //propLabel = (l) ? l.split(DELIMIT_GROUP_BY_VALUE_AND_LABEL)[1]: $('#groupByMenu :selected').text();
+
+              //}
+
+              _root.find('.' + getMainFocus().attr('class') + ' > property[iri=\''+propIRI+'\'] > value').each(function(k){
+                if(!facet && $(this).text() === value) {
+                  facet = true;
+                }
+              });
+              var checked = (facet) ? ' checked="checked"': '';
+              var active = (facet) ? 'active': '';
+
+              label = processLabel(label, value, datatype, lang);
+              labels[value] = label;
+
+              // POI: the label and values need to have the apostrophe (') char removed before insertion into the javascript functions below
+              // but they need to be desanitized by the respective javascript methods before being used in a query (or else the query will fail due to value mismatch)
+              // also, a double encoding is used by the sanitize function, so we have to desanitize the label before displaying it in the data canvas
+              label = sanitizeLabel(label);
+              value = sanitizeLabel(value);
+              //console.log($(col[0]));
+              var id = createId();
+
+              var opts = new Object();
+              opts.tag = TAG_LIST;
+              opts.parentId = 'gbr_'+id;
+              opts.childrenId = opts.tag + opts.parentId;
+
+var color = 'success';
+var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'primary' : 'info';
+
+/*
+
+              rows +=  '<button id="'+opts.parentId+'" class="up list-group-item text-left">';
+                rows += '<span class="thumb-sm float-left mr"><img class="rounded-circle" src="'+getFaviconUrl(value)+'" alt="...">';
+                rows += '<i class="status status-bottom bg-success"></i>';
+                rows += '</span>';
+                rows += '<div>';
+                rows += '<h6 class="m-0">'+label+'</h6>';
+                rows += '<p class="help-block text-ellipsis m-0"></p>';
+                rows += '</div>';
+                rows += '</button>';
+*/
+rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
+                                rows +=  '<span class="thumb-sm float-left mr">';
+
+/*
+
+                                    rows +=  '<img alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
+                                    rows +=  '<i class="status status-bottom bg-success"></i>';
+                                rows +=  '</span>';
+
+
+
+            rows +=  '<div>';
+              rows +=  '<h6 class="m-0">'+label+'</h6>';
+              rows +=  '<p class="help-block text-ellipsis m-0"></p>';
+            rows +=  '</div>';
+
+
+rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
+                                rows +=  '<span class="thumb-sm float-left mr">';
+                                    //rows +=  '<img alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
+                                    rows +=  '<span _ngcontent-c9="" class="badge badge-pill badge-info" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addClassFacet(\''+id+'\', \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</span>';
+                                    //rows +=  '<i class="status status-bottom bg-success"></i>';
+                                rows +=  '</span>';
+            rows +=  '<div>';
+              rows +=  '<h6 class="m-0">'+label+'</h6>';
+              rows +=  '<p class="help-block text-ellipsis m-0"></p>';
+            rows +=  '</div>';
+          rows +=  '</a>';
+*/
+
+if(true){
+
+              //rows += '<tr><td class="up" id="'+opts.parentId+'"><span id="'+id+'">';
+
+              if(datatype=='uri') {
+                rows += '<img style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
+                                  rows +=  '<i class="status status-bottom bg-'+color+'"></i>';
+              }
+              else {
+                rows += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="glyphicon glyphicon-tag"></span>';
+              }
+                                rows +=  '</span>';
+
+            //rows +=  '<div>';
+
+
+
+              label = deSanitizeLabel(label);
+              var labelLink = (datatype=='uri') ? ' onclick="javascript:describe(\''+value+'\');"' : '';
+              rows +=  '<h6 class="text-ellipsis m-0" '+labelLink+'>';
+              rows+='<span '+buildTitle(value)+'>'+label+'</span>';
+              rows +=  '<p class="help-block text-ellipsis m-0">'+text+'</p>';
+
+
+rows+='</h6>';
+
+if(!isGroupByCriteria){
+              var badgeId = createId();
+              var childProp = getMainFocus().children('property, property-of');
+//              if(childProp.length > 0) rows +=  '<p class="text-ellipsis m-0" id="'+badgeId+'"></p><script type="text/javascript">loadSubjectBadge(\''+value+'\', \''+$(childProp[0]).attr('iri')+'\', \''+badgeId+'\', '+($(childProp[0]).prop('nodeName').toLowerCase() == 'property-of')+');</script><!--'+$(childProp[0]).prop('nodeName')+'-->'; //
+              rows +=  '<p class="text-ellipsis m-0" id="'+badgeId+'"></p><script type="text/javascript">loadSubjectBadge(\''+value+'\', \''+badgeId+'\');</script>'; //
+
+}
+            //rows +=  '</div>';
+
+          rows +=  '</a>';
+
+          }
+}          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 
 
           if(value.length <= 0 && label.length <= 0 && ct<= 1){
@@ -4735,9 +4951,14 @@ function loadTextResults(xml){
               rows += text;
               rows += '</span></td></tr>';
           }
+
+*/
+
+
+
       });
       //console.log(rows);
-          $('#'+ID_GROUP_BY+'').append(rows);
+          $('#angular_recordsList').append(rows);
 
         //$('#groupby').append(rows);
         //return total;
@@ -6842,10 +7063,6 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
         //console.log('nodeName: ' + $(ele).prop('nodeName'));
         //if(isPropOf) console.log('is property-of: ' + label);
 
-        var isLiteralValue = false;
-        if(v && v.text() && v.text().length > 0 && v.attr('datatype') != 'uri' && id != ID_QUERY){
-          isLiteralValue = true;
-        }
 
         var action = "removeValue";
         var categoryAsValue = false;
@@ -6856,7 +7073,7 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
               if(cval){
                 val = cval;
                 if(id != ID_QUERY) {
-                  val = 'is ' + aOrAn(val) + ' ' + val;
+                  val = aOrAn(val) + ' ' + val;
                   categoryAsValue = true;
                 }
               }
@@ -7119,8 +7336,6 @@ if(false){
         '</tbody></table></td>';
         //console.log("bc added: " + ret);
         */
-
-        if(isLiteralValue) selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES_IN);
 
         return ret;
     }
