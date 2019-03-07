@@ -248,17 +248,39 @@ function setViewType(type, q){
   $(q).find('view').attr('type', type);
 }
 
-function setMutex(cid, type){
-  if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN || type == VIEW_TYPE_GRAPHS || type == VIEW_TYPE_TEXT_PROPERTIES){
-    $('#showMeColumn').attr('mutex', cid);
+function setMutex(mtx, type, isCount){
+  if(isCount) {
+    if(type == 'showMeMenu'){
+      $('#showMeCount').attr('mutex', mtx);
+    }
+    else if(type == 'groupByMenu'){
+      $('#groupByCount').attr('mutex', mtx);
+    }
+    else if(type == 'table'){
+      $('#tableCount').attr('mutex', mtx);
+    }
+  }
+  else if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN || type == VIEW_TYPE_GRAPHS || type == VIEW_TYPE_TEXT_PROPERTIES){
+    $('#showMeColumn').attr('mutex', mtx);
   }
   else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT || type == VIEW_TYPE_TEXT){
-    $('#recordsListWidgetContainer').attr('mutex', cid);
+    $('#recordsListWidgetContainer').attr('mutex', mtx);
   }
 }
 
-function getMutex(type){
-  if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN || type == VIEW_TYPE_GRAPHS || type == VIEW_TYPE_TEXT_PROPERTIES){
+function getMutex(type, isCount){
+  if(isCount) {
+    if(type == 'showMeMenu'){
+      return $('#showMeCount').attr('mutex');
+    }
+    else if(type == 'groupByMenu'){
+      return $('#groupByCount').attr('mutex');
+    }
+    else if(type == 'table'){
+      return $('#tableCount').attr('mutex');
+    }
+  }
+  else if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN || type == VIEW_TYPE_GRAPHS || type == VIEW_TYPE_TEXT_PROPERTIES){
     return $('#showMeColumn').attr('mutex');
   }
   else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT || type == VIEW_TYPE_TEXT){
@@ -312,7 +334,7 @@ function getDbActivity(xml){
 var dataspace = 'http://lod.openlinksw.com';
 var service_fct = getProxyEndpoint(dataspace) + "/fct/service";
 var service_sparql = getProxyEndpoint(dataspace) + "/sparql";
-var service_fct_label = "LOD Cloud Cache";
+var service_fct_label = "LOD";
 var dataspaceAdded = false;
 
 //var service_fct = "http://myopenlink.net/fct/service";
@@ -607,6 +629,7 @@ function fct_sparql(sparql, opt){
   //var qstr = q.prop('outerHTML');
   //var qstr = q.prop('outerHTML');
   var id = sparql ? (service_fct + sparql).hashCode() : 0;
+  setMutex(id, opt.tar, true);
   //q.attr('timeout', fct_queryTimeout);
   var resp;
   if(fct_isCache){
@@ -630,13 +653,21 @@ function fct_sparql(sparql, opt){
             }
             else {
               if(opt.tar == 'showMeMenu'){
+                if(getMutex(opt.tar, true) != id){
+                  return;
+                }
                 fct_handleSparqlShowMeCount(resp, opt);
-
               }
               else if(opt.tar == 'groupByMenu'){
+                if(getMutex(opt.tar, true) != id){
+                  return;
+                }
                 fct_handleSparqlGroupByCount(resp, opt);
               }
               else if(opt.tar == 'table'){
+                if(getMutex(opt.tar, true) != id){
+                  return;
+                }
                 fct_handleSparqlTableCount(resp, opt);
               }
               else if(opt.tar == 'subject'){
@@ -656,6 +687,7 @@ function fct_sparql(sparql, opt){
           jqXHR.url = settings.url;
       },
           success : function(xml) {
+
             xml = xml.replaceAll('xml:lang', 'lang');
 
             if(!opt.tar){
@@ -663,13 +695,22 @@ function fct_sparql(sparql, opt){
             }
             else {
               if(opt.tar == 'showMeMenu'){
+                if(getMutex(opt.tar, true) != id){
+                  return;
+                }
                 fct_handleSparqlShowMeCount(xml, opt);
 
               }
               else if(opt.tar == 'groupByMenu'){
+                if(getMutex(opt.tar, true) != id){
+                  return;
+                }
                 fct_handleSparqlGroupByCount(xml, opt);
               }
               else if(opt.tar == 'table'){
+                if(getMutex(opt.tar, true) != id){
+                  return;
+                }
                 fct_handleSparqlTableCount(xml, opt);
               }
               else if(opt.tar == 'subject'){
@@ -1603,18 +1644,19 @@ function setSparqlProjection(sparql, projection){
 }
 
 function getSparqlCount(sparql, type){
-  var ctVar = (type==VIEW_TYPE_GRAPHS) ? '?g' : getSparqlFocus(sparql)
+  var ctVar = (type==VIEW_TYPE_GRAPHS) ? '?g' : getSparqlFocus(sparql);
+  var distinctStr = 'distinct ';
   switch(type) {
 //    case VIEW_TYPE_CLASSES: ctVar = ctVar + 'c'; break;
 //    case VIEW_TYPE_PROPERTIES: ctVar = ctVar + 'p'; break;
 //    case VIEW_TYPE_PROPERTIES_IN: ctVar = ctVar + 'ip'; break;
 //    case VIEW_TYPE_TEXT_PROPERTIES: ctVar = ctVar + 'textp'; break;
     case VIEW_TYPE_GRAPHS: ctVar = '?g'; break; // redundant
-    case VIEW_TYPE_TEXT: ctVar = '?o1'; break;
+    case VIEW_TYPE_TEXT: distinctStr=''; break; //ctVar = '?o1'
     default: ctVar = getSparqlFocus(sparql); break;
   }
   if(VIEW_TYPE_TEXT != type && sparql.indexOf('group')>0) sparql = sparql.substring(0, sparql.indexOf('group'));
-  sparql = setSparqlProjection(sparql, 'count(distinct '+ctVar+') as ?c1');
+  sparql = setSparqlProjection(sparql, 'count('+distinctStr+ctVar+') as ?c1');
   if(sparql.match(/{\s*select.*distinct.*?{/gi)){
     sparql = sparql.substring(sparql.indexOf('select')+6);
     sparql = sparql.substring(sparql.indexOf('select'), sparql.lastIndexOf('}'));
@@ -2347,12 +2389,12 @@ function init(){
 var newDataspacePicker = '';
 
 newDataspacePicker += '<div _ngcontent-c2="" class="btn-group dropdown" dropdown="">';
-            newDataspacePicker += '<button _ngcontent-c2="" class="btn btn-default" id="dropdown-btn-three">LOD Cloud</button>';
+            newDataspacePicker += '<button _ngcontent-c2="" class="btn btn-default" id="dropdown-btn-three">LOD</button>';
             newDataspacePicker += '<button _ngcontent-c2="" class="btn btn-default dropdown-toggle" dropdowntoggle="" aria-haspopup="true" aria-expanded="false">';
               newDataspacePicker += '<i _ngcontent-c2="" class="fa fa-caret-down"></i>';
             newDataspacePicker += '</button>';
             newDataspacePicker += '<!----><ul _ngcontent-c2="" aria-labelledby="dropdown-btn-three" class="dropdown-menu" role="menu" style="left: 0px; right: auto; top: 100%; transform: translateY(0px);">';
-              newDataspacePicker += '<li _ngcontent-c2="" role="menuitem"><a _ngcontent-c2="" value="http://lod.openlinksw.com" class="dropdown-item">LOD Cloud</a></li>';
+              newDataspacePicker += '<li _ngcontent-c2="" role="menuitem"><a _ngcontent-c2="" value="http://lod.openlinksw.com" class="dropdown-item">LOD</a></li>';
               newDataspacePicker += '<li _ngcontent-c2="" role="menuitem"><a _ngcontent-c2="" value="http://id.myopenlinksw.net" class="dropdown-item">MyOpenLink</a></li>';
               newDataspacePicker += '<li _ngcontent-c2="" role="menuitem"><a _ngcontent-c2="" value="http://uriburner.net" class="dropdown-item">URI Burner</a></li>';
               newDataspacePicker += '<li _ngcontent-c2="" role="menuitem"><a _ngcontent-c2="" value="http://demo.openlinksw.net" class="dropdown-item">OpenLink Demo</a></li>';
@@ -3160,7 +3202,7 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     }
 
     addDataspace('dbpedia.org','DBPedia',false,true); // try to add DBPedia
-    addDataspace('lod.openlinksw.com','LOD Cloud Cache',false,true); // try to add LOD Cloud Cache
+    addDataspace('lod.openlinksw.com','LOD',false,true); // try to add LOD Cloud Cache
     addDataspace('ggg.vios.network','VIOS',false,true); // try to add VIOS
     addDataspace('linkeddata.uriburner.com','URI Burner',false,true); // try to add URI Burner
     addDataspace('demo.openlinksw.com','OpenLink Demo',false,true); // try to add OpenLink Demo
@@ -3261,7 +3303,7 @@ function doRemoveDataspace(){
     selectDataspace(ds[idx][0], ds[idx][1]);
   }
   else {
-    addDataspace('lod.openlinksw.com','LOD Cloud Cache',false,false); // try to add LOD Cloud Cache
+    addDataspace('lod.openlinksw.com','LOD',false,false); // try to add LOD Cloud Cache
   }
 }
 
@@ -4003,7 +4045,8 @@ if(!$('input[type="text"]').is(":focus")){
         selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES_IN);
     }
     else if (e.keyCode == '84') { // T key
-      if(isExpandSearch && getMainFocus().attr('class') == ID_QUERY){
+      if(isExpandSearch){
+          takeMainFocus(ID_QUERY);
           selectMenuItem('showMeMenu', VIEW_TYPE_TEXT_PROPERTIES);
           selectMenuItem('groupByMenu', GROUP_BY_TEXT_VALUE);
       }
@@ -4669,7 +4712,7 @@ var groupByResultsCt = 0;
 
 function resetPaging(){
   page = 0;
-  groupByResultsCt = 0;
+  //groupByResultsCt = 0;
   getMainFocus().find('view').attr('offset', 0);
 }
 
@@ -4886,6 +4929,17 @@ if(true){
               var labelLink = (datatype=='uri') ? ' onclick="javascript:describe(\''+value+'\');"' : '';
               rows +=  '<h6 class="text-ellipsis m-0" '+labelLink+'>';
               rows+='<span '+buildTitle(value)+'>'+label+'</span>';
+              if(text.indexOf('<b>') > 30) text = text.substring(text.indexOf('<b>') - 10);
+              var kwa = getQueryText().split(' ');
+              for(k = 0; k < kwa.length; k++){
+                var clz = '';
+                if(k == 0) clz = 'style="padding: 2px 5px"';
+                var offset = 1;
+                if(kwa[k].length > 1) offset = 2;
+                if(kwa[k].length > 2) offset = 3;
+                var krgx = new RegExp('<b>'+kwa[k]+'</b>','gi');
+                text = text.replace(krgx, '<b '+buildTitle(kwa[k])+' >'+kwa[k].substring(0, offset)+'</b>');
+              }
               rows +=  '<p class="help-block text-ellipsis m-0">'+text+'</p>';
 
 
@@ -4895,7 +4949,7 @@ if(!isGroupByCriteria){
               var badgeId = createId();
               var childProp = getMainFocus().children('property, property-of');
 //              if(childProp.length > 0) rows +=  '<p class="text-ellipsis m-0" id="'+badgeId+'"></p><script type="text/javascript">loadSubjectBadge(\''+value+'\', \''+$(childProp[0]).attr('iri')+'\', \''+badgeId+'\', '+($(childProp[0]).prop('nodeName').toLowerCase() == 'property-of')+');</script><!--'+$(childProp[0]).prop('nodeName')+'-->'; //
-              rows +=  '<p class="text-ellipsis m-0" id="'+badgeId+'"></p><script type="text/javascript">loadSubjectBadge(\''+value+'\', \''+badgeId+'\');</script>'; //
+              rows +=  '<p class="text-ellipsis m-0 text-match-subject" id="'+badgeId+'"></p><script type="text/javascript">loadSubjectBadge(\''+value+'\', \''+badgeId+'\');</script>'; //
 
 }
             //rows +=  '</div>';

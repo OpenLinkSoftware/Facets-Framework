@@ -552,6 +552,9 @@ p.help-block b{
 
 }
 
+p.text-match-subject{
+  padding-top: 4px;
+}
 
 /*
 .text-warning {
