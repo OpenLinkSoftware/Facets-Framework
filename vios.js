@@ -50,7 +50,7 @@ function Rainbow(){"use strict";var e=null,r=0,F=100,t=["ff0000","ffff00","00ff0
 var VIEW_TYPE_LIST = "list";
 var VIEW_TYPE_LIST_COUNT = "list-count";
 var VIEW_TYPE_PROPVAL_LIST = "propval-list";
-var VIEW_TYPE_PROPERTIES = "properties";
+var VIEW_TYPE_PROPERTIES = "properties"; 
 var VIEW_TYPE_PROPERTIES_IN = "properties-in";
 var VIEW_TYPE_TEXT_PROPERTIES = "text-properties";
 var VIEW_TYPE_CLASSES = "classes";
@@ -408,6 +408,7 @@ function getURIBurnerURL(url){
 }
 
 function fct_query(q, viewType, opt){
+  var tstamp = new Date().getTime();
   if(!opt) opt = new Object();
   opt.focusId = getFocus(q).attr('class');
   $('[data-toggle="tooltip"]').tooltip('hide');
@@ -495,9 +496,10 @@ function fct_query(q, viewType, opt){
         if(!xml.startsWith('<')) {
           filter = xml.substring(0, xml.indexOf('<fct:facets'));
           xml = xml.substring(xml.indexOf('<fct:facets'));
-          xml = xml.replace('fct:facets ', 'fct:facets timestamp="' + new Date().getTime() + '" ');          
           //xml = xml.replace('fct:facets ', 'fct:facets sparql="' + sparql + '" ');
         }
+        xml = xml.replace('fct:facets ', 'fct:facets timestampResp="' + new Date().getTime() + '" ');
+        xml = xml.replace('fct:facets ', 'fct:facets timestampReq="' + tstamp + '" ');
         xml = xml.replaceAll('xml:lang', 'lang');
         //xml = xml.replace('fct:','');
 
@@ -614,6 +616,7 @@ function fct_query(q, viewType, opt){
 }
 
 function fct_sparql(sparql, opt){
+  var tstamp = new Date().getTime();
   if(!opt) opt = new Object();
   fct_isCache = $('#isCache').is(':checked');
   fct_isDebug = $('#isDebug').is(':checked');
@@ -673,20 +676,28 @@ function fct_sparql(sparql, opt){
               else if(opt.tar == 'subject'){
                 fct_handleSparqlSubject(resp, opt);
               }
+              else if(opt.tar == 'record'){
+                fct_handleSparqlDescribe(resp, opt);
+              }
             }
 
     updatePermalink();
     return;
   }
+
+  var accept = 'application/sparql-results+xml';
+  if(opt.tar == 'record') accept = 'application/rdf+xml';
   var req = $.ajax({
       url: service_sparql + "?query=" + encodeURIComponent(sparql),
       type: 'GET',
-      headers: {Accept: "application/sparql-results+xml"},
+      headers: {Accept: accept},
       dataType: "text", // POI: can't do dataType: xml, since the service sometimes returns malformed XML
       beforeSend: function(jqXHR, settings) {
           jqXHR.url = settings.url;
       },
           success : function(xml) {
+        xml = xml.replace('sparql ', 'sparql timestampResp="' + new Date().getTime() + '" ');
+        xml = xml.replace('sparql ', 'sparql timestampReq="' + tstamp + '" ');
 
             xml = xml.replaceAll('xml:lang', 'lang');
 
@@ -715,6 +726,9 @@ function fct_sparql(sparql, opt){
               }
               else if(opt.tar == 'subject'){
                 fct_handleSparqlSubject(xml, opt);
+              }
+              else if(opt.tar == 'record'){
+                fct_handleSparqlDescribe(xml, opt);
               }
             }
           //console.log('sparql results: ' + xml);
@@ -869,6 +883,9 @@ function fct_handleSparqlSubject(xml, opt){
   });
 }
 
+function fct_handleSparqlDescribe(xml, opt){
+  loadDescribeResults(xml);
+}
 
 function fct_handleGeoListResults(xml, opt){
     loadGeoListResults(xml);
@@ -1455,7 +1472,7 @@ function fct_handleListCountResults(xml, opt){
     
   }
       else {
-        $('#describe').attr('src', '');
+        $('#angular_recordViewer').attr('src', '');
       //  $('#'+viewType+'').empty();
 
 
@@ -1669,6 +1686,12 @@ function getSparqlCount(sparql, type){
   }
   return sparql;
 }
+
+
+function getSPARQLDescribe(uri){
+  return 'describe <' + uri + '>';
+}
+
 
 function fct_handleTextResults(xml, opt){
     var groupby = $('#groupByMenu :selected').attr('value');
@@ -2190,6 +2213,8 @@ function historyBackward(){
 
 var ds = new Array();
 
+var record;
+
 function init(){
     fct_init(); // this method must be the first method called by the implementation of the fct_ framework
 
@@ -2275,7 +2300,6 @@ function init(){
   $('#showMeRightButton').remove();
   //$('#keywords').remove();
   $('.search-area').remove();
-  $('#describe').remove();
 
   $('#isDebug').prop('checked', false);
 
@@ -2823,9 +2847,9 @@ gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Interact</a>';
       gbcol += '</li>';
-      gbcol += '<li class="nav-item">';
-        gbcol += '<a id="ggg" class="nav-link" data-target="#" onclick="selectDataspace(\'http://linkeddata.uriburner.com\', \'URI Burner\', false); doExplore( $(\'.iframe\').attr(\'src\') , true)">Lookup</a>';
-      gbcol += '</li>';
+//      gbcol += '<li class="nav-item">';
+//        gbcol += '<a id="ggg" class="nav-link" data-target="#" onclick="selectDataspace(\'http://linkeddata.uriburner.com\', \'URI Burner\', false); doExplore( $(\'.iframe\').attr(\'src\') , true)">Lookup</a>';
+//      gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="www" class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
       gbcol += '</li>';
@@ -2873,7 +2897,7 @@ gbcol += '</nav>';
             gbcol += '<div id="angular_recordViewer" class="embed-responsive embed-responsive-1by1">';
 
 
-gbcol += '<iframe id="describe" class="iframe embed-responsive-item" src="" height="100%"></iframe>';
+//gbcol += '<iframe id="describe" class="iframe embed-responsive-item" src="" height="100%"></iframe>';
             gbcol += '</div>';
 
 
@@ -3983,27 +4007,31 @@ function checkKey(e) {
 
     e = e || window.event;
 
-    if (e.keyCode == '65') {
-      aKeyDown = true;
-    }
-    else if (e.keyCode == '188') { // period key
-        if(page > 0 && !$('#leftButton').hasClass('hide')) pageLeft();
-    }
-    else if (e.keyCode == '190') { // comma key
-        if(!$('#rightButton').hasClass('hide')) pageRight();
-    }
-    else if (e.keyCode == '37') { // left arrow key
-       if(showMePage > 0 && !$('#showMeLeftButton').hasClass('hide')) showMePageLeft();
-    }
-    else if (e.keyCode == '39') { // right arrow key
-       if(!$('#showMeRightButton').hasClass('hide')) showMePageRight();
-    }
-    else if (e.keyCode == '116') { // F5 key
+    if (e.keyCode == '116') { // F5 key
        doExplore($('#keywords').val());
     }
 
 
 if(!$('input[type="text"]').is(":focus")){
+    if (e.keyCode == '65') {
+      aKeyDown = true;
+    }
+    else if (e.keyCode == '188') { // period key
+        if(page > 0 && !$('#leftButton').hasClass('hide')) pageLeft();
+        else beep2();
+    }
+    else if (e.keyCode == '190') { // comma key
+        if(!$('#rightButton').hasClass('hide')) pageRight();
+        else beep2();
+    }
+    else if (e.keyCode == '37') { // left arrow key
+       if(showMePage > 0 && !$('#showMeLeftButton').hasClass('hide')) showMePageLeft();
+        else beep2();
+    }
+    else if (e.keyCode == '39') { // right arrow key
+       if(!$('#showMeRightButton').hasClass('hide')) showMePageRight();
+        else beep2();
+    }
   if(ctrlDown && false){ // turn this off for now
     if (e.keyCode == '67') { // Delete key or C key
       if(isControlListVisible()) hideControlList();
@@ -4044,12 +4072,17 @@ if(!$('input[type="text"]').is(":focus")){
     else if (e.keyCode == '13' || e.keyCode == '82') { // Return key or R key
         selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES_IN);
     }
+    else if (e.keyCode == '68') { // D key
+      var dsidx = ds.indexOfDataspace(dataspace);
+      if(dsidx == ds.length - 1) dsidx = 0;
+      else dsidx++;
+      selectDataspace(ds[dsidx][0], ds[dsidx][1]);
+    }
     else if (e.keyCode == '84') { // T key
-      if(isExpandSearch){
-          takeMainFocus(ID_QUERY);
-          selectMenuItem('showMeMenu', VIEW_TYPE_TEXT_PROPERTIES);
-          selectMenuItem('groupByMenu', GROUP_BY_TEXT_VALUE);
-      }
+      isExpandSearch = true;
+      takeMainFocus(ID_QUERY);
+      selectMenuItem('showMeMenu', VIEW_TYPE_TEXT_PROPERTIES);
+      selectMenuItem('groupByMenu', GROUP_BY_TEXT_VALUE);
     }
     else if (e.keyCode == '16' || e.keyCode == '76' || e.keyCode == '71') { // Shift key or L key or G key
         selectMenuItem('showMeMenu', VIEW_TYPE_GRAPHS);
@@ -4271,10 +4304,19 @@ function processLabel(label, value, datatype, lang, labelSize){
 //var snd = new Audio("data:audio/wav;base64,"+beep1Str);  
 
 var snd = new Audio('http://www.soundjay.com/button/beep-24.wav');
+var snd2 = new Audio('http://www.soundjay.com/button/beep-07.wav');
 
 function beep() {
     try{
       snd.play();
+    }
+    catch(e){
+
+    }
+}
+function beep2() {
+    try{
+      snd2.play();
     }
     catch(e){
 
@@ -4547,6 +4589,7 @@ else {
       $('[title!=""]').qtip();
       */
 }
+
 
 function checkTextProperties(){
   if(!isExpandSearch || getMainFocus() != ID_QUERY){
@@ -4879,7 +4922,7 @@ var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'p
                 rows += '</button>';
 */
 rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
-                                rows +=  '<span class="thumb-sm float-left mr">';
+                                rows +=  '<span class="thumb-sm float-left mr-1">';
 
 /*
 
@@ -4935,10 +4978,18 @@ if(true){
                 var clz = '';
                 if(k == 0) clz = 'style="padding: 2px 5px"';
                 var offset = 1;
-                if(kwa[k].length > 1) offset = 2;
-                if(kwa[k].length > 2) offset = 3;
-                var krgx = new RegExp('<b>'+kwa[k]+'</b>','gi');
-                text = text.replace(krgx, '<b '+buildTitle(kwa[k])+' >'+kwa[k].substring(0, offset)+'</b>');
+                //if(kwa[k].length == 4) offset = 1;
+                //if(kwa[k].length == 5) offset = 2;
+                var krgx = new RegExp('<b>('+kwa[k]+')</b>','gi');
+                var match = krgx.exec(text);
+                if(match){
+                  var seen = [];
+                  for(l = 1; l < match.length; l++) {
+                    var substitute = (match[l].length <= 2) ? match[l] : match[l].substring(0, 1)+'\''+match[l].substring(match[l].length - offset);
+                    seen.push(substitute);
+                    text = text.replace(krgx, '<b '+buildTitle(match[l])+' >'+substitute+'</b>');
+                  }
+                }
               }
               rows +=  '<p class="help-block text-ellipsis m-0">'+text+'</p>';
 
@@ -5260,7 +5311,7 @@ var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'p
                 rows += '</button>';
 */
 rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
-                                rows +=  '<span class="thumb-sm float-left mr">';
+                                rows +=  '<span class="thumb-sm float-left m-0 mr-1">';
 
 /*
 
@@ -6431,7 +6482,81 @@ var ckcolor = 'primary';
         //return total;
 } // loadPropertiesResults
 
+function loadDescribeResults(xml){
+    $('#angular_recordViewer').empty();
+    var content = "";
+    var description = $(xml).children('rdf\\:Description');
+    var triples = description.children();
+    for(i = 0; i < triples.length; i++){
 
+    }
+
+    var uri = $('#angular_recordViewer').attr('iri');
+
+    if(uri.startsWith('http://dbpedia.org')) $('#angular_recordViewer').append('<iframe src="'+uri+'"/>');
+    else $('#angular_recordViewer').append('<iframe src="'+getURIBurnerURL(uri)+'"/>');
+
+    if($('#angular_recordViewer').attr('iri') == 'http://dbpedia.org/ontology/lccn'){
+
+//    content += '<section class="widget">';
+//    content += '<div class="widget-body">';
+    content += '<div class="widget-top-overflow text-white">';
+    content += '<div class="height-250 overflow-hidden">';
+    content += '<img class="img-fluid" src="assets/img/pictures/19.jpg">';
+    content += '</div>';
+    content += '<div class="btn-toolbar">';
+    content += '<a class="btn btn-outline btn-sm pull-right" href="#">';
+    content += '<i class="fa fa-twitter mr-xs"></i> Follow ';
+    content += '</a>';
+    content += '</div>';
+    content += '</div>';
+
+    content += '<div class="row">';
+    content += '<div class="col-md-5 col-12 text-center">';
+    content += '<div class="post-user post-user-profile">';
+    content += '<span class="thumb-xl"><img alt="..." class="rounded-circle" src="assets/img/people/a5.jpg"></span>';
+    content += '<h5 class="fw-normal">Adam <span class="fw-semi-bold">Johns</span></h5>';
+    content += '<p>UI/UX designer</p>';
+    content += '<a class="btn btn-danger btn-sm mt-sm" href="#"> &nbsp;Send <i class="fa fa-envelope ml-xs"></i>&nbsp; </a>';
+    content += '<ul class="contacts">';
+    content += '<li><i class="fa fa-lg fa-phone fa-fw mr-xs"></i><a href="#"> +375 29 555-55-55</a></li>';
+    content += '<li><i class="fa fa-lg fa-envelope fa-fw mr-xs"></i><a href="#"> psmith@example.com</a></li>';
+    content += '<li><i class="fa fa-lg fa-map-marker fa-fw mr-xs"></i><a href="#"> Minsk, Belarus</a></li>';
+    content += '</ul>';
+    content += '</div>';
+    content += '</div>';
+    content += '<div class="col-md-7 col-12">';
+    content += '<div class="stats-row stats-row-profile mt text-left">';
+    content += '<div class="stat-item">';
+    content += '<p class="value text-left">251</p>';
+    content += '<h6 class="name">Posts</h6>';
+    content += '</div>';
+    content += '<div class="stat-item">';
+    content += '<p class="value text-left">9.38%</p>';
+    content += '<h6 class="name">Conversion</h6>';
+    content += '</div>';
+    content += '<div class="stat-item">';
+    content += '<p class="value text-left">842</p>';
+    content += '<h6 class="name">Followers</h6>';
+    content += '</div>';
+    content += '</div>';
+    content += '<p class="text-left mt-lg">';
+    content += '<a class="badge badge-warning rounded-0" href="#"> UI/UX </a>';
+    content += '<a class="badge badge-danger rounded-0 ml-xs" href="#"> Web Design </a>';
+    content += '<a class="badge badge-default rounded-0 ml-xs" href="#"> Mobile Apps </a>';
+    content += '</p>';
+    content += '<p class="lead mt-lg"> My name is Adam Johns and here is my new Sing user profile page. </p>';
+    content += '<p> I love reading people\'s summaries page especially those who are in the same industry as me. Sometimes it\'s much easier to find your concentration during the night. </p>';
+    content += '</div>';
+    content += '</div>';
+
+//    content += '</div>';
+//    content += '</section>';
+
+    }
+
+    $('#angular_recordViewer').append(content);
+}
 
 function loadGeoListResults(xml){
       //var mapId = '';
@@ -6908,26 +7033,31 @@ addSubResults(opts);
 var twin = "vios.window.1";
 
 $(document).ready(function () {
-    $('#describe').on('load', function () {
+    $('#angular_recordViewer').on('load', function () {
         $('#describePanel').removeClass('loadingDescribe');
     });
 });
 
 function describe(src){
-    src = deSanitizeLabel(src);
-    $('#describe').attr('iri', src);
-    if(dataspace == 'http://linkeddata.uriburner.com') src = getURIBurnerURL(src);
+    src = deSanitizeLabel(src); // deprecated
+    $('#angular_recordViewer').attr('iri', src); // deprecated
+    if(dataspace == 'http://linkeddata.uriburner.com') src = getURIBurnerURL(src); // deprecated
     //$('#describePanel').addClass('loadingDescribe');
-    $('#describe').attr('src', src);
+    $('#angular_recordViewer').attr('src', src); // deprecated
     //$('#recordLabel').val(label);
 
     //var win = window.open(src, twin, 'width="'+window.outerWidth+'" height="'+window.outerHeight+'"');
     //win.blur();
     //this.window.focus();
+
+
+    var opt = new Object();
+    opt.tar = 'record';
+    fct_sparql(getSPARQLDescribe(src), opt);
 }
 
 function linkOut(){
-    var src = $('.iframe').attr('iri');
+    var src = $('#angular_recordViewer').attr('iri');
     if(!src || src.length <= 0) return;
     var win = window.open(deSanitizeLabel(src), twin, 'width="'+window.outerWidth+'" height="'+window.outerHeight+'"');
     //win.blur();
@@ -7367,7 +7497,8 @@ if(false){
             bcOutline = bcOutline.replace('primary', 'info');
           }
 
-          ret = '<li '+buildTitle(tooltip)+' class="breadcrumb-item'+focusClass+'" id="nav'+id+'"><a ><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
+          var roleBadge = '';// '<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>';
+          ret = '<li '+buildTitle(tooltip)+' class="breadcrumb-item'+focusClass+'" id="nav'+id+'"><a ><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;'+roleBadge:'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
 
 
         }
