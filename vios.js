@@ -392,6 +392,8 @@ function formatDate(date) {
 }
 
 function getProxyEndpoint(url){
+  if(url == 'http://localhost' || url == 'http://localhost/') return url;
+  if(url.startsWith('http://127.0.0.1')) return url;
   url = url.replace('http://', 'http/');
   url = url.replace('https://', 'https/');
 //  return 'http://poc.vios.network/proxy/-start-'+url+'-end-';
@@ -488,9 +490,6 @@ function fct_query(q, viewType, opt){
           jqXHR.data = settings.data;
       },
             success : function(xml) {
-              if(getMutex(viewType) != id){
-                return;
-              }
 
         var filter = '';
         if(!xml.startsWith('<')) {
@@ -552,6 +551,9 @@ function fct_query(q, viewType, opt){
             }
           }
         }
+              if(getMutex(viewType) != id){ // POI: make sure to cache the results always!, i.e. place this after the cache above
+                return;
+              }
         
         switch(viewType){
           case VIEW_TYPE_LIST: {
@@ -594,7 +596,7 @@ function fct_query(q, viewType, opt){
         }
         var currentdataspace = $('#dataSpaceMenu :selected').attr('value');
         var currentdataspacelabel = $('#dataSpaceMenu :selected').text();
-        /*window.open(
+        window.open(
           'mailto:sdmonroe@gmail.com?subject=Data%20server%20error&body=' +
                 'The server '+currentdataspacelabel+' ('+currentdataspace+') threw this error: ' + 
                 '%0A%0AError message: ' + thrownError + 
@@ -603,7 +605,7 @@ function fct_query(q, viewType, opt){
                 '%0AStatus: ' + xhr.status + 
                 '%0APOST data: %0A'+ encodeURIComponent( xhr.data )+
                 ''
-        );*/
+        );
         fct_handleError(xhr, ajaxOptions, thrownError);
         if(xhr.url == service_fct){
           $('#dataSpaceLabel').addClass('text-danger');
@@ -1761,16 +1763,16 @@ function fct_handleClassesResults(xml, opt){
 
 function fct_handlePropertiesResults(xml, opt){
     var showme = $('#showMeMenu :selected').attr('value');
-    if(opt == OPT_SEND_TO_GROUP_BY){
+    /*if(opt == OPT_SEND_TO_GROUP_BY){
       // $('#'+viewType+'').empty();
         //loadGroupByMenu(xml);
         //$('#groupByHeader').removeClass('loading');
 
         if(qGroupBy && qGroupBy.length > 0){
             var qgb = decodeURIComponent(qGroupBy);
-           /* if(qgb.endsWith(DELIMIT_GROUP_BY_REVERSE_PROPERTY)){
-              qgb = GROUP_BY_NONE_VALUE;
-            }*/
+            //if(qgb.endsWith(DELIMIT_GROUP_BY_REVERSE_PROPERTY)){
+              //qgb = GROUP_BY_NONE_VALUE;
+            //}
             var gbjson = JSON.parse(qgb);
             //selectMenuItem('groupByMenu', qgb.iri);
             doGroup(gbjson.iri, gbjson.label, gbjson.isReverse);
@@ -1783,8 +1785,8 @@ function fct_handlePropertiesResults(xml, opt){
             //if(isDebug) console.log('groupByNotLoaded: ' + qgb + ', old value:' + qGroupBy);
         }
 
-    }
-    else {
+    }*/
+    //else {
       if(showme === VIEW_TYPE_PROPERTIES){
         loadPropertiesResults(xml);
       }
@@ -1793,7 +1795,7 @@ function fct_handlePropertiesResults(xml, opt){
       opt.tar = 'showMeMenu';
       var sparql = processSparql(xml);
       fct_sparql(getSparqlCount(sparql, VIEW_TYPE_PROPERTIES), opt);
-    }
+    //}
 }
 
 function fct_handlePropertiesInResults(xml, opt){
@@ -2328,6 +2330,7 @@ function init(){
   //$('#keywords').remove();
   // ***** END TODO
 
+//$('#isSearchAllFields').parent().append('to <span class="badge badge-info">34523</span>');
   isExpandSearch = $('#isSearchAllFields').parent().hasClass('active');
   $('#isSearchAllFields').parent().click(function(e){
     isExpandSearch = !$('#isSearchAllFields').parent().hasClass('active');
@@ -3175,7 +3178,10 @@ $('.avatar').parent().children('.circle').each(async (i) => {
 
     qIsRollup = fct_getUrlParameter('isRollup');
 
-
+    if(qShowMe && qShowMe.length > 0) {
+      selectMenuItem('showMeMenu', qShowMe, true);
+      qShowMe = null;
+    }
     if(qTimeout && qTimeout.length > 0) {
       setQueyTimeout(qTimeout);
       qTimeout = null;
@@ -3227,7 +3233,7 @@ $('.avatar').parent().children('.circle').each(async (i) => {
 
     addDataspace('dbpedia.org','DBPedia',false,true); // try to add DBPedia
     addDataspace('lod.openlinksw.com','LOD',false,true); // try to add LOD Cloud Cache
-    addDataspace('ggg.vios.network','VIOS',false,true); // try to add VIOS
+    addDataspace('data.vios.network','VIOS',false,true); // try to add VIOS
     addDataspace('linkeddata.uriburner.com','URI Burner',false,true); // try to add URI Burner
     addDataspace('demo.openlinksw.com','OpenLink Demo',false,true); // try to add OpenLink Demo
 
@@ -3836,7 +3842,6 @@ function activate(){
 
   function doTable(){
     setNavType(NAV_TYPE_2);
-    selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES);
     doQuery(getQueryText());
     $('#recordViewerColumn').addClass('hide');
     $('#groupByColumn').removeClass('col-lg-'+SIZE_GROUP_BY);
@@ -3845,6 +3850,7 @@ function activate(){
     $('#recordsListWidgetContainer').addClass('hide');
     if(nav_type == NAV_TYPE_3) $('#facetCollectorWidgetContainer').addClass('hide');
 
+    selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES); // POI: be sure to load the fields menu after 'hide' class logic is applied to table, since this controls the visibility of group-by 'pinch' icon
     loadTable();
 
   }
@@ -4329,7 +4335,6 @@ function updatePermalink(){
     if(isTableShowing()) canvasViewType = 'table';
     else if(isFormShowing()) canvasViewType = 'form';
 
-
     var long_url = this_endpoint + '?' + 
       '&dataSpace=' + encodeURIComponent( dataspace ) + 
       '&dataSpaceLabel=' + encodeURIComponent( getDataspaceLabel() ) + 
@@ -4489,111 +4494,109 @@ function exitGroupBy(id){
 }
 
 var dqct = 0;
-function doQuery(keywords){
-      if(!isActivated) {
+function doQuery(keywords) {
+    if (!isActivated) {
         activate();
         isActivated = true;
-      }
-      //console.log("keywords:" + keywords);
-      setQueryText(keywords);
+    }
+    //console.log("keywords:" + keywords);
+    setQueryText(keywords);
 
 
-      $('#groupByHeader > p.gbsub').text('');
-      $('#groupByHeader > p.gbbadge').text('');
+    $('#groupByHeader > p.gbsub').text('');
+    $('#groupByHeader > p.gbbadge').text('');
 
-      // POI: groupby is now done via the Show Me menu, items are added to the Group by menu on-demand by user
-      //$('#groupByHeader').addClass('loading');
-      //fct_query(query, VIEW_TYPE_PROPERTIES, OPT_SEND_TO_GROUP_BY);
-      //console.log('query 1: ' + getQuery().prop('outerHTML'));
-  
-      //console.log('query 2: ' + getQuery().prop('outerHTML'));
+    // POI: groupby is now done via the Show Me menu, items are added to the Group by menu on-demand by user
+    //$('#groupByHeader').addClass('loading');
+    //fct_query(query, VIEW_TYPE_PROPERTIES, OPT_SEND_TO_GROUP_BY);
+    //console.log('query 1: ' + getQuery().prop('outerHTML'));
 
-
-      // POI: load the groupby list concurrently except if this is the first
-      // load of the page, and the 'groupBy' parameter is present, in this case
-      // load the groupby list after the groupByMenu has finished loading, to
-      // ensure the value of the 'groupBy' parameter is availiable in the drop-down
-      //console.log('ct doQuery: ' + dqct);
-      //var chk = qdataSpace == null && qShowMe == null && qSearchAllFields == null;
-      if(dqct = 3 || !fct_isPermalink){ 
-
-      //console.log('query 1: ' + getQuery().prop('outerHTML'));
-
-      //var q = query.clone();
-
-if(!fct_isPermalink){
-        selectShowMe(false);
-
-        $('#groupByHeader').addClass('loading');
-        $('#groupByTableHeader').addClass('loading');
-        // POI: always exit groupby mode on each smart folder refresh/execute
-        selectMenuItem('groupByMenu', GROUP_BY_NONE_VALUE, true);
-
-        // POI: groupby does not persist between canvas updates
-        // TODO: this removal of the groupBy property might not be needed anymore, since the new logic
-        // requires the user to add the field before the groupBy icon appears, selectGroupBy
-        // always pulls the property from the facet collector
-        //remove(     _root.find('[isGroupBy="true"]').attr('class') , true);
-        exitGroupBy();
-        //if(!fct_isPermalink || preInitialized){// POI: the initial load sequence is over after three calls to doQuery (one call for each menu: showme, expand search, data space), if this fact ever changes, the groupby load from the permalink will break
-        qGroupBy = undefined;
-
-    //query.attr('same-as', 'true');
-        fct_query(query, VIEW_TYPE_LIST_COUNT);
-      //console.log('query 3: ' + getQuery().prop('outerHTML'));
-}
-else {
-
-          if(qGroupBy && qGroupBy.length > 0 && qGroupBy !== 'undefined'){
-          selectShowMe(true);
+    //console.log('query 2: ' + getQuery().prop('outerHTML'));
 
 
-          var qgb = decodeURIComponent(qGroupBy);
-           /* if(qgb.endsWith(DELIMIT_GROUP_BY_REVERSE_PROPERTY)){
-              qgb = GROUP_BY_NONE_VALUE;
-            }*/
-            var gbjson = JSON.parse(qgb);
-            //selectMenuItem('groupByMenu', qgb.iri);
-            doGroup(gbjson.iri, gbjson.label, gbjson.isReverse);
-            //selectGroupBy(true);
-            //if(isDebug) console.log('groupByLoaded: ' + qgb + ', old value:' + qGroupBy);
-            //doQuery(keywords);
-            //selectGroupBy();
-        }
+    // POI: load the groupby list concurrently except if this is the first
+    // load of the page, and the 'groupBy' parameter is present, in this case
+    // load the groupby list after the groupByMenu has finished loading, to
+    // ensure the value of the 'groupBy' parameter is availiable in the drop-down
+    //console.log('ct doQuery: ' + dqct);
+    //var chk = qdataSpace == null && qShowMe == null && qSearchAllFields == null;
+    //if (!fct_isPermalink) { //dqct = 3 || 
+
+        //console.log('query 1: ' + getQuery().prop('outerHTML'));
+
+        //var q = query.clone();
+
+        if (!fct_isPermalink) {
+            selectShowMe(false);
+
+            $('#groupByHeader').addClass('loading');
+            $('#groupByTableHeader').addClass('loading');
+            // POI: always exit groupby mode on each smart folder refresh/execute
+            selectMenuItem('groupByMenu', GROUP_BY_NONE_VALUE, true);
+
+            // POI: groupby does not persist between canvas updates
+            // TODO: this removal of the groupBy property might not be needed anymore, since the new logic
+            // requires the user to add the field before the groupBy icon appears, selectGroupBy
+            // always pulls the property from the facet collector
+            //remove(     _root.find('[isGroupBy="true"]').attr('class') , true);
+            exitGroupBy();
+            //if(!fct_isPermalink || preInitialized){// POI: the initial load sequence is over after three calls to doQuery (one call for each menu: showme, expand search, data space), if this fact ever changes, the groupby load from the permalink will break
+            qGroupBy = undefined;
+
+            //query.attr('same-as', 'true');
+            fct_query(query, VIEW_TYPE_LIST_COUNT);
+            //console.log('query 3: ' + getQuery().prop('outerHTML'));
+        } 
         else {
-            //if(isDebug) console.log('groupByNotLoaded: ' + qgb + ', old value:' + qGroupBy);
+
+            if (qGroupBy && qGroupBy.length > 0 && qGroupBy !== 'undefined') {
+                selectShowMe(true);
+
+
+                var qgb = qGroupBy; //decodeURIComponent(qGroupBy);
+                /* if(qgb.endsWith(DELIMIT_GROUP_BY_REVERSE_PROPERTY)){
+                   qgb = GROUP_BY_NONE_VALUE;
+                 }*/
+                var gbjson = JSON.parse(qgb);
+                //selectMenuItem('groupByMenu', qgb.iri);
+                doGroup(gbjson.iri, gbjson.label, gbjson.isReverse);
+                //selectGroupBy(true);
+                //if(isDebug) console.log('groupByLoaded: ' + qgb + ', old value:' + qGroupBy);
+                //doQuery(keywords);
+                //selectGroupBy();
+            } else {
+                //if(isDebug) console.log('groupByNotLoaded: ' + qgb + ', old value:' + qGroupBy);
+            }
+
+            fct_isPermalink = false;
         }
+    //} 
+    //else {
+    //    dqct++;
+    //}
 
-  fct_isPermalink = false;
+    //clearKeywords();
+
+    buildNavPath();
+    //console.log('query 4: ' + getQuery().prop('outerHTML'));
+
+    var isLiteralValue = false;
+    var v = getMainFocus().children('value');
+    if (v && v.text() && v.text().length > 0 && v.attr('datatype') != 'uri' && getMainFocus().attr('class') != ID_QUERY) {
+        isLiteralValue = true;
+    }
+    if (isLiteralValue) selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES_IN);
+
+    checkTextProperties();
+
+    /* TODO: use qTip for tooltips, see http://qtip2.com/api
+    $('[title!=""]').qtip();
+    */
 }
-      }
-      else {
-        dqct++;
-      }
-
-      //clearKeywords();
-
-      buildNavPath();
-      //console.log('query 4: ' + getQuery().prop('outerHTML'));
-
-        var isLiteralValue = false;
-        var v = getMainFocus().children('value');
-        if(v && v.text() && v.text().length > 0 && v.attr('datatype') != 'uri' && getMainFocus().attr('class') != ID_QUERY){
-          isLiteralValue = true;
-        }
-        if(isLiteralValue) selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES_IN);
-
-      checkTextProperties();
-
-      /* TODO: use qTip for tooltips, see http://qtip2.com/api
-      $('[title!=""]').qtip();
-      */
-}
-
 
 function checkTextProperties(){
   if(!isExpandSearch || getMainFocus() != ID_QUERY){
-    if($('#showMeMenu > option[value="'+VIEW_TYPE_TEXT_PROPERTIES+'"]')) selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES);;
+    if($('#showMeMenu').val()==VIEW_TYPE_TEXT_PROPERTIES) selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES);;
   }
 }
 
@@ -6136,7 +6139,7 @@ if(true){
               //rows += '<img title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
           rows += '<i '+buildTitle('preview field values')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
 //              rows += '<a title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>&nbsp;';
-          if((facet && facet.length > 0))rows += '<i '+buildTitle('group the record list by \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\')" ></i>';
+          if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the record list by \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\')" ></i>';
           }
           rows +='</h6>';
             rows +=  '</div>';
@@ -6298,7 +6301,7 @@ var ckcolor = 'primary';
           rows += '</div>';
           rows += '<i '+buildTitle('preview rolees')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
               //rows += '<img title="shows up in the \''+propLabel+'\' field of these records" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
-          if((facet && facet.length > 0))rows += '<i '+buildTitle('group the record list by role: \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\', true)" ></i>';
+          if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the record list by role: \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\', true)" ></i>';
           }
 
           rows +='</h6>';
@@ -7497,21 +7500,22 @@ if(false){
             bcOutline = bcOutline.replace('primary', 'info');
           }
 
-          var roleBadge = '';// '<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>';
-          ret = '<li '+buildTitle(tooltip)+' class="breadcrumb-item'+focusClass+'" id="nav'+id+'"><a ><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;'+roleBadge:'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
+          var roleBadge = '';// '&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>';
+          ret = '<li '+buildTitle(tooltip)+' class="breadcrumb-item'+focusClass+'" id="nav'+id+'"><a ><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?roleBadge:'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
 
 
         }
         else if(nav_type == NAV_TYPE_3){
+          var roleBadge = '';// '&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>';
           if(bcFacetType == BC_FACET_TYPE_FACET) {
-            ret = '<div style="padding: 0px; background-color:transparent;" class="row" '+buildTitle(tooltip)+' id="nav'+id+'" '+focus+'><div style="display:inline; padding:0px;" class="text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6 style="vertical-align:bottom;margin-bottom:0px">&nbsp;<span onclick="javascript:'+action+'(\''+id+'\')" class="via" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')">' + ''+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+((len > 0) ? '</span>&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">'+len+'</span>' : '')+'</h6></div><button class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
+            ret = '<div style="padding: 0px; background-color:transparent;" class="row" '+buildTitle(tooltip)+' id="nav'+id+'" '+focus+'><div style="display:inline; padding:0px;" class="text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6 style="vertical-align:bottom;margin-bottom:0px">&nbsp;<span onclick="javascript:'+action+'(\''+id+'\')" class="via" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')">' + ''+desc+of+((isPropOf)?roleBadge:'')+((len > 0) ? '</span>&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">'+len+'</span>' : '')+'</h6></div><button class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
           }
           else if(bcFacetType == BC_FACET_TYPE_FOCUS) {
-            ret = '<div style="padding: 0px; background-color:transparent;" class="row" '+buildTitle(tooltip)+' id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')"><h3 class="fw-semi-bold" style="padding-bottom:4px" >'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</h3></div><button id="focusValue" class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
+            ret = '<div style="padding: 0px; background-color:transparent;" class="row" '+buildTitle(tooltip)+' id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')"><h3 class="fw-semi-bold" style="padding-bottom:4px" >'+desc+of+((isPropOf)?roleBadge:'')+'</h3></div><button id="focusValue" class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
           }
           else { // isBreadCrumb
             //ret = '<li class="breadcrumb-item"><div class="row" style="background-color:transparent;" title="'+tooltip+'" id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6>' + ''+desc+'</h6></div><button class="btn-rounded-f  btn btn-'+outline+'default btn-block btn-xs text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div></li>';
-    ret = '<li '+buildTitle(tooltip)+' class="breadcrumb-item" id="nav'+id+'"><a><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?'&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>':'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
+    ret = '<li '+buildTitle(tooltip)+' class="breadcrumb-item" id="nav'+id+'"><a><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?roleBadge:'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
   //  gbcol += '<li class="breadcrumb-item"><a  title=""><em>distributor</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-outline-default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\'0\')">'+VALUE_ANON_NODE+'</button></li>';
           }
 
