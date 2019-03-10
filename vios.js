@@ -1224,7 +1224,7 @@ function fct_handleSparqlResults(xml, opt) {
                         str += '<img style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' alt="..." class="rounded-circle" src="' + getFaviconUrl($(this).text()) + '">';
                         str += '<i class="status status-bottom bg-success"></i>';
                     } else {
-                        str += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' class="glyphicon glyphicon-tag"></span>';
+                        str += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' class="icon-literal glyphicon glyphicon-tag"></span>';
                     }
 
                 } // if j == 0
@@ -2069,7 +2069,7 @@ function addPropertyOfFacet(id, prop, propLabel, val, valLabel, datatype, lang, 
   if(!silent) doQuery(getQueryText());
 }
 
-function addClassFacet(id, clazz, label){
+function addClassFacet(id, clazz, label, silent){
     exitGroupBy(id);
 
   //clazz = deSanitizeLabel(clazz);
@@ -2088,7 +2088,7 @@ function addClassFacet(id, clazz, label){
   getMainFocus().prepend(c); // POI: 'prepend' to ensure the last one added is the first returned by $.find() 
   //takeFocus(p, getFocus(query));
   //takeFocus(query, getFocus(query));
-  doQuery(getQueryText());
+  if(!silent) doQuery(getQueryText());
 }
 
 function setGraphFacet(graph, graphLabel){
@@ -2156,7 +2156,17 @@ var preInitialized = false;
 var screenSz = screen.width;
 var SIZE_GROUP_BY = (screenSz < 1500) ? "3" : "2";
 var SIZE_SHOW_ME = (screenSz < 1500) ? "3" : "2";
-var SIZE_RECORD_VIEWER = (screenSz < 1500) ? "6" : "8";
+var SIZE_RECORD_VIEWER = (screenSz < 1500) ? "6" : "6";
+
+var SIZE_GROUP_BY_DETAIL_RESULTS = (screenSz < 1500) ? "9" : "5";
+var SIZE_SHOW_ME_DETAIL_RESULTS = (screenSz < 1500) ? "3" : "2";
+var SIZE_RECORD_VIEWER_DETAIL_RESULTS = (screenSz < 1500) ? "0" : "5";
+
+
+var groupByColumnWidth = SIZE_GROUP_BY;
+var showMeColumnWidth = SIZE_SHOW_ME;
+var recordViewerColumnWidth = SIZE_RECORD_VIEWER;
+
 var SIZE_RECORD_FORM = (screenSz < 1500) ? "6" : "6";
 var SIZE_LABEL = (screenSz < 1500) ? 22 : 30; // TODO: this constant is deprecated, using text-ellipsis now
 var SIZE_RESULT_SET = (screenSz < 1500) ? 15: 30;
@@ -2216,6 +2226,35 @@ function historyBackward(){
 var ds = new Array();
 
 var record;
+
+function detailResultsColumnWidths(){
+  $('#groupByColumn').removeClass('col-lg-'+groupByColumnWidth);
+  $('#showMeColumn').removeClass('col-lg-'+showMeColumnWidth);
+  $('#recordViewerColumn').removeClass('col-lg-'+recordViewerColumnWidth);
+
+  groupByColumnWidth = SIZE_GROUP_BY_DETAIL_RESULTS;
+  showMeColumnWidth = SIZE_SHOW_ME_DETAIL_RESULTS;
+  recordViewerColumnWidth = SIZE_RECORD_VIEWER_DETAIL_RESULTS;
+
+  $('#groupByColumn').addClass('col-lg-'+groupByColumnWidth);
+  $('#showMeColumn').addClass('col-lg-'+showMeColumnWidth);
+  $('#recordViewerColumn').addClass('col-lg-'+recordViewerColumnWidth);
+}
+
+function resetColumnWidths(){
+  $('#groupByColumn').removeClass('col-lg-'+groupByColumnWidth);
+  $('#showMeColumn').removeClass('col-lg-'+showMeColumnWidth);
+  $('#recordViewerColumn').removeClass('col-lg-'+recordViewerColumnWidth);
+
+  groupByColumnWidth = SIZE_GROUP_BY;
+  showMeColumnWidth = SIZE_SHOW_ME;
+  recordViewerColumnWidth = SIZE_RECORD_VIEWER;
+
+  $('#groupByColumn').addClass('col-lg-'+groupByColumnWidth);
+  $('#showMeColumn').addClass('col-lg-'+showMeColumnWidth);
+  $('#recordViewerColumn').addClass('col-lg-'+recordViewerColumnWidth);
+}
+
 
 function init(){
     fct_init(); // this method must be the first method called by the implementation of the fct_ framework
@@ -2278,6 +2317,15 @@ function init(){
         link.src = 'http://data.vios.network/DAV/home/vios/js/jquery.capslockstate.js';
         document.head.appendChild(link);
 
+        link = document.createElement('script');
+        link.type = 'text/javascript';
+        link.src = 'https://demo.flatlogic.com/sing-app/angular/profile-profile-module.js';
+        document.head.appendChild(link);
+
+
+
+        https://demo.flatlogic.com/sing-app/angular/profile-profile-module.js
+
 
 //alert('init() screen width: ' + screen.width);
 
@@ -2338,12 +2386,20 @@ function init(){
   });
 
   var fastForwardButton = '';
-  fastForwardButton += '<span class="input-group-append" style="cursor:pointer;">';
+  fastForwardButton += '<span '+buildTitle('find connections between this and the focus')+' class="input-group-append" style="cursor:pointer;">';
         fastForwardButton += '<span class="input-group-text">';
           fastForwardButton += '<i class="fw-bold la la-angle-double-right text-default"></i>';
         fastForwardButton += '</span>';
       fastForwardButton += '</span>';
       $('.input-group-text').parent().parent().append(fastForwardButton);
+
+  var glossaryButton = '';
+  glossaryButton += '<span id="glossaryButton" '+buildTitle('open glossary')+' class="hide input-group-append" onclick="javascript: isExpandSearch = true; var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/WikicatGlossaries\', \'Glossaries\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\'); takeMainFocus(pid);" style="cursor:pointer;">';
+        glossaryButton += '<span class="input-group-text">';
+          glossaryButton += '<i class="fw-bold glyphicon glyphicon-book text-info"></i>';
+        glossaryButton += '</span>';
+      glossaryButton += '</span>';
+      $('.input-group-text').parent().parent().append(glossaryButton);
 
 
   //$('#queryTimeout').unbind('click');  
@@ -2423,7 +2479,7 @@ newDataspacePicker += '<div _ngcontent-c2="" class="btn-group dropdown" dropdown
             newDataspacePicker += '<!----><ul _ngcontent-c2="" aria-labelledby="dropdown-btn-three" class="dropdown-menu" role="menu" style="left: 0px; right: auto; top: 100%; transform: translateY(0px);">';
               newDataspacePicker += '<li _ngcontent-c2="" role="menuitem"><a _ngcontent-c2="" value="http://lod.openlinksw.com" class="dropdown-item">LOD</a></li>';
               newDataspacePicker += '<li _ngcontent-c2="" role="menuitem"><a _ngcontent-c2="" value="http://id.myopenlinksw.net" class="dropdown-item">MyOpenLink</a></li>';
-              newDataspacePicker += '<li _ngcontent-c2="" role="menuitem"><a _ngcontent-c2="" value="http://uriburner.net" class="dropdown-item">URI Burner</a></li>';
+              newDataspacePicker += '<li _ngcontent-c2="" role="menuitem"><a _ngcontent-c2="" value="http://uriburner.net" class="dropdown-item">URIBurner</a></li>';
               newDataspacePicker += '<li _ngcontent-c2="" role="menuitem"><a _ngcontent-c2="" value="http://demo.openlinksw.net" class="dropdown-item">OpenLink Demo</a></li>';
               newDataspacePicker += '<li _ngcontent-c2="" class="dropdown-divider"></li>';
               newDataspacePicker += '<li _ngcontent-c2="" role="menuitem"><a value="localhost:8890" _ngcontent-c2="" class="dropdown-item">Local Dataspace</a></li>';
@@ -2531,7 +2587,127 @@ gbcol += '</ul></div>';
 $('#angular_breadcrumbs').append(gbcol);
 
 
-gbcol = '<div id="groupByColumn" class="hide col-lg-'+SIZE_GROUP_BY+' col-12">';
+
+gbcol = '<div id="recordViewerColumn" class="hide col-lg-'+recordViewerColumnWidth+' col-12"><section class="widget" widget>';
+
+        gbcol += '<div class="widget-body  p-0 ">';
+       // gbcol += '<div class="widget-body p-0">';
+
+
+gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
+  gbcol += '<a  style="margin-left: 1.5em;" class="navbar-brand" data-target="#" onclick="javascript:buildForm()">Compose</a>';
+  gbcol += '<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">';
+    gbcol += '<i class="glyphicon glyphicon-tree-conifer"></i>';
+    gbcol += '<i _ngcontent-c10="" class="glyphicon glyphicon-tree-conifer text-success"></i>';
+  gbcol += '</button>';
+
+  gbcol += '<div class="collapse navbar-collapse" id="navbarSupportedContent">';
+    gbcol += '<ul class="navbar-nav mr-auto">';
+      gbcol += '<li class="nav-item active">';
+        gbcol += '<a id="ggg" class="nav-link" data-target="#">Edit</a>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Interact</a>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a id="ggg" class="nav-link" data-target="#" onclick="doGGGView( $(\'#angular_recordViewer\').attr(\'iri\') )">GGG</a>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a id="www" class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
+      gbcol += '</li>';
+      /*
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a class="nav-link" data-target="#">Charts</a>';
+      gbcol += '</li>';
+
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a class="nav-link" data-target="#">Map</a>';
+      gbcol += '</li>';
+      */
+      gbcol += '<li class="nav-item dropdown">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'Pair';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="navbarDropdown">';
+          gbcol += '<a class="dropdown-item" data-target="#">Browser Window</a>';
+          gbcol += '<a class="dropdown-item" data-target="#">Device</a>';
+          gbcol += '<div class="dropdown-divider"></div>';
+          gbcol += '<a class="dropdown-item" data-target="#">New Data Canvas</a>';
+        gbcol += '</div>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item dropdown">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'Subscribe';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="navbarDropdown">';
+          gbcol += '<a class="dropdown-item" data-target="#">Record</a>';
+          gbcol += '<a class="dropdown-item" data-target="#">Folder</a>';
+        gbcol += '</div>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a class="nav-link disabled" data-target="#">Edit</a>';
+      gbcol += '</li>';
+    gbcol += '</ul>';
+    gbcol += '<form class="form-inline my-2 my-lg-0">';
+      //gbcol += '<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">';
+      gbcol += '<button style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" type="submit">IDN</button>';
+    gbcol += '</form>';
+  gbcol += '</div>';
+gbcol += '</nav>';
+
+
+            gbcol += '<div id="angular_recordViewer" class="embed-responsive">'; //embed-responsive-1by1
+
+
+//gbcol += '<iframe id="describe" class="iframe embed-responsive-item" src="" height="100%"></iframe>';
+            gbcol += '</div>';
+
+
+
+          //  gbcol += '</div>';
+            gbcol += '</div>';        
+
+
+                        gbcol += '</section></div>';
+
+
+gbcol += '<div id="recordFormColumn" class="hide col-lg-'+SIZE_RECORD_FORM+' col-12">'
+
+gbcol += '<div class="widget-body  p-0"></div>';
+                        gbcol += '</div>';
+
+
+
+
+
+gbcol += '<div id="mapResults" class="short-div hide"><section class="widget" widget>';
+
+gbcol += '<header id="mapResultsHeader">';
+        gbcol += '<div class="widget-controls">';
+          //gbcol += '<a href="#"><i class="glyphicon glyphicon-cog"></i></a>';
+         // gbcol += '<a data-target="#" class="leftButton" onclick="javascript:pageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
+         // gbcol += '<a data-target="#" class="rightButton" onclick="javascript:pageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
+          gbcol += '<a data-widgster="close" onclick="hideMap()" class="btn-gray"><i class="glyphicon glyphicon-remove"></i></a>';
+        gbcol += '</div>';
+      gbcol += '</header>';
+        gbcol += '<div class="widget-body">';
+
+
+//var apiKey = 'AIzaSyDe_oVpi9eRSN99G4o6TwVjJbFBNr58NxE';
+
+//gbcol += '<script async defer src="https://maps.googleapis.com/maps/api/js?key='+apiKey+'"> </script>';
+gbcol += '<div id="map"></div>';
+
+            gbcol += '</div>'; // widget-body
+
+
+
+gbcol += '</section></div>';
+
+$('#dataCanvas').append(gbcol);
+
+
+gbcol = '<div id="groupByColumn" class="hide col-lg-'+groupByColumnWidth+' col-12">';
 gbcol += '<div id="facetCollectorWidgetContainer" class="short-div"><section class="widget bg-info text-white focusHeaderSec" widget>';
 gbcol += '<header id="focusHeader">';
         gbcol += '<h3 id="angular_focusCollector" class="fw-semi-bold">'+LABEL_ROOT+'</h3>';
@@ -2776,9 +2952,7 @@ $('#dataCanvas').append(gbcol);
 
 
 
-
-
-gbcol = '<div id="showMeColumn" class="hide col-lg-'+SIZE_SHOW_ME+' col-12"><section class="widget" widget>';
+gbcol = '<div id="showMeColumn" class="hide col-lg-'+showMeColumnWidth+' col-12"><section class="widget" widget>';
 gbcol += '<header id="showMeHeader">';
         gbcol += '<h4><span id="showMeCount" class="badge badge-info">0/0</span>&nbsp;<span id="showMeMenuSelectLabel">Categories</span></h4>';
 
@@ -2827,124 +3001,7 @@ $('#dataCanvas').append(gbcol);
 
 
 
-
-
-gbcol = '<div id="recordViewerColumn" class="hide col-lg-'+SIZE_RECORD_VIEWER+' col-12"><section class="widget" widget>';
-
-        gbcol += '<div class="widget-body  p-0 ">';
-       // gbcol += '<div class="widget-body p-0">';
-
-
-gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
-  gbcol += '<a class="navbar-brand" data-target="#" onclick="javascript:buildForm()">Compose</a>';
-  gbcol += '<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">';
-    gbcol += '<i class="glyphicon glyphicon-tree-conifer"></i>';
-    gbcol += '<i _ngcontent-c10="" class="glyphicon glyphicon-tree-conifer text-success"></i>';
-  gbcol += '</button>';
-
-  gbcol += '<div class="collapse navbar-collapse" id="navbarSupportedContent">';
-    gbcol += '<ul class="navbar-nav mr-auto">';
-      gbcol += '<li class="nav-item active">';
-        gbcol += '<a id="ggg" class="nav-link" data-target="#">Edit</a>';
-      gbcol += '</li>';
-      gbcol += '<li class="nav-item">';
-        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Interact</a>';
-      gbcol += '</li>';
-//      gbcol += '<li class="nav-item">';
-//        gbcol += '<a id="ggg" class="nav-link" data-target="#" onclick="selectDataspace(\'http://linkeddata.uriburner.com\', \'URI Burner\', false); doExplore( $(\'.iframe\').attr(\'src\') , true)">Lookup</a>';
-//      gbcol += '</li>';
-      gbcol += '<li class="nav-item">';
-        gbcol += '<a id="www" class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
-      gbcol += '</li>';
-      /*
-      gbcol += '<li class="nav-item">';
-        gbcol += '<a class="nav-link" data-target="#">Charts</a>';
-      gbcol += '</li>';
-
-      gbcol += '<li class="nav-item">';
-        gbcol += '<a class="nav-link" data-target="#">Map</a>';
-      gbcol += '</li>';
-      */
-      gbcol += '<li class="nav-item dropdown">';
-        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
-          gbcol += 'Pair';
-        gbcol += '</a>';
-        gbcol += '<div class="dropdown-menu" aria-labelledby="navbarDropdown">';
-          gbcol += '<a class="dropdown-item" data-target="#">Browser Window</a>';
-          gbcol += '<a class="dropdown-item" data-target="#">Device</a>';
-          gbcol += '<div class="dropdown-divider"></div>';
-          gbcol += '<a class="dropdown-item" data-target="#">New Data Canvas</a>';
-        gbcol += '</div>';
-      gbcol += '</li>';
-      gbcol += '<li class="nav-item dropdown">';
-        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
-          gbcol += 'Subscribe';
-        gbcol += '</a>';
-        gbcol += '<div class="dropdown-menu" aria-labelledby="navbarDropdown">';
-          gbcol += '<a class="dropdown-item" data-target="#">Record</a>';
-          gbcol += '<a class="dropdown-item" data-target="#">Folder</a>';
-        gbcol += '</div>';
-      gbcol += '</li>';
-      gbcol += '<li class="nav-item">';
-        gbcol += '<a class="nav-link disabled" data-target="#">Edit</a>';
-      gbcol += '</li>';
-    gbcol += '</ul>';
-    gbcol += '<form class="form-inline my-2 my-lg-0">';
-      //gbcol += '<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">';
-      gbcol += '<button style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" type="submit">IDN</button>';
-    gbcol += '</form>';
-  gbcol += '</div>';
-gbcol += '</nav>';
-
-
-            gbcol += '<div id="angular_recordViewer" class="embed-responsive embed-responsive-1by1">';
-
-
-//gbcol += '<iframe id="describe" class="iframe embed-responsive-item" src="" height="100%"></iframe>';
-            gbcol += '</div>';
-
-
-
-          //  gbcol += '</div>';
-            gbcol += '</div>';        
-
-
-                        gbcol += '</section></div>';
-
-
-gbcol += '<div id="recordFormColumn" class="hide col-lg-'+SIZE_RECORD_FORM+' col-12">'
-
-gbcol += '<div class="widget-body  p-0"></div>';
-                        gbcol += '</div>';
-
-
-
-
-
-gbcol += '<div id="mapResults" class="short-div hide"><section class="widget" widget>';
-
-gbcol += '<header id="mapResultsHeader">';
-        gbcol += '<div class="widget-controls">';
-          //gbcol += '<a href="#"><i class="glyphicon glyphicon-cog"></i></a>';
-         // gbcol += '<a data-target="#" class="leftButton" onclick="javascript:pageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
-         // gbcol += '<a data-target="#" class="rightButton" onclick="javascript:pageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
-          gbcol += '<a data-widgster="close" onclick="hideMap()" class="btn-gray"><i class="glyphicon glyphicon-remove"></i></a>';
-        gbcol += '</div>';
-      gbcol += '</header>';
-        gbcol += '<div class="widget-body">';
-
-
-//var apiKey = 'AIzaSyDe_oVpi9eRSN99G4o6TwVjJbFBNr58NxE';
-
-//gbcol += '<script async defer src="https://maps.googleapis.com/maps/api/js?key='+apiKey+'"> </script>';
-gbcol += '<div id="map"></div>';
-
-            gbcol += '</div>'; // widget-body
-
-
-
-gbcol += '</section></div>';
-
+/// was here
 
 
 gbcol += '</div>';
@@ -3234,7 +3291,7 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     addDataspace('dbpedia.org','DBPedia',false,true); // try to add DBPedia
     addDataspace('lod.openlinksw.com','LOD',false,true); // try to add LOD Cloud Cache
     addDataspace('data.vios.network','VIOS',false,true); // try to add VIOS
-    addDataspace('linkeddata.uriburner.com','URI Burner',false,true); // try to add URI Burner
+    addDataspace('linkeddata.uriburner.com','URIBurner',false,true); // try to add URI Burner
     addDataspace('demo.openlinksw.com','OpenLink Demo',false,true); // try to add OpenLink Demo
 
     try{
@@ -3320,6 +3377,10 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     */
 
     $('#keywords').focus();
+
+
+$('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
+
 
 }
 
@@ -3730,13 +3791,13 @@ footer += '<br/>';
 footer += '<div class="clearfix">';
           footer += '<div class="pull-right">';
             footer += '<button class="btn btn-default btn-sm">';
-              footer += '<i class="fa fa-plus-square text-primary"></i>&nbsp;Category';
+              footer += '<i class="fa fa-plus-square text-info"></i>&nbsp;Category';
             footer += '</button>&nbsp;';
             footer += '<button class="btn btn-default btn-sm">';
-              footer += '<i class="fa fa-plus-square text-primary"></i>&nbsp;Field';
+              footer += '<i class="fa fa-plus-square text-info"></i>&nbsp;Field';
             footer += '</button>&nbsp;';
             footer += '<button class="btn btn-default btn-sm">';
-              footer += '<i class="fa fa-plus-square text-primary"></i>&nbsp;Role';
+              footer += '<i class="fa fa-plus-square text-info"></i>&nbsp;Role';
             footer += '</button>&nbsp;';
             footer += '&nbsp;&nbsp;&nbsp;&nbsp;';
           
@@ -4573,7 +4634,7 @@ function doQuery(keywords) {
     //} 
     //else {
     //    dqct++;
-    //}
+    //} 
 
     //clearKeywords();
 
@@ -4588,10 +4649,24 @@ function doQuery(keywords) {
     if (isLiteralValue) selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES_IN);
 
     checkTextProperties();
+    checkGlossaryButton();
 
     /* TODO: use qTip for tooltips, see http://qtip2.com/api
     $('[title!=""]').qtip();
     */
+}
+
+function checkGlossaryButton(){
+  if(dataspace == 'http://dbpedia.org' && (
+    !_root.children('query').children('class[iri="http://dbpedia.org/class/yago/WikicatGlossaries"]') || 
+    _root.children('query').children('class[iri="http://dbpedia.org/class/yago/WikicatGlossaries"]').length <= 0
+    )
+    ){
+    $('#glossaryButton').removeClass('hide');
+  }
+  else if( !$('#glossaryButton').hasClass('hide') ){
+    $('#glossaryButton').addClass('hide');
+  }
 }
 
 function checkTextProperties(){
@@ -4963,7 +5038,7 @@ if(true){
                                   rows +=  '<i class="status status-bottom bg-'+color+'"></i>';
               }
               else {
-                rows += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="glyphicon glyphicon-tag"></span>';
+                rows += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="icon-literal glyphicon glyphicon-tag"></span>';
               }
                                 rows +=  '</span>';
 
@@ -4973,7 +5048,7 @@ if(true){
 
               label = deSanitizeLabel(label);
               var labelLink = (datatype=='uri') ? ' onclick="javascript:describe(\''+value+'\');"' : '';
-              rows +=  '<h6 class="text-ellipsis m-0" '+labelLink+'>';
+              rows +=  '<h6 class="row-result text-ellipsis m-0" '+labelLink+'>';
               rows+='<span '+buildTitle(value)+'>'+label+'</span>';
               if(text.indexOf('<b>') > 30) text = text.substring(text.indexOf('<b>') - 10);
               var kwa = getQueryText().split(' ');
@@ -5256,6 +5331,127 @@ function loadGroupByResults(xml, focusVarName){
                   if(datatype === 'uri'){
                     loadedUri = true;
                     describe(value);
+
+
+    if(value == 'http://dbpedia.org/ontology/lccn'){
+
+detailResultsColumnWidths();
+
+/*
+rows += '<section class="search-result-item">';
+rows += '<a class="image-link" >';
+rows += '<img class="image" src="https://demo.flatlogic.com/sing-app/angular/assets/img/pictures/3.jpg">';
+rows += '</a>';
+rows += '<div class="search-result-item-body">';
+rows += '<div class="row">';
+rows += '<div class="col-md-9 col-12">';
+rows += '<h5 class="search-result-item-heading"><a href="#">Digital Camera</a></h5>';
+rows += '<p class="info"> Device </p>';
+rows += '<p class="description"> A digital camera is a device that records images electronically, as opposed to a conventional camera that records images by chemical and mechanical processes. </p>';
+rows += '</div>';
+rows += '<div class="col-md-3 col-12 text-center">';
+rows += '<p class="value3 mt-sm">9, 700 AVI</p>';
+rows += '<p class="fs-mini text-muted"> PER WEEK </p><a class="btn btn-primary btn-info btn-sm" href="#">Buy Now</a>';
+rows += '</div>';
+rows += '</div>';
+rows += '</div>';
+rows += '</section>';
+rows += '<section class="search-result-item">';
+rows += '<a class="image-link" >';
+rows += '<img class="image" src="https://demo.flatlogic.com/sing-app/angular/assets/img/pictures/5.jpg">';
+rows += '</a>';
+rows += '<div class="search-result-item-body">';
+rows += '<div class="row">';
+rows += '<div class="col-md-9 col-12">';
+rows += '<h5 class="search-result-item-heading"><a href="#">Saint Martin</a></h5>';
+rows += '<p class="info"> Populated Place </p>';
+rows += '<p class="description"> St. Martin\'s history shares many commonalities with other Caribbean islands. Its earliest inhabitants were Amerindians, followed by Europeans who brought slavery to exploit commercial interests. </p>';
+rows += '</div>';
+rows += '<div class="col-md-3 col-12 text-center">';
+rows += '<p class="value3 mt-sm"> 1, 700 AVI </p>';
+rows += '<p class="fs-mini text-muted"> PER WEEK </p><a class="btn btn-primary btn-info btn-sm" href="#">Buy Now</a>';
+rows += '</div>';
+rows += '</div>';
+rows += '</div>';
+rows += '</section>';
+rows += '<section class="search-result-item">';
+rows += '<a class="image-link" >';
+rows += '<img class="image" src="https://demo.flatlogic.com/sing-app/angular/assets/img/pictures/13.jpg">';
+rows += '</a>';
+rows += '<div class="search-result-item-body">';
+rows += '<div class="row">';
+rows += '<div class="col-md-9 col-12">';
+rows += '<h5 class="search-result-item-heading"><a href="#">REM Sleep</a></h5>';
+rows += '<p class="info"> Cognition </p>';
+rows += '<p class="description"> Rapid eye movement sleep (REM sleep, REMS) is a unique phase of mammalian sleep characterized by random movement of the eyes, low muscle tone throughout the body, and the propensity of the sleeper to dream vividly. </p>';
+rows += '</div>';
+rows += '<div class="col-md-3 col-12 text-center">';
+rows += '<p class="value3 mt-sm"> 250 AVI </p>';
+rows += '<p class="fs-mini text-muted"> PER WEEK </p><a class="btn btn-primary btn-info btn-sm" href="#">Buy Now</a>';
+rows += '</div>';
+rows += '</div>';
+rows += '</div>';
+rows += '</section>';
+
+*/
+
+rows += '<section class="search-result-item">';
+rows += '<a class="image-link" >';
+rows += '<img class="image" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ2ehxSliMhXtH-Anppcd-gkFFpfGWLkFMhPEuGEtq4D0RGkURx_w">';
+rows += '</a>';
+rows += '<div class="search-result-item-body">';
+rows += '<div class="row">';
+rows += '<div class="col-md-9 col-12">';
+rows += '<h5 class="search-result-item-heading"><a href="#">Pizza chains that deliver, by country</a></h5>';
+rows += '<p class="info"> Smart Folder Request </p>';
+rows += '<p class="description"> I need a list of delivery Pizza chains, for each country, and grouped by country, and here are the other fields I need... </p>';
+rows += '</div>';
+rows += '<div class="col-md-3 col-12 text-center">';
+rows += '<p class="value3 mt-sm">20 VIOS</p>';
+rows += '<p class="fs-mini text-muted"> ON DELIVERY </p><a class="btn btn-success btn-sm" href="#">Accept</a>';
+rows += '</div>';
+rows += '</div>';
+rows += '</div>';
+rows += '</section>';
+rows += '<section class="search-result-item">';
+rows += '<a class="image-link" >';
+rows += '<img class="image" src="http://i.imgur.com/RmZIumM.jpg">';
+rows += '</a>';
+rows += '<div class="search-result-item-body">';
+rows += '<div class="row">';
+rows += '<div class="col-md-9 col-12">';
+rows += '<h5 class="search-result-item-heading"><a href="#">GOT Family Lineages and Factions</a></h5>';
+rows += '<p class="info"> Dataspace Request </p>';
+rows += '<p class="description"> I would like a complete dataspace for all bloodlines of the Game of Thrones series, by George R.R. Martin. The dataspace should include the following ...</p>';
+rows += '</div>';
+rows += '<div class="col-md-3 col-12 text-center">';
+rows += '<p class="value3 mt-sm"> 1.541 BTC </p>';
+rows += '<p class="fs-mini text-muted"> IN INCREMENTS </p><a class="btn btn-success btn-sm" href="#">Accept</a>';
+rows += '</div>';
+rows += '</div>';
+rows += '</div>';
+rows += '</section>';
+rows += '<section class="search-result-item">';
+rows += '<a class="image-link" >';
+rows += '<img class="image" src="data:image/jpeg;base64,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">';
+rows += '</a>';
+rows += '<div class="search-result-item-body">';
+rows += '<div class="row">';
+rows += '<div class="col-md-9 col-12">';
+rows += '<h5 class="search-result-item-heading"><a href="#">Wikidata Label Fixes</a></h5>';
+rows += '<p class="info"> Data Repair </p>';
+rows += '<p class="description"> There are many labels missing for Classes and Properties for Wikidata URIs in the LOD Cloud Cache, for example, this list of attributes. I also notice that the label is declared indirectly, like on the describe of this producer attribute. Is there a way this can be remedied from the data loading end, perhaps using inference rules? </p>';
+rows += '</div>';
+rows += '<div class="col-md-3 col-12 text-center">';
+rows += '<p class="value3 mt-sm"> 15 ETH </p>';
+rows += '<p class="fs-mini text-muted"> IN INCREMENTS </p><a class="btn btn-success btn-sm" href="#">Accept</a>';
+rows += '</div>';
+rows += '</div>';
+rows += '</div>';
+rows += '</section>';
+
+}
+
                   } 
               }
               var propIRI = getGroupByValue();
@@ -5362,7 +5558,7 @@ if(true){
                                     rows +=  '<i class="status status-bottom bg-'+color+'"></i>';
                 }
                 else {
-                  rows += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="glyphicon glyphicon-tag"></span>';
+                  rows += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="icon-literal glyphicon glyphicon-tag"></span>';
                 }
               }
                                 rows +=  '</span>';
@@ -5373,7 +5569,7 @@ if(true){
 
               label = deSanitizeLabel(label);
               var labelLink = (datatype=='uri') ? ' onclick="javascript:describe(\''+value+'\');"' : '';
-              rows +=  '<h6 class="text-ellipsis m-0" '+labelLink+'>';
+              rows +=  '<h6 class="row-result text-ellipsis m-0" '+labelLink+'>';
               rows+='<span '+buildTitle(value)+'>'+label+'</span>';
               //rows +=  '<p class="help-block text-ellipsis m-0"></p>';
 
@@ -5900,7 +6096,7 @@ if(true){
           //rows += '<a title="'+uri+'" onclick="javascript:describe(\''+uri+'\');">'+ spaceCamelCase(label) +'</a>&nbsp;';
                                 rows +=  '</span>';
             rows +=  '<div>';
-          rows +=  '<h6 class="text-ellipsis m-0" onclick="javascript:describe(\''+uri+'\');">';
+          rows +=  '<h6 class="row-result text-ellipsis m-0" onclick="javascript:describe(\''+uri+'\');">';
           rows += '<span '+buildTitle(uri)+'>' + label + '</span>';
               //rows +=  '<p class="help-block text-ellipsis m-0"></p>';
 
@@ -6073,6 +6269,13 @@ function loadPropertiesResults(xml){
           //label = processLabel(label, uri, datatype);
           //var id = createId();
           //console.log($(col[0]));
+          isCategory = (propIRI == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type');
+          var holdRows = '';
+          if(isCategory && false){
+            holdRows = rows;
+            rows = '';
+          }
+
           propLabel = processLabel(propLabel, propIRI, datatype, undefined);
           //console.log($(col[0]));
           var id = createId();
@@ -6088,7 +6291,10 @@ function loadPropertiesResults(xml){
           //var color = ( $('#showMeMenu :selected').attr('value') == VIEW_TYPE_TEXT_PROPERTIES ) ? 'warning' : 'info';
           var ckcolor = 'primary';
 var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'info' : 'info';
-
+if(isCategory && false) {
+  badgeColor = 'warning';
+  ckcolor = 'warning';
+}
 
 
 rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
@@ -6125,7 +6331,7 @@ if(true){
             rows +=  '<div>';
 //          rows += '<a class="count" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addPropertyFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\');">'+ct+'</a>&nbsp;-&nbsp;';
 //          if(datatype=='uri') {
-          rows +=  '<h6 class="text-ellipsis m-0" onclick="javascript:describe(\''+propIRI+'\');">';
+          rows +=  '<h6 class="row-result text-ellipsis m-0" onclick="javascript:describe(\''+propIRI+'\');">';
             //rows += '<a title="'+propIRI+'" onclick="javascript:describe(\''+propIRI+'\');">';
             rows += '<span '+buildTitle(propIRI)+'>'+propLabel+'</span>';
             //rows += '</a>&nbsp;';
@@ -6154,11 +6360,16 @@ if(true){
 
          // rows += '</td></tr>';
 
+         if(isCategory && false) {
+            rows += holdRows;
+         }
+
 }
 
       });
       //console.log(rows);
 //           $('#'+ID_SHOW_ME+'').append(rows);
+           
            $('#angular_showMeList').append(rows);
 
         //$('#groupby').append(rows);
@@ -6288,7 +6499,7 @@ var ckcolor = 'primary';
           rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(pid)">'+ct+'</span>';
                                 rows +=  '</span>';
             rows +=  '<div>';
-          rows +=  '<h6 class="text-ellipsis m-0" onclick="javascript:describe(\''+propIRI+'\');">';
+          rows +=  '<h6 class="row-result text-ellipsis m-0" onclick="javascript:describe(\''+propIRI+'\');">';
 
 
 
@@ -6455,7 +6666,7 @@ var ckcolor = 'primary';
             else rows += '<a href="#'+id+'" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\')"><img src="https://cdn3.iconfinder.com/data/icons/linecons-free-vector-icons-pack/32/tag-512.png" width="16" height="16" /></a>&nbsp;';
           }*/
           // a property is always a uri datatype
-          rows +=  '<h6 class="text-ellipsis m-0" '+buildTitle(graphIRI)+' onclick="javascript:describe(\''+graphIRI+'\');">';
+          rows +=  '<h6 class="row-result text-ellipsis m-0" '+buildTitle(graphIRI)+' onclick="javascript:describe(\''+graphIRI+'\');">';
           //if(datatype=='uri') {
             //rows += '<a title="'+graphIRI+'" onclick="javascript:describe(\''+graphIRI+'\');">'
             rows+=graphLabel;
@@ -6495,21 +6706,41 @@ function loadDescribeResults(xml){
     }
 
     var uri = $('#angular_recordViewer').attr('iri');
-
-    if(uri.startsWith('http://dbpedia.org')) $('#angular_recordViewer').append('<iframe src="'+uri+'"/>');
-    else $('#angular_recordViewer').append('<iframe src="'+getURIBurnerURL(uri)+'"/>');
+    if(!$('#angular_recordViewer').hasClass('embed-responsive-1by1')) $('#angular_recordViewer').addClass('embed-responsive-1by1');
 
     if($('#angular_recordViewer').attr('iri') == 'http://dbpedia.org/ontology/lccn'){
 
+      /*
+content += '<section class="search-result-item">';
+content += '<a class="image-link" >';
+content += '<img class="image" src="https://demo.flatlogic.com/sing-app/angular/assets/img/pictures/1.jpg">';
+content += '</a>';
+content += '<div class="search-result-item-body">';
+content += '<div class="row">';
+content += '<div class="col-md-9 col-12">';
+content += '<h5 class="search-result-item-heading"><a href="#">Next generation admin template</a></h5>';
+content += '<p class="info"> New York, NY 20188 </p>';
+content += '<p class="description"> Not just usual Metro. But something bigger. Not just usual widgets, but real widgets. Not just yet another admin template, but next generation admin template. </p>';
+content += '</div>';
+content += '<div class="col-md-3 col-12 text-center">';
+content += '<p class="value3 mt-sm"> $9, 700 </p>';
+content += '<p class="fs-mini text-muted"> PER WEEK </p><a class="btn btn-primary btn-info btn-sm" href="#">Learn More</a>';
+content += '</div>';
+content += '</div>';
+content += '</div>';
+content += '</section>';
+*/
+
 //    content += '<section class="widget">';
 //    content += '<div class="widget-body">';
+/*
     content += '<div class="widget-top-overflow text-white">';
     content += '<div class="height-250 overflow-hidden">';
-    content += '<img class="img-fluid" src="assets/img/pictures/19.jpg">';
+    content += '<img class="img-fluid" src="https://demo.flatlogic.com/sing-app/angular/assets/img/pictures/3.jpg">';//assets/img/pictures/19.jpg
     content += '</div>';
     content += '<div class="btn-toolbar">';
     content += '<a class="btn btn-outline btn-sm pull-right" href="#">';
-    content += '<i class="fa fa-twitter mr-xs"></i> Follow ';
+    content += '<i class="glyphicon glyphicon-glyph-bell mr-xs"></i> Subscribe ';
     content += '</a>';
     content += '</div>';
     content += '</div>';
@@ -6518,12 +6749,13 @@ function loadDescribeResults(xml){
     content += '<div class="col-md-5 col-12 text-center">';
     content += '<div class="post-user post-user-profile">';
     content += '<span class="thumb-xl"><img alt="..." class="rounded-circle" src="assets/img/people/a5.jpg"></span>';
-    content += '<h5 class="fw-normal">Adam <span class="fw-semi-bold">Johns</span></h5>';
-    content += '<p>UI/UX designer</p>';
-    content += '<a class="btn btn-danger btn-sm mt-sm" href="#"> &nbsp;Send <i class="fa fa-envelope ml-xs"></i>&nbsp; </a>';
-    content += '<ul class="contacts">';
-    content += '<li><i class="fa fa-lg fa-phone fa-fw mr-xs"></i><a href="#"> +375 29 555-55-55</a></li>';
-    content += '<li><i class="fa fa-lg fa-envelope fa-fw mr-xs"></i><a href="#"> psmith@example.com</a></li>';
+    content += '<h5 class="fw-normal">Digital <span class="fw-semi-bold">Camera</span></h5>';
+    content += '<p>Owner: jnash</p>';
+    content += '<a class="btn btn-danger btn-sm mt-sm" href="#"> &nbsp;Private Message <i class="fa fa-envelope ml-xs"></i>&nbsp; </a>';
+    content += '<ul class="contacts">';*/
+/*    content += '<li><i class="fa fa-lg fa-phone fa-fw mr-xs"></i><a href="#"> +375 29 555-55-55</a></li>';
+    content += '<li><i class="fa fa-lg fa-envelope fa-fw mr-xs"></i><a href="#"> psmith@example.com</a></li>';*/
+    /*
     content += '<li><i class="fa fa-lg fa-map-marker fa-fw mr-xs"></i><a href="#"> Minsk, Belarus</a></li>';
     content += '</ul>';
     content += '</div>';
@@ -6531,34 +6763,96 @@ function loadDescribeResults(xml){
     content += '<div class="col-md-7 col-12">';
     content += '<div class="stats-row stats-row-profile mt text-left">';
     content += '<div class="stat-item">';
-    content += '<p class="value text-left">251</p>';
-    content += '<h6 class="name">Posts</h6>';
+    content += '<p class="value text-left">9, 700</p>';
+    content += '<h6 class="name">AVI</h6>';
     content += '</div>';
     content += '<div class="stat-item">';
     content += '<p class="value text-left">9.38%</p>';
-    content += '<h6 class="name">Conversion</h6>';
+    content += '<h6 class="name">Prevelance</h6>';
     content += '</div>';
     content += '<div class="stat-item">';
     content += '<p class="value text-left">842</p>';
-    content += '<h6 class="name">Followers</h6>';
+    content += '<h6 class="name">Performance</h6>';
     content += '</div>';
     content += '</div>';
     content += '<p class="text-left mt-lg">';
-    content += '<a class="badge badge-warning rounded-0" href="#"> UI/UX </a>';
-    content += '<a class="badge badge-danger rounded-0 ml-xs" href="#"> Web Design </a>';
-    content += '<a class="badge badge-default rounded-0 ml-xs" href="#"> Mobile Apps </a>';
+    content += '<a class="badge badge-warning rounded-0" href="#"> Device </a>';
+    content += '<a class="badge badge-danger rounded-0 ml-xs" href="#"> Class </a>';
+    content += '<a class="badge badge-default rounded-0 ml-xs" href="#"> Artifact </a>';
     content += '</p>';
-    content += '<p class="lead mt-lg"> My name is Adam Johns and here is my new Sing user profile page. </p>';
-    content += '<p> I love reading people\'s summaries page especially those who are in the same industry as me. Sometimes it\'s much easier to find your concentration during the night. </p>';
+    content += '<p class="lead mt-lg"> Digital and movie cameras share an optical system, typically using a lens with a variable diaphragm to focus light onto an image pickup device. </p>';
+    content += '<p> The history of the digital camera began with Eugene F. Lally of the Jet Propulsion Laboratory, who was thinking about how to use a mosaic photosensor to capture digital images. His 1961 idea was to take pictures of the planets and stars while travelling through space to give information about the astronauts\' position. </p>';
     content += '</div>';
     content += '</div>';
+*/
+
+
+    content += '<div class="widget-top-overflow text-white">';
+    content += '<div class="height-250 overflow-hidden bg-info">';
+    content += '<!--<img class="img-responsive" src="assets/img/pictures/19.jpg">-->';//assets/img/pictures/19.jpg
+    content += '</div>';
+    content += '<div class="btn-toolbar">';
+    content += '<a class="btn btn-outline btn-sm pull-right" href="#">';
+    content += '<i class="glyphicon glyphicon-glyph-bell mr-xs"></i> Subscribe ';
+    content += '</a>';
+    content += '</div>';
+    content += '</div>';
+
+    content += '<div class="row">';
+    content += '<div class="col-md-5 col-12 text-center">';
+    content += '<div class="post-user post-user-profile">';
+    content += '<span class="thumb-xl"><img alt="..." class="rounded-circle" src="assets/img/people/a5.jpg"></span>';
+    content += '<h5 class="fw-normal">Smart Folder <span class="fw-semi-bold">Request</span></h5>';
+    content += '<p>Sponsor: jnash</p>';
+    content += '<a class="btn btn-danger btn-sm mt-sm" href="#"> &nbsp;Private Message <i class="fa fa-envelope ml-xs mr-2"></i>&nbsp; </a>';
+    content += '<ul class="contacts">';
+/*    content += '<li><i class="fa fa-lg fa-phone fa-fw mr-xs"></i><a href="#"> +375 29 555-55-55</a></li>';
+    content += '<li><i class="fa fa-lg fa-envelope fa-fw mr-xs"></i><a href="#"> psmith@example.com</a></li>';*/
+    content += '<li><i class="fa fa-lg fa-map-marker fa-fw mr-xs"></i><a href="#"> Minsk, Belarus</a></li>';
+    content += '</ul>';
+    content += '</div>';
+    content += '</div>';
+    content += '<div class="col-md-7 col-12">';
+    content += '<div class="stats-row stats-row-profile mt text-left">';
+    content += '<div class="stat-item">';
+    content += '<p class="value text-left">34</p>';
+    content += '<h6 class="name">Views</h6>';
+    content += '</div>';
+    content += '<div class="stat-item">';
+    content += '<p class="value text-left">2 days</p>';
+    content += '<h6 class="name">Time Remaining</h6>';
+    content += '</div>';
+    content += '<div class="stat-item">';
+    content += '<p class="value text-left">2</p>';
+    content += '<h6 class="name">Subscribes</h6>';
+    content += '</div>';
+    content += '</div>';
+    content += '<p class="text-left mt-lg">';
+    content += '<a class="badge badge-warning rounded-0" href="#"> Bounty </a>';
+    content += '<a class="badge badge-danger rounded-0 ml-xs" href="#"> Smart Folder Request </a>';
+    content += '<a class="badge badge-default rounded-0 ml-xs" href="#"> Service Request </a>';
+    content += '</p>';
+    content += '<p class="lead mt-lg"> Pizza chains that deliver, by country </p>';
+    content += '<p> I need a list of delivery Pizza chains, for each country, and grouped by country, and here are the other fields I need. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lobortis eget tortor nec tristique. Pellentesque bibendum faucibus augue vitae vestibulum. Sed nulla sem, luctus non maximus eu, ornare dapibus nisi. Ut luctus dui nisl, tempus volutpat dolor tempus id. Phasellus at lacinia ipsum, quis semper lorem. Suspendisse turpis lacus, vehicula sed elementum ut, auctor ac sem. Nunc egestas risus sit amet leo luctus vehicula. Proin fringilla ante eu metus finibus gravida. Suspendisse nec nunc eros. Etiam et nisl ac elit eleifend semper vel non nisi. </p>';
+    content += '</div>';
+    content += '</div>';
+
+
+    $('#angular_recordViewer').removeClass('embed-responsive-1by1');
+    $('#angular_recordViewer').append(content);
 
 //    content += '</div>';
 //    content += '</section>';
 
-    }
+    } //
 
-    $('#angular_recordViewer').append(content);
+    else doGGGView(uri);
+
+}//recordViewerColumn
+
+function doGGGView(uri){
+   if(uri.startsWith('http://dbpedia.org')) $('#angular_recordViewer').append('<iframe src="'+uri+'"/>');
+    else $('#angular_recordViewer').append('<iframe src="'+getURIBurnerURL(uri)+'"/>');
 }
 
 function loadGeoListResults(xml){
@@ -6769,7 +7063,7 @@ if(datatype == 'uri'){
                                     rows +=  '<i class="status status-bottom bg-success"></i>';
 }
                 else {
-                  rows += '<span style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="glyphicon glyphicon-tag"></span>';
+                  rows += '<span style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="icon-literal glyphicon glyphicon-tag"></span>';
                 }
 rows += '</span>';
 //rows += '</a>';
@@ -6777,7 +7071,7 @@ rows += '</span>';
 var link = '';
 if(datatype=='uri') link = 'style="cursor:pointer" onclick="javascript:describe(\''+value+'\');"';
 
-          rows +=  '<h6 '+buildTitle(value)+' '+link+'>'+label
+          rows +=  '<h6 class="row-result" '+buildTitle(value)+' '+link+'>'+label
 
           var facet = _root.find('.' + getMainFocus().attr('class') + ' > property[iri=\''+opts.propIRI+'\'] > value');
           var checked = false;
@@ -6873,7 +7167,7 @@ rows += '<tr><td>';
 rows += '</span>';
 //rows += '</a>';
 
-          rows +=  '<h6 style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+value+'\');">'+label;
+          rows +=  '<h6 class="row-result" style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+value+'\');">'+label;
 
 
           var facet = _root.find('.' + getMainFocus().attr('class') + ' > property-of[iri=\''+opts.propIRI+'\'] > value');
@@ -6966,7 +7260,7 @@ rows += '<tr><td>';
 rows += '</span>';
 //rows += '</a>';
 
-          rows +=  '<h6 style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+value+'\');">'+label+'</h6>';
+          rows +=  '<h6 class="row-result" style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+value+'\');">'+label+'</h6>';
 rows += '</td></tr>';
 /*
           rows += '<tr><td class="instance" id="'+id+'"><span id="'+id+'">';
@@ -7112,13 +7406,13 @@ rows += '<tr><td>';
                                     rows +=  '<i class="status status-bottom bg-'+color+'"></i>';
                 }
                 else {
-                  rows += '<span style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:remove('+getMainFocus().attr('class')+', true);setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="glyphicon glyphicon-tag"></span>';
+                  rows += '<span style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:remove('+getMainFocus().attr('class')+', true);setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="icon-literal glyphicon glyphicon-tag"></span>';
                 }
 
 rows += '</span>';
 //rows += '</a>';
 
-          rows +=  '<h6  style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+value+'\');">'+label+'</h6>';
+          rows +=  '<h6 class="row-result"  style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+value+'\');">'+label+'</h6>';
               var badgeId = createId();
               rows +=  '<p style="cursor:pointer" class="text-ellipsis m-0" id="'+badgeId+'"></p><script type="text/javascript">loadSubjectBadge(\''+value+'\', \''+badgeId+'\');</script>'; //
 rows += '</td></tr>';
