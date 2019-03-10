@@ -401,7 +401,12 @@ function getProxyEndpoint(url){
   //return url;
 }
 
-function getURIBurnerURL(url){
+function getGGGURL(url){
+  if(url.startsWith('http://dbpedia.org/')) return url;
+  if(url.startsWith('http://localhost/')) return url;
+  if(url.startsWith('http://127.0.0.1/')) return url;
+  url = url.replace('http://', 'http/');
+  url = url.replace('https://', 'https/');
   //url = url.replace('http://', 'http/');
   //url = url.replace('https://', 'https/');
 //  return 'http://poc.vios.network/proxy/-start-'+url+'-end-';
@@ -596,6 +601,7 @@ function fct_query(q, viewType, opt){
         }
         var currentdataspace = $('#dataSpaceMenu :selected').attr('value');
         var currentdataspacelabel = $('#dataSpaceMenu :selected').text();
+        /*
         window.open(
           'mailto:sdmonroe@gmail.com?subject=Data%20server%20error&body=' +
                 'The server '+currentdataspacelabel+' ('+currentdataspace+') threw this error: ' + 
@@ -606,6 +612,7 @@ function fct_query(q, viewType, opt){
                 '%0APOST data: %0A'+ encodeURIComponent( xhr.data )+
                 ''
         );
+        */
         fct_handleError(xhr, ajaxOptions, thrownError);
         if(xhr.url == service_fct){
           $('#dataSpaceLabel').addClass('text-danger');
@@ -2394,7 +2401,7 @@ function init(){
       $('.input-group-text').parent().parent().append(fastForwardButton);
 
   var glossaryButton = '';
-  glossaryButton += '<span id="glossaryButton" '+buildTitle('open glossary')+' class="hide input-group-append" onclick="javascript: isExpandSearch = true; var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/WikicatGlossaries\', \'Glossaries\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\'); takeMainFocus(pid);" style="cursor:pointer;">';
+  glossaryButton += '<span id="glossaryButton" '+buildTitle('open glossary')+' class="hide input-group-append" onclick="javascript: isExpandSearch = true; var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/Glossary106420781\', \'Glossary\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\'); takeMainFocus(pid);" style="cursor:pointer;">';
         glossaryButton += '<span class="input-group-text">';
           glossaryButton += '<i class="fw-bold glyphicon glyphicon-book text-info"></i>';
         glossaryButton += '</span>';
@@ -3272,6 +3279,11 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     try{
       ds = JSON.parse(localStorage.getItem('dataspaces'));
       if(!ds) ds = [];
+      ds.sort(function(a, b){
+        var x = a[1].toLowerCase();
+        var y = b[1].toLowerCase();
+        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+      });
     }
     catch(err){
       if(fct_isDebug) console.log('Dataspace cache retrieve failed: ' + err);
@@ -3290,9 +3302,9 @@ $('.avatar').parent().children('.circle').each(async (i) => {
 
     addDataspace('dbpedia.org','DBPedia',false,true); // try to add DBPedia
     addDataspace('lod.openlinksw.com','LOD',false,true); // try to add LOD Cloud Cache
-    addDataspace('data.vios.network','VIOS',false,true); // try to add VIOS
-    addDataspace('linkeddata.uriburner.com','URIBurner',false,true); // try to add URI Burner
     addDataspace('demo.openlinksw.com','OpenLink Demo',false,true); // try to add OpenLink Demo
+    addDataspace('linkeddata.uriburner.com','URIBurner',false,true); // try to add URI Burner
+    addDataspace('data.vios.network','VIOS',false,true); // try to add VIOS
 
     try{
       if(idx){
@@ -3451,137 +3463,188 @@ function hideMap(){
 }
 
 
-    function addTab(fctId, tabCounter) {
-     // tabCounter++;
-      //var label = tabTitle.val() || "Tab " + tabCounter;
-      var  id = "tabs-" + tabCounter;
-     var tabTitle = $( "#tab_title" );
-    var tabContent = $( "#tab_content" );
- 
- if(tabCounter == 0){
-    $('.tab-content').empty();
-    $('ul[role="tablist"]').empty();
- }
 
 
+var formRDF = '';//$.createElement('rdf\\:RDF');
+var formNamespaceCt = 0;
+var formNamespaceMap = {};
 
-
-          var form = $.createElement('form');
-          form.attr('id', 'tabs-1');
-          form.addClass('form-horizontal');
-          form.addClass('ng-untouched');
-          form.addClass('ng-pristine');
-          form.addClass('ng-valid');
-          form.attr('novalidate', '');
-          form.attr('role', 'form');
-          form.attr('_lpchecked', '1');
-          var fieldset = $.createElement('fieldset');
-
-          //var table = $.createElement('table');
-          var buttonPanel = $.createElement('div');
-          buttonPanel.addClass('form-actions');
-
-          var rows = '';
-
-            var buttonblock = $.createElement('div');
-            buttonblock.addClass('btn-block');
-            buttonblock.addClass('text-center');
-
-
-
-var classes = $(_root.find('.'+fctId + ' > class'));
-var tabLabel = _root.find('.'+fctId).attr('label');
-
-
-if(classes && classes.length > 0){
-          rows += '<legend class="m-2"><strong>General</strong> Categories</legend>';
-
-              rows += '<div class="form-group row">';
-              rows += '<label class="col-md-4  col-form-label text-md-right" for="normal-field">';
-              rows += 'Categories';
-              rows += '</label>';
-              rows += '<div class="col-md-7 ">';
-var clazz = '';
-      classes.each(function(i) {
-        //tabTemplate.replace('class="nav-item', 'class="nav-item drop');
-       //var  ddli = $( tabTemplate.replace( /#\{id\}/g, id ).replace( /#\{label\}/g,    ( (fctId == ID_QUERY) ? (tabTitle.val() || "Record " + tabCounter) : getQuery().attr('label') )     ) );
-        //tabList.append(ddli);
-        if(i == 0) tabLabel = processLabel($(this).attr('label')); // POI: take the latest added class as the tab label
-              clazz += ((i > 0) ? ', ' : '') + processLabel($(this).attr('label'));
-
-              
-      });
-              rows += '<input class="form-control" id="normal-field" disabled="disabled" placeholder="Enter category value" value="'+clazz+'" type="text" id="'+createId()+'"/>';
-              rows += '</div>';
-              rows += '</div>';
+function createURI(){
+  return 'http://www.vios.network/inst#' + createId();
 }
 
 
+function addTab(fctId, tabCounter) {
+    // tabCounter++;
+    //var label = tabTitle.val() || "Tab " + tabCounter;
+    var id = "tabs-" + tabCounter;
+    var tabTitle = $("#tab_title");
+    var tabContent = $("#tab_content");
+    var uri = createURI();
+    var uriDesc = $.createElement('rdf:Description');
+    uriDesc.attr('rdf:about', uri);
+
+    if (tabCounter == 0) {
+        $('.tab-content').empty();
+        $('ul[role="tablist"]').empty();
+        formRDF = $.createElement('rdf:RDF');
+        formRDF.append(uriDesc);
+        formNamespaceCt = 0;
+        formNamespaceMap = {};
+    }
 
 
-var hasLegend = false;
 
 
-      $(_root.find('.'+fctId + ' > property')).each(function(i) {
-          /*var children = $(this).has('property');
-          var tar = (children) ? breadcrumbs : facetCollector ;*/
+    var form = $.createElement('form');
+    form.attr('id', 'tabs-1');
+    form.addClass('form-horizontal');
+    form.addClass('ng-untouched');
+    form.addClass('ng-pristine');
+    form.addClass('ng-valid');
+    form.attr('novalidate', '');
+    form.attr('role', 'form');
+    form.attr('_lpchecked', '1');
+    var fieldset = $.createElement('fieldset');
 
-          var label = $(this).attr('label');
-          var len = $(this).find('property').length;
-          len += $(this).find('property-of').length;
-          len += $(this).find('class').length;
-          //if(len > 0) label += ' [' + len + ']';
-          var value = $(this).find('value').text();
-          var valueLabel = $(this).find('value').attr('label');
-          var iri = $(this).attr('iri');
-          var subId = $(this).attr('class');
-          
-          //len += ', including';
-          var datatype = $(this).attr('datatype');
+    //var table = $.createElement('table');
+    var buttonPanel = $.createElement('div');
+    buttonPanel.addClass('form-actions');
+
+    var rows = '';
+
+    var buttonblock = $.createElement('div');
+    buttonblock.addClass('btn-block');
+    buttonblock.addClass('text-center');
 
 
-          if($(this).children('property, property-of').length <= 0){
 
-        if(!hasLegend){
-          rows += '<legend class="m-2"><strong>General</strong> Fields</legend>';
-          hasLegend = true;
+    var classes = $(_root.find('.' + fctId + ' > class'));
+    var tabLabel = _root.find('.' + fctId).attr('label');
 
+
+    if (classes && classes.length > 0) {
+        rows += '<legend class="m-2"><strong>General</strong> Categories</legend>';
+
+        rows += '<div class="form-group row">';
+        rows += '<label class="col-md-4  col-form-label text-md-right" for="normal-field">';
+        rows += 'Categories';
+        rows += '</label>';
+        rows += '<div class="col-md-7 ">';
+        var clazz = '';
+        classes.each(function(i) {
+            //tabTemplate.replace('class="nav-item', 'class="nav-item drop');
+            //var  ddli = $( tabTemplate.replace( /#\{id\}/g, id ).replace( /#\{label\}/g,    ( (fctId == ID_QUERY) ? (tabTitle.val() || "Record " + tabCounter) : getQuery().attr('label') )     ) );
+            //tabList.append(ddli);
+            if (i == 0) tabLabel = processLabel($(this).attr('label')); // POI: take the latest added class as the tab label
+            clazz += ((i > 0) ? ', ' : '') + processLabel($(this).attr('label'));
+
+            var type = $.createElement('rdf:type');
+            type.attr('rdf:Resource', $(this).attr('iri'));
+            uriDesc.append(type);
+
+        });
+        rows += '<input class="form-control" id="normal-field" disabled="disabled" placeholder="Enter category value" value="' + clazz + '" type="text" id="' + createId() + '"/>';
+        rows += '</div>';
+        rows += '</div>';
+    }
+
+
+
+
+    var hasLegend = false;
+
+
+    $(_root.find('.' + fctId + ' > property')).each(function(i) {
+        /*var children = $(this).has('property');
+        var tar = (children) ? breadcrumbs : facetCollector ;*/
+
+        var label = $(this).attr('label');
+        var len = $(this).find('property').length;
+        len += $(this).find('property-of').length;
+        len += $(this).find('class').length;
+        //if(len > 0) label += ' [' + len + ']';
+        var value = $(this).find('value').text();
+        var valueLabel = $(this).find('value').attr('label');
+        var iri = $(this).attr('iri');
+        var subId = $(this).attr('class');
+
+        var ns = iri;
+        var propFrag = iri;
+        var nsQName = '';
+        if (iri.indexOf('#') > 0) {
+            ns = iri.substring(0, iri.lastIndexOf('#') + 1);
+            propFrag = iri.substring(iri.lastIndexOf('#') + 1);
         }
-              rows += '<div class="form-group row">';
-              rows += '<label class="col-md-4  col-form-label text-md-right" for="normal-field">';
-              rows += label;
+        else {
+            ns = iri.substring(0, iri.lastIndexOf('/') + 1);
+            propFrag = iri.substring(iri.lastIndexOf('/') + 1);
+        }
+        if(formNamespaceMap[ns]){
+          nsQName = formNamespaceMap[ns];
+        }
+        else {
+          nsQName = 'ns' + formNamespaceCt;
+          formNamespaceMap[ns] = nsQName;
+          formNamespaceCt++;
+        }
+        formRDF.attr('xmlns:' + nsQName, ns);
+        var triple = $.createElement(nsQName + ':' + propFrag);
+        if (value) {
+            var datatype = value.attr('datatype');
+            if (datatype == 'uri') triple.attr('rdf:Resource', value);
+            else {
+              var lang = value.attr('lang');
+              if (lang) triple.attr('xml:lang', lang);
+              triple.text((value) ? value : '');
+            }
+        }
+        else{
+            //triple.text(createId());
+        }
+        uriDesc.append(triple);
+
+        if ($(this).children('property, property-of').length <= 0) {
+
+            if (!hasLegend) {
+                rows += '<legend class="m-2"><strong>General</strong> Fields</legend>';
+                hasLegend = true;
+
+            }
+            rows += '<div class="form-group row">';
+            rows += '<label class="col-md-4  col-form-label text-md-right" for="normal-field">';
+            rows += label;
 
 
 
 
+            var cls = $(_root.find('.' + fctId + ' > property[iri="' + iri + '"]')).children('class');
 
-var  cls = $(_root.find('.'+fctId + ' > property[iri="'+iri+'"]')).children('class');
+
+            if (cls && cls.length > 0) {
+                rows += '<span class="help-block">';
+
+                cls.each(function(j) {
+                    rows += ((j > 0) ? ', ' : '') + processLabel($(this).attr('label'));
 
 
-if(cls && cls.length > 0){
-          rows += '<span class="help-block">';
-
-      cls.each(function(j) {
-              rows += ((j > 0) ? ', ' : '') + processLabel($(this).attr('label'));
-
-              
-      });
-              rows += '</span>';
-}
-
+                });
+                rows += '</span>';
+            }
 
 
 
-              rows += '</label>';
-              rows += '<div class="col-md-7 ">';
-              var disabled = (value) ? ' disabled="disabled"' : '';
-              if(valueLabel) valueLabel = processLabel(valueLabel);
-              else valueLabel = '';
-              rows += '<input class="form-control" id="normal-field"'+disabled+' placeholder="Enter field value" value="'+valueLabel+'" type="text" id="'+createId()+'"/>';
-              rows += '</div>';
-              rows += '</div>';
-          }
-          else{
+
+            rows += '</label>';
+            rows += '<div class="col-md-7 ">';
+            var disabled = (value) ? ' disabled="disabled"' : '';
+            if (valueLabel) valueLabel = processLabel(valueLabel);
+            else valueLabel = '';
+            rows += '<input class="form-control" id="normal-field"' + disabled + ' placeholder="Enter field value" value="' + valueLabel + '" type="text" id="' + createId() + '"/>';
+            rows += '</div>';
+            rows += '</div>';
+        }
+        else {
             //var subTab = $(this);
             var b = $.createElement('button');
             b.addClass('btn');
@@ -3589,7 +3652,7 @@ if(cls && cls.length > 0){
             b.attr('type', 'button');
 
             // AddTab button: just opens the dialog
-            b.button().on( "click", function() {
+            b.button().on("click", function() {
                 //$('#tab_title').attr('value', );        
                 //buildForm();
 
@@ -3599,101 +3662,117 @@ if(cls && cls.length > 0){
                 //$('#recordFormColumn').remmoveClass('dont-touch');
                 //$('#tabs').removeClass('hide');
                 b.remove();
-                if(buttonblock.children('button').length <= 0) {
-                  buttonblock.parent().remove();
+                if (buttonblock.children('button').length <= 0) {
+                    buttonblock.parent().remove();
                 }
-        //        dialog.dialog( "open" );
+                //        dialog.dialog( "open" );
             });
 
             b.text(label);
 
             buttonblock.append(b);
             buttonblock.append('&nbsp;');
-         
-           }
 
-      });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-hasLegend = false;
-
-
-      $(_root.find('.'+fctId + ' > property-of')).each(function(i) {
-          /*var children = $(this).has('property');
-          var tar = (children) ? breadcrumbs : facetCollector ;*/
-
-          var label = $(this).attr('label');
-          var len = $(this).find('property').length;
-          len += $(this).find('property-of').length;
-          len += $(this).find('class').length;
-          //if(len > 0) label += ' [' + len + ']';
-          var value = $(this).find('value').text();
-          var valueLabel = $(this).find('value').attr('label');
-          var iri = $(this).attr('iri');
-          var subId = $(this).attr('class');
-          
-          //len += ', including';
-          var datatype = $(this).attr('datatype');
-
-
-          if($(this).children('property, property-of').length <= 0){
-        if(!hasLegend){
-          rows += '<legend class="m-2"><strong>General</strong> Roles</legend>';
-          hasLegend = true;
         }
-              rows += '<div class="form-group row">';
-              rows += '<label class="col-md-4  col-form-label text-md-right" for="normal-field">';
-              rows += label + ' of';
+
+    });
 
 
 
 
+    hasLegend = false;
+
+
+    $(_root.find('.' + fctId + ' > property-of')).each(function(i) {
+        /*var children = $(this).has('property');
+        var tar = (children) ? breadcrumbs : facetCollector ;*/
+
+        var label = $(this).attr('label');
+        var len = $(this).find('property').length;
+        len += $(this).find('property-of').length;
+        len += $(this).find('class').length;
+        //if(len > 0) label += ' [' + len + ']';
+        var value = $(this).find('value').text();
+        var valueLabel = $(this).find('value').attr('label');
+        var iri = $(this).attr('iri');
+        var subId = $(this).attr('class');
+
+
+        var ns = iri;
+        var propFrag = iri;
+        var nsQName = '';
+        if (iri.indexOf('#') > 0) {
+            ns = iri.substring(0, iri.lastIndexOf('#') + 1);
+            propFrag = iri.substring(iri.lastIndexOf('#') + 1);
+        }
+        else {
+            ns = iri.substring(0, iri.lastIndexOf('/') + 1);
+            propFrag = iri.substring(iri.lastIndexOf('/') + 1);
+        }
+        if(formNamespaceMap[ns]){
+          nsQName = formNamespaceMap[ns];
+        }
+        else {
+          nsQName = 'ns' + formNamespaceCt;
+          formNamespaceMap[ns] = nsQName;
+          formNamespaceCt++;
+        }
+        formRDF.attr('xmlns:' + nsQName, ns);
+        var triple = $.createElement(nsQName + ':' + propFrag);
+        if (value) {
+            var datatype = value.attr('datatype');
+            if (datatype == 'uri') triple.attr('rdf:Resource', value);
+            else {
+              var lang = value.attr('lang');
+              if (lang) triple.attr('xml:lang', lang);
+              triple.text((value) ? value : '');
+            }
+        }
+        else{
+            //triple.text(createId());
+        }
+        uriDesc.append(triple);
+
+
+        if ($(this).children('property, property-of').length <= 0) {
+            if (!hasLegend) {
+                rows += '<legend class="m-2"><strong>General</strong> Roles</legend>';
+                hasLegend = true;
+            }
+            rows += '<div class="form-group row">';
+            rows += '<label class="col-md-4  col-form-label text-md-right" for="normal-field">';
+            rows += label + ' of';
 
 
 
-var  cls = $(_root.find('.'+fctId + ' > property-of[iri="'+iri+'"]')).children('class');
+
+            var cls = $(_root.find('.' + fctId + ' > property-of[iri="' + iri + '"]')).children('class');
 
 
-if(cls && cls.length > 0){
-          rows += '<span class="help-block">';
+            if (cls && cls.length > 0) {
+                rows += '<span class="help-block">';
 
-      cls.each(function(j) {
-              rows += ((j > 0) ? ', ' : '') + processLabel($(this).attr('label'));
-
-              
-      });
-              rows += '</span>';
-}
+                cls.each(function(j) {
+                    rows += ((j > 0) ? ', ' : '') + processLabel($(this).attr('label'));
 
 
-
-
+                });
+                rows += '</span>';
+            }
 
 
 
 
-              rows += '</label>';
-              rows += '<div class="col-md-7 ">';
-              var disabled = (value) ? ' disabled="disabled"' : '';
-              if(valueLabel) valueLabel = processLabel(valueLabel);
-              else valueLabel = '';
-              rows += '<input class="form-control" id="normal-field"'+disabled+' placeholder="Enter rolee value" value="'+valueLabel+'" type="text" id="'+createId()+'"/>';
-              rows += '</div>';
-              rows += '</div>';
-          }
-          else{
+            rows += '</label>';
+            rows += '<div class="col-md-7 ">';
+            var disabled = (value) ? ' disabled="disabled"' : '';
+            if (valueLabel) valueLabel = processLabel(valueLabel);
+            else valueLabel = '';
+            rows += '<input class="form-control" id="normal-field"' + disabled + ' placeholder="Enter rolee value" value="' + valueLabel + '" type="text" id="' + createId() + '"/>';
+            rows += '</div>';
+            rows += '</div>';
+        }
+        else {
             //var subTab = $(this);
             var b = $.createElement('button');
             b.addClass('btn');
@@ -3701,7 +3780,7 @@ if(cls && cls.length > 0){
             b.attr('type', 'button');
 
             // AddTab button: just opens the dialog
-            b.button().on( "click", function() {
+            b.button().on("click", function() {
                 //$('#tab_title').attr('value', );        
                 //takeMainFocus(subId);
                 //buildForm();
@@ -3712,132 +3791,145 @@ if(cls && cls.length > 0){
                 //$('#recordFormColumn').remmoveClass('dont-touch');
                 //$('#tabs').removeClass('hide');
                 b.remove();
-                if(buttonblock.children('button').length <= 0) {
-                  buttonblock.parent().remove();
+                if (buttonblock.children('button').length <= 0) {
+                    buttonblock.parent().remove();
                 }
 
-        //        dialog.dialog( "open" );
+                //        dialog.dialog( "open" );
             });
 
             b.text(label);
 
             buttonblock.append(b);
             buttonblock.append('&nbsp;');
-           }
+        }
 
-      });
+    });
 
-      //table.append(rows);
-      if(rows && rows != undefined) {
-fieldset.append(rows);
+    //table.append(rows);
+    if (rows && rows != undefined) {
+        fieldset.append(rows);
         form.append(fieldset);
-      }
-      form.append("<br/>");
-      if(buttonblock.children('button').length > 0) {
+    }
+    form.append("<br/>");
+    if (buttonblock.children('button').length > 0) {
         buttonPanel.append(buttonblock);
         form.append(buttonPanel);
-      }
-      //var tabs = $.createElement('ul');
-      //tabs.append('<li><a href="#tabs-1">'+getQuery().attr('label')+'</a></li>');
+    }
+    //var tabs = $.createElement('ul');
+    //tabs.append('<li><a href="#tabs-1">'+getQuery().attr('label')+'</a></li>');
 
 
-    var tabTemplate = '<li class="nav-item"><a aria-controls="'+id+'" onclick="selectTab('+tabCounter+')" aria-expanded="false" class="nav-link'+((tabCounter == 0) ? ' active' : '')+'" data-toggle="tab" id="profile-tab" role="tab">'+tabLabel+'</a></li>';
-    var tabDropDownTemplate = '<a aria-controls="'+id+'" aria-expanded="true" class="dropdown-item show" data-toggle="tab" id="'+id+'-tab" role="tab" aria-selected="true">'+_root.find('.'+fctId).attr('label')+'</a>';
-      $(_root.find('.'+fctId + ' > class')).each(function(i) {
+    var tabTemplate = '<li class="nav-item"><a aria-controls="' + id + '" onclick="selectTab(' + tabCounter + ')" aria-expanded="false" class="nav-link' + ((tabCounter == 0) ? ' active' : '') + '" data-toggle="tab" id="profile-tab" role="tab">' + tabLabel + '</a></li>';
+    var tabDropDownTemplate = '<a aria-controls="' + id + '" aria-expanded="true" class="dropdown-item show" data-toggle="tab" id="' + id + '-tab" role="tab" aria-selected="true">' + _root.find('.' + fctId).attr('label') + '</a>';
+    $(_root.find('.' + fctId + ' > class')).each(function(i) {
         //tabTemplate.replace('class="nav-item', 'class="nav-item drop');
-       //var  ddli = $( tabTemplate.replace( /#\{id\}/g, id ).replace( /#\{label\}/g,    ( (fctId == ID_QUERY) ? (tabTitle.val() || "Record " + tabCounter) : getQuery().attr('label') )     ) );
+        //var  ddli = $( tabTemplate.replace( /#\{id\}/g, id ).replace( /#\{label\}/g,    ( (fctId == ID_QUERY) ? (tabTitle.val() || "Record " + tabCounter) : getQuery().attr('label') )     ) );
         //tabList.append(ddli);
-      });
+    });
 
-/*
-      var  li = $( tabTemplate.replace( /#\{id\}/g, id ).replace( /#\{label\}/g,    ( (fctId == ID_QUERY) ? (tabTitle.val() || "Record " + tabCounter) : getQuery().attr('label') )     ) );
-      var  tabContentHtml = form.prop('outerHTML') || "Tab " + tabCounter + " content.";
- 
+    /*
+          var  li = $( tabTemplate.replace( /#\{id\}/g, id ).replace( /#\{label\}/g,    ( (fctId == ID_QUERY) ? (tabTitle.val() || "Record " + tabCounter) : getQuery().attr('label') )     ) );
+          var  tabContentHtml = form.prop('outerHTML') || "Tab " + tabCounter + " content.";
+     
 
-*/
-
-
-$('ul[role="tablist"]').append(tabTemplate);
+    */
 
 
-      var tabPanel = $.createElement('div');
-      tabPanel.attr('aria-labelledby', id+'-tab');
-      tabPanel.attr('role', 'tabpanel');
-      tabPanel.addClass('tab-pane');
-      tabPanel.attr('id', id);
-if(tabCounter == 0 && false) {
-      tabPanel.attr('aria-expanded', 'true');
-     tabPanel.addClass('active');
-      tabPanel.addClass('in');
-      tabPanel.addClass('clearfix');
+    $('ul[role="tablist"]').append(tabTemplate);
 
 
+    var tabPanel = $.createElement('div');
+    tabPanel.attr('aria-labelledby', id + '-tab');
+    tabPanel.attr('role', 'tabpanel');
+    tabPanel.addClass('tab-pane');
+    tabPanel.attr('id', id);
+    if (tabCounter == 0 && false) {
+        tabPanel.attr('aria-expanded', 'true');
+        tabPanel.addClass('active');
+        tabPanel.addClass('in');
+        tabPanel.addClass('clearfix');
+
+
+    }
+
+
+
+    tabPanel.append(form);
+    /*
+    tabPanel.append('<div class="float-right">');
+              tabPanel.append('<button onclick="hideForm()" class="btn btn-inverse">Cancel</button>');
+              tabPanel.append('&nbsp;');
+              tabPanel.append('<button class="btn btn-primary">Save to localhost</button>');
+            tabPanel.append('</div>');
+    */
+
+    var footer = '';
+
+    footer += '<br/>';
+    footer += '<div class="clearfix">';
+    footer += '<div _ngcontent-c4="" class="btn-group dropdown" dropdown="">';
+    footer += '<button _ngcontent-c4="" class="btn btn-default btn-sm" id="dropdown-btn-three">Namespaces</button>';
+    footer += '<button _ngcontent-c4="" class="btn btn-default dropdown-toggle btn-sm" dropdowntoggle="" aria-haspopup="true">';
+    footer += '<i _ngcontent-c4="" class="fa fa-caret-down"></i>';
+    footer += '</button>&nbsp;';
+    footer += '<!---->';
+    footer += '</div>';
+    footer += '<div class="pull-right">';
+
+    footer += '<button class="btn btn-default btn-sm">';
+    footer += '<i class="fa fa-plus-square text-info"></i>&nbsp;Category';
+    footer += '</button>&nbsp;';
+    footer += '<button class="btn btn-default btn-sm">';
+    footer += '<i class="fa fa-plus-square text-info"></i>&nbsp;Field';
+    footer += '</button>&nbsp;';
+    footer += '<button class="btn btn-default btn-sm">';
+    footer += '<i class="fa fa-plus-square text-info"></i>&nbsp;Role';
+    footer += '</button>&nbsp;';
+    footer += '&nbsp;&nbsp;&nbsp;&nbsp;';
+
+    footer += '<button onclick="hideForm()" class="btn btn-default btn-sm">';
+    footer += 'Cancel';
+    footer += '</button>&nbsp;';
+
+    footer += '<div class="btn-group" data-dropdown="">';
+    footer += '<button class="btn btn-sm btn-inverse dropdown-toggle" data-toggle="dropdown" aria-expanded="false">';
+    footer += '&nbsp; Save To... &nbsp;';
+    footer += '<i class="fa fa-caret-down"></i>';
+    footer += '</button>';
+
+    footer += '<ul class="dropdown-menu dropdown-menu-right" x-placement="top-end" style="position: absolute; transform: translate3d(-97px, -145px, 0px; top: 0px; left: 0px; will-change: transform;">';
+    if (inbox) footer += '<li><a href="' + getInbox() + '" ' + buildTitle(getInbox(), 'right') + ' class="dropdown-item" >Inbox</a></li>';
+    if (storage) footer += '<li><a href="' + getStorage() + '" ' + buildTitle(getStorage(), 'right') + ' class="dropdown-item" >Storage</a></li>';
+    //footer += '<li><a class="dropdown-item" href="#">vios.network</a></li>';
+    //footer += '<li><a class="dropdown-item" href="#">Solid POD</a></li>';
+    if (!inbox && !storage) {
+        //                  footer += '<li class="dropdown-divider"></li>';
+        footer += '<li><a class="dropdown-item" href="#">Save to Data Space...</a></li>';
+    }
+    else {
+        footer += '<li class="dropdown-divider"></li>';
+    }
+    footer += '<li><a onclick="downloadDataFile(formRDF.prop(\'outerHTML\'), \'rdf_' + createId() + '.rdf\');" class="dropdown-item" href="#">Export</a></li>';
+    footer += '</ul>';
+    footer += '</div>';
+
+
+    footer += '</div>';
+    footer += '</div>';
+
+    tabPanel.append(footer);
+
+
+
+    $('.tab-content').append(tabPanel);
+
+
+
+    selectTab(tabCounter);
+    $('[data-toggle="tooltip"]').tooltip();
 }
 
-
-
-tabPanel.append(form);
-/*
-tabPanel.append('<div class="float-right">');
-          tabPanel.append('<button onclick="hideForm()" class="btn btn-inverse">Cancel</button>');
-          tabPanel.append('&nbsp;');
-          tabPanel.append('<button class="btn btn-primary">Save to localhost</button>');
-        tabPanel.append('</div>');
-*/
-
-var footer = '';
-
-footer += '<br/>';
-footer += '<div class="clearfix">';
-          footer += '<div class="pull-right">';
-            footer += '<button class="btn btn-default btn-sm">';
-              footer += '<i class="fa fa-plus-square text-info"></i>&nbsp;Category';
-            footer += '</button>&nbsp;';
-            footer += '<button class="btn btn-default btn-sm">';
-              footer += '<i class="fa fa-plus-square text-info"></i>&nbsp;Field';
-            footer += '</button>&nbsp;';
-            footer += '<button class="btn btn-default btn-sm">';
-              footer += '<i class="fa fa-plus-square text-info"></i>&nbsp;Role';
-            footer += '</button>&nbsp;';
-            footer += '&nbsp;&nbsp;&nbsp;&nbsp;';
-          
-            footer += '<button onclick="hideForm()" class="btn btn-default btn-sm">';
-              footer += 'Cancel';
-            footer += '</button>&nbsp;';
-
-            footer += '<div class="btn-group" data-dropdown="">';
-              footer += '<button class="btn btn-sm btn-inverse dropdown-toggle" data-toggle="dropdown" aria-expanded="false">';
-                footer += '&nbsp; Save To... &nbsp;';
-                footer += '<i class="fa fa-caret-down"></i>';
-              footer += '</button>';
-
-              footer += '<ul class="dropdown-menu dropdown-menu-right" x-placement="top-end" style="position: absolute; transform: translate3d(-97px, -145px, 0px; top: 0px; left: 0px; will-change: transform;">';
-                if(inbox) footer += '<li><a href="'+getInbox()+'" '+buildTitle(getInbox(), 'right')+' class="dropdown-item" >Inbox</a></li>';
-                if(storage) footer += '<li><a href="'+getStorage()+'" '+buildTitle(getStorage(), 'right')+' class="dropdown-item" >Storage</a></li>';
-                //footer += '<li><a class="dropdown-item" href="#">vios.network</a></li>';
-                //footer += '<li><a class="dropdown-item" href="#">Solid POD</a></li>';
-                if(!inbox && !storage) {
-//                  footer += '<li class="dropdown-divider"></li>';
-                  footer += '<li><a class="dropdown-item" href="#">Save to Data Space...</a></li>';
-                }
-              footer += '</ul>';
-            footer += '</div>';
-
-
-          footer += '</div>';
-        footer += '</div>';
-
-           tabPanel.append(footer);
-
-
-
-$('.tab-content').append(tabPanel);
-
-
-
-selectTab(tabCounter);
-$('[data-toggle="tooltip"]').tooltip();
-    }
 
 function selectTab(tabct){
 
@@ -3947,10 +4039,10 @@ function exportTableToCSV(filename) {
     }
 
     // Download CSV file
-    downloadCSV(csv.join("\n"), filename.replace('.cvs', + '_' + createId() + '.cvs'));
+    downloadDataFile(csv.join("\n"), filename.replace('.cvs', + '_' + createId() + '.cvs'));
 }
 
-function downloadCSV(csv, filename) {
+function downloadDataFile(csv, filename) {
     var csvFile;
     var downloadLink;
 
@@ -3968,6 +4060,8 @@ function downloadCSV(csv, filename) {
 
     // Hide download link
     downloadLink.style.display = "none";
+
+    downloadLink.target = '_blank';
 
     // Add the link to DOM
     document.body.appendChild(downloadLink);
@@ -4130,14 +4224,34 @@ if(!$('input[type="text"]').is(":focus")){
     }
   }
   else {
-    if (e.keyCode == '8' || e.keyCode == '67') { // Delete key or C key
+    if (e.keyCode == '8') { // Delete key
+        clearKeywords();
+        doQuery($('#keywords').val());
+        //$('#keywords').removeAttr('disabled');
+        //$('#keywords').removeClass('disabled');
+        //$('#keywords').focus(); 
+    }
+    else if (e.keyCode == '16') { // Shift key
+    }
+    else if (e.keyCode == '13') { // Return key
+        window.location = this_endpoint;
+    }
+    else if (e.keyCode == '220') { // | key
+    }
+    else if (e.keyCode == '67') { // C key
         selectMenuItem('showMeMenu', VIEW_TYPE_CLASSES);
     }
-    else if (e.keyCode == '220' || e.keyCode == '80' || e.keyCode == '70') { // | key or P key or F key
+    else if (e.keyCode == '80' || e.keyCode == '70') { // P key or F key
         selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES);
     }
-    else if (e.keyCode == '13' || e.keyCode == '82') { // Return key or R key
+    else if (e.keyCode == '82') { // R key
         selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES_IN);
+    }
+    else if (e.keyCode == '69') { // E key
+      var dsidx = ds.indexOfDataspace(dataspace);
+      if(dsidx == 0) dsidx = ds.length - 1;
+      else dsidx--;
+      selectDataspace(ds[dsidx][0], ds[dsidx][1]);
     }
     else if (e.keyCode == '68') { // D key
       var dsidx = ds.indexOfDataspace(dataspace);
@@ -4151,7 +4265,7 @@ if(!$('input[type="text"]').is(":focus")){
       selectMenuItem('showMeMenu', VIEW_TYPE_TEXT_PROPERTIES);
       selectMenuItem('groupByMenu', GROUP_BY_TEXT_VALUE);
     }
-    else if (e.keyCode == '16' || e.keyCode == '76' || e.keyCode == '71') { // Shift key or L key or G key
+    else if (e.keyCode == '76' || e.keyCode == '71') { // L key or G key
         selectMenuItem('showMeMenu', VIEW_TYPE_GRAPHS);
     }  
 /*    else if (e.keyCode == '88') { // X key
@@ -4658,8 +4772,8 @@ function doQuery(keywords) {
 
 function checkGlossaryButton(){
   if(dataspace == 'http://dbpedia.org' && (
-    !_root.children('query').children('class[iri="http://dbpedia.org/class/yago/WikicatGlossaries"]') || 
-    _root.children('query').children('class[iri="http://dbpedia.org/class/yago/WikicatGlossaries"]').length <= 0
+    !_root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]') || 
+    _root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]').length <= 0
     )
     ){
     $('#glossaryButton').removeClass('hide');
@@ -4721,7 +4835,6 @@ function addDataspace(url, label, secure, silent){
         if (ok) console.log('Added dataspace '+ url);
         else console.log('Could not add dataspace: ' + url + ', message:'+message);
       });
-
   }
 
   selectDataspace(protocol+url, label, silent);
@@ -6851,8 +6964,7 @@ content += '</section>';
 }//recordViewerColumn
 
 function doGGGView(uri){
-   if(uri.startsWith('http://dbpedia.org')) $('#angular_recordViewer').append('<iframe src="'+uri+'"/>');
-    else $('#angular_recordViewer').append('<iframe src="'+getURIBurnerURL(uri)+'"/>');
+  $('#angular_recordViewer').append('<iframe src="'+getGGGURL(uri)+'"/>');
 }
 
 function loadGeoListResults(xml){
@@ -7338,7 +7450,7 @@ $(document).ready(function () {
 function describe(src){
     src = deSanitizeLabel(src); // deprecated
     $('#angular_recordViewer').attr('iri', src); // deprecated
-    if(dataspace == 'http://linkeddata.uriburner.com') src = getURIBurnerURL(src); // deprecated
+    if(dataspace == 'http://linkeddata.uriburner.com') src = getGGGURL(src); // deprecated
     //$('#describePanel').addClass('loadingDescribe');
     $('#angular_recordViewer').attr('src', src); // deprecated
     //$('#recordLabel').val(label);
