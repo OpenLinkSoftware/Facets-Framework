@@ -640,7 +640,8 @@ function fct_sparql(sparql, opt){
   //q = fct_removeVariableData(q);
   //var qstr = q.prop('outerHTML');
   //var qstr = q.prop('outerHTML');
-  var id = sparql ? (service_fct + sparql).hashCode() : 0;
+  var sparqlSvr = (opt.srv) ? opt.srv : service_sparql;
+  var id = sparql ? (sparqlSvr + sparql).hashCode() : 0;
   setMutex(id, opt.tar, true);
   //q.attr('timeout', fct_queryTimeout);
   var resp;
@@ -697,7 +698,7 @@ function fct_sparql(sparql, opt){
   var accept = 'application/sparql-results+xml';
   if(opt.tar == 'record') accept = 'application/rdf+xml';
   var req = $.ajax({
-      url: service_sparql + "?query=" + encodeURIComponent(sparql),
+      url: sparqlSvr + "?query=" + encodeURIComponent(sparql),
       type: 'GET',
       headers: {Accept: accept},
       dataType: "text", // POI: can't do dataType: xml, since the service sometimes returns malformed XML
@@ -1206,11 +1207,11 @@ function fct_handleSparqlResults(xml, opt) {
                 var id = createId();
                 var str = '';
 
-                str += '<a data-target="#">';
+                //str += '<a data-target="#">';
 
 
                 if(j == 0 && isRollup()) str += '<i class="la la-bars expand float-right"></i>';
-                str += '<span class="thumb-sm float-left mr">';
+                //str += '<span class="thumb-sm float-left mr">';
                 var onclick = 'onclick="javascript:setValue(\'' + id + '\', \'' + value + '\', \'' + label + '\', \'' + datatype + '\', \'' + lang + '\')"';
                 if(isRollup() && j == 0) onclick = 'onclick="javascript: addClassFacet(\''+id+'\', \''+sanitizeLabel($(this).text())+'\', \''+sanitizeLabel(label)+'\')"';
 
@@ -1228,7 +1229,7 @@ function fct_handleSparqlResults(xml, opt) {
                 if (j == 0) {
 
                     if (datatype == 'uri') {
-                        str += '<img style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' alt="..." class="rounded-circle" src="' + getFaviconUrl($(this).text()) + '">';
+                        str += '<img class="pull-right" style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' alt="..." class="rounded-circle" src="' + getFaviconUrl($(this).text()) + '"/>&nbsp;';
                         str += '<i class="status status-bottom bg-success"></i>';
                     } else {
                         str += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' class="icon-literal glyphicon glyphicon-tag"></span>';
@@ -1237,20 +1238,20 @@ function fct_handleSparqlResults(xml, opt) {
                 } // if j == 0
 
 
-                str += '</span>';
+                //str += '</span>';
 
 
 
 
                 label = deSanitizeLabel(label);
                 var labelLink = (datatype == 'uri') ? '' + buildTitle($(this).text()) : '';
-                str += '<h6 ' + onclick + ' ' + labelLink + '>';
-                str += '<span>' + label + '</span>';
+                //str += '<h6 >';
+                str += '<span ' + onclick + ' ' + labelLink + '>' + label + '</span>';
 
-                str += '</h6>';
-                str += '</a>';
+                //str += '</h6>';
+                //str += '</a>';
 
-
+                if(j == 0) col.attr('nowrap', 'true');
                 col.append(str);
                 if(isRollup() && j > 0) col.css('text-align', 'right');
 
@@ -1331,7 +1332,7 @@ function fct_handleSparqlResults(xml, opt) {
                 if (j == 0) {
                     //var mcolId = createId();
                     //r1.value += '<td '+buildTitle(v)+' style="text-align:left;" class="text-nowrap" onclick="javascript:setValue(\'mtxcola-' + i + '-' + j + '\', \'' + v + '\', \'' + sanitizeLabel(labelKey) + '\', \'' + d + '\', \'\')"><span class="thumb-sm float-left mr"><img class="rounded-circle" src="' + getFaviconUrl(v) + '"/><i class="status status-bottom bg-success"></i></span> ' + labelKey + '</td>';
-                  r1.value += '<td style="vertical-align:middle;text-align:left;cursor:pointer;" class="text-nowrap" onclick="javascript:setValue(\'mtxcola-'+i+'-'+j+'\', \''+v+'\', \''+sanitizeLabel(labelKey)+'\', \''+d+'\', \'\')"><img src="'+getFaviconUrl(v)+'">&nbsp;<span>'+labelKey+'</span></td>';
+                  r1.value += '<td style="vertical-align:middle;text-align:left;cursor:pointer;" class="text-nowrap" onclick="javascript:setValue(\'mtxcola-'+i+'-'+j+'\', \''+v+'\', \''+sanitizeLabel(labelKey)+'\', \''+d+'\', \'\')"><img class="pull-right" src="'+getFaviconUrl(v)+'">&nbsp;<span>'+labelKey+'</span></td>';
                     //            var str = '<td onclick="javascript:setValue(\''+createId()+'\', \''+v+'\', \''+labelKey+'\', \''+d+'\', \'\')">'+labelKey+'</td>';
                     //row.append('<td>'+labelKey+'</td>');
                 }
@@ -1441,7 +1442,7 @@ function fct_handleIncompleteResults(resultSize, opt, viewType, fct_sparql, fct_
 
 
 function fct_handleError(xhr, ajaxOptions, thrownError){
-  $('*').removeClass('loading');
+  $('.loading').removeClass('loading');
 }
 
 function fct_handleListResults(xml, opt){
@@ -1697,7 +1698,15 @@ function getSparqlCount(sparql, type){
 }
 
 
-function getSPARQLDescribe(uri){
+function getSPARQLDescribe(uri, isURIBurner){
+  if(isURIBurner || dataspace == 'http://linkeddata.uriburner.com'){
+    var doc = uri;
+    if(doc.indexOf('#') > 0) {
+      doc = doc.substring(0, doc.lastIndexOf('#'));
+    }
+    //return 'define get:soft "soft" describe <' + uri + '> from <'+doc+'>';
+    return 'describe <' + uri + '>';
+  }
   return 'describe <' + uri + '>';
 }
 
@@ -2406,7 +2415,11 @@ function init(){
           glossaryButton += '<i class="fw-bold glyphicon glyphicon-book text-info"></i>';
         glossaryButton += '</span>';
       glossaryButton += '</span>';
-      $('.input-group-text').parent().parent().append(glossaryButton);
+      
+
+      var favButton = '<li class="nav-item d-none d-md-block"><a class="nav-link pl-2 text-info" id="permalink" ><i class="la la-heart-o la-lg text-default"></i></a></li>'; //la-heart-o
+
+      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(favButton);
 
 
   //$('#queryTimeout').unbind('click');  
@@ -2602,7 +2615,7 @@ gbcol = '<div id="recordViewerColumn" class="hide col-lg-'+recordViewerColumnWid
 
 
 gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
-  gbcol += '<a  style="margin-left: 1.5em;" class="navbar-brand" data-target="#" onclick="javascript:buildForm()">Compose</a>';
+  gbcol += '<a  style="margin-left: 7px;" class="navbar-brand" data-target="#" onclick="javascript:buildForm()">Compose</a>';
   gbcol += '<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">';
     gbcol += '<i class="glyphicon glyphicon-tree-conifer"></i>';
     gbcol += '<i _ngcontent-c10="" class="glyphicon glyphicon-tree-conifer text-success"></i>';
@@ -2617,10 +2630,10 @@ gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Interact</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a id="ggg" class="nav-link" data-target="#" onclick="doGGGView( $(\'#angular_recordViewer\').attr(\'iri\') )">GGG</a>';
+        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe( $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a id="www" class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
+        gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
       gbcol += '</li>';
       /*
       gbcol += '<li class="nav-item">';
@@ -3591,10 +3604,10 @@ function addTab(fctId, tabCounter) {
         formRDF.attr('xmlns:' + nsQName, ns);
         var triple = $.createElement(nsQName + ':' + propFrag);
         if (value) {
-            var datatype = value.attr('datatype');
+            var datatype = $(this).find('value').attr('datatype');
             if (datatype == 'uri') triple.attr('rdf:Resource', value);
             else {
-              var lang = value.attr('lang');
+              var lang = $(this).find('value').attr('lang');
               if (lang) triple.attr('xml:lang', lang);
               triple.text((value) ? value : '');
             }
@@ -3719,11 +3732,11 @@ function addTab(fctId, tabCounter) {
         }
         formRDF.attr('xmlns:' + nsQName, ns);
         var triple = $.createElement(nsQName + ':' + propFrag);
-        if (value) {
-            var datatype = value.attr('datatype');
+        if ($(this).find('value')) {
+            var datatype = $(this).find('value').attr('datatype');
             if (datatype == 'uri') triple.attr('rdf:Resource', value);
             else {
-              var lang = value.attr('lang');
+              var lang = $(this).find('value').attr('lang');
               if (lang) triple.attr('xml:lang', lang);
               triple.text((value) ? value : '');
             }
@@ -3869,9 +3882,12 @@ function addTab(fctId, tabCounter) {
     footer += '<br/>';
     footer += '<div class="clearfix">';
     footer += '<div _ngcontent-c4="" class="btn-group dropdown" dropdown="">';
-    footer += '<button _ngcontent-c4="" class="btn btn-default btn-sm" id="dropdown-btn-three">Namespaces</button>';
+    footer += '<button _ngcontent-c4="" class="btn btn-default btn-sm" id="dropdown-btn-three">Vocabularies</button>';
     footer += '<button _ngcontent-c4="" class="btn btn-default dropdown-toggle btn-sm" dropdowntoggle="" aria-haspopup="true">';
     footer += '<i _ngcontent-c4="" class="fa fa-caret-down"></i>';
+    footer += '</button>';
+    footer += '<button _ngcontent-c4="" '+buildTitle('Vocabulary Search')+ ' onclick="javascript:window.open(\'https://lov.linkeddata.es\', \'vios.vocab\', \'width=\\\''+window.outerWidth+'\\\' height=\\\''+window.outerHeight+'\\\'\')" class="btn btn-default btn-sm">';
+    footer += '<i _ngcontent-c4="" class="fa fa-search"></i>';
     footer += '</button>&nbsp;';
     footer += '<!---->';
     footer += '</div>';
@@ -4247,13 +4263,13 @@ if(!$('input[type="text"]').is(":focus")){
     else if (e.keyCode == '82') { // R key
         selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES_IN);
     }
-    else if (e.keyCode == '69') { // E key
+    else if (e.keyCode == '65') { // A key
       var dsidx = ds.indexOfDataspace(dataspace);
       if(dsidx == 0) dsidx = ds.length - 1;
       else dsidx--;
       selectDataspace(ds[dsidx][0], ds[dsidx][1]);
     }
-    else if (e.keyCode == '68') { // D key
+    else if (e.keyCode == '90') { // Z key
       var dsidx = ds.indexOfDataspace(dataspace);
       if(dsidx == ds.length - 1) dsidx = 0;
       else dsidx++;
@@ -4400,8 +4416,11 @@ function sanitizeLabel(label){
 }
 
 function deSanitizeLabel(label){
-  label = label.split('&amp;apos;').join("\'");
-  label = label.split('&amp;apos;').join("&#39;");
+  label = label.split('&amp;').join("&");
+  label = label.split('&apos;').join("\'");
+//  label = label.split('&apos;').join("&#39;");
+  label = label.split('&Apos;').join("\'");
+//  label = label.split('&Apos;').join("&#39;");
   return label;
 }
 
@@ -4421,12 +4440,15 @@ function processLabel(label, value, datatype, lang, labelSize){
     if(label.length <= 0){
       label = value;
     }
-      if(label.lastIndexOf("/") == label.length - 1){
+
+    while(label.indexOf('/') >= 0){
+      if(label.trim().endsWith("/")){
         label = label.substring(0, label.length-1);
       }
       else{
         label = label.substring(label.lastIndexOf("/")+1);
       }
+    }
       if(label.lastIndexOf("#") == label.length - 1){
         label = label.substring(0, label.length-1);
       }
@@ -4771,7 +4793,7 @@ function doQuery(keywords) {
 }
 
 function checkGlossaryButton(){
-  if(dataspace == 'http://dbpedia.org' && (
+  if( ( dataspace == 'http://dbpedia.org' || dataspace == 'http://data.vios.network' || dataspace == 'http://lod.openlinksw.com')  && (
     !_root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]') || 
     _root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]').length <= 0
     )
@@ -5450,7 +5472,7 @@ function loadGroupByResults(xml, focusVarName){
 
 detailResultsColumnWidths();
 
-/*
+
 rows += '<section class="search-result-item">';
 rows += '<a class="image-link" >';
 rows += '<img class="image" src="https://demo.flatlogic.com/sing-app/angular/assets/img/pictures/3.jpg">';
@@ -5506,8 +5528,10 @@ rows += '</div>';
 rows += '</div>';
 rows += '</section>';
 
-*/
 
+
+
+/*
 rows += '<section class="search-result-item">';
 rows += '<a class="image-link" >';
 rows += '<img class="image" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ2ehxSliMhXtH-Anppcd-gkFFpfGWLkFMhPEuGEtq4D0RGkURx_w">';
@@ -5562,6 +5586,8 @@ rows += '</div>';
 rows += '</div>';
 rows += '</div>';
 rows += '</section>';
+
+*/
 
 }
 
@@ -6204,7 +6230,7 @@ if(true){
           var focusTargetClass = (getMainFocus().attr('class') == ID_QUERY+"") ? 'queryFocus' : 'queryFocusValue';
           //rows += '<tr  id="rw'+id+'" onmouseover="javascript:showControls(\''+id+'\')" onmouseout="javascript:hideControls(\''+id+'\')"><td class="up" id="'+opts.parentId+'">';
 
-          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onmouseover="javascript:$(\'#'+focusTarget+'\').addClass(\''+focusTargetClass+'\')" onmouseout="javascript:$(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\')" onclick="javascript: var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</span>';
+          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onmouseover="javascript:$(\'#'+focusTarget+'\').addClass(\''+focusTargetClass+'\')" onmouseout="javascript:$(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\')" onclick="javascript: $(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\'); var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</span>';
 //          rows += '<a class="count" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addClassFacet(\''+id+'\', \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</a>&nbsp;-&nbsp;';
           //rows += '<a title="'+uri+'" onclick="javascript:describe(\''+uri+'\');">'+ spaceCamelCase(label) +'</a>&nbsp;';
                                 rows +=  '</span>';
@@ -6809,18 +6835,136 @@ var ckcolor = 'primary';
         //return total;
 } // loadPropertiesResults
 
+var showRecordRoles = false;
+
 function loadDescribeResults(xml){
+  xml = xml.replaceAll('xml\\:lang', 'lang');
+    showRecordRoles = $('#showMeMenu').val() == VIEW_TYPE_PROPERTIES_IN;
     $('#angular_recordViewer').empty();
     var content = "";
-    var description = $(xml).children('rdf\\:Description');
-    var triples = description.children();
-    for(i = 0; i < triples.length; i++){
+    //var description = $(xml).children('rdf\\:Description')[0];
+    //var triples = description.children();
+    var table = $.createElement('table');
+    table.addClass('table');
+    table.addClass('table-hover');
+    table.addClass('table-striped');
+    var header = $.createElement('thead');
+    var body = $.createElement('tbody');
+    table.append(header);
+    var row = $.createElement('tr');
+    var col = $.createElement('th');
+    col.addClass('d-none');
+    col.addClass('d-md-table-cell');
+    col.append((showRecordRoles ? '... is a' : 'Field') + '&nbsp;<i class="pull-right glyphicon glyphicon-filter text-secondary"></i>');
+    row.append(col);
 
-    }
+    col = $.createElement('th');
+    col.addClass('d-none');
+    col.addClass('d-md-table-cell');
+    col.text((showRecordRoles ? 'of this' : 'Value'));
+    row.append(col);
+
+    //header.append(row);
+
 
     var uri = $('#angular_recordViewer').attr('iri');
-    if(!$('#angular_recordViewer').hasClass('embed-responsive-1by1')) $('#angular_recordViewer').addClass('embed-responsive-1by1');
+    var uriLabel = processLabel(     uri).replace(/\b\w/g, function(l){ return l.toUpperCase() }) ;    
 
+    var desc;
+    var categoryBadges = '';
+    var headerAdded = false;
+    $('rdf\\:Description', xml).each(function(i){
+      var subject = $(this).attr('rdf:about');
+      $('*', this).each(function(j){
+
+        var objectIRI = $(this).attr('rdf:resource');
+        var objectValue = $(this).text();
+        var propLabel = $(this).prop('nodeName').toLowerCase();
+        var lang = ( $(this).attr('lang') && $(this).attr('lang').length > 0 ) ? $(this).attr('lang') : undefined ;
+        if(lang && lang != 'en') return;
+
+        var isRole = propLabel.trim().toLowerCase().endsWith('of') || objectIRI == uri;
+
+        var proplink = $.createElement('a');
+        proplink.attr('href', $(this).prop('nodeName'));
+        if(propLabel == 'rdf:type'){
+          categoryBadges += '<a href="#"> '+processLabel(objectIRI)+' </a>&nbsp;'; //class="badge badge-warning fw-semi-bold rounded-0" 
+          propLabel = 'category';
+        }
+        if(propLabel.endsWith(':label')) uriLabel = processLabel(  deSanitizeLabel(   objectValue)).replace(/\b\w/g, function(l){ return l.toUpperCase() }) ;
+        if(!desc && propLabel.endsWith(':comment')) desc = objectValue;
+        if(!desc && propLabel.endsWith(':abstract')) desc = objectValue;
+        if(!desc && propLabel.endsWith(':description')) desc = objectValue;
+        //if(objectIRI == uri && !propLabel.trim().toLowerCase().endsWith('of')) propLabel += ' of';
+        if(propLabel == 'RDF:TYPE') propLabel = 'category';
+        proplink.text(processLabel(propLabel.toLowerCase()));
+        proplink.css('color', '#495057');
+        proplink.css('text-decoration','none');
+
+
+
+        if(isRole && !showRecordRoles) return;
+        if(!isRole && showRecordRoles) return;
+
+        if(!headerAdded){
+          header.append(row);
+          headerAdded = true;
+        }
+
+        row = $.createElement('tr');
+        col = $.createElement('td');
+        //col.addClass('d-none');
+        //col.addClass('d-md-table-cell');
+        col.append(proplink);
+        row.append(col);
+
+        col = $.createElement('td');
+        //col.attr('width', '100%');
+        //col.addClass('d-none');
+        //col.addClass('d-md-table-cell');
+        if(objectIRI == uri){
+          if(subject) {
+            col.html('<a style="text-decoration:none;" href="'+subject + '">' +processLabel(subject)+ '&nbsp;<img class="pull-right" src="'+getFaviconUrl(subject)+'"></a>');
+          }        
+          else col.text(objectValue);
+        }
+        else {
+          if(objectIRI) {
+            col.html('<a style="text-decoration:none;" href="'+objectIRI + '">' +processLabel(objectIRI)+ '&nbsp;<img class="pull-right" src="'+getFaviconUrl(subject)+'"></a>');
+          }        
+          else col.text(objectValue);
+        }
+        row.append(col);
+
+        body.append(row);
+      });
+    });
+    uriLabel = uriLabel.replace('\'S', '\'s');
+    uriLabel = uriLabel.replace('\'T', '\'t');
+
+    uriLabel = uriLabel.trim();
+
+    var uriLabalArray = uriLabel.split(' ');
+    uriLabel = '';
+    for(i =0; i < uriLabalArray.length; i++){
+      uriLabel += ' ' + ( (i == uriLabalArray.length - 1) ? '<span class="fw-semi-bold">' +uriLabalArray[i]+ '</span>' : uriLabalArray[i] );
+    }
+    uriLabel = uriLabel.trim();
+    $('#angular_recordViewer').append('<h3 style="padding-top:1em; padding-left:.55rem; padding-right:.55rem;">'+uriLabel+'</h3>');
+    if(desc) $('#angular_recordViewer').append('<div style="padding-left:.55rem; padding-right:.55rem; ">'+desc+'</div>');
+
+    if(categoryBadges.length > 0){
+        content += $('#angular_recordViewer').append('<legend class="m-2 text-left text-dark">Categories</legend><div style="padding-left:.55rem; padding-right:.55rem; " class="text-left ">'+categoryBadges+'</div>');
+    }
+
+    table.append(body);
+    $('#angular_recordViewer').removeClass('embed-responsive-1by1');
+    $('#angular_recordViewer').append('<p/>');
+    $('#angular_recordViewer').append('<p/>');
+    $('#angular_recordViewer').append(table);
+    //if(!$('#angular_recordViewer').hasClass('embed-responsive-1by1')) $('#angular_recordViewer').addClass('embed-responsive-1by1');
+
+    if(true) return;
     if($('#angular_recordViewer').attr('iri') == 'http://dbpedia.org/ontology/lccn'){
 
       /*
@@ -6846,7 +6990,7 @@ content += '</section>';
 
 //    content += '<section class="widget">';
 //    content += '<div class="widget-body">';
-/*
+
     content += '<div class="widget-top-overflow text-white">';
     content += '<div class="height-250 overflow-hidden">';
     content += '<img class="img-fluid" src="https://demo.flatlogic.com/sing-app/angular/assets/img/pictures/3.jpg">';//assets/img/pictures/19.jpg
@@ -6865,10 +7009,10 @@ content += '</section>';
     content += '<h5 class="fw-normal">Digital <span class="fw-semi-bold">Camera</span></h5>';
     content += '<p>Owner: jnash</p>';
     content += '<a class="btn btn-danger btn-sm mt-sm" href="#"> &nbsp;Private Message <i class="fa fa-envelope ml-xs"></i>&nbsp; </a>';
-    content += '<ul class="contacts">';*/
+    content += '<ul class="contacts">';
 /*    content += '<li><i class="fa fa-lg fa-phone fa-fw mr-xs"></i><a href="#"> +375 29 555-55-55</a></li>';
     content += '<li><i class="fa fa-lg fa-envelope fa-fw mr-xs"></i><a href="#"> psmith@example.com</a></li>';*/
-    /*
+    
     content += '<li><i class="fa fa-lg fa-map-marker fa-fw mr-xs"></i><a href="#"> Minsk, Belarus</a></li>';
     content += '</ul>';
     content += '</div>';
@@ -6897,8 +7041,10 @@ content += '</section>';
     content += '<p> The history of the digital camera began with Eugene F. Lally of the Jet Propulsion Laboratory, who was thinking about how to use a mosaic photosensor to capture digital images. His 1961 idea was to take pictures of the planets and stars while travelling through space to give information about the astronauts\' position. </p>';
     content += '</div>';
     content += '</div>';
-*/
 
+
+
+/*
 
     content += '<div class="widget-top-overflow text-white">';
     content += '<div class="height-250 overflow-hidden bg-info">';
@@ -6919,8 +7065,10 @@ content += '</section>';
     content += '<p>Sponsor: jnash</p>';
     content += '<a class="btn btn-danger btn-sm mt-sm" href="#"> &nbsp;Private Message <i class="fa fa-envelope ml-xs mr-2"></i>&nbsp; </a>';
     content += '<ul class="contacts">';
+    */
 /*    content += '<li><i class="fa fa-lg fa-phone fa-fw mr-xs"></i><a href="#"> +375 29 555-55-55</a></li>';
     content += '<li><i class="fa fa-lg fa-envelope fa-fw mr-xs"></i><a href="#"> psmith@example.com</a></li>';*/
+    /*
     content += '<li><i class="fa fa-lg fa-map-marker fa-fw mr-xs"></i><a href="#"> Minsk, Belarus</a></li>';
     content += '</ul>';
     content += '</div>';
@@ -6949,7 +7097,7 @@ content += '</section>';
     content += '<p> I need a list of delivery Pizza chains, for each country, and grouped by country, and here are the other fields I need. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lobortis eget tortor nec tristique. Pellentesque bibendum faucibus augue vitae vestibulum. Sed nulla sem, luctus non maximus eu, ornare dapibus nisi. Ut luctus dui nisl, tempus volutpat dolor tempus id. Phasellus at lacinia ipsum, quis semper lorem. Suspendisse turpis lacus, vehicula sed elementum ut, auctor ac sem. Nunc egestas risus sit amet leo luctus vehicula. Proin fringilla ante eu metus finibus gravida. Suspendisse nec nunc eros. Etiam et nisl ac elit eleifend semper vel non nisi. </p>';
     content += '</div>';
     content += '</div>';
-
+*/
 
     $('#angular_recordViewer').removeClass('embed-responsive-1by1');
     $('#angular_recordViewer').append(content);
@@ -6964,6 +7112,8 @@ content += '</section>';
 }//recordViewerColumn
 
 function doGGGView(uri){
+  if(!$('#angular_recordViewer').hasClass('embed-responsive-1by1')) $('#angular_recordViewer').addClass('embed-responsive-1by1');
+  $('#angular_recordViewer').empty();
   $('#angular_recordViewer').append('<iframe src="'+getGGGURL(uri)+'"/>');
 }
 
@@ -7447,10 +7597,10 @@ $(document).ready(function () {
     });
 });
 
-function describe(src){
+function describe(src, isGGGRecord){
     src = deSanitizeLabel(src); // deprecated
     $('#angular_recordViewer').attr('iri', src); // deprecated
-    if(dataspace == 'http://linkeddata.uriburner.com') src = getGGGURL(src); // deprecated
+    //if(dataspace == 'http://linkeddata.uriburner.com') src = getGGGURL(src); // deprecated
     //$('#describePanel').addClass('loadingDescribe');
     $('#angular_recordViewer').attr('src', src); // deprecated
     //$('#recordLabel').val(label);
@@ -7462,7 +7612,8 @@ function describe(src){
 
     var opt = new Object();
     opt.tar = 'record';
-    fct_sparql(getSPARQLDescribe(src), opt);
+    if(isGGGRecord) opt.srv = 'http://linkeddata.uriburner.com/sparql';
+    fct_sparql(getSPARQLDescribe(src, isGGGRecord), opt);
 }
 
 function linkOut(){
