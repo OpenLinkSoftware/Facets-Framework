@@ -4257,11 +4257,15 @@ if(!$('input[type="text"]').is(":focus")){
     else if (e.keyCode == '67') { // C key
         selectMenuItem('showMeMenu', VIEW_TYPE_CLASSES);
     }
-    else if (e.keyCode == '80' || e.keyCode == '70') { // P key or F key
+    else if (e.keyCode == '70') { // F key
         selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES);
+        showRecordRoles == false;
+        describe($('#angular_recordViewer').attr('iri'));
     }
     else if (e.keyCode == '82') { // R key
         selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES_IN);
+        showRecordRoles == true;
+        describe($('#angular_recordViewer').attr('iri'));
     }
     else if (e.keyCode == '65') { // A key
       var dsidx = ds.indexOfDataspace(dataspace);
@@ -4280,6 +4284,8 @@ if(!$('input[type="text"]').is(":focus")){
       takeMainFocus(ID_QUERY);
       selectMenuItem('showMeMenu', VIEW_TYPE_TEXT_PROPERTIES);
       selectMenuItem('groupByMenu', GROUP_BY_TEXT_VALUE);
+      showRecordRoles == false;
+      describe($('#angular_recordViewer').attr('iri'));
     }
     else if (e.keyCode == '76' || e.keyCode == '71') { // L key or G key
         selectMenuItem('showMeMenu', VIEW_TYPE_GRAPHS);
@@ -4441,8 +4447,10 @@ function processLabel(label, value, datatype, lang, labelSize){
       label = value;
     }
 
+    if(!label) return ''; 
+
     while(label.indexOf('/') >= 0){
-      if(label.trim().endsWith("/")){
+      if(label.endsWith("/")){
         label = label.substring(0, label.length-1);
       }
       else{
@@ -6836,9 +6844,17 @@ var ckcolor = 'primary';
 } // loadPropertiesResults
 
 var showRecordRoles = false;
+var filterRecordViewFields = true;
 
 function loadDescribeResults(xml){
   xml = xml.replaceAll('xml\\:lang', 'lang');
+  xml = xml.substring(xml.indexOf('<rdf:'));
+  xml = '<t>' + xml + '</t>';
+
+    var uri = $('#angular_recordViewer').attr('iri');
+    var uriLabel = processLabel(     uri).replace(/\b\w/g, function(l){ return l.toUpperCase() }) ;    
+
+  //xml = xml.replaceAll('rdf\\:RDF', 'rdf');
     showRecordRoles = $('#showMeMenu').val() == VIEW_TYPE_PROPERTIES_IN;
     $('#angular_recordViewer').empty();
     var content = "";
@@ -6848,6 +6864,7 @@ function loadDescribeResults(xml){
     table.addClass('table');
     table.addClass('table-hover');
     table.addClass('table-striped');
+
     var header = $.createElement('thead');
     var body = $.createElement('tbody');
     table.append(header);
@@ -6855,7 +6872,9 @@ function loadDescribeResults(xml){
     var col = $.createElement('th');
     col.addClass('d-none');
     col.addClass('d-md-table-cell');
-    col.append((showRecordRoles ? '... is a' : 'Field') + '&nbsp;<i class="pull-right glyphicon glyphicon-filter text-secondary"></i>');
+    col.css('cursor', 'pointer');
+
+    col.append((showRecordRoles ? '... is a' : 'Field') + '&nbsp;<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\''+uri+'\')" class="pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'secondary')+'"></i>');
     row.append(col);
 
     col = $.createElement('th');
@@ -6865,10 +6884,23 @@ function loadDescribeResults(xml){
     row.append(col);
 
     //header.append(row);
+    var namespaces = {};
 
+    $('rdf\\:RDF', xml).each(function() {
+      // this.attributes is not a plain object, but an array
+      // of attribute nodes, which contain both the name and value
+      for(i=0; i < this.attributes.length; i++){
+        var att = this.attributes[i];
+        if(att && att.specified) {
+          var name = att.name;
+          var val = att.value;
+          name = name.replace('xmlns:', '');
+          namespaces[name] = val;
+        }
+      }
 
-    var uri = $('#angular_recordViewer').attr('iri');
-    var uriLabel = processLabel(     uri).replace(/\b\w/g, function(l){ return l.toUpperCase() }) ;    
+    });
+
 
     var desc;
     var categoryBadges = '';
@@ -6880,6 +6912,8 @@ function loadDescribeResults(xml){
         var objectIRI = $(this).attr('rdf:resource');
         var objectValue = $(this).text();
         var propLabel = $(this).prop('nodeName').toLowerCase();
+        var qname = propLabel.substring(0, propLabel.indexOf(':'));
+        var fragId = propLabel.substring(propLabel.indexOf(':') + 1);
         var lang = ( $(this).attr('lang') && $(this).attr('lang').length > 0 ) ? $(this).attr('lang') : undefined ;
         if(lang && lang != 'en') return;
 
@@ -6891,13 +6925,13 @@ function loadDescribeResults(xml){
           categoryBadges += '<a href="#"> '+processLabel(objectIRI)+' </a>&nbsp;'; //class="badge badge-warning fw-semi-bold rounded-0" 
           propLabel = 'category';
         }
-        if(propLabel.endsWith(':label')) uriLabel = processLabel(  deSanitizeLabel(   objectValue)).replace(/\b\w/g, function(l){ return l.toUpperCase() }) ;
+        if(propLabel == 'rdfs:label' && !isRole) uriLabel = processLabel(  deSanitizeLabel(   objectValue)).replace(/\b\w/g, function(l){ return l.toUpperCase() }) ;
         if(!desc && propLabel.endsWith(':comment')) desc = objectValue;
         if(!desc && propLabel.endsWith(':abstract')) desc = objectValue;
         if(!desc && propLabel.endsWith(':description')) desc = objectValue;
         //if(objectIRI == uri && !propLabel.trim().toLowerCase().endsWith('of')) propLabel += ' of';
         if(propLabel == 'RDF:TYPE') propLabel = 'category';
-        proplink.text(processLabel(propLabel.toLowerCase()));
+        proplink.text(propLabel.toLowerCase());
         proplink.css('color', '#495057');
         proplink.css('text-decoration','none');
 
@@ -6905,6 +6939,9 @@ function loadDescribeResults(xml){
 
         if(isRole && !showRecordRoles) return;
         if(!isRole && showRecordRoles) return;
+        var facets = getMainFocus().children('property[iri="'+namespaces[qname]+fragId+'"]');
+        if(filterRecordViewFields && (!facets || facets.length <= 0) ) return;
+        if(propLabel == 'category') return;
 
         if(!headerAdded){
           header.append(row);
@@ -6926,13 +6963,13 @@ function loadDescribeResults(xml){
           if(subject) {
             col.html('<a style="text-decoration:none;" href="'+subject + '">' +processLabel(subject)+ '&nbsp;<img class="pull-right" src="'+getFaviconUrl(subject)+'"></a>');
           }        
-          else col.text(objectValue);
+          else col.html(objectValue);
         }
         else {
           if(objectIRI) {
-            col.html('<a style="text-decoration:none;" href="'+objectIRI + '">' +processLabel(objectIRI)+ '&nbsp;<img class="pull-right" src="'+getFaviconUrl(subject)+'"></a>');
+            col.html('<a style="text-decoration:none;" href="'+objectIRI + '">' +processLabel(objectIRI)+ '&nbsp;<img class="pull-right" src="'+getFaviconUrl(objectIRI)+'"></a>');
           }        
-          else col.text(objectValue);
+          else col.html(objectValue);
         }
         row.append(col);
 
@@ -6950,7 +6987,8 @@ function loadDescribeResults(xml){
       uriLabel += ' ' + ( (i == uriLabalArray.length - 1) ? '<span class="fw-semi-bold">' +uriLabalArray[i]+ '</span>' : uriLabalArray[i] );
     }
     uriLabel = uriLabel.trim();
-    $('#angular_recordViewer').append('<h3 style="padding-top:1em; padding-left:.55rem; padding-right:.55rem;">'+uriLabel+'</h3>');
+
+    $('#angular_recordViewer').append('<h3 onclick="javascript:linkOut();" style="cursor:pointer;padding-top:1em; padding-left:.55rem; padding-right:.55rem;">'+uriLabel+'</h3>'+((body.children().length <= 0 && filterRecordViewFields)?'<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = false; describe(\''+uri+'\')" class="p-2 glyphicon glyphicon-filter text-info"></i>':''));
     if(desc) $('#angular_recordViewer').append('<div style="padding-left:.55rem; padding-right:.55rem; ">'+desc+'</div>');
 
     if(categoryBadges.length > 0){
