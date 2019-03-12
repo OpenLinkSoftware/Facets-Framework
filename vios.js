@@ -392,6 +392,7 @@ function formatDate(date) {
 }
 
 function getProxyEndpoint(url){
+  if(url == 'http://lod.openlinksw.com') url = 'http://dbpedia.org';
   if(url == 'http://localhost' || url == 'http://localhost/') return url;
   if(url.startsWith('http://127.0.0.1')) return url;
   url = url.replace('http://', 'http/');
@@ -894,7 +895,7 @@ function fct_handleSparqlSubject(xml, opt){
 }
 
 function fct_handleSparqlDescribe(xml, opt){
-  loadDescribeResults(xml);
+  loadDescribeResults(xml, opt);
 }
 
 function fct_handleGeoListResults(xml, opt){
@@ -1192,7 +1193,7 @@ function fct_handleSparqlResults(xml, opt) {
             var lang = $($(this).children()[0]).attr('lang');
             var label = value;
             if (datatype == 'uri') {
-                label = labels[value];
+                label = getLabel(value);
                 if (!label) label = processLabel(value);
                 //label = getFavicon(value) + '&nbsp;<h6 class="text-ellipsis m-0" >' + label + '</h6>';
                 value = label;
@@ -1286,7 +1287,7 @@ function fct_handleSparqlResults(xml, opt) {
                 r1.value += '<th  style="vertical-align:bottom;text-align:center;cursor:pointer;" class="rotate"><div></div></th>';
             }
             var value = matrixValues[i].text();
-            var label = (value) ? labels[value] : '';
+            var label = (value) ? getLabel(value) : '';
             if (!label) label = processLabel(value);
             var h = matrixValues[i].attr("name");
             var v = matrixValues[i].text();
@@ -1321,7 +1322,7 @@ function fct_handleSparqlResults(xml, opt) {
             r1.value += '<tr>';
             //r2.value += '<tr>';
             var valueKey = matrixKeys[i].text();
-            var labelKey = (valueKey) ? labels[valueKey] : '';
+            var labelKey = (valueKey) ? getLabel(valueKey) : '';
             if (!labelKey) {
                 labelKey = processLabel(valueKey);
             }
@@ -1337,7 +1338,7 @@ function fct_handleSparqlResults(xml, opt) {
                     //row.append('<td>'+labelKey+'</td>');
                 }
                 var value = matrixValues[j].text();
-                var label = (value) ? labels[value] : '';
+                var label = (value) ? getLabel(value) : '';
                 //var sanitizedLabel = label;
                 if (!label) {
                     label = processLabel(value);
@@ -2215,6 +2216,31 @@ var showChart = false;
 var chartProperty;
 var verticalChartHeaders = false;
 var showRollup = false;
+var showIDN = false;
+
+function toggleIDN(){
+  showIDN = !showIDN;
+  if(showIDN){
+    $('#idnButton').text('Record');
+    detailResultsColumnWidths();
+  }
+  else {
+    $('#idnButton').text('IDN');
+    resetColumnWidths();
+  }
+  //describe( $('#angular_recordViewer').attr(iri) );
+  doQuery(getQueryText());
+}
+
+function setLabel(iri, label){
+  if(!iri) return;
+  labels[iri.toLowerCase()] = label;
+}
+
+function getLabel(iri){
+  if(!iri) return;
+  return labels[iri.toLowerCase()];
+}
 
 
   function getStorage(){
@@ -2614,7 +2640,7 @@ gbcol = '<div id="recordViewerColumn" class="hide col-lg-'+recordViewerColumnWid
        // gbcol += '<div class="widget-body p-0">';
 
 
-gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
+gbcol += '<nav id="recordNavBar" class="navbar navbar-expand-lg navbar-light bg-light">';
   gbcol += '<a  style="margin-left: 7px;" class="navbar-brand" data-target="#" onclick="javascript:buildForm()">Compose</a>';
   gbcol += '<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">';
     gbcol += '<i class="glyphicon glyphicon-tree-conifer"></i>';
@@ -2630,7 +2656,7 @@ gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Interact</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe( $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
+        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe( $(undefined, \'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
@@ -2668,10 +2694,10 @@ gbcol += '<nav class="navbar navbar-expand-lg navbar-light bg-light">';
         gbcol += '<a class="nav-link disabled" data-target="#">Edit</a>';
       gbcol += '</li>';
     gbcol += '</ul>';
-    gbcol += '<form class="form-inline my-2 my-lg-0">';
+      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">IDN</button>';
+//    gbcol += '<form class="form-inline my-2 my-lg-0">';
       //gbcol += '<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">';
-      gbcol += '<button style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" type="submit">IDN</button>';
-    gbcol += '</form>';
+//    gbcol += '</form>';
   gbcol += '</div>';
 gbcol += '</nav>';
 
@@ -4256,16 +4282,17 @@ if(!$('input[type="text"]').is(":focus")){
     }
     else if (e.keyCode == '67') { // C key
         selectMenuItem('showMeMenu', VIEW_TYPE_CLASSES);
+        describe(undefined, $('#angular_recordViewer').attr('iri'));
     }
     else if (e.keyCode == '70') { // F key
         selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES);
         showRecordRoles == false;
-        describe($('#angular_recordViewer').attr('iri'));
+        describe(undefined, $('#angular_recordViewer').attr('iri'));
     }
     else if (e.keyCode == '82') { // R key
         selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES_IN);
         showRecordRoles == true;
-        describe($('#angular_recordViewer').attr('iri'));
+        describe(undefined, $('#angular_recordViewer').attr('iri'));
     }
     else if (e.keyCode == '65') { // A key
       var dsidx = ds.indexOfDataspace(dataspace);
@@ -4285,10 +4312,11 @@ if(!$('input[type="text"]').is(":focus")){
       selectMenuItem('showMeMenu', VIEW_TYPE_TEXT_PROPERTIES);
       selectMenuItem('groupByMenu', GROUP_BY_TEXT_VALUE);
       showRecordRoles == false;
-      describe($('#angular_recordViewer').attr('iri'));
+      describe(undefined, $('#angular_recordViewer').attr('iri'));
     }
     else if (e.keyCode == '76' || e.keyCode == '71') { // L key or G key
         selectMenuItem('showMeMenu', VIEW_TYPE_GRAPHS);
+        describe(undefined, $('#angular_recordViewer').attr('iri'));
     }  
 /*    else if (e.keyCode == '88') { // X key
         if(isExpandSearch) {
@@ -4415,7 +4443,7 @@ function clearKeywords(){
 function sanitizeLabel(label){
   label = label.split('\'').join("&amp;apos;");
   label = label.split('&#39;').join("&amp;apos;");
-  label = label.replaceAll('"', '\"');
+  label = label.replaceAll('"', '&amp;quot;');
   label = label.replaceAll('\\', '\\\\');
   //label = label.split('_').join(" ");
   return label;
@@ -4423,9 +4451,14 @@ function sanitizeLabel(label){
 
 function deSanitizeLabel(label){
   label = label.split('&amp;').join("&");
+    label = label.split('&amp;apos;').join("\'");
+    label = label.split('&amp;quot;').join("\"");
+  //label = label.split('&amp;apos;').join("&#39;");
+  label = label.split('&Apos;').join("\'");
   label = label.split('&apos;').join("\'");
 //  label = label.split('&apos;').join("&#39;");
-  label = label.split('&Apos;').join("\'");
+  label = label.split('&#39;').join("\'");
+  label = label.split('&amp;Apos;').join("\'");
 //  label = label.split('&Apos;').join("&#39;");
   return label;
 }
@@ -5081,10 +5114,12 @@ function loadTextResults(xml){
           }
           else {
 
+            var rowId = opts.parentId;
+
               if(!loadedUri) {
                   if(datatype === 'uri'){
                     loadedUri = true;
-                    describe(value);
+                    describe(rowId, value);
                   } 
               }
               var propIRI = getGroupByValue();
@@ -5112,7 +5147,7 @@ function loadTextResults(xml){
               var active = (facet) ? 'active': '';
 
               label = processLabel(label, value, datatype, lang);
-              labels[value] = label;
+              setLabel(value, label);
 
               // POI: the label and values need to have the apostrophe (') char removed before insertion into the javascript functions below
               // but they need to be desanitized by the respective javascript methods before being used in a query (or else the query will fail due to value mismatch)
@@ -5190,7 +5225,7 @@ if(true){
 
 
               label = deSanitizeLabel(label);
-              var labelLink = (datatype=='uri') ? ' onclick="javascript:describe(\''+value+'\');"' : '';
+              var labelLink = (datatype=='uri') ? ' onclick="javascript:describe(\''+rowId+'\', \''+value+'\');"' : '';
               rows +=  '<h6 class="row-result text-ellipsis m-0" '+labelLink+'>';
               rows+='<span '+buildTitle(value)+'>'+label+'</span>';
               if(text.indexOf('<b>') > 30) text = text.substring(text.indexOf('<b>') - 10);
@@ -5469,14 +5504,22 @@ function loadGroupByResults(xml, focusVarName){
               //rows += '</span></td></tr>';
           }
           else {
+              var id = createId();
+
+              var opts = new Object();
+              opts.tag = TAG_LIST;
+              opts.parentId = 'gbr_'+id;
+              opts.childrenId = opts.tag + opts.parentId;
+
+            var rowId = opts.parentId;
 
               if(!loadedUri) {
                   if(datatype === 'uri'){
                     loadedUri = true;
-                    describe(value);
+                    describe(rowId, value);
 
 
-    if(value == 'http://dbpedia.org/ontology/lccn'){
+    if(showIDN){
 
 detailResultsColumnWidths();
 
@@ -5626,7 +5669,7 @@ rows += '</section>';
               var active = (facet) ? 'active': '';
 
               label = processLabel(label, value, datatype, lang);
-              labels[value] = label;
+              setLabel(value, label);
 
               // POI: the label and values need to have the apostrophe (') char removed before insertion into the javascript functions below
               // but they need to be desanitized by the respective javascript methods before being used in a query (or else the query will fail due to value mismatch)
@@ -5634,12 +5677,6 @@ rows += '</section>';
               label = sanitizeLabel(label);
               value = sanitizeLabel(value);
               //console.log($(col[0]));
-              var id = createId();
-
-              var opts = new Object();
-              opts.tag = TAG_LIST;
-              opts.parentId = 'gbr_'+id;
-              opts.childrenId = opts.tag + opts.parentId;
 
 var color = 'success';
 var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'primary' : 'info';
@@ -5715,7 +5752,7 @@ if(true){
 
 
               label = deSanitizeLabel(label);
-              var labelLink = (datatype=='uri') ? ' onclick="javascript:describe(\''+value+'\');"' : '';
+              var labelLink = (datatype=='uri') ? ' onclick="javascript:describe(\''+rowId+'\', \''+value+'\');"' : '';
               rows +=  '<h6 class="row-result text-ellipsis m-0" '+labelLink+'>';
               rows+='<span '+buildTitle(value)+'>'+label+'</span>';
               //rows +=  '<p class="help-block text-ellipsis m-0"></p>';
@@ -6200,6 +6237,7 @@ function loadCategoriesResults(xml){
           });
           label = processLabel(label, uri, datatype);
           label = spaceCamelCase(label);
+              setLabel(uri, label);
           var id = createId();
           //console.log($(col[0]));
           var opts = new Object();
@@ -6225,6 +6263,8 @@ rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">'
   var ckcolor = 'primary';
 var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'info' : 'info';
 
+var rowId = opts.parentId;
+
 if(true){
 
 
@@ -6243,8 +6283,8 @@ if(true){
           //rows += '<a title="'+uri+'" onclick="javascript:describe(\''+uri+'\');">'+ spaceCamelCase(label) +'</a>&nbsp;';
                                 rows +=  '</span>';
             rows +=  '<div>';
-          rows +=  '<h6 class="row-result text-ellipsis m-0" onclick="javascript:describe(\''+uri+'\');">';
-          rows += '<span '+buildTitle(uri)+'>' + label + '</span>';
+          rows +=  '<h6 class="row-result text-ellipsis m-0" >';
+          rows += '<span '+buildTitle(uri)+' onclick="javascript:describe(\''+rowId+'\', \''+uri+'\');">' + label + '</span>';
               //rows +=  '<p class="help-block text-ellipsis m-0"></p>';
 
           //rows += '</td><td id="ctrl'+id+'" class="hideCtrl" style="white-space:nowrap; vertical-align:top;">';
@@ -6424,6 +6464,7 @@ function loadPropertiesResults(xml){
           }
 
           propLabel = processLabel(propLabel, propIRI, datatype, undefined);
+              setLabel(propIRI, propLabel);
           //console.log($(col[0]));
           var id = createId();
           var opts = new Object();
@@ -6467,6 +6508,7 @@ rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">'
 
 if(true){
 
+var rowId = opts.parentId;
 
           var facet = _root.find('.' + getMainFocus().attr('class') + ' > property[iri=\''+opts.propIRI+'\']');
           var checked = (facet && facet.length > 0) ? ' checked="checked"': '';
@@ -6478,9 +6520,9 @@ if(true){
             rows +=  '<div>';
 //          rows += '<a class="count" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addPropertyFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\');">'+ct+'</a>&nbsp;-&nbsp;';
 //          if(datatype=='uri') {
-          rows +=  '<h6 class="row-result text-ellipsis m-0" onclick="javascript:describe(\''+propIRI+'\');">';
+          rows +=  '<h6 class="row-result text-ellipsis m-0" >';
             //rows += '<a title="'+propIRI+'" onclick="javascript:describe(\''+propIRI+'\');">';
-            rows += '<span '+buildTitle(propIRI)+'>'+propLabel+'</span>';
+            rows += '<span '+buildTitle(propIRI)+' onclick="javascript:describe(\''+rowId+'\', \''+propIRI+'\');">'+propLabel+'</span>';
             //rows += '</a>&nbsp;';
 //          }
           //rows += '</span></td><td id="ctrl'+id+'" style="white-space:nowrap; vertical-align:top;">';          
@@ -6615,6 +6657,7 @@ function loadPropertiesInResults(xml){
           //var id = createId();
           //console.log($(col[0]));
           propLabel = processLabel(propLabel, propIRI, datatype);
+              setLabel(propIRI, propLabel);
           //console.log($(col[0]));
           var id = createId();
           var opts = new Object();
@@ -6626,6 +6669,8 @@ function loadPropertiesInResults(xml){
           opts.contextId = id;
           opts.propIRI = propIRI;
           opts.propLabel = propLabel;
+
+          var rowId = opts.parentId;
 
 
 rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
@@ -6646,11 +6691,11 @@ var ckcolor = 'primary';
           rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(pid)">'+ct+'</span>';
                                 rows +=  '</span>';
             rows +=  '<div>';
-          rows +=  '<h6 class="row-result text-ellipsis m-0" onclick="javascript:describe(\''+propIRI+'\');">';
+          rows +=  '<h6 class="row-result text-ellipsis m-0" >';
 
 
 
-            rows += '<span '+buildTitle(propIRI)+'>' + propLabel + '</span>';
+            rows += '<span '+buildTitle(propIRI)+' onclick="javascript:describe(\''+rowId+'\', \''+propIRI+'\');">' + propLabel + '</span>';
           //rows += '</span></td><td id="ctrl'+id+'" class="hideCtrl" style="white-space:nowrap; vertical-align:top;">';          
           if(propIRI != GROUP_BY_NONE_VALUE){
           rows += '<div class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
@@ -6761,6 +6806,8 @@ function loadGraphResults(xml){
           if(!graphIRI || graphIRI.length == 0) return; // continue the loop
           graphLabel = processLabel(graphLabel, graphIRI, datatype);
           graphLabel = getLibraryLabel(graphLabel);
+              setLabel(graphIRI, graphLabel);
+
           //console.log($(col[0]));
           var id = createId();
           var opts = new Object();
@@ -6806,6 +6853,8 @@ rows += '</span>';
 
 var ckcolor = 'primary';
 
+var rowId = opts.parentId;
+
 
 
           /*else {
@@ -6813,7 +6862,7 @@ var ckcolor = 'primary';
             else rows += '<a href="#'+id+'" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\')"><img src="https://cdn3.iconfinder.com/data/icons/linecons-free-vector-icons-pack/32/tag-512.png" width="16" height="16" /></a>&nbsp;';
           }*/
           // a property is always a uri datatype
-          rows +=  '<h6 class="row-result text-ellipsis m-0" '+buildTitle(graphIRI)+' onclick="javascript:describe(\''+graphIRI+'\');">';
+          rows +=  '<h6 class="row-result text-ellipsis m-0" '+buildTitle(graphIRI)+' onclick="javascript:describe(\''+rowId+'\', \''+graphIRI+'\');">';
           //if(datatype=='uri') {
             //rows += '<a title="'+graphIRI+'" onclick="javascript:describe(\''+graphIRI+'\');">'
             rows+=graphLabel;
@@ -6846,164 +6895,10 @@ var ckcolor = 'primary';
 var showRecordRoles = false;
 var filterRecordViewFields = true;
 
-function loadDescribeResults(xml){
-  xml = xml.replaceAll('xml\\:lang', 'lang');
-  xml = xml.substring(xml.indexOf('<rdf:'));
-  xml = '<t>' + xml + '</t>';
+function loadDescribeResults(xml, opt){
+      $('#angular_recordViewer').empty();
 
-    var uri = $('#angular_recordViewer').attr('iri');
-    var uriLabel = processLabel(     uri).replace(/\b\w/g, function(l){ return l.toUpperCase() }) ;    
-
-  //xml = xml.replaceAll('rdf\\:RDF', 'rdf');
-    showRecordRoles = $('#showMeMenu').val() == VIEW_TYPE_PROPERTIES_IN;
-    $('#angular_recordViewer').empty();
-    var content = "";
-    //var description = $(xml).children('rdf\\:Description')[0];
-    //var triples = description.children();
-    var table = $.createElement('table');
-    table.addClass('table');
-    table.addClass('table-hover');
-    table.addClass('table-striped');
-
-    var header = $.createElement('thead');
-    var body = $.createElement('tbody');
-    table.append(header);
-    var row = $.createElement('tr');
-    var col = $.createElement('th');
-    col.addClass('d-none');
-    col.addClass('d-md-table-cell');
-    col.css('cursor', 'pointer');
-
-    col.append((showRecordRoles ? '... is a' : 'Field') + '&nbsp;<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\''+uri+'\')" class="pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'secondary')+'"></i>');
-    row.append(col);
-
-    col = $.createElement('th');
-    col.addClass('d-none');
-    col.addClass('d-md-table-cell');
-    col.text((showRecordRoles ? 'of this' : 'Value'));
-    row.append(col);
-
-    //header.append(row);
-    var namespaces = {};
-
-    $('rdf\\:RDF', xml).each(function() {
-      // this.attributes is not a plain object, but an array
-      // of attribute nodes, which contain both the name and value
-      for(i=0; i < this.attributes.length; i++){
-        var att = this.attributes[i];
-        if(att && att.specified) {
-          var name = att.name;
-          var val = att.value;
-          name = name.replace('xmlns:', '');
-          namespaces[name] = val;
-        }
-      }
-
-    });
-
-
-    var desc;
-    var categoryBadges = '';
-    var headerAdded = false;
-    $('rdf\\:Description', xml).each(function(i){
-      var subject = $(this).attr('rdf:about');
-      $('*', this).each(function(j){
-
-        var objectIRI = $(this).attr('rdf:resource');
-        var objectValue = $(this).text();
-        var propLabel = $(this).prop('nodeName').toLowerCase();
-        var qname = propLabel.substring(0, propLabel.indexOf(':'));
-        var fragId = propLabel.substring(propLabel.indexOf(':') + 1);
-        var lang = ( $(this).attr('lang') && $(this).attr('lang').length > 0 ) ? $(this).attr('lang') : undefined ;
-        if(lang && lang != 'en') return;
-
-        var isRole = propLabel.trim().toLowerCase().endsWith('of') || objectIRI == uri;
-
-        var proplink = $.createElement('a');
-        proplink.attr('href', $(this).prop('nodeName'));
-        if(propLabel == 'rdf:type'){
-          categoryBadges += '<a href="#"> '+processLabel(objectIRI)+' </a>&nbsp;'; //class="badge badge-warning fw-semi-bold rounded-0" 
-          propLabel = 'category';
-        }
-        if(propLabel == 'rdfs:label' && !isRole) uriLabel = processLabel(  deSanitizeLabel(   objectValue)).replace(/\b\w/g, function(l){ return l.toUpperCase() }) ;
-        if(!desc && propLabel.endsWith(':comment')) desc = objectValue;
-        if(!desc && propLabel.endsWith(':abstract')) desc = objectValue;
-        if(!desc && propLabel.endsWith(':description')) desc = objectValue;
-        //if(objectIRI == uri && !propLabel.trim().toLowerCase().endsWith('of')) propLabel += ' of';
-        if(propLabel == 'RDF:TYPE') propLabel = 'category';
-        proplink.text(propLabel.toLowerCase());
-        proplink.css('color', '#495057');
-        proplink.css('text-decoration','none');
-
-
-
-        if(isRole && !showRecordRoles) return;
-        if(!isRole && showRecordRoles) return;
-        var facets = getMainFocus().children('property[iri="'+namespaces[qname]+fragId+'"]');
-        if(filterRecordViewFields && (!facets || facets.length <= 0) ) return;
-        if(propLabel == 'category') return;
-
-        if(!headerAdded){
-          header.append(row);
-          headerAdded = true;
-        }
-
-        row = $.createElement('tr');
-        col = $.createElement('td');
-        //col.addClass('d-none');
-        //col.addClass('d-md-table-cell');
-        col.append(proplink);
-        row.append(col);
-
-        col = $.createElement('td');
-        //col.attr('width', '100%');
-        //col.addClass('d-none');
-        //col.addClass('d-md-table-cell');
-        if(objectIRI == uri){
-          if(subject) {
-            col.html('<a style="text-decoration:none;" href="'+subject + '">' +processLabel(subject)+ '&nbsp;<img class="pull-right" src="'+getFaviconUrl(subject)+'"></a>');
-          }        
-          else col.html(objectValue);
-        }
-        else {
-          if(objectIRI) {
-            col.html('<a style="text-decoration:none;" href="'+objectIRI + '">' +processLabel(objectIRI)+ '&nbsp;<img class="pull-right" src="'+getFaviconUrl(objectIRI)+'"></a>');
-          }        
-          else col.html(objectValue);
-        }
-        row.append(col);
-
-        body.append(row);
-      });
-    });
-    uriLabel = uriLabel.replace('\'S', '\'s');
-    uriLabel = uriLabel.replace('\'T', '\'t');
-
-    uriLabel = uriLabel.trim();
-
-    var uriLabalArray = uriLabel.split(' ');
-    uriLabel = '';
-    for(i =0; i < uriLabalArray.length; i++){
-      uriLabel += ' ' + ( (i == uriLabalArray.length - 1) ? '<span class="fw-semi-bold">' +uriLabalArray[i]+ '</span>' : uriLabalArray[i] );
-    }
-    uriLabel = uriLabel.trim();
-
-    $('#angular_recordViewer').append('<h3 onclick="javascript:linkOut();" style="cursor:pointer;padding-top:1em; padding-left:.55rem; padding-right:.55rem;">'+uriLabel+'</h3>'+((body.children().length <= 0 && filterRecordViewFields)?'<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = false; describe(\''+uri+'\')" class="p-2 glyphicon glyphicon-filter text-info"></i>':''));
-    if(desc) $('#angular_recordViewer').append('<div style="padding-left:.55rem; padding-right:.55rem; ">'+desc+'</div>');
-
-    if(categoryBadges.length > 0){
-        content += $('#angular_recordViewer').append('<legend class="m-2 text-left text-dark">Categories</legend><div style="padding-left:.55rem; padding-right:.55rem; " class="text-left ">'+categoryBadges+'</div>');
-    }
-
-    table.append(body);
-    $('#angular_recordViewer').removeClass('embed-responsive-1by1');
-    $('#angular_recordViewer').append('<p/>');
-    $('#angular_recordViewer').append('<p/>');
-    $('#angular_recordViewer').append(table);
-    //if(!$('#angular_recordViewer').hasClass('embed-responsive-1by1')) $('#angular_recordViewer').addClass('embed-responsive-1by1');
-
-    if(true) return;
-    if($('#angular_recordViewer').attr('iri') == 'http://dbpedia.org/ontology/lccn'){
+    if(showIDN){
 
       /*
 content += '<section class="search-result-item">';
@@ -7145,9 +7040,226 @@ content += '</section>';
 
     } //
 
-    else doGGGView(uri);
+    else {
+      xml = xml.replaceAll('xml\\:lang', 'lang');
+      xml = xml.substring(xml.indexOf('<rdf:'));
+      xml = '<t>' + xml + '</t>';
+
+      var uri = $('#angular_recordViewer').attr('iri');
+      var uriLabel = uri;
+      if(getLabel(uri)) uriLabel = getLabel(uri);
+      uriLabel = processLabel(uriLabel).replace(/\b\w/g, function(l){ return l.toUpperCase() }) ;    
+
+    //xml = xml.replaceAll('rdf\\:RDF', 'rdf');
+      showRecordRoles = $('#showMeMenu').val() == VIEW_TYPE_PROPERTIES_IN;
+      var content = "";
+      //var description = $(xml).children('rdf\\:Description')[0];
+      //var triples = description.children();
+      var table = $.createElement('table');
+      table.addClass('table');
+      table.addClass('table-hover');
+      table.addClass('table-striped');
+
+      var header = $.createElement('thead');
+      var body = $.createElement('tbody');
+      table.append(header);
+      var row = $.createElement('tr');
+      var col = $.createElement('th');
+      col.addClass('d-none');
+      col.addClass('d-md-table-cell');
+      col.css('cursor', 'pointer');
+
+      col.append((showRecordRoles ? '... is a' : 'Field')); //&nbsp;<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\''+ sanitizeLabel(uri)+'\')" class="pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'secondary')+'"></i>
+      row.append(col);
+
+      col = $.createElement('th');
+      col.addClass('d-none');
+      col.addClass('d-md-table-cell');
+      col.text((showRecordRoles ? 'of this' : 'Value'));
+      row.append(col);
+
+      //header.append(row);
+      var namespaces = {};
+
+      $('rdf\\:RDF', xml).each(function() {
+        // this.attributes is not a plain object, but an array
+        // of attribute nodes, which contain both the name and value
+        for(i=0; i < this.attributes.length; i++){
+          var att = this.attributes[i];
+          if(att && att.specified) {
+            var name = att.name;
+            var val = att.value;
+            name = name.replace('xmlns:', '');
+            namespaces[name] = val;
+
+          }
+        }
+
+      });
+
+
+      var desc;
+      var categoryBadges = '';
+      var headerAdded = false;
+      var hasClass = false;
+      var hasImage = false;
+      var isOddClass = false;
+      var img;
+      $('rdf\\:Description', xml).each(function(i){
+        var subject = $(this).attr('rdf:about');
+        var subLabel = subject;
+        if(getLabel(subject)) subLabel = getLabel(subject);
+        $('*', this).each(function(j){
+
+          var objectIRI = $(this).attr('rdf:resource');
+          var objLabel = objectIRI;
+          if(getLabel(objectIRI)) objLabel = getLabel(objectIRI);
+          var objectValue = $(this).text();
+          var propLabel = $(this).prop('nodeName').toLowerCase();
+          var qname = propLabel.substring(0, propLabel.indexOf(':'));
+          var fragId = propLabel.substring(propLabel.indexOf(':') + 1);
+          var lang = ( $(this).attr('lang') && $(this).attr('lang').length > 0 ) ? $(this).attr('lang') : undefined ;
+          if(lang && lang != 'en') return;
+
+          var isRole = propLabel.trim().toLowerCase().endsWith('of') || objectIRI == uri;
+
+          var proplink = $.createElement('a');
+          proplink.attr('href', $(this).prop('nodeName'));
+          if(propLabel == 'rdf:type'){
+            //if(categoryBadges.length > 0) categoryBadges += '<strong class="text-dark">&middot;</strong>';
+            categoryBadges += '<a class="link-category'+((isOddClass)? ' link-odd' :'')+'" href="#"> '+processLabel(objLabel)+' </a>'; //class="badge badge-inverse fw-semi-bold rounded-0" 
+            propLabel = 'category';
+            isOddClass = !isOddClass;
+          }
+          if((namespaces[qname]+fragId) == 'http://www.w3.org/2000/01/rdf-schema#label' && !isRole) uriLabel = processLabel(  deSanitizeLabel(objectValue)).replace(/\b\w/g, function(l){ return l.toUpperCase() }) ;
+          if((namespaces[qname]+fragId) == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' && objectIRI == 'http://www.w3.org/2002/07/owl#Class') hasClass = true;
+          if((namespaces[qname]+fragId) == 'http://xmlns.com/foaf/0.1/depiction') {
+            hasImage = true;
+            img = '<div class="pull-right"><img onclick="javascript:linkOut(\''+objectIRI+'\');" style="cursor:pointer;width:200px; margin-left:.55em;" class="class="rounded img-thumbnail" src="'+objectIRI+'"/></div>';
+          }
+          if(!desc && propLabel.endsWith(':comment')) desc = objectValue;
+          if(!desc && propLabel.endsWith(':abstract')) desc = objectValue;
+          if(!desc && propLabel.endsWith(':description')) desc = objectValue;
+          //if(objectIRI == uri && !propLabel.trim().toLowerCase().endsWith('of')) propLabel += ' of';
+          if(propLabel == 'RDF:TYPE') propLabel = 'category';
+          proplink.css('color', '#495057');
+          proplink.css('text-decoration','none');
+          propLabel = propLabel.toLowerCase();
+
+
+
+          if(isRole && !showRecordRoles) return;
+          if(!isRole && showRecordRoles) return;
+          var propIRI = namespaces[qname]+fragId;
+          var facets = matchFocusProperties(propIRI);
+          var ctxId = (facets && facets.length > 0) ? facets.attr('class') : createId();
+          if(facets && facets.length > 0) propIRI = facets.attr('iri');
+          if(filterRecordViewFields && (!facets || facets.length <= 0) ) return;
+          if(propLabel == 'category') return;
+
+          if(getLabel(propIRI)) propLabel = getLabel(propIRI);
+          proplink.text(propLabel);
+
+          if(!headerAdded){
+            header.append(row);
+            headerAdded = true;
+          }
+
+          row = $.createElement('tr');
+          col = $.createElement('td');
+          //col.addClass('d-none');
+          //col.addClass('d-md-table-cell');
+          col.append(proplink);
+          row.append(col);
+
+          col = $.createElement('td');
+              var cid = 'copy_' + createId();
+              col.on('mouseover', function(){
+                $('#'+cid).removeClass('hide');
+              });
+              col.on('mouseout', function(){
+                $('#'+cid).addClass('hide');
+              });
+          //col.attr('width', '100%');
+          //col.addClass('d-none');
+          //col.addClass('d-md-table-cell');
+          if(objectIRI == uri){
+            if(subject) {
+              col.html('<a style="text-decoration:none;" href="'+subject + '">' +processLabel(subLabel)+ '</a>&nbsp;<img style="cursor:pointer" class="pull-right" src="'+getFaviconUrl(subject)+'" onclick="javascript: remove(\''+facets.attr('class')+'\'); var pid = createId(); setPropertyValue(pid, \''+NODE_TYPE_PROPERTY+'\', \''+ctxId+'\', \''+propIRI+'\', \''+propLabel+'\', \''+objectIRI+'\', \''+processLabel(objLabel)+'\', \'uri\', \''+lang+'\');"/>');
+            }        
+            else col.html(objectValue + '<i class="fa fa-copy fa-sm"></i>');
+          }
+          else {
+            if(objectIRI) {
+              col.html('<a style="text-decoration:none;" href="'+objectIRI + '">' +processLabel(objLabel)+ '</a>&nbsp;<img style="cursor:pointer" class="pull-right" src="'+getFaviconUrl(objectIRI)+'" onclick="javascript: remove(\''+facets.attr('class')+'\'); var pid = createId(); setPropertyValue(pid, \''+NODE_TYPE_PROPERTY+'\', \''+ctxId+'\', \''+propIRI+'\', \''+propLabel+'\', \''+objectIRI+'\', \''+processLabel(objLabel)+'\', \'uri\', \''+lang+'\');"/>');
+            }        
+            else { 
+              col.html('<span style="cursor:pointer" class="pull-right icon-literal glyphicon glyphicon-tag" onclick="javascript: remove(\''+facets.attr('class')+'\'); var pid = createId(); setPropertyValue(pid, \''+NODE_TYPE_PROPERTY+'\', \''+ctxId+'\', \''+propIRI+'\', \''+propLabel+'\', \''+objectValue+'\', \''+sanitizeLabel(objectValue)+'\', \'uri\', \''+lang+'\');"></span>' + objectValue + '&nbsp;&nbsp;<i id="'+cid+'" onmouseout="$(\'#'+cid+'\').tooltip(\'hide\');$(\'#'+cid+'\').attr(\'data-original-title\', \'Copy to clipboard\');$(\'#'+cid+'\').tooltip();" '+buildTitle('Copy to clipboard')+' onclick="javascript:$(\'#'+cid+'\').tooltip(\'hide\');copy(\''+sanitizeLabel(objectValue)+'\'); $(\'#'+cid+'\').attr(\'data-original-title\', \'Copied\');$(\'#'+cid+'\').tooltip(\'show\');" style="cursor:pointer;" class="hide fa fa-copy fa-sm"></i>');
+            }
+          }
+          row.append(col);
+
+          body.append(row);
+        });
+      });
+
+      uriLabel = uriLabel.replace('\'S', '\'s');
+      uriLabel = uriLabel.replace('\'T', '\'t');
+
+      uriLabel = uriLabel.trim();
+
+      var uriLabalArray = uriLabel.split(' ');
+      var buttonLabel = uriLabel;
+      uriLabel = '';
+      for(i =0; i < uriLabalArray.length; i++){
+        uriLabel += ' ' + ( (i == uriLabalArray.length - 1) ? '<span class="fw-semi-bold">' +uriLabalArray[i]+ '</span>' : uriLabalArray[i] );
+      }
+      uriLabel = uriLabel.trim();
+
+      $('#angular_recordViewer').append('<h3 onclick="javascript:linkOut();" style="cursor:pointer;padding-top:1em; padding-left:.55rem; padding-right:.55rem;">'+uriLabel+'</h3>'+ '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'secondary')+'"></i>');//((body.children().length <= 0 && filterRecordViewFields)?'<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = false; describe(\''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-info"></i>':''));
+      if(hasImage){
+        desc = img + desc;
+      }
+      if(desc) $('#angular_recordViewer').append('<div style="padding-left:.55rem; padding-right:.55rem; ">'+desc+'</div>');
+
+      if(categoryBadges.length > 0){
+          content += $('#angular_recordViewer').append('<legend class="m-2 text-left text-dark">Categories</legend><div style="padding-left:.55rem; padding-right:.55rem; " >'+categoryBadges+'</div>');
+      }
+
+
+
+      table.append(body);
+      $('#angular_recordViewer').removeClass('embed-responsive-1by1');
+      $('#angular_recordViewer').append('<p/>');
+      $('#angular_recordViewer').append('<p/>');
+      $('#angular_recordViewer').append(table);
+      if(hasClass) $('#angular_recordViewer').append('<div class="form-actions"><div class="text-center"><button _ngcontent-c7="" class="btn btn-info " role="button">New '+buttonLabel+'</button>&nbsp;<button _ngcontent-c7="" class="btn btn-inverse " role="button"> New Subclass </button></div></div>');
+      //if(!$('#angular_recordViewer').hasClass('embed-responsive-1by1')) $('#angular_recordViewer').addClass('embed-responsive-1by1');
+    }
+$('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
+
+if(opt.srcId){
+  $('#'+opt.srcId).removeClass('loading');
+}
 
 }//recordViewerColumn
+
+function matchFocusProperties(propIRI, isReverse){
+  return getMainFocus().children('property').filter(function() {
+            return $(this).attr('iri').toLowerCase() == propIRI.toLowerCase();
+          });
+}
+
+function copy(str) {
+    str = deSanitizeLabel(str);
+    var textArea = document.createElement("textarea");
+    textArea.value = str;
+    //textArea.classList.add('hide');
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("Copy");
+    textArea.remove();
+}
 
 function doGGGView(uri){
   if(!$('#angular_recordViewer').hasClass('embed-responsive-1by1')) $('#angular_recordViewer').addClass('embed-responsive-1by1');
@@ -7347,15 +7459,17 @@ function loadPropertyValues(xml, opts){
           var id = createId();
           //console.log($(col[0]));
 
+          var rowId = 'r_' + createId();
+
               if(!loadedUri) {
                   if(datatype === 'uri'){
                     loadedUri = true;
-                    describe(value);
+                    describe(rowId, value);
                   } 
               }
 
 
-rows += '<tr><td>';
+rows += '<tr><td id="'+rowId+'">';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 if(datatype == 'uri'){
@@ -7369,7 +7483,7 @@ rows += '</span>';
 //rows += '</a>';
 
 var link = '';
-if(datatype=='uri') link = 'style="cursor:pointer" onclick="javascript:describe(\''+value+'\');"';
+if(datatype=='uri') link = 'style="cursor:pointer" onclick="javascript:describe(\''+rowId+'\', \''+value+'\');"';
 
           rows +=  '<h6 class="row-result" '+buildTitle(value)+' '+link+'>'+label
 
@@ -7450,6 +7564,8 @@ function loadPropertyOfValues(xml, opts){
           var id = createId();
           //console.log($(col[0]));
 
+          var rowId = 'r_' + createId();
+
               if(!loadedUri) {
                   if(datatype === 'uri'){
                     loadedUri = true;
@@ -7458,7 +7574,7 @@ function loadPropertyOfValues(xml, opts){
               }
 
 
-rows += '<tr><td>';
+rows += '<tr><td id="'+rowId+'">';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
@@ -7467,7 +7583,7 @@ rows += '<tr><td>';
 rows += '</span>';
 //rows += '</a>';
 
-          rows +=  '<h6 class="row-result" style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+value+'\');">'+label;
+          rows +=  '<h6 class="row-result" style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+rowId+'\', \''+value+'\');">'+label;
 
 
           var facet = _root.find('.' + getMainFocus().attr('class') + ' > property-of[iri=\''+opts.propIRI+'\'] > value');
@@ -7539,6 +7655,8 @@ var loadedUri = false;
           var id = createId();
           //console.log($(col[0]));
 
+          var rowId = 'r_' + createId();
+
 
               if(!loadedUri) {
                   if(datatype === 'uri'){
@@ -7551,7 +7669,7 @@ var loadedUri = false;
           var focusTarget = 'focusValue';
           var focusTargetClass = 'queryFocusValue';
 
-rows += '<tr><td>';
+rows += '<tr><td id="'+rowId+'">';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
@@ -7560,7 +7678,7 @@ rows += '<tr><td>';
 rows += '</span>';
 //rows += '</a>';
 
-          rows +=  '<h6 class="row-result" style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+value+'\');">'+label+'</h6>';
+          rows +=  '<h6 class="row-result" style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+rowId+'\', \''+value+'\');">'+label+'</h6>';
 rows += '</td></tr>';
 /*
           rows += '<tr><td class="instance" id="'+id+'"><span id="'+id+'">';
@@ -7635,12 +7753,20 @@ $(document).ready(function () {
     });
 });
 
-function describe(src, isGGGRecord){
+function describe(id, src, isGGGRecord){
+    var linkOutURI = src;
+    if(linkOutURI.startsWith('http://linkeddata.uriburner.com/') && false){
+      linkOutURI = linkOutURI.substring(linkOutURI.indexOf('http://linkeddata.uriburner.com/')+'http://linkeddata.uriburner.com/'.length);
+      linkOutURI = linkOutURI.substring(linkOutURI.indexOf('http'));
+      linkOutURI = linkOutURI.replace('https/', 'https://');
+      linkOutURI = linkOutURI.replace('http/', 'http://');
+    }
+    linkOutURI = deSanitizeLabel(linkOutURI); // deprecated
     src = deSanitizeLabel(src); // deprecated
-    $('#angular_recordViewer').attr('iri', src); // deprecated
+    $('#angular_recordViewer').attr('iri', linkOutURI); // deprecated
     //if(dataspace == 'http://linkeddata.uriburner.com') src = getGGGURL(src); // deprecated
     //$('#describePanel').addClass('loadingDescribe');
-    $('#angular_recordViewer').attr('src', src); // deprecated
+    $('#angular_recordViewer').attr('src', linkOutURI); // deprecated
     //$('#recordLabel').val(label);
 
     //var win = window.open(src, twin, 'width="'+window.outerWidth+'" height="'+window.outerHeight+'"');
@@ -7651,11 +7777,15 @@ function describe(src, isGGGRecord){
     var opt = new Object();
     opt.tar = 'record';
     if(isGGGRecord) opt.srv = 'http://linkeddata.uriburner.com/sparql';
+    if(id) {
+      opt.srcId = id;
+      $('#'+id).addClass('loading');
+    }
     fct_sparql(getSPARQLDescribe(src, isGGGRecord), opt);
 }
 
-function linkOut(){
-    var src = $('#angular_recordViewer').attr('iri');
+function linkOut(src){
+    if(! src ) src = $('#angular_recordViewer').attr('iri');
     if(!src || src.length <= 0) return;
     var win = window.open(deSanitizeLabel(src), twin, 'width="'+window.outerWidth+'" height="'+window.outerHeight+'"');
     //win.blur();
@@ -7683,12 +7813,13 @@ function loadInstances(xml, opts){
           });
           label = processLabel(label, value, datatype);
           var id = createId();
+          var rowId = 'r_' + createId();
           //console.log($(col[0]));
 
               if(!loadedUri) {
                   if(datatype === 'uri'){
                     loadedUri = true;
-                    describe(value);
+                    describe(rowId, value);
                   } 
               }
 
@@ -7698,7 +7829,7 @@ function loadInstances(xml, opts){
 
               var color = 'success';
 
-rows += '<tr><td>';
+rows += '<tr><td id="'+rowId+'"  >';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
@@ -7713,7 +7844,7 @@ rows += '<tr><td>';
 rows += '</span>';
 //rows += '</a>';
 
-          rows +=  '<h6 class="row-result"  style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+value+'\');">'+label+'</h6>';
+          rows +=  '<h6 class="row-result"  style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+rowId+'\', \''+value+'\');">'+label+'</h6>';
               var badgeId = createId();
               rows +=  '<p style="cursor:pointer" class="text-ellipsis m-0" id="'+badgeId+'"></p><script type="text/javascript">loadSubjectBadge(\''+value+'\', \''+badgeId+'\');</script>'; //
 rows += '</td></tr>';

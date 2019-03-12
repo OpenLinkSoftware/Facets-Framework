@@ -558,10 +558,19 @@ p.text-match-subject{
   padding-top: 4px;
 }
 
-/*
-.text-warning {
+.link-odd{
+  color:#36393D;/*#C79810;*/
+  
+}
+.link-category{
+
+}
+.link-category:hover{
+  text-decoration: none;
+}
+.text-warning-hack {
     color: #ffc247 !important;
-}*/
+}
     .badge-subject{
         margin-left: auto;
         position: absolute;
