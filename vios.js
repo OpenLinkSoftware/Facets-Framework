@@ -1233,7 +1233,7 @@ function fct_handleSparqlResults(xml, opt) {
                         str += '<img class="pull-right" style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' alt="..." class="rounded-circle" src="' + getFaviconUrl($(this).text()) + '"/>&nbsp;';
                         str += '<i class="status status-bottom bg-success"></i>';
                     } else {
-                        str += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' class="icon-literal glyphicon glyphicon-tag"></span>';
+                        str += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' class="pull-right icon-literal glyphicon glyphicon-tag"></span>';
                     }
 
                 } // if j == 0
@@ -1717,7 +1717,7 @@ function fct_handleTextResults(xml, opt){
     loadTextResults(xml);
     $('#groupByHeader').removeClass('loading');
     //$('#focusHeader').removeClass('loading');
-    $('#groupByCount').text('');
+    $('#groupByCount').text('0/0');
         var sparql = processSparql(xml, true); // POI: for now, let the table share the Record's list limit and offset
         var focus = getSparqlFocus(sparql);
         if(!opt) opt = new Object();
@@ -2047,7 +2047,7 @@ function addPropertyFacet(id, prop, propLabel, val, valLabel, datatype, lang, si
   resetPaging();
   //pageTable = 0;
 
-  if(isAKeyDown()) getMainFocus().prepend(p);
+  if(isOneKeyDown()) getMainFocus().prepend(p);
   else getMainFocus().append(p);
   //takeFocus(p, getFocus(query));
   //takeFocus(query, getFocus(query));
@@ -2079,7 +2079,7 @@ function addPropertyOfFacet(id, prop, propLabel, val, valLabel, datatype, lang, 
   resetPaging();
   //pageTable = 0;
 
-  if(isAKeyDown()) getMainFocus().prepend(p);
+  if(isOneKeyDown()) getMainFocus().prepend(p);
   else getMainFocus().append(p);
   //takeFocus(p, getFocus(query));
   //takeFocus(query, getFocus(query));
@@ -3083,9 +3083,13 @@ gbcol += '<div class="modal fade" id="helpModal" tabindex="-1" role="dialog" ari
       gbcol += '  </li><li>'; 
       gbcol += '  Press <i>C</i>, <i>T</i>, <i>F</i>, <i>R</i> or <i>L</i> keys to switch CTRL lists';
       gbcol += '  </li><li>';
-      gbcol += '  Use <i>&lt;</i>, <i>&gt;</i>, <i>left arrow</i>, and <i>right arrow</i> to move through list pages';
+      gbcol += '  Use <i>&lt;</i>, <i>&gt;</i>, <i>left arrow</i>, and <i>right arrow</i> to page through list';
       gbcol += '  </li><li>';
-      gbcol += '  Hold down <i>A</i> key, then click Field checkbox to prepend Field to filter collector';
+      gbcol += '  Use <i>J</i>, <i>K</i>, <i>L</i>, <i>:</i> (colon), or <i>\'</i> (apostrophe) to move up lists';
+      gbcol += '  </li><li>';
+      gbcol += '  Use <i>M</i> or <i>/</i> to move down lists';
+      gbcol += '  </li><li>';
+      gbcol += '  Hold down <i>1</i> (number one) key, then click Field checkbox to prepend Field to filter collector';
       gbcol += '  </li><li>';
       gbcol += '  Press <i>S</i> key to toggle Topic badges';
       gbcol += '  </li><li>';
@@ -4187,12 +4191,12 @@ document.onkeydown = checkKey;
 document.onkeyup = checkKeyRelease;
 
 var ctrlDown = false;
-var aKeyDown = false;
+var oneKeyDown = false;
 function isCTRLKeyDown(){
   return ctrlDown;
 }
-function isAKeyDown(){
-  return aKeyDown;
+function isOneKeyDown(){
+  return oneKeyDown;
 }
 
 function checkKeyRelease(e) {
@@ -4200,8 +4204,8 @@ function checkKeyRelease(e) {
     if (e.keyCode == '17') { // control key
         ctrlDown = false;
     }
-    else if (e.keyCode == '65') { // A KEY
-        aKeyDown = false;
+    else if (e.keyCode == '49') { // 1 KEY
+        oneKeyDown = false;
     }
 }
 
@@ -4216,8 +4220,8 @@ function checkKey(e) {
 
 
 if(!$('input[type="text"]').is(":focus")){
-    if (e.keyCode == '65') {
-      aKeyDown = true;
+    if (e.keyCode == '49') {
+      oneKeyDown = true;
     }
     else if (e.keyCode == '188') { // period key
         if(page > 0 && !$('#leftButton').hasClass('hide')) pageLeft();
@@ -4314,7 +4318,7 @@ if(!$('input[type="text"]').is(":focus")){
       showRecordRoles == false;
       describe(undefined, $('#angular_recordViewer').attr('iri'));
     }
-    else if (e.keyCode == '76' || e.keyCode == '71') { // L key or G key
+    else if (e.keyCode == '71') { // G key
         selectMenuItem('showMeMenu', VIEW_TYPE_GRAPHS);
         describe(undefined, $('#angular_recordViewer').attr('iri'));
     }  
@@ -4338,6 +4342,36 @@ if(!$('input[type="text"]').is(":focus")){
     $('#helpModal').modal({});
     }
 
+    else if(e.keyCode == '74' || e.keyCode == '75' || e.keyCode == '76' || e.keyCode == '186' || e.keyCode == '222') { // J key or K key or L key or : key or ' key
+      var rec = $('.record-active');
+      if(rec.prop('nodeName').toLowerCase() == 'td'){
+        if(!rec.parent().prev() || rec.parent().prev().length <= 0 || rec.parent().prev().prop('nodeName').toLowerCase() != 'tr') return;
+        rec.removeClass('record-active');
+        rec.parent().prev().children('td').addClass('record-active');
+        describe(rec.parent().prev().children('td').attr('id'), rec.parent().prev().children('td').children('h6').attr('data-original-title'));
+      }
+      else if(rec.prop('nodeName').toLowerCase() == 'a'){
+        if(!rec.prev() || rec.prev().length <= 0 || rec.prev().prop('nodeName').toLowerCase() != 'a') return;
+        rec.removeClass('record-active');
+        rec.prev().addClass('record-active');
+        describe(rec.prev().attr('id'), rec.prev().find('h6 > span').attr('data-original-title'));
+      }
+    }
+    else if(e.keyCode == '77' || e.keyCode == '191') { // M key or ? key
+      var rec = $('.record-active');
+      if(rec.prop('nodeName').toLowerCase() == 'td'){
+        if(!rec.parent().next() || rec.parent().next().length <=0 || rec.parent().next().prop('nodeName').toLowerCase() != 'tr') return;
+        rec.removeClass('record-active');
+        rec.parent().next().children('td').addClass('record-active');
+        describe(rec.parent().next().children('td').attr('id'), rec.parent().next().children('td').children('h6').attr('data-original-title'));
+      }
+      else if(rec.prop('nodeName').toLowerCase() == 'a'){
+        if(!rec.next() || rec.next().length <= 0 || rec.next().prop('nodeName').toLowerCase() != 'a') return;
+        rec.removeClass('record-active');
+        rec.next().addClass('record-active');
+        describe(rec.next().attr('id'), rec.next().find('h6 > span').attr('data-original-title'));
+      }
+    }
 
 
     else if(e.keyCode == '78') { // N key
@@ -5115,11 +5149,14 @@ function loadTextResults(xml){
           else {
 
             var rowId = opts.parentId;
+            var recordActive = false;
 
               if(!loadedUri) {
                   if(datatype === 'uri'){
                     loadedUri = true;
                     describe(rowId, value);
+                    recordActive = true;
+                    $('.record-active').removeClass('record-active');
                   } 
               }
               var propIRI = getGroupByValue();
@@ -5177,7 +5214,7 @@ var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'p
                 rows += '</div>';
                 rows += '</button>';
 */
-rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
+rows +=  '<a id="'+opts.parentId+'" class="up list-group-item'+((recordActive)?' record-active':'')+'" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr-1">';
 
 /*
@@ -5512,11 +5549,14 @@ function loadGroupByResults(xml, focusVarName){
               opts.childrenId = opts.tag + opts.parentId;
 
             var rowId = opts.parentId;
+            var recordActive = false;
 
               if(!loadedUri) {
                   if(datatype === 'uri'){
                     loadedUri = true;
                     describe(rowId, value);
+                    recordActive = true;
+                    $('.record-active').removeClass('record-active');
 
 
     if(showIDN){
@@ -5693,7 +5733,7 @@ var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'p
                 rows += '</div>';
                 rows += '</button>';
 */
-rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
+rows +=  '<a id="'+opts.parentId+'" class="up list-group-item'+((recordActive)?' record-active':'')+'" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left m-0 mr-1">';
 
 /*
@@ -5770,7 +5810,7 @@ if(true){
           rows += '</div>';
 //                 rows += '<img title="click to drop-down" class="count" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
                  // rows += '<a title="click to drop-down" class="count" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"><img width="16" height="16"/>&nbsp;&nbsp;</a>&nbsp;';
-          rows += '<i '+buildTitle('acts as \''+propLabel+'\' of these things')+' class="expand la la-bars" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('acts as \''+propLabel+'\' of these things')+' class="expand la la-bars" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\')"></i>' + ((i==0) ? '<script type="text/javascript">expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\');</script>' :'');
               }
              // rows += '</td></tr>';
 
@@ -5839,6 +5879,7 @@ function addSubResults(opt){
 }
 
 function expand(propVal, datatype, lang, optsStr){
+    optsStr = deSanitizeLabel(optsStr);
     var opts = toJSONObject(optsStr);
     var childrenId = opts.childrenId;
     var parentId = opts.parentId;
@@ -7121,7 +7162,7 @@ content += '</section>';
           var lang = ( $(this).attr('lang') && $(this).attr('lang').length > 0 ) ? $(this).attr('lang') : undefined ;
           if(lang && lang != 'en') return;
 
-          var isRole = propLabel.trim().toLowerCase().endsWith('of') || objectIRI == uri;
+          var isRole = objectIRI == uri; //propLabel.trim().toLowerCase().endsWith('of') || 
 
           var proplink = $.createElement('a');
           proplink.attr('href', $(this).prop('nodeName'));
@@ -7167,6 +7208,7 @@ content += '</section>';
 
           row = $.createElement('tr');
           col = $.createElement('td');
+          //col.css('font-weight', '400');
           //col.addClass('d-none');
           //col.addClass('d-md-table-cell');
           col.append(proplink);
@@ -7216,7 +7258,7 @@ content += '</section>';
       }
       uriLabel = uriLabel.trim();
 
-      $('#angular_recordViewer').append('<h3 onclick="javascript:linkOut();" style="cursor:pointer;padding-top:1em; padding-left:.55rem; padding-right:.55rem;">'+uriLabel+'</h3>'+ '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'secondary')+'"></i>');//((body.children().length <= 0 && filterRecordViewFields)?'<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = false; describe(\''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-info"></i>':''));
+      $('#angular_recordViewer').append('<h3 onclick="javascript:linkOut();" style="cursor:pointer;padding-top:1em; padding-left:.55rem; padding-right:.55rem;">'+uriLabel+'</h3>'+ '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');//((body.children().length <= 0 && filterRecordViewFields)?'<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = false; describe(\''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-info"></i>':''));
       if(hasImage){
         desc = img + desc;
       }
@@ -7460,16 +7502,19 @@ function loadPropertyValues(xml, opts){
           //console.log($(col[0]));
 
           var rowId = 'r_' + createId();
+          var recordActive = false;
 
               if(!loadedUri) {
                   if(datatype === 'uri'){
                     loadedUri = true;
                     describe(rowId, value);
+                    recordActive = true;
+                    $('.record-active').removeClass('record-active');
                   } 
               }
 
 
-rows += '<tr><td id="'+rowId+'">';
+rows += '<tr><td id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+'>';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 if(datatype == 'uri'){
@@ -7565,16 +7610,19 @@ function loadPropertyOfValues(xml, opts){
           //console.log($(col[0]));
 
           var rowId = 'r_' + createId();
+          var recordActive = false;
 
               if(!loadedUri) {
                   if(datatype === 'uri'){
                     loadedUri = true;
-                    describe(value);
+                    describe(rowId, value);
+                    recordActive = true;
+                    $('.record-active').removeClass('record-active');
                   } 
               }
 
 
-rows += '<tr><td id="'+rowId+'">';
+rows += '<tr><td id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+'>';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
@@ -7656,12 +7704,15 @@ var loadedUri = false;
           //console.log($(col[0]));
 
           var rowId = 'r_' + createId();
+          var recordActive = false;
 
 
               if(!loadedUri) {
                   if(datatype === 'uri'){
                     loadedUri = true;
-                    describe(value);
+                    describe(rowId, value);
+                    recordActive = true;
+                    $('.record-active').removeClass('record-active');
                   } 
               }
 
@@ -7669,7 +7720,7 @@ var loadedUri = false;
           var focusTarget = 'focusValue';
           var focusTargetClass = 'queryFocusValue';
 
-rows += '<tr><td id="'+rowId+'">';
+rows += '<tr><td id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+'>';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
@@ -7814,12 +7865,15 @@ function loadInstances(xml, opts){
           label = processLabel(label, value, datatype);
           var id = createId();
           var rowId = 'r_' + createId();
+          var recordActive = false;
           //console.log($(col[0]));
 
               if(!loadedUri) {
                   if(datatype === 'uri'){
                     loadedUri = true;
                     describe(rowId, value);
+                    recordActive = true;
+                    $('.record-active').removeClass('record-active');
                   } 
               }
 
@@ -7829,22 +7883,22 @@ function loadInstances(xml, opts){
 
               var color = 'success';
 
-rows += '<tr><td id="'+rowId+'"  >';
+rows += '<tr><td id="'+rowId+'"  '+((recordActive)?' class="record-active"':'')+'>';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
                 if(datatype=='uri') {
-                  rows += '<img style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:remove('+getMainFocus().attr('class')+', true);setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
+                  rows += '<img style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:remove('+getMainFocus().attr('class')+', true);setValue(\''+id+'\', \''+sanitizeLabel(value)+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
                                     rows +=  '<i class="status status-bottom bg-'+color+'"></i>';
                 }
                 else {
-                  rows += '<span style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:remove('+getMainFocus().attr('class')+', true);setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="icon-literal glyphicon glyphicon-tag"></span>';
+                  rows += '<span style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:remove('+getMainFocus().attr('class')+', true);setValue(\''+id+'\', \''+sanitizeLabel(value)+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="icon-literal glyphicon glyphicon-tag"></span>';
                 }
 
 rows += '</span>';
 //rows += '</a>';
 
-          rows +=  '<h6 class="row-result"  style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+rowId+'\', \''+value+'\');">'+label+'</h6>';
+          rows +=  '<h6 class="row-result"  style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+rowId+'\', \''+sanitizeLabel(value)+'\');">'+label+'</h6>';
               var badgeId = createId();
               rows +=  '<p style="cursor:pointer" class="text-ellipsis m-0" id="'+badgeId+'"></p><script type="text/javascript">loadSubjectBadge(\''+value+'\', \''+badgeId+'\');</script>'; //
 rows += '</td></tr>';
