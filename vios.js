@@ -260,6 +260,9 @@ function setMutex(mtx, type, isCount){
       $('#tableCount').attr('mutex', mtx);
     }
   }
+  else if(type == 'record'){
+    $('#angular_recordViewer').attr('mutex', mtx);
+  }
   else if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN || type == VIEW_TYPE_GRAPHS || type == VIEW_TYPE_TEXT_PROPERTIES){
     $('#showMeColumn').attr('mutex', mtx);
   }
@@ -279,6 +282,9 @@ function getMutex(type, isCount){
     else if(type == 'table'){
       return $('#tableCount').attr('mutex');
     }
+  }
+  else if(type == 'record'){
+    return $('#angular_recordViewer').attr('mutex');
   }
   else if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN || type == VIEW_TYPE_GRAPHS || type == VIEW_TYPE_TEXT_PROPERTIES){
     return $('#showMeColumn').attr('mutex');
@@ -392,7 +398,7 @@ function formatDate(date) {
 }
 
 function getProxyEndpoint(url){
-  if(url == 'http://lod.openlinksw.com') url = 'http://dbpedia.org';
+//  if(url == 'http://lod.openlinksw.com') url = 'http://dbpedia.org';
   if(url == 'http://localhost' || url == 'http://localhost/') return url;
   if(url.startsWith('http://127.0.0.1')) return url;
   url = url.replace('http://', 'http/');
@@ -415,6 +421,8 @@ function getGGGURL(url){
   //return url;
 }
 
+
+var mainSparql = '';
 function fct_query(q, viewType, opt){
   var tstamp = new Date().getTime();
   if(!opt) opt = new Object();
@@ -453,9 +461,11 @@ function fct_query(q, viewType, opt){
   if (resp != null) { // if exist on cache
         switch(viewType){
           case VIEW_TYPE_LIST: {
+            mainSparql = getSparql(resp);
             fct_handleListResults(resp, opt);
           } break;
           case VIEW_TYPE_LIST_COUNT: {
+            mainSparql = getSparql(resp);
             fct_handleListCountResults(resp, opt);
           } break;
           case VIEW_TYPE_TEXT: {
@@ -563,9 +573,11 @@ function fct_query(q, viewType, opt){
         
         switch(viewType){
           case VIEW_TYPE_LIST: {
+            mainSparql = sparql;
             fct_handleListResults(xml, opt);
           } break;
           case VIEW_TYPE_LIST_COUNT: {
+            mainSparql = sparql;
             fct_handleListCountResults(xml, opt);
           } break;
           case VIEW_TYPE_TEXT: {
@@ -663,7 +675,8 @@ function fct_sparql(sparql, opt){
     //console.log('sparql results: ' + resp);
 
             if(!opt.tar){
-              fct_handleSparqlResults(resp, opt);
+                mainSparql = sparql;
+               fct_handleSparqlResults(resp, opt);
             }
             else {
               if(opt.tar == 'showMeMenu'){
@@ -688,6 +701,9 @@ function fct_sparql(sparql, opt){
                 fct_handleSparqlSubject(resp, opt);
               }
               else if(opt.tar == 'record'){
+                if(getMutex(opt.tar, true) != id){
+                  //return;
+                }
                 fct_handleSparqlDescribe(resp, opt);
               }
             }
@@ -713,6 +729,7 @@ function fct_sparql(sparql, opt){
             xml = xml.replaceAll('xml:lang', 'lang');
 
             if(!opt.tar){
+              mainSparql = sparql;
               fct_handleSparqlResults(xml, opt);
             }
             else {
@@ -739,6 +756,9 @@ function fct_sparql(sparql, opt){
                 fct_handleSparqlSubject(xml, opt);
               }
               else if(opt.tar == 'record'){
+                if(getMutex(opt.tar, true) != id){
+                  //return;
+                }
                 fct_handleSparqlDescribe(xml, opt);
               }
             }
@@ -1000,10 +1020,17 @@ var valStr = VALUE_ANON_NODE;
           //colStr += '</h3>';
           //colStr += '</div>';
 
+var color = '000000';// colourNames[getRandomKey(colourNames)];
 var rainbow = new Rainbow(); 
 rainbow.setNumberRange(1, node.parents().length +1);
-rainbow.setSpectrum('#e9ecef', '#ffffff'); //'#e9ecef', d7daddff
-col.css('background-color', '#' + rainbow.colourAt( (node.parents().length <= 2) ? 1 : node.parents().length - 1));
+rainbow.setSpectrum('#'+color, '#ffffff'); //'#e9ecef', d7daddff //'#e9ecef'
+col.css('color', '#' + rainbow.colourAt( (node.parents().length <= 2) ? 1 : node.parents().length - 1));
+
+rainbow = new Rainbow(); 
+rainbow.setNumberRange(1, node.parents().length +1);
+rainbow.setSpectrum('#e9ecef', '#ffffff'); //'#e9ecef', d7daddff //'#e9ecef'
+col.css('background-color', '#ffffff');
+//col.css('background-color', '#' + rainbow.colourAt( (node.parents().length <= 2) ? 1 : node.parents().length - 1));
 
 
   col.html(colStr);
@@ -1230,8 +1257,8 @@ function fct_handleSparqlResults(xml, opt) {
                 if (j == 0) {
 
                     if (datatype == 'uri') {
-                        str += '<img class="pull-right" style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' alt="..." class="rounded-circle" src="' + getFaviconUrl($(this).text()) + '"/>&nbsp;';
-                        str += '<i class="status status-bottom bg-success"></i>';
+                        //str += '<img class="pull-right" style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' alt="..." class="rounded-circle" src="' + getFaviconUrl($(this).text()) + '"/>&nbsp;';
+                        //str += '<i class="status status-bottom bg-success"></i>';
                     } else {
                         str += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' class="pull-right icon-literal glyphicon glyphicon-tag"></span>';
                     }
@@ -1245,6 +1272,7 @@ function fct_handleSparqlResults(xml, opt) {
 
 
                 label = deSanitizeLabel(label);
+                if(datatype == 'uri') label = '<a href="#">' + label + '</a>';
                 var labelLink = (datatype == 'uri') ? '' + buildTitle($(this).text()) : '';
                 //str += '<h6 >';
                 str += '<span ' + onclick + ' ' + labelLink + '>' + label + '</span>';
@@ -1333,7 +1361,7 @@ function fct_handleSparqlResults(xml, opt) {
                 if (j == 0) {
                     //var mcolId = createId();
                     //r1.value += '<td '+buildTitle(v)+' style="text-align:left;" class="text-nowrap" onclick="javascript:setValue(\'mtxcola-' + i + '-' + j + '\', \'' + v + '\', \'' + sanitizeLabel(labelKey) + '\', \'' + d + '\', \'\')"><span class="thumb-sm float-left mr"><img class="rounded-circle" src="' + getFaviconUrl(v) + '"/><i class="status status-bottom bg-success"></i></span> ' + labelKey + '</td>';
-                  r1.value += '<td style="vertical-align:middle;text-align:left;cursor:pointer;" class="text-nowrap" onclick="javascript:setValue(\'mtxcola-'+i+'-'+j+'\', \''+v+'\', \''+sanitizeLabel(labelKey)+'\', \''+d+'\', \'\')"><img class="pull-right" src="'+getFaviconUrl(v)+'">&nbsp;<span>'+labelKey+'</span></td>';
+                  r1.value += '<td style="vertical-align:middle;text-align:left;cursor:pointer;" class="text-nowrap" onclick="javascript:setValue(\'mtxcola-'+i+'-'+j+'\', \''+v+'\', \''+sanitizeLabel(labelKey)+'\', \''+d+'\', \'\')"><span>'+labelKey+'</span></td>';//<img class="pull-right" src="'+getFaviconUrl(v)+'">&nbsp;
                     //            var str = '<td onclick="javascript:setValue(\''+createId()+'\', \''+v+'\', \''+labelKey+'\', \''+d+'\', \'\')">'+labelKey+'</td>';
                     //row.append('<td>'+labelKey+'</td>');
                 }
@@ -2297,6 +2325,7 @@ function resetColumnWidths(){
   $('#recordViewerColumn').addClass('col-lg-'+recordViewerColumnWidth);
 }
 
+var orientationLeft = false;
 
 function init(){
     fct_init(); // this method must be the first method called by the implementation of the fct_ framework
@@ -2304,6 +2333,13 @@ function init(){
 
 
 
+      try{
+        orientationLeft = localStorage.getItem('orientationLeft') == 'true';
+        localStorage.setItem('orientationLeft', orientationLeft); // attempt to claim memory before cache uses it all
+      }
+      catch(e){
+
+      }
 
 
 //************************************//
@@ -2443,9 +2479,15 @@ function init(){
       glossaryButton += '</span>';
       
 
-      var favButton = '<li class="nav-item d-none d-md-block"><a class="nav-link pl-2 text-info" id="permalink" ><i class="la la-heart-o la-lg text-default"></i></a></li>'; //la-heart-o
+      var favButton = '<li class="nav-item d-none d-md-block"><a class="nav-link pl-2 text-info" id="favButton" ><i class="la la-heart-o la-lg text-default"></i></a></li>'; //la-heart-o
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(favButton);
+
+
+      var copyButton = '<li class="nav-item d-none d-md-block"><a class="nav-link pl-2 text-info" ><i id="copySPARQL" onmouseout="$(\'#copySPARQL\').tooltip(\'hide\');$(\'#copySPARQL\').attr(\'data-original-title\', \'Copy SPARQL to clipboard\');$(\'#copySPARQL\').tooltip();" '+buildTitle('Copy SPARQL to clipboard')+' onclick="javascript:$(\'#copySPARQL\').tooltip(\'hide\');copySPARQL(); $(\'#copySPARQL\').attr(\'data-original-title\', \'Copied\');$(\'#copySPARQL\').tooltip(\'show\');" style="cursor:pointer;" class="la la-copy fa-lg"></i></a></li>'; //la-heart-o
+
+      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(copyButton);
+
 
 
   //$('#queryTimeout').unbind('click');  
@@ -2462,6 +2504,12 @@ function init(){
   $('#permalink').on('mouseover', function(e){
     get_short_url($('#permalink').attr('href'), function(short_url) {
       $('#permalink').attr('href',  short_url); //+ '&idCt=' + idCt
+/*
+      $('#permalink').unbind('click');
+      $('#permalink').on('click', function(e){
+        linkOut(short_url);
+      });
+      */
     });
   });
 
@@ -2633,6 +2681,7 @@ gbcol += '</ul></div>';
 $('#angular_breadcrumbs').append(gbcol);
 
 
+if(!orientationLeft){
 
 gbcol = '<div id="recordViewerColumn" class="hide col-lg-'+recordViewerColumnWidth+' col-12"><section class="widget" widget>';
 
@@ -2653,7 +2702,7 @@ gbcol += '<nav id="recordNavBar" class="navbar navbar-expand-lg navbar-light bg-
         gbcol += '<a id="ggg" class="nav-link" data-target="#">Edit</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Interact</a>';
+        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Analyze</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe( $(undefined, \'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
@@ -2751,6 +2800,8 @@ gbcol += '<div id="map"></div>';
 gbcol += '</section></div>';
 
 $('#dataCanvas').append(gbcol);
+
+}
 
 
 gbcol = '<div id="groupByColumn" class="hide col-lg-'+groupByColumnWidth+' col-12">';
@@ -2867,7 +2918,7 @@ gbcol += '</td></tr></table>';
 
 */
 
-gbcol += '<table id="resultsTable" class="table table-hover table-bordered table-sm mt-sm mb-0" width="100%">';
+gbcol += '<table id="resultsTable" class="table table-hover table-bordered table-striped table-sm mt-sm mb-0" width="100%">';
 gbcol += '<thead>';
 gbcol += '<tr>';
 gbcol += '<th>';
@@ -3049,6 +3100,127 @@ $('#dataCanvas').append(gbcol);
 
 /// was here
 
+if(orientationLeft){
+
+gbcol = '<div id="recordViewerColumn" class="hide col-lg-'+recordViewerColumnWidth+' col-12"><section class="widget" widget>';
+
+        gbcol += '<div class="widget-body  p-0 ">';
+       // gbcol += '<div class="widget-body p-0">';
+
+
+gbcol += '<nav id="recordNavBar" class="navbar navbar-expand-lg navbar-light bg-light">';
+  gbcol += '<a  style="margin-left: 7px;" class="navbar-brand" data-target="#" onclick="javascript:buildForm()">Compose</a>';
+  gbcol += '<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">';
+    gbcol += '<i class="glyphicon glyphicon-tree-conifer"></i>';
+    gbcol += '<i _ngcontent-c10="" class="glyphicon glyphicon-tree-conifer text-success"></i>';
+  gbcol += '</button>';
+
+  gbcol += '<div class="collapse navbar-collapse" id="navbarSupportedContent">';
+    gbcol += '<ul class="navbar-nav mr-auto">';
+      gbcol += '<li class="nav-item active">';
+        gbcol += '<a id="ggg" class="nav-link" data-target="#">Edit</a>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Interact</a>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe( $(undefined, \'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
+      gbcol += '</li>';
+      /*
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a class="nav-link" data-target="#">Charts</a>';
+      gbcol += '</li>';
+
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a class="nav-link" data-target="#">Map</a>';
+      gbcol += '</li>';
+      */
+      gbcol += '<li class="nav-item dropdown">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'Pair';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="navbarDropdown">';
+          gbcol += '<a class="dropdown-item" data-target="#">Browser Window</a>';
+          gbcol += '<a class="dropdown-item" data-target="#">Device</a>';
+          gbcol += '<div class="dropdown-divider"></div>';
+          gbcol += '<a class="dropdown-item" data-target="#">New Data Canvas</a>';
+        gbcol += '</div>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item dropdown">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'Subscribe';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="navbarDropdown">';
+          gbcol += '<a class="dropdown-item" data-target="#">Record</a>';
+          gbcol += '<a class="dropdown-item" data-target="#">Folder</a>';
+        gbcol += '</div>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a class="nav-link disabled" data-target="#">Edit</a>';
+      gbcol += '</li>';
+    gbcol += '</ul>';
+      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">IDN</button>';
+//    gbcol += '<form class="form-inline my-2 my-lg-0">';
+      //gbcol += '<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">';
+//    gbcol += '</form>';
+  gbcol += '</div>';
+gbcol += '</nav>';
+
+
+            gbcol += '<div id="angular_recordViewer" class="embed-responsive">'; //embed-responsive-1by1
+
+
+//gbcol += '<iframe id="describe" class="iframe embed-responsive-item" src="" height="100%"></iframe>';
+            gbcol += '</div>';
+
+
+
+          //  gbcol += '</div>';
+            gbcol += '</div>';        
+
+
+                        gbcol += '</section></div>';
+
+
+gbcol += '<div id="recordFormColumn" class="hide col-lg-'+SIZE_RECORD_FORM+' col-12">'
+
+gbcol += '<div class="widget-body  p-0"></div>';
+                        gbcol += '</div>';
+
+
+
+
+
+gbcol += '<div id="mapResults" class="short-div hide"><section class="widget" widget>';
+
+gbcol += '<header id="mapResultsHeader">';
+        gbcol += '<div class="widget-controls">';
+          //gbcol += '<a href="#"><i class="glyphicon glyphicon-cog"></i></a>';
+         // gbcol += '<a data-target="#" class="leftButton" onclick="javascript:pageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
+         // gbcol += '<a data-target="#" class="rightButton" onclick="javascript:pageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
+          gbcol += '<a data-widgster="close" onclick="hideMap()" class="btn-gray"><i class="glyphicon glyphicon-remove"></i></a>';
+        gbcol += '</div>';
+      gbcol += '</header>';
+        gbcol += '<div class="widget-body">';
+
+
+//var apiKey = 'AIzaSyDe_oVpi9eRSN99G4o6TwVjJbFBNr58NxE';
+
+//gbcol += '<script async defer src="https://maps.googleapis.com/maps/api/js?key='+apiKey+'"> </script>';
+gbcol += '<div id="map"></div>';
+
+            gbcol += '</div>'; // widget-body
+
+
+
+gbcol += '</section></div>';
+
+$('#dataCanvas').append(gbcol);
+}
+
 
 gbcol += '</div>';
 
@@ -3085,13 +3257,15 @@ gbcol += '<div class="modal fade" id="helpModal" tabindex="-1" role="dialog" ari
       gbcol += '  </li><li>';
       gbcol += '  Use <i>&lt;</i>, <i>&gt;</i>, <i>left arrow</i>, and <i>right arrow</i> to page through list';
       gbcol += '  </li><li>';
-      gbcol += '  Use <i>J</i>, <i>K</i>, <i>L</i>, <i>:</i> (colon), or <i>\'</i> (apostrophe) to move up lists';
+      gbcol += '  Use <i>K</i> or <i>L</i> keys to move up lists';
       gbcol += '  </li><li>';
       gbcol += '  Use <i>M</i> or <i>/</i> to move down lists';
       gbcol += '  </li><li>';
       gbcol += '  Hold down <i>1</i> (number one) key, then click Field checkbox to prepend Field to filter collector';
       gbcol += '  </li><li>';
-      gbcol += '  Press <i>S</i> key to toggle Topic badges';
+      gbcol += '  Press <i>O</i> key to toggle orientation';
+      gbcol += '  </li><li>';
+      gbcol += '  Press <i>S</i> key to toggle Subject badges';
       gbcol += '  </li><li>';
       gbcol += '  Press <i>H</i> key to view this menu';
       gbcol += '  </li></ul>';
@@ -4219,7 +4393,7 @@ function checkKey(e) {
     }
 
 
-if(!$('input[type="text"]').is(":focus")){
+if(!$('input[type="text"], input[type="search"]').is(":focus")){
     if (e.keyCode == '49') {
       oneKeyDown = true;
     }
@@ -4346,14 +4520,14 @@ if(!$('input[type="text"]').is(":focus")){
       var rec = $('.record-active');
       if(rec.prop('nodeName').toLowerCase() == 'td'){
         if(!rec.parent().prev() || rec.parent().prev().length <= 0 || rec.parent().prev().prop('nodeName').toLowerCase() != 'tr') return;
-        rec.removeClass('record-active');
-        rec.parent().prev().children('td').addClass('record-active');
+        //rec.removeClass('record-active');
+        //rec.parent().prev().children('td').addClass('record-active');
         describe(rec.parent().prev().children('td').attr('id'), rec.parent().prev().children('td').children('h6').attr('data-original-title'));
       }
       else if(rec.prop('nodeName').toLowerCase() == 'a'){
         if(!rec.prev() || rec.prev().length <= 0 || rec.prev().prop('nodeName').toLowerCase() != 'a') return;
-        rec.removeClass('record-active');
-        rec.prev().addClass('record-active');
+        //rec.removeClass('record-active');
+        //rec.prev().addClass('record-active');
         describe(rec.prev().attr('id'), rec.prev().find('h6 > span').attr('data-original-title'));
       }
     }
@@ -4361,14 +4535,14 @@ if(!$('input[type="text"]').is(":focus")){
       var rec = $('.record-active');
       if(rec.prop('nodeName').toLowerCase() == 'td'){
         if(!rec.parent().next() || rec.parent().next().length <=0 || rec.parent().next().prop('nodeName').toLowerCase() != 'tr') return;
-        rec.removeClass('record-active');
-        rec.parent().next().children('td').addClass('record-active');
+        //rec.removeClass('record-active');
+        //rec.parent().next().children('td').addClass('record-active');
         describe(rec.parent().next().children('td').attr('id'), rec.parent().next().children('td').children('h6').attr('data-original-title'));
       }
       else if(rec.prop('nodeName').toLowerCase() == 'a'){
         if(!rec.next() || rec.next().length <= 0 || rec.next().prop('nodeName').toLowerCase() != 'a') return;
-        rec.removeClass('record-active');
-        rec.next().addClass('record-active');
+        //rec.removeClass('record-active');
+        //rec.next().addClass('record-active');
         describe(rec.next().attr('id'), rec.next().find('h6 > span').attr('data-original-title'));
       }
     }
@@ -4387,6 +4561,18 @@ if(!$('input[type="text"]').is(":focus")){
         doQuery(getQueryText());
       
     }    
+
+    else if(e.keyCode == '79') { // O key
+      orientationLeft = !orientationLeft;
+      try{
+        localStorage.setItem('orientationLeft', orientationLeft);
+      }
+      catch(e){
+
+      }
+      window.location = window.location;
+    }
+
 
   }
 }
@@ -4421,7 +4607,7 @@ document.onclick = doCtrlMode;
 function doCtrlMode(e){
   e = e || window.event;
   var target = e.target || e.srcElement;
-  if($('input[type="text"]').is(":focus") || (target.tagName.toUpperCase() == 'INPUT' && target.getAttribute('type') == 'text')){
+  if($('input[type="text"], input[type="search"]').is(":focus") || (target.tagName.toUpperCase() == 'INPUT' && target.getAttribute('type') == 'text') || (target.tagName.toUpperCase() == 'INPUT' && target.getAttribute('type') == 'search')){
       $('#keywords').removeAttr('disabled');
       $('#keywords').removeClass('disabled');
 
@@ -4626,6 +4812,18 @@ function updatePermalink(){
   
     $('#permalink').attr('href',  long_url); // use long url by default in case of rate limit
 
+  $('#permalink').on('mouseover', function(e){
+    get_short_url($('#permalink').attr('href'), function(short_url) {
+      $('#permalink').attr('href',  short_url); //+ '&idCt=' + idCt
+/*
+      $('#permalink').removeAttr('href');
+      $('#permalink').unbind('click');
+      $('#permalink').on('click', function(e){
+        linkOut(short_url);
+      });
+      */
+    });
+  });
 
 
     // TODO: this only works in HTML5 compatible browsers, need to support older browsers also
@@ -4774,6 +4972,7 @@ function doQuery(keywords) {
     //console.log("keywords:" + keywords);
     setQueryText(keywords);
 
+    resetPaging();
 
     $('#groupByHeader > p.gbsub').text('');
     $('#groupByHeader > p.gbbadge').text('');
@@ -4839,6 +5038,12 @@ function doQuery(keywords) {
             } else {
                 //if(isDebug) console.log('groupByNotLoaded: ' + qgb + ', old value:' + qGroupBy);
             }
+
+            document.getSelection().removeAllRanges();
+            $('#keywords').blur();
+            $('#keywords').attr('disabled', 'true');
+            $('#keywords').addClass('disabled');
+
 
             fct_isPermalink = false;
         }
@@ -5147,6 +5352,12 @@ function loadTextResults(xml){
               //rows += '</span></td></tr>';
           }
           else {
+              var id = createId();
+
+              var opts = new Object();
+              opts.tag = TAG_LIST;
+              opts.parentId = 'gbr_'+id;
+              opts.childrenId = opts.tag + opts.parentId;
 
             var rowId = opts.parentId;
             var recordActive = false;
@@ -5192,12 +5403,6 @@ function loadTextResults(xml){
               label = sanitizeLabel(label);
               value = sanitizeLabel(value);
               //console.log($(col[0]));
-              var id = createId();
-
-              var opts = new Object();
-              opts.tag = TAG_LIST;
-              opts.parentId = 'gbr_'+id;
-              opts.childrenId = opts.tag + opts.parentId;
 
 var color = 'success';
 var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'primary' : 'info';
@@ -5793,8 +5998,8 @@ if(true){
 
               label = deSanitizeLabel(label);
               var labelLink = (datatype=='uri') ? ' onclick="javascript:describe(\''+rowId+'\', \''+value+'\');"' : '';
-              rows +=  '<h6 class="row-result text-ellipsis m-0" '+labelLink+'>';
-              rows+='<span '+buildTitle(value)+'>'+label+'</span>';
+              rows +=  '<h6 class="row-result text-ellipsis m-0" >';
+              rows+='<span '+buildTitle(value)+' '+labelLink+'>'+label+'</span>';
               //rows +=  '<p class="help-block text-ellipsis m-0"></p>';
 
 
@@ -6087,7 +6292,9 @@ function selectGroupBy(isPaging){
         //takeMainFocus(prop.attr('class'), true);
         var sub = $.createElement('p');
         sub.addClass('help-block');
+        //sub.css('margin-top', '.55rem');
         sub.addClass('m-0');
+        sub.addClass('text-dark');
         sub.addClass('text-ellipsis');
         sub.addClass('gbsub');
         sub.text('Grouped by ');
@@ -6116,10 +6323,11 @@ if(isReverse){
 
         badge = $.createElement('p');
         badge.addClass('badge');
+        badge.addClass('badge-pill');
         badge.addClass('badge-primary');
         badge.addClass('gbbadge');
         badge.css('display', 'inline');
-        badge.text( label +  ( (isReverse) ? ' of' : '') );
+        badge.text( label +  ( (isReverse && false) ? ' of' : '') );
         //var removeLink = $.createElement('a');
         //removeLink.text('x');
         //badge.append(removeLink);
@@ -7110,13 +7318,13 @@ content += '</section>';
       col.addClass('d-md-table-cell');
       col.css('cursor', 'pointer');
 
-      col.append((showRecordRoles ? '... is a' : 'Field')); //&nbsp;<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\''+ sanitizeLabel(uri)+'\')" class="pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'secondary')+'"></i>
+      col.append((showRecordRoles ? '... Is A' : 'Field')); //&nbsp;<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\''+ sanitizeLabel(uri)+'\')" class="pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'secondary')+'"></i>
       row.append(col);
 
       col = $.createElement('th');
       col.addClass('d-none');
       col.addClass('d-md-table-cell');
-      col.text((showRecordRoles ? 'of this' : 'Value'));
+      col.text((showRecordRoles ? 'Of This' : 'Content'));
       row.append(col);
 
       //header.append(row);
@@ -7141,6 +7349,14 @@ content += '</section>';
 
       var desc;
       var categoryBadges = '';
+      var actions;
+      var long;
+      var lat;
+      var isMovie = false;
+      var isMusic = false;
+      var isAlbum = false;
+      var name;
+      var title;
       var headerAdded = false;
       var hasClass = false;
       var hasImage = false;
@@ -7171,6 +7387,13 @@ content += '</section>';
             categoryBadges += '<a class="link-category'+((isOddClass)? ' link-odd' :'')+'" href="#"> '+processLabel(objLabel)+' </a>'; //class="badge badge-inverse fw-semi-bold rounded-0" 
             propLabel = 'category';
             isOddClass = !isOddClass;
+            if(objectIRI == 'http://dbpedia.org/class/yago/Movie106613686') isMovie = true;
+            else if(objectIRI == 'https://schema.org/Movie')  isMovie = true;
+            else if(objectIRI == 'http://dbpedia.org/ontology/Film')  isMovie = true;
+            else if(objectIRI == 'http://dbpedia.org/ontology/Album')  {isMusic = true; isAlbum=true;}
+            else if(objectIRI == 'http://dbpedia.org/ontology/MusicalWork')  isMusic = true;
+            else if(objectIRI == 'https://www.wikidata.org/wiki/Q482994')  isMusic = true;
+            else if(objectIRI == 'http://dbpedia.org/class/yago/Album106591815')  {isMusic = true; isAlbum=true;}
           }
           if((namespaces[qname]+fragId) == 'http://www.w3.org/2000/01/rdf-schema#label' && !isRole) uriLabel = processLabel(  deSanitizeLabel(objectValue)).replace(/\b\w/g, function(l){ return l.toUpperCase() }) ;
           if((namespaces[qname]+fragId) == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' && objectIRI == 'http://www.w3.org/2002/07/owl#Class') hasClass = true;
@@ -7181,6 +7404,14 @@ content += '</section>';
           if(!desc && propLabel.endsWith(':comment')) desc = objectValue;
           if(!desc && propLabel.endsWith(':abstract')) desc = objectValue;
           if(!desc && propLabel.endsWith(':description')) desc = objectValue;
+          if(propLabel.endsWith(':long')) long = objectValue;
+          if(propLabel.endsWith(':lat')) lat = objectValue;
+          if(propLabel.endsWith(':name')) name = objectValue;
+          if(propLabel.endsWith(':title')) title = objectValue;
+          if(propLabel.endsWith(':isbn')) {
+            if(!actions) actions = '';
+            actions += '<i style="cursor:pointer" '+buildTitle('View on Amazon')+' onclick="javascript:linkOut(\'https://www.amazon.com/s?i=stripbooks&rh=p_66:'+objectValue.replaceAll('-', '')+'\')" class="fa fa-amazon fa-lg"></i>';
+          }
           //if(objectIRI == uri && !propLabel.trim().toLowerCase().endsWith('of')) propLabel += ' of';
           if(propLabel == 'RDF:TYPE') propLabel = 'category';
           proplink.css('color', '#495057');
@@ -7229,7 +7460,7 @@ content += '</section>';
             if(subject) {
               col.html('<a style="text-decoration:none;" href="'+subject + '">' +processLabel(subLabel)+ '</a>&nbsp;<img style="cursor:pointer" class="pull-right" src="'+getFaviconUrl(subject)+'" onclick="javascript: remove(\''+facets.attr('class')+'\'); var pid = createId(); setPropertyValue(pid, \''+NODE_TYPE_PROPERTY+'\', \''+ctxId+'\', \''+propIRI+'\', \''+propLabel+'\', \''+objectIRI+'\', \''+processLabel(objLabel)+'\', \'uri\', \''+lang+'\');"/>');
             }        
-            else col.html(objectValue + '<i class="fa fa-copy fa-sm"></i>');
+            else col.html(objectValue);
           }
           else {
             if(objectIRI) {
@@ -7252,6 +7483,25 @@ content += '</section>';
 
       var uriLabalArray = uriLabel.split(' ');
       var buttonLabel = uriLabel;
+
+
+      if(isMovie){
+        if(!actions) actions = '';
+        var mtitle = name;
+        if(!mtitle) mtitle = title;
+        if(!mtitle) mtitle = uriLabel;
+        actions += '<i style="cursor:pointer" '+buildTitle('View on IMDB')+' onclick="javascript:linkOut(\'http://www.imdb.com/find?q='+mtitle+'\')" class="fa fa-imdb fa-lg"></i>';        
+      }
+      if(isMusic){
+        if(!actions) actions = '';
+        var mtitle = name;
+        if(!mtitle) mtitle = title;
+        if(!mtitle) mtitle = uriLabel;
+        var albumStr = (isAlbum) ? '&type=album' : '';
+        actions += '<i style="cursor:pointer" '+buildTitle('View in iTunes')+' onclick="javascript:linkOut(\'https://linkmaker.itunes.apple.com/en-us?term='+mtitle+albumStr+'\')" class="fa fa-apple fa-lg"></i>';        
+      }
+
+
       uriLabel = '';
       for(i =0; i < uriLabalArray.length; i++){
         uriLabel += ' ' + ( (i == uriLabalArray.length - 1) ? '<span class="fw-semi-bold">' +uriLabalArray[i]+ '</span>' : uriLabalArray[i] );
@@ -7264,6 +7514,14 @@ content += '</section>';
       }
       if(desc) $('#angular_recordViewer').append('<div style="padding-left:.55rem; padding-right:.55rem; ">'+desc+'</div>');
 
+      if(long && lat){
+        if(!actions) actions = '';
+        actions += '<i style="cursor:pointer" '+buildTitle('View on Google Maps')+' onclick="javascript:linkOut(\'https://www.google.com/maps/search/?api=1&query='+lat+','+long+'\')" class="fa fa-map-marker fa-lg"></i>';
+      }
+
+      if(actions && actions.length > 0){
+          content += $('#angular_recordViewer').append('<legend class="m-2 text-left text-dark">Services</legend><div style="padding-left:.55rem; padding-right:.55rem; " >'+actions+'</div>');
+      }
       if(categoryBadges.length > 0){
           content += $('#angular_recordViewer').append('<legend class="m-2 text-left text-dark">Categories</legend><div style="padding-left:.55rem; padding-right:.55rem; " >'+categoryBadges+'</div>');
       }
@@ -7301,6 +7559,10 @@ function copy(str) {
     textArea.select();
     document.execCommand("Copy");
     textArea.remove();
+}
+
+function copySPARQL(){
+  copy(mainSparql);
 }
 
 function doGGGView(uri){
@@ -7805,6 +8067,20 @@ $(document).ready(function () {
 });
 
 function describe(id, src, isGGGRecord){
+    if(id && id != 'recordNavBar' && $('#'+id) && $('#'+id).length > 0){
+      var rec = $('.record-active');
+      if($('#'+id).prop('nodeName').toLowerCase() == 'td'){
+        if(!$('#'+id).parent() || $('#'+id).parent().length <=0 || $('#'+id).parent().prop('nodeName').toLowerCase() != 'tr') return;
+        rec.removeClass('record-active');
+        $('#'+id).parent().children('td').addClass('record-active');
+      }
+      else if($('#'+id).prop('nodeName').toLowerCase() == 'a'){
+        if($('#'+id).prop('nodeName').toLowerCase() != 'a') return;
+        rec.removeClass('record-active');
+        $('#'+id).addClass('record-active');
+      }
+    }
+
     var linkOutURI = src;
     if(linkOutURI.startsWith('http://linkeddata.uriburner.com/') && false){
       linkOutURI = linkOutURI.substring(linkOutURI.indexOf('http://linkeddata.uriburner.com/')+'http://linkeddata.uriburner.com/'.length);
@@ -7832,7 +8108,7 @@ function describe(id, src, isGGGRecord){
       opt.srcId = id;
       $('#'+id).addClass('loading');
     }
-    fct_sparql(getSPARQLDescribe(src, isGGGRecord), opt);
+    if(!isTableShowing()) fct_sparql(getSPARQLDescribe(src, isGGGRecord), opt);
 }
 
 function linkOut(src){
@@ -8236,7 +8512,7 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
         }
 
         // update root
-        getQuery().attr('label', desc);
+        getQuery().attr('label', (desc == 'name' || desc == 'keywords') ? val : desc);
 
         //var slash = (!isFacet) ? '/' : '';
 
