@@ -790,6 +790,13 @@ function fct_sparql(sparql, opt){
   return req;  
 }
 
+function save(title){
+  var s = 'INSERT into <http://www.vios.network/g/smartFolders> {<'+$('#permalink').attr('href')+'> <http://www.w3.org/2000/01/rdf-schema#label> "' + title + '"}';
+  var opt = new Object();
+  opt.srv = 'http://data.vios.network/sparql';
+  fct_sparql(s);
+}
+
 function fct_handleSparqlShowMeCount(xml, opt){
   var results = $(xml).find('results');
   $('result', results).each(function(i){
@@ -2479,10 +2486,60 @@ function init(){
       glossaryButton += '</span>';
       
 
-      var favButton = '<li class="nav-item d-none d-md-block"><a class="nav-link pl-2 text-info" id="favButton" ><i class="la la-heart-o la-lg text-default"></i></a></li>'; //la-heart-o
+      var favButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" onclick="javascript:save($(\'#keywords\').text()); $(\'keywords\').text(\'\');" class="nav-link pl-2 text-info" id="favButton" ><i class="la la-save la-lg text-default"></i></a></li>'; //la-heart-o
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(favButton);
 
+      /*
+      $('#favButton').click(function(e) {
+    e.preventDefault();
+    var bookmarkURL = $('#favButton').attr('href');
+    var bookmarkTitle = $('#keywords').text();
+    $('#keywords').text('');
+    $('#favButton').attr('title', bookmarkTitle);
+
+    if ('addToHomescreen' in window && window.addToHomescreen.isCompatible) {
+        // Mobile browsers
+        addToHomescreen({ autostart: false, startDelay: 0 }).show(true);
+    } else if (window.sidebar && window.sidebar.addPanel) {
+        // Firefox version < 23
+        window.sidebar.addPanel(bookmarkTitle, bookmarkURL, '');
+    } else if ((window.sidebar && /Firefox/i.test(navigator.userAgent)) || (window.opera && window.print)) {
+        // Firefox version >= 23 and Opera Hotlist
+        $(this).attr({
+            href: bookmarkURL,
+            title: bookmarkTitle,
+            rel: 'sidebar'
+        }).off(e);
+        return true;
+    } else if (window.external && ('AddFavorite' in window.external)) {
+        // IE Favorite
+        window.external.AddFavorite(bookmarkURL, bookmarkTitle);
+    } else {
+        // Other browsers (mainly WebKit - Chrome/Safari)
+        alert('Please press ' + (/Mac/i.test(navigator.userAgent) ? 'CMD' : 'Strg') + ' + D to add this page to your favorites.');
+    }
+
+    return false;
+});
+*/
+
+
+/*
+
+      .click(function(e){
+    e.preventDefault(); // this will prevent the anchor tag from going the user off to the link
+
+    if (window.sidebar) { // For Mozilla Firefox Bookmark
+        //window.sidebar.addPanel(bookmarkTitle, bookmarkUrl,"");
+    } else if( window.external || document.all) { // For IE Favorite
+        window.external.AddFavorite( bookmarkUrl, bookmarkTitle);
+    } else { // for other browsers which does not support
+         alert('Your browser does not support this bookmark action');
+         return false;
+    }
+  });
+*/
 
       var copyButton = '<li class="nav-item d-none d-md-block"><a class="nav-link pl-2 text-info" ><i id="copySPARQL" onmouseout="$(\'#copySPARQL\').tooltip(\'hide\');$(\'#copySPARQL\').attr(\'data-original-title\', \'Copy SPARQL to clipboard\');$(\'#copySPARQL\').tooltip();" '+buildTitle('Copy SPARQL to clipboard')+' onclick="javascript:$(\'#copySPARQL\').tooltip(\'hide\');copySPARQL(); $(\'#copySPARQL\').attr(\'data-original-title\', \'Copied\');$(\'#copySPARQL\').tooltip(\'show\');" style="cursor:pointer;" class="la la-copy fa-lg"></i></a></li>'; //la-heart-o
 
@@ -2702,7 +2759,7 @@ gbcol += '<nav id="recordNavBar" class="navbar navbar-expand-lg navbar-light bg-
         gbcol += '<a id="ggg" class="nav-link" data-target="#">Edit</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Analyze</a>';
+        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Interact</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe( $(undefined, \'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
@@ -4492,7 +4549,7 @@ if(!$('input[type="text"], input[type="search"]').is(":focus")){
       showRecordRoles == false;
       describe(undefined, $('#angular_recordViewer').attr('iri'));
     }
-    else if (e.keyCode == '71') { // G key
+    else if (e.keyCode == '71' || e.keyCode == '76') { // G key or L key
         selectMenuItem('showMeMenu', VIEW_TYPE_GRAPHS);
         describe(undefined, $('#angular_recordViewer').attr('iri'));
     }  
@@ -4516,7 +4573,7 @@ if(!$('input[type="text"], input[type="search"]').is(":focus")){
     $('#helpModal').modal({});
     }
 
-    else if(e.keyCode == '74' || e.keyCode == '75' || e.keyCode == '76' || e.keyCode == '186' || e.keyCode == '222') { // J key or K key or L key or : key or ' key
+    else if(e.keyCode == '74' || e.keyCode == '75' || e.keyCode == '186' || e.keyCode == '222') { // J key or K key or : key or ' key
       var rec = $('.record-active');
       if(rec.prop('nodeName').toLowerCase() == 'td'){
         if(!rec.parent().prev() || rec.parent().prev().length <= 0 || rec.parent().prev().prop('nodeName').toLowerCase() != 'tr') return;
@@ -7383,16 +7440,24 @@ content += '</section>';
           var proplink = $.createElement('a');
           proplink.attr('href', $(this).prop('nodeName'));
           if(propLabel == 'rdf:type'){
-            //if(categoryBadges.length > 0) categoryBadges += '<strong class="text-dark">&middot;</strong>';
-            categoryBadges += '<a class="link-category'+((isOddClass)? ' link-odd' :'')+'" href="#"> '+processLabel(objLabel)+' </a>'; //class="badge badge-inverse fw-semi-bold rounded-0" 
+            if(categoryBadges.length > 0) categoryBadges += '&nbsp;';//;'<strong class="text-dark">&middot;</strong>';
+
+            var focusTarget = (getMainFocus().attr('class') == ID_QUERY+"") ? 'focusHeader' : 'focusValue';
+            var focusTargetClass = (getMainFocus().attr('class') == ID_QUERY+"") ? 'queryFocus' : 'queryFocusValue';
+            categoryBadges += '<a class="link-category'+((isOddClass)? '-odd' :'')+'" onclick="javascript: $(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\'); var cid = createId(); addClassFacet(cid, \''+objectIRI+'\', \''+sanitizeLabel(processLabel(objLabel))+'\')"> '+processLabel(objLabel)+' </a>'; //class="badge badge-inverse fw-semi-bold rounded-0" 
             propLabel = 'category';
             isOddClass = !isOddClass;
             if(objectIRI == 'http://dbpedia.org/class/yago/Movie106613686') isMovie = true;
-            else if(objectIRI == 'https://schema.org/Movie')  isMovie = true;
+            else if(objectIRI == 'http://schema.org/Movie')  isMovie = true;
             else if(objectIRI == 'http://dbpedia.org/ontology/Film')  isMovie = true;
+            else if(objectIRI == 'http://www.wikidata.org/entity/Q11424')  isMovie = true;
+            else if(objectIRI == 'http://schema.org/TVEpisode')  isMovie = true;
+            else if(objectIRI == 'http://www.wikidata.org/entity/Q1983062')  isMovie = true;
+
+
             else if(objectIRI == 'http://dbpedia.org/ontology/Album')  {isMusic = true; isAlbum=true;}
             else if(objectIRI == 'http://dbpedia.org/ontology/MusicalWork')  isMusic = true;
-            else if(objectIRI == 'https://www.wikidata.org/wiki/Q482994')  isMusic = true;
+            else if(objectIRI == 'http://www.wikidata.org/entity/Q482994')  isMusic = true;
             else if(objectIRI == 'http://dbpedia.org/class/yago/Album106591815')  {isMusic = true; isAlbum=true;}
           }
           if((namespaces[qname]+fragId) == 'http://www.w3.org/2000/01/rdf-schema#label' && !isRole) uriLabel = processLabel(  deSanitizeLabel(objectValue)).replace(/\b\w/g, function(l){ return l.toUpperCase() }) ;
@@ -7410,6 +7475,7 @@ content += '</section>';
           if(propLabel.endsWith(':title')) title = objectValue;
           if(propLabel.endsWith(':isbn')) {
             if(!actions) actions = '';
+            else actions += '&nbsp;';
             actions += '<i style="cursor:pointer" '+buildTitle('View on Amazon')+' onclick="javascript:linkOut(\'https://www.amazon.com/s?i=stripbooks&rh=p_66:'+objectValue.replaceAll('-', '')+'\')" class="fa fa-amazon fa-lg"></i>';
           }
           //if(objectIRI == uri && !propLabel.trim().toLowerCase().endsWith('of')) propLabel += ' of';
@@ -7487,18 +7553,20 @@ content += '</section>';
 
       if(isMovie){
         if(!actions) actions = '';
+        else actions += '&nbsp;';
         var mtitle = name;
         if(!mtitle) mtitle = title;
         if(!mtitle) mtitle = uriLabel;
-        actions += '<i style="cursor:pointer" '+buildTitle('View on IMDB')+' onclick="javascript:linkOut(\'http://www.imdb.com/find?q='+mtitle+'\')" class="fa fa-imdb fa-lg"></i>';        
+        actions += '<i style="cursor:pointer" '+buildTitle('View on IMDB')+' onclick="javascript:linkOut(\'http://www.imdb.com/find?q='+mtitle.replace('\'', '%27')+'\')" class="fa fa-imdb fa-lg"></i>';        
       }
       if(isMusic){
         if(!actions) actions = '';
+        else actions += '&nbsp;';
         var mtitle = name;
         if(!mtitle) mtitle = title;
         if(!mtitle) mtitle = uriLabel;
         var albumStr = (isAlbum) ? '&type=album' : '';
-        actions += '<i style="cursor:pointer" '+buildTitle('View in iTunes')+' onclick="javascript:linkOut(\'https://linkmaker.itunes.apple.com/en-us?term='+mtitle+albumStr+'\')" class="fa fa-apple fa-lg"></i>';        
+        actions += '<i style="cursor:pointer" '+buildTitle('View in iTunes')+' onclick="javascript:linkOut(\'https://linkmaker.itunes.apple.com/en-us?term='+mtitle.replace('\'', '%27')+albumStr+'\')" class="fa fa-apple fa-lg"></i>';        
       }
 
 
@@ -7516,6 +7584,7 @@ content += '</section>';
 
       if(long && lat){
         if(!actions) actions = '';
+        else actions += '&nbsp;';
         actions += '<i style="cursor:pointer" '+buildTitle('View on Google Maps')+' onclick="javascript:linkOut(\'https://www.google.com/maps/search/?api=1&query='+lat+','+long+'\')" class="fa fa-map-marker fa-lg"></i>';
       }
 

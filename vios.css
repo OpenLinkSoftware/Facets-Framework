@@ -593,15 +593,21 @@ p.text-match-subject{
   padding-top: 4px;
 }
 
-.link-odd{
-  color:#36393D;/*#C79810;*/
-
+.link-category-odd{
+  color:#36393D!important;/*#C79810;*/
+    text-decoration: none!important;
+    background-color: transparent!important;
+    -webkit-text-decoration-skip: objects!important;
 }
 .link-category{
-
+    color: #218bc3!important;
+    text-decoration: none!important;
+    background-color: transparent!important;
+    -webkit-text-decoration-skip: objects!important;
 }
-.link-category:hover{
-  text-decoration: none;
+.link-category:hover, .link-category-odd:hover{
+    color: #165c82!important;
+  text-decoration: none!important;
 }
 .text-warning-hack {
     color: #ffc247 !important;
