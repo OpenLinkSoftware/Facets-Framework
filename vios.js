@@ -2335,6 +2335,12 @@ function resetColumnWidths(){
 
 var orientationLeft = false;
 
+const ORIENTATION_TYPE_1 = 1;
+const ORIENTATION_TYPE_2 = 2;
+const ORIENTATION_TYPE_3 = 3;
+
+var orientationType = ORIENTATION_TYPE_1;
+
 function init(){
     fct_init(); // this method must be the first method called by the implementation of the fct_ framework
 
@@ -2342,8 +2348,10 @@ function init(){
 
 
       try{
-        orientationLeft = localStorage.getItem('orientationLeft') == 'true';
-        localStorage.setItem('orientationLeft', orientationLeft); // attempt to claim memory before cache uses it all
+        orientationType = localStorage.getItem('orientationType');
+//        orientationLeft = localStorage.getItem('orientationLeft') == 'true';
+if(!orientationType) orientationType = ORIENTATION_TYPE_2;
+        localStorage.setItem('orientationType', orientationType); // attempt to claim memory before cache uses it all
       }
       catch(e){
 
@@ -2739,7 +2747,7 @@ gbcol += '</ul></div>';
 $('#angular_breadcrumbs').append(gbcol);
 
 
-if(!orientationLeft){
+if(orientationType == ORIENTATION_TYPE_3){
 
 gbcol = '<div id="recordViewerColumn" class="hide col-lg-'+recordViewerColumnWidth+' col-12"><section class="widget" widget>';
 
@@ -3104,6 +3112,128 @@ $('#dataCanvas').append(gbcol);
 
 
 
+if(orientationType == ORIENTATION_TYPE_2){
+
+gbcol = '<div id="recordViewerColumn" class="hide col-lg-'+recordViewerColumnWidth+' col-12"><section class="widget" widget>';
+
+        gbcol += '<div class="widget-body  p-0 ">';
+       // gbcol += '<div class="widget-body p-0">';
+
+
+gbcol += '<nav id="recordNavBar" class="navbar navbar-expand-lg navbar-light bg-light">';
+  gbcol += '<a  style="margin-left: 7px;" class="navbar-brand" data-target="#" onclick="javascript:buildForm()">Compose</a>';
+  gbcol += '<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">';
+    gbcol += '<i class="glyphicon glyphicon-tree-conifer"></i>';
+    gbcol += '<i _ngcontent-c10="" class="glyphicon glyphicon-tree-conifer text-success"></i>';
+  gbcol += '</button>';
+
+  gbcol += '<div class="collapse navbar-collapse" id="navbarSupportedContent">';
+    gbcol += '<ul class="navbar-nav mr-auto">';
+      gbcol += '<li class="nav-item active">';
+        gbcol += '<a id="ggg" class="nav-link" data-target="#">Edit</a>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Interact</a>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe( $(undefined, \'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
+      gbcol += '</li>';
+      /*
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a class="nav-link" data-target="#">Charts</a>';
+      gbcol += '</li>';
+
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a class="nav-link" data-target="#">Map</a>';
+      gbcol += '</li>';
+      */
+      gbcol += '<li class="nav-item dropdown">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'Pair';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="navbarDropdown">';
+          gbcol += '<a class="dropdown-item" data-target="#">Browser Window</a>';
+          gbcol += '<a class="dropdown-item" data-target="#">Device</a>';
+          gbcol += '<div class="dropdown-divider"></div>';
+          gbcol += '<a class="dropdown-item" data-target="#">New Data Canvas</a>';
+        gbcol += '</div>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item dropdown">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'Subscribe';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="navbarDropdown">';
+          gbcol += '<a class="dropdown-item" data-target="#">Record</a>';
+          gbcol += '<a class="dropdown-item" data-target="#">Folder</a>';
+        gbcol += '</div>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item">';
+        gbcol += '<a class="nav-link disabled" data-target="#">Edit</a>';
+      gbcol += '</li>';
+    gbcol += '</ul>';
+      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">IDN</button>';
+//    gbcol += '<form class="form-inline my-2 my-lg-0">';
+      //gbcol += '<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">';
+//    gbcol += '</form>';
+  gbcol += '</div>';
+gbcol += '</nav>';
+
+
+            gbcol += '<div id="angular_recordViewer" class="embed-responsive">'; //embed-responsive-1by1
+
+
+//gbcol += '<iframe id="describe" class="iframe embed-responsive-item" src="" height="100%"></iframe>';
+            gbcol += '</div>';
+
+
+
+          //  gbcol += '</div>';
+            gbcol += '</div>';        
+
+
+                        gbcol += '</section></div>';
+
+
+gbcol += '<div id="recordFormColumn" class="hide col-lg-'+SIZE_RECORD_FORM+' col-12">'
+
+gbcol += '<div class="widget-body  p-0"></div>';
+                        gbcol += '</div>';
+
+
+
+
+
+gbcol += '<div id="mapResults" class="short-div hide"><section class="widget" widget>';
+
+gbcol += '<header id="mapResultsHeader">';
+        gbcol += '<div class="widget-controls">';
+          //gbcol += '<a href="#"><i class="glyphicon glyphicon-cog"></i></a>';
+         // gbcol += '<a data-target="#" class="leftButton" onclick="javascript:pageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
+         // gbcol += '<a data-target="#" class="rightButton" onclick="javascript:pageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
+          gbcol += '<a data-widgster="close" onclick="hideMap()" class="btn-gray"><i class="glyphicon glyphicon-remove"></i></a>';
+        gbcol += '</div>';
+      gbcol += '</header>';
+        gbcol += '<div class="widget-body">';
+
+
+//var apiKey = 'AIzaSyDe_oVpi9eRSN99G4o6TwVjJbFBNr58NxE';
+
+//gbcol += '<script async defer src="https://maps.googleapis.com/maps/api/js?key='+apiKey+'"> </script>';
+gbcol += '<div id="map"></div>';
+
+            gbcol += '</div>'; // widget-body
+
+
+
+gbcol += '</section></div>';
+
+$('#dataCanvas').append(gbcol);
+
+}
+
 
 
 
@@ -3158,7 +3288,7 @@ $('#dataCanvas').append(gbcol);
 
 /// was here
 
-if(orientationLeft){
+if(orientationType == ORIENTATION_TYPE_1){
 
 gbcol = '<div id="recordViewerColumn" class="hide col-lg-'+recordViewerColumnWidth+' col-12"><section class="widget" widget>';
 
@@ -3309,8 +3439,12 @@ gbcol += '<div class="modal fade" id="helpModal" tabindex="-1" role="dialog" ari
       gbcol += '  </p><p>';
       gbcol += '  In Commmand Mode:';
       gbcol += '  <ul><li>';
-      gbcol += '  Press <i>N</i> key to toggle navigation types';
+      gbcol += '  Press <i>N</i> key to toggle navigation type';
       gbcol += '  </li><li>'; 
+      gbcol += '  Press <i>O</i> key to change orientation';
+      gbcol += '  </li><li>';
+      gbcol += '  Press <i>S</i> key to toggle Subject badges';
+      gbcol += '  </li><li>';
       gbcol += '  Press <i>C</i>, <i>T</i>, <i>F</i>, <i>R</i> or <i>L</i> keys to switch CTRL lists';
       gbcol += '  </li><li>';
       gbcol += '  Use <i>&lt;</i>, <i>&gt;</i>, <i>left arrow</i>, and <i>right arrow</i> to page through list';
@@ -3320,10 +3454,6 @@ gbcol += '<div class="modal fade" id="helpModal" tabindex="-1" role="dialog" ari
       gbcol += '  Use <i>M</i> or <i>/</i> to move down lists';
       gbcol += '  </li><li>';
       gbcol += '  Hold down <i>1</i> (number one) key, then click Field checkbox to prepend Field to filter collector';
-      gbcol += '  </li><li>';
-      gbcol += '  Press <i>O</i> key to toggle orientation';
-      gbcol += '  </li><li>';
-      gbcol += '  Press <i>S</i> key to toggle Subject badges';
       gbcol += '  </li><li>';
       gbcol += '  Press <i>H</i> key to view this menu';
       gbcol += '  </li></ul>';
@@ -4632,9 +4762,14 @@ if(!$('input[type="text"], input[type="search"]').is(":focus")){
     }    
 
     else if(e.keyCode == '79') { // O key
-      orientationLeft = !orientationLeft;
+        if(orientationType == ORIENTATION_TYPE_1) orientationType = ORIENTATION_TYPE_2;
+        else if(orientationType == ORIENTATION_TYPE_2) orientationType = ORIENTATION_TYPE_3;
+        else if(orientationType == ORIENTATION_TYPE_3) orientationType = ORIENTATION_TYPE_1;
+
+      //orientationLeft = !orientationLeft;
       try{
-        localStorage.setItem('orientationLeft', orientationLeft);
+        //localStorage.setItem('orientationLeft', orientationLeft);
+        localStorage.setItem('orientationType', orientationType);
       }
       catch(e){
 
@@ -7600,7 +7735,7 @@ content += '</section>';
       }
       uriLabel = uriLabel.trim();
 
-      $('#angular_recordViewer').append('<h3 onclick="javascript:linkOut();" style="cursor:pointer;padding-top:1em; padding-left:.55rem; padding-right:.55rem;">'+uriLabel+'</h3>'+ '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');//((body.children().length <= 0 && filterRecordViewFields)?'<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = false; describe(\''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-info"></i>':''));
+      $('#angular_recordViewer').append('<h3 onclick="javascript:linkOut();" '+buildTitle('Visit ' + sanitizeLabel(uri))+' style="cursor:pointer;padding-top:1em; padding-left:.55rem; padding-right:.55rem;">'+uriLabel+'</h3>'+ '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');//((body.children().length <= 0 && filterRecordViewFields)?'<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = false; describe(\''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-info"></i>':''));
       if(hasImage){
         desc = img + desc;
       }
