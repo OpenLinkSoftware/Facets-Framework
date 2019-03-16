@@ -375,10 +375,10 @@ try{
 function fct_removeVariableData(query){
   query.removeAttr('label');
   query.removeAttr('varname');
-  //query.removeAttr('class');
+  query.removeAttr('class');
 
 
-  //query.find('*').removeAttr('class');
+  query.find('*').removeAttr('class');
   query.find('*').removeAttr('label');
   query.find('*').removeAttr('varname');
   query.find('*').removeAttr('isGroupBy');
@@ -496,6 +496,7 @@ function fct_query(q, viewType, opt){
   }
   var req = $.ajax({
       url: service_fct,
+      headers: {'X-VIOS-Type': 'fct', 'X-VIOS-QID': createId()},
       data: $(q).prop('outerHTML'), 
       type: 'POST',
       contentType: "text/xml",
@@ -717,7 +718,7 @@ function fct_sparql(sparql, opt){
   var req = $.ajax({
       url: sparqlSvr + "?query=" + encodeURIComponent(sparql),
       type: 'GET',
-      headers: {Accept: accept},
+      headers: {'Accept': accept, 'X-VIOS-Type': 'sparql', 'X-VIOS-QID': createId()},
       dataType: "text", // POI: can't do dataType: xml, since the service sometimes returns malformed XML
       beforeSend: function(jqXHR, settings) {
           jqXHR.url = settings.url;
@@ -791,7 +792,7 @@ function fct_sparql(sparql, opt){
 }
 
 function save(title){
-  var s = 'INSERT into <http://www.vios.network/g/smartFolders> {<'+$('#permalink').attr('href')+'> <http://www.w3.org/2000/01/rdf-schema#label> "' + title + '"}';
+  var s = 'INSERT into <http://www.vios.network/l/SmartFolders> {<'+$('#permalink').attr('href')+'> <http://www.w3.org/2000/01/rdf-schema#label> "' + title + '"}';
   var opt = new Object();
   opt.srv = 'http://data.vios.network/sparql';
   fct_sparql(s);
@@ -2193,7 +2194,7 @@ var TAG_GRAPH = 'g';
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://poc.vios.network";
 var this_endpoint = 'http://poc.vios.network';
 
-var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qPage, qshowMePage, qTimeout, qNavType, qSubjectBadges, qVerticalChartHeaders, qViewType, qIsChart, qIsRollup;
+var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qPage, qshowMePage, qTimeout, qNavType, qSubjectBadges, qVerticalChartHeaders, qViewType, qIsChart, qIsRollup, qFilterRecordViewFields;
 
 var icon_folder_black = 'http://icon-park.com/imagefiles/folder_icon_black.png';
 var icon_file = 'http://myopenlink.net/DAV/home/sdmonroe/img/blank-file-xxl.png';
@@ -3511,6 +3512,7 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     qViewType = fct_getUrlParameter('viewType');
     qIsChart = fct_getUrlParameter('isChart');
     qSubjectBadges = fct_getUrlParameter('subjectBadges');
+    qFilterRecordViewFields = fct_getUrlParameter('filterRecordViewFields');
 
     qVerticalChartHeaders = fct_getUrlParameter('verticalChartHeaders');
 
@@ -3542,6 +3544,11 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     if(qVerticalChartHeaders && qVerticalChartHeaders.length > 0) {
       setVerticalChartHeaders(qVerticalChartHeaders == 'true');
       qVerticalChartHeaders = null;
+    }
+
+    if(qFilterRecordViewFields && qFilterRecordViewFields.length > 0) {
+      filterRecordViewFields = qFilterRecordViewFields == 'true';
+      qFilterRecordViewFields = null;
     }
 
     //POI:
@@ -3744,7 +3751,7 @@ var formNamespaceCt = 0;
 var formNamespaceMap = {};
 
 function createURI(){
-  return 'http://www.vios.network/inst#' + createId();
+  return 'http://www.vios.network/i#' + createId();
 }
 
 
@@ -4155,13 +4162,13 @@ function addTab(fctId, tabCounter) {
     footer += '<div class="pull-right">';
 
     footer += '<button class="btn btn-default btn-sm">';
-    footer += '<i class="fa fa-plus-square text-info"></i>&nbsp;Category';
+    footer += 'Category&nbsp;<i class="fa fa-plus-square text-info"></i>';
     footer += '</button>&nbsp;';
     footer += '<button class="btn btn-default btn-sm">';
-    footer += '<i class="fa fa-plus-square text-info"></i>&nbsp;Field';
+    footer += 'Field&nbsp;<i class="fa fa-plus-square text-info"></i>';
     footer += '</button>&nbsp;';
     footer += '<button class="btn btn-default btn-sm">';
-    footer += '<i class="fa fa-plus-square text-info"></i>&nbsp;Role';
+    footer += 'Role&nbsp;<i class="fa fa-plus-square text-info"></i>';
     footer += '</button>&nbsp;';
     footer += '&nbsp;&nbsp;&nbsp;&nbsp;';
 
@@ -4414,6 +4421,11 @@ console.log(e);
   function isRecordsListVisible(){
     return !$('#recordsListWidgetContainer').hasClass('hide');
   }
+  function setRecordListVisable(b){
+    if(b) $('#recordsListWidgetContainer').removeClass('hide');
+    else $('#recordsListWidgetContainer').addClass('hide');
+  }
+
   function isControlListVisible(){
     return !$('#showMeColumn').hasClass('hide');
   }
@@ -4844,6 +4856,8 @@ function beep2() {
     }
 }
 
+var mouseOnPermalink = false;
+
 function updatePermalink(){
 
     var canvasViewType = 'default';
@@ -4865,23 +4879,33 @@ function updatePermalink(){
       '&verticalChartHeaders=' + isVerticalChartHeaders() + 
       '&isRollup=' + isRollup() + 
       '&isChart=' + isChart() + 
+      '&filterRecordViewFields=' + filterRecordViewFields + 
       '&qxml=' + encodeURIComponent(_root.find('query').prop('outerHTML'));
   
     $('#permalink').attr('href',  long_url); // use long url by default in case of rate limit
+    $('#permalink').unbind('mouseover');
+    $('#permalink').unbind('mouseout');
 
   $('#permalink').on('mouseover', function(e){
-    get_short_url($('#permalink').attr('href'), function(short_url) {
-      $('#permalink').attr('href',  short_url); //+ '&idCt=' + idCt
-/*
-      $('#permalink').removeAttr('href');
-      $('#permalink').unbind('click');
-      $('#permalink').on('click', function(e){
-        linkOut(short_url);
+    if(!mouseOnPermalink){
+      get_short_url(long_url, function(short_url) {
+        $('#permalink').attr('href',  short_url); //+ '&idCt=' + idCt
+  /*
+        $('#permalink').removeAttr('href');
+        $('#permalink').unbind('click');
+        $('#permalink').on('click', function(e){
+          linkOut(short_url);
+        });
+        */
       });
-      */
-    });
+    }
+        mouseOnPermalink = true;
+
   });
 
+  $('#permalink').on('mouseout', function(e){
+    mouseOnPermalink = false;
+  });
 
     // TODO: this only works in HTML5 compatible browsers, need to support older browsers also
 
@@ -6041,7 +6065,7 @@ if(true){
               else {
                 if(datatype=='uri') {
                   rows += '<img style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
-                                    rows +=  '<i class="status status-bottom bg-'+color+'"></i>';
+                                    //rows +=  '<i class="status status-bottom bg-'+color+'"></i>';
                 }
                 else {
                   rows += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="icon-literal glyphicon glyphicon-tag"></span>';
@@ -6384,7 +6408,7 @@ if(isReverse){
         badge.addClass('badge-primary');
         badge.addClass('gbbadge');
         badge.css('display', 'inline');
-        badge.text( label +  ( (isReverse && false) ? ' of' : '') );
+        badge.text( label +  ( (isReverse) ? ' of' : '') );
         //var removeLink = $.createElement('a');
         //removeLink.text('x');
         //badge.append(removeLink);
@@ -6840,7 +6864,7 @@ var rowId = opts.parentId;
               //rows += '<img title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
           rows += '<i '+buildTitle('preview field values')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
 //              rows += '<a title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>&nbsp;';
-          if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the record list by \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\')" ></i>';
+          if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the contents list by \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\')" ></i>';
           }
           rows +='</h6>';
             rows +=  '</div>';
@@ -7010,7 +7034,7 @@ var ckcolor = 'primary';
           rows += '</div>';
           rows += '<i '+buildTitle('preview rolees')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
               //rows += '<img title="shows up in the \''+propLabel+'\' field of these records" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
-          if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the record list by role: \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\', true)" ></i>';
+          if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the contents list by role: \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\', true)" ></i>';
           }
 
           rows +='</h6>';
@@ -7154,7 +7178,7 @@ rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">'
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
                   rows += '<img onclick="javascript:setGraphFacet(\''+graphIRI+'\', \''+graphLabel+'\')" src="'+getFaviconUrl(graphIRI)+'">';
-                                    rows +=  '<i class="status status-bottom bg-success"></i>';
+                                    //rows +=  '<i class="status status-bottom bg-success"></i>';
 rows += '</span>';
 
 var ckcolor = 'primary';
@@ -7462,7 +7486,7 @@ content += '</section>';
           }
           if((namespaces[qname]+fragId) == 'http://www.w3.org/2000/01/rdf-schema#label' && !isRole) uriLabel = processLabel(  deSanitizeLabel(objectValue)).replace(/\b\w/g, function(l){ return l.toUpperCase() }) ;
           if((namespaces[qname]+fragId) == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' && objectIRI == 'http://www.w3.org/2002/07/owl#Class') hasClass = true;
-          if((namespaces[qname]+fragId) == 'http://xmlns.com/foaf/0.1/depiction') {
+          if((namespaces[qname]+fragId) == 'http://xmlns.com/foaf/0.1/depiction' ) { //|| (namespaces[qname]+fragId) == 'http://dbpedia.org/property/logo'
             hasImage = true;
             img = '<div class="pull-right"><img onclick="javascript:linkOut(\''+objectIRI+'\');" style="cursor:pointer;width:200px; margin-left:.55em;" class="class="rounded img-thumbnail" src="'+objectIRI+'"/></div>';
           }
@@ -7850,7 +7874,7 @@ rows += '<tr><td id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+'>
                                 rows +=  '<span class="thumb-sm float-left mr">';
 if(datatype == 'uri'){
                   rows += '<img style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\'); takeMainFocus(\''+opts.contextId+'\')" src="'+getFaviconUrl(value)+'">';
-                                    rows +=  '<i class="status status-bottom bg-success"></i>';
+                                    //rows +=  '<i class="status status-bottom bg-success"></i>';
 }
                 else {
                   rows += '<span style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="icon-literal glyphicon glyphicon-tag"></span>';
@@ -7958,7 +7982,7 @@ rows += '<tr><td id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+'>
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
                   rows += '<img style="cursor:pointer" onclick="javascript:setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY_OF+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\'); takeMainFocus(\''+opts.contextId+'\')" src="'+getFaviconUrl(value)+'">';
-                                    rows +=  '<i class="status status-bottom bg-success"></i>';
+                                    //rows +=  '<i class="status status-bottom bg-success"></i>';
 rows += '</span>';
 //rows += '</a>';
 
@@ -8056,7 +8080,7 @@ rows += '<tr><td id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+'>
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
                   rows += '<img style="cursor:pointer" onmouseover="javascript:$(\'#'+focusTarget+'\').addClass(\''+focusTargetClass+'\')" onmouseout="javascript:$(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" src="'+getFaviconUrl(value)+'">';
-                                    rows +=  '<i class="status status-bottom bg-success"></i>';
+                                    //rows +=  '<i class="status status-bottom bg-success"></i>';
 rows += '</span>';
 //rows += '</a>';
 
@@ -8234,7 +8258,7 @@ rows += '<tr><td id="'+rowId+'"  '+((recordActive)?' class="record-active"':'')+
 
                 if(datatype=='uri') {
                   rows += '<img style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:remove('+getMainFocus().attr('class')+', true);setValue(\''+id+'\', \''+sanitizeLabel(value)+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
-                                    rows +=  '<i class="status status-bottom bg-'+color+'"></i>';
+                                    //rows +=  '<i class="status status-bottom bg-'+color+'"></i>';
                 }
                 else {
                   rows += '<span style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:remove('+getMainFocus().attr('class')+', true);setValue(\''+id+'\', \''+sanitizeLabel(value)+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="icon-literal glyphicon glyphicon-tag"></span>';
@@ -8742,16 +8766,12 @@ return ret;
 function get_short_url(long_url, func)
 {
     $.getJSON(
-        "http://api.bitly.com/v3/shorten?callback=?", 
+        "http://vio.sn/c/create?uri="+ encodeURIComponent( long_url ), 
         { 
-            "format": "json",
-            "apiKey": 'R_c940e7c2050c4394b45711de1e78fe3c',
-            "login": 'o_19grlau42p',
-            "longUrl": long_url
         },
         function(response)
         {
-            if(response.data.url) func(response.data.url);
+            if(response.c_uri) func(response.c_uri);
         }
     );
 }
