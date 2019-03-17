@@ -2418,9 +2418,6 @@ if(!orientationType) orientationType = ORIENTATION_TYPE_2;
 
 
 
-        https://demo.flatlogic.com/sing-app/angular/profile-profile-module.js
-
-
 //alert('init() screen width: ' + screen.width);
 
   //startDictation();
@@ -2479,26 +2476,6 @@ if(!orientationType) orientationType = ORIENTATION_TYPE_2;
     doQuery(getQueryText());
   });
 
-  var fastForwardButton = '';
-  fastForwardButton += '<span '+buildTitle('find connections between this and the focus')+' class="input-group-append" style="cursor:pointer;">';
-        fastForwardButton += '<span class="input-group-text">';
-          fastForwardButton += '<i class="fw-bold la la-angle-double-right text-default"></i>';
-        fastForwardButton += '</span>';
-      fastForwardButton += '</span>';
-      $('.input-group-text').parent().parent().append(fastForwardButton);
-
-  var glossaryButton = '';
-  glossaryButton += '<span id="glossaryButton" '+buildTitle('open glossary')+' class="hide input-group-append" onclick="javascript: isExpandSearch = true; var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/Glossary106420781\', \'Glossary\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\'); takeMainFocus(pid);" style="cursor:pointer;">';
-        glossaryButton += '<span class="input-group-text">';
-          glossaryButton += '<i class="fw-bold glyphicon glyphicon-book text-info"></i>';
-        glossaryButton += '</span>';
-      glossaryButton += '</span>';
-      
-
-      var favButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" onclick="javascript:save($(\'#keywords\').text()); $(\'keywords\').text(\'\');" class="nav-link pl-2 text-info" id="favButton" ><i class="la la-save la-lg text-default"></i></a></li>'; //la-heart-o
-
-      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(favButton);
-
       /*
       $('#favButton').click(function(e) {
     e.preventDefault();
@@ -2554,6 +2531,60 @@ if(!orientationType) orientationType = ORIENTATION_TYPE_2;
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(copyButton);
 
+
+
+
+      var bountyButton = '<li class="nav-item d-none d-md-block"><a '+buildTitle('Publish a Bounty')+' onclick="javascript:save($(\'#keywords\').text()); $(\'keywords\').text(\'\');" class="nav-link pl-2 text-info" id="favButton" ><i class="la la-bullhorn la-lg text-default"></i></a></li>'; //la-heart-o
+
+      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(bountyButton);
+
+/*
+  var fastForwardButton = '';
+  fastForwardButton += '<span '+buildTitle('find connections between this and the focus')+' class="input-group-append" style="cursor:pointer;">';
+        fastForwardButton += '<span class="input-group-text">';
+          fastForwardButton += '<i class="nav-link la la-angle-double-right la-lg text-default"></i>';
+        fastForwardButton += '</span>';
+      fastForwardButton += '</span>';
+      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(fastForwardButton);
+
+  var glossaryButton = '';
+  glossaryButton += '<span id="glossaryButton" '+buildTitle('open glossary')+' class="hide input-group-append" onclick="javascript: isExpandSearch = true; var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/Glossary106420781\', \'Glossary\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\'); takeMainFocus(pid);" style="cursor:pointer;">';
+        glossaryButton += '<span class="input-group-text">';
+          glossaryButton += '<i class="nav-link la la-book la-lg text-info"></i>';
+        glossaryButton += '</span>';
+      glossaryButton += '</span>';
+      
+      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(glossaryButton);
+
+
+  var bountyButton = '';
+  bountyButton += '<span id="bountyButton" '+buildTitle('Post a bounty')+' class="input-group-append" style="cursor:pointer;">';
+        bountyButton += '<span class="input-group-text">';
+          bountyButton += '<i class="nav-link la la-edit la-lg text-info"></i>';
+        bountyButton += '</span>';
+      bountyButton += '</span>';
+      
+      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(bountyButton);
+
+      $('#keywords').parent().css('width', '100%');
+
+*/
+
+      var fastForwardButton = '<li class="nav-item d-none d-md-block"><a onclick="javascript:save($(\'#keywords\').text()); $(\'keywords\').text(\'\');" class="nav-link pl-2 text-info" id="favButton" ><i class="la la-angle-double-right la-lg text-default"></i></a></li>'; //la-heart-o
+
+      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(fastForwardButton);
+
+
+      var glossaryButton = '<li class="nav-item d-none d-md-block"><a  id="glossaryButton" '+buildTitle('Find a Glossary')+' class="hide nav-link pl-2 text-info" onclick="javascript: isExpandSearch = true; var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/Glossary106420781\', \'Glossary\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\'); takeMainFocus(pid);" style="cursor:pointer;"><i class="la la-book la-lg text-info"></i></a></li>'; //la-heart-o
+
+      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(glossaryButton);
+
+
+
+
+      var favButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" onclick="javascript:save($(\'#keywords\').text()); $(\'keywords\').text(\'\');" class="nav-link pl-2 text-info" id="favButton" ><i class="la la-save la-lg text-default"></i></a></li>'; //la-heart-o
+
+      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(favButton);
 
 
   //$('#queryTimeout').unbind('click');  
@@ -5873,6 +5904,14 @@ function getGroupByLabel(){
   return gbjson.label;
 }
 
+function getGroupById(){
+  var gbjStr = $('#groupByMenu :selected').attr('json');
+  if(!gbjStr) return GROUP_BY_NONE_LABEL;
+  var gbjson = JSON.parse( gbjStr ) ;
+  return gbjson.id;
+}
+
+
 function loadGroupByResults(xml, focusVarName){
       $('#'+ID_GROUP_BY+'').empty();
       $('#angular_recordsList').empty();
@@ -6107,6 +6146,7 @@ rows += '</section>';
               }
               var propIRI = getGroupByValue();
               var propLabel = getGroupByLabel();
+              //var contextId = getGroupById();
               var facet = false;
 
               //var groupByCriteria = getMainFocus();
@@ -6194,6 +6234,7 @@ if(true){
               //if(propIRI != GROUP_BY_NONE_VALUE && propIRI != GROUP_BY_TEXT_VALUE) {
                 var addPropOrPropOf = (isReverse) ? "addPropertyOfFacet" : "addPropertyFacet";
                 var propOrPropOf = (isReverse) ? "property-of" : "property";
+                var nodeType = (isReverse) ? NODE_TYPE_PROPERTY_OF: NODE_TYPE_PROPERTY;
                 //rows += '<a class="count" onclick="javascript: remove(\''+getMainFocus().attr('class')+'\', true); '+propOrPropOf+'(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\'); selectMenuItem(\''+id+'\', \''+propIRI+'\');">'+ct+'</a>&nbsp;-&nbsp;';
                 rows +=  '<span style="cursor:pointer" _ngcontent-c9="" class="badge badge-pill badge-'+badgeColor+'" onclick="javascript: removeEmptyFacet(\''+propOrPropOf+'\',\''+propIRI+'\', true); '+addPropOrPropOf+'(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\', \''+lang+'\'); selectMenuItem(\''+id+'\', \''+propIRI+'\');">'+ct+'</span>';
               }
@@ -6226,7 +6267,7 @@ if(true){
                  // rows += 'Right way'
                   //rows += '</label>';
           rows += '<div class="form-check-inline abc-checkbox abc-checkbox-primary">';
-          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: removeEmptyFacet(\''+propOrPropOf+'\',\''+propIRI+'\', true); '+addPropOrPropOf+'(\''+createId()+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\', \''+lang+'\')" />&nbsp;';
+          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {removeFacetValue(\''+propOrPropOf+'\',\''+propIRI+'\', \''+value+'\');}else{setPropertyValue(\''+createId()+'\', \''+nodeType+'\', \''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')} doGroup(\''+propIRI+'\', \''+propLabel+'\');" />&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
 //                 rows += '<img title="click to drop-down" class="count" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
@@ -6492,16 +6533,16 @@ function selectGroupBy(isPaging){
         // POI: user is not allowed to "add" a property-of facet (for now), instead, user must
         // manually add a field from the Roles menu, after that, the Roles field will 
         // appear in the Group by menu, if the focus has one
-        if(isReverse) prop = $( getFocus(q).children('property-of[iri="' +iri+ '"]')[0] );
+        if(isReverse) prop = $( getFocus(q).children('property-of[iri="' +iri+ '"]:not(:has("value"))')[0] );
         else {
-          prop = $( getFocus(q).children('property[iri="' +iri+ '"]')[0] );
-          if(!prop || prop.length == 0){
-            prop = $.createElement('property');
-            prop.attr('class', $('#groupByMenu :selected').attr('id'));
-            prop.attr('iri', iri);
-            prop.attr('label', label);
-            getFocus(q).append(prop);
-          }
+          prop = $( getFocus(q).children('property[iri="' +iri+ '"]:not(:has("value"))')[0] );
+        }
+        if(!prop || prop.length == 0){
+          prop = $.createElement(isReverse ? 'property-of' : 'property');
+          prop.attr('class', $('#groupByMenu :selected').attr('id'));
+          prop.attr('iri', iri);
+          prop.attr('label', label);
+          getFocus(q).append(prop);
         }
         prop.attr('isGroupBy', 'true');
         takeFocus(prop, getFocus(q));

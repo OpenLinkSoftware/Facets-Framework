@@ -648,6 +648,13 @@ td .thumb-sm .status{
 }
 
 
+#angular_recordsList .list-group-item div .abc-checkbox label::before{
+  top:1px!important;
+}
+#angular_recordsList .list-group-item div .abc-checkbox label{
+  top:-10px!important;
+}
+
 
 div h6 i {
   top: 12px;
