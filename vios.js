@@ -1300,6 +1300,8 @@ function fct_handleSparqlResults(xml, opt) {
 
     });
     if (!isChart()) $('#resultsTable > tbody').append(rows);
+    if (!isChart()) $('#resultsTable').removeClass('table-bordered');
+
 
 
     // chart logic
@@ -1308,6 +1310,7 @@ function fct_handleSparqlResults(xml, opt) {
         $('#resultsTable > tbody').empty();
         //$('#resultsTableFocus > thead').empty();
         //$('#resultsTableFocus > tbody').empty();
+        $('#resultsTable').addClass('table-bordered');
         if (isVerticalChartHeaders()) $('#resultsTable').addClass('table-header-rotated');
         //$('#resultsTableFocus').addClass('table-header-rotated');
 
@@ -2799,7 +2802,7 @@ gbcol += '<nav id="recordNavBar" class="navbar navbar-expand-lg navbar-light bg-
         gbcol += '<a id="ggg" class="nav-link" data-target="#">Edit</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Interact</a>';
+        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Connections</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe( $(undefined, \'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
@@ -2957,9 +2960,9 @@ gbcol += '<header id="groupByHeader" style="cursor:pointer;">';
 
 
 
-gbcol += '<div id="tabularResults" class="short-div hide"><section class="widget" widget>';
+gbcol += '<div id="tabularResults" class="short-div hide"><section class="widget p-0" widget>';
 
-gbcol += '<header id="groupByTableHeader">';
+gbcol += '<header class="m-1" id="groupByTableHeader">';
         gbcol += '<h5>';
           gbcol += '<h4><span id="tableCount" class="badge badge-info">0/0</span> '+GROUP_BY_NONE_LABEL+' - <span id="tableType" class="fw-semi-bold">'+((isChart()) ? TABLE_HEADER_LABEL_CHART : TABLE_HEADER_LABEL_DETAILS)+'</span></h4>';
         gbcol += '</h5>';
@@ -3015,7 +3018,7 @@ gbcol += '</td></tr></table>';
 
 */
 
-gbcol += '<table id="resultsTable" class="table table-hover table-bordered table-striped table-sm mt-sm mb-0" width="100%">';
+gbcol += '<table id="resultsTable" class="table table-hover table-striped table-sm mt-sm m-0" width="100%" style="border:0px solid transparent; border-right:0px solid transparent;">';
 gbcol += '<thead>';
 gbcol += '<tr>';
 gbcol += '<th>';
@@ -3164,7 +3167,7 @@ gbcol += '<nav id="recordNavBar" class="navbar navbar-expand-lg navbar-light bg-
         gbcol += '<a id="ggg" class="nav-link" data-target="#">Edit</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Interact</a>';
+        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Connections</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe( $(undefined, \'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
@@ -3340,7 +3343,7 @@ gbcol += '<nav id="recordNavBar" class="navbar navbar-expand-lg navbar-light bg-
         gbcol += '<a id="ggg" class="nav-link" data-target="#">Edit</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Interact</a>';
+        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Links</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe( $(undefined, \'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
@@ -7612,13 +7615,16 @@ content += '</section>';
       var isMovie = false;
       var isMusic = false;
       var isAlbum = false;
+      var wikiPage;
       var name;
       var title;
       var headerAdded = false;
       var hasClass = false;
-      var hasImage = false;
+      //var hasImage = false;
       var isOddClass = false;
       var img;
+
+      var rows = '';
       $('rdf\\:Description', xml).each(function(i){
         var subject = $(this).attr('rdf:about');
         var subLabel = subject;
@@ -7638,7 +7644,8 @@ content += '</section>';
           var isRole = objectIRI == uri; //propLabel.trim().toLowerCase().endsWith('of') || 
 
           var proplink = $.createElement('a');
-          proplink.attr('href', $(this).prop('nodeName'));
+          proplink.attr('href', namespaces[qname]+fragId);
+          setTitleOnElement(proplink, namespaces[qname]+fragId);
           if(propLabel == 'rdf:type'){
             if(categoryBadges.length > 0) categoryBadges += '&nbsp;';//;'<strong class="text-dark">&middot;</strong>';
 
@@ -7659,11 +7666,13 @@ content += '</section>';
             else if(objectIRI == 'http://dbpedia.org/ontology/MusicalWork')  isMusic = true;
             else if(objectIRI == 'http://www.wikidata.org/entity/Q482994')  isMusic = true;
             else if(objectIRI == 'http://dbpedia.org/class/yago/Album106591815')  {isMusic = true; isAlbum=true;}
+
+
           }
           if((namespaces[qname]+fragId) == 'http://www.w3.org/2000/01/rdf-schema#label' && !isRole) uriLabel = processLabel(  deSanitizeLabel(objectValue)).replace(/\b\w/g, function(l){ return l.toUpperCase() }) ;
           if((namespaces[qname]+fragId) == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' && objectIRI == 'http://www.w3.org/2002/07/owl#Class') hasClass = true;
           if((namespaces[qname]+fragId) == 'http://xmlns.com/foaf/0.1/depiction' ) { //|| (namespaces[qname]+fragId) == 'http://dbpedia.org/property/logo'
-            hasImage = true;
+            //hasImage = true;
             img = '<div class="pull-right"><img onclick="javascript:linkOut(\''+objectIRI+'\');" style="cursor:pointer;width:200px; margin-left:.55em;" class="class="rounded img-thumbnail" src="'+objectIRI+'"/></div>';
           }
           if(!desc && propLabel.endsWith(':comment')) desc = objectValue;
@@ -7678,6 +7687,11 @@ content += '</section>';
             else actions += '&nbsp;';
             actions += '<i style="cursor:pointer" '+buildTitle('View on Amazon')+' onclick="javascript:linkOut(\'https://www.amazon.com/s?i=stripbooks&rh=p_66:'+objectValue.replaceAll('-', '')+'\')" class="fa fa-amazon fa-lg"></i>';
           }
+
+
+          if((namespaces[qname]+fragId) == 'http://www.w3.org/ns/prov#wasDerivedFrom'.toLowerCase())  wikiPage = (!objectValue) ? objectIRI : objectValue;
+          if((namespaces[qname]+fragId) == 'http://www.w3.org/ns/prov#hadPrimarySource'.toLowerCase())  wikiPage = (!objectValue) ? objectIRI : objectValue;
+
           //if(objectIRI == uri && !propLabel.trim().toLowerCase().endsWith('of')) propLabel += ' of';
           if(propLabel == 'RDF:TYPE') propLabel = 'category';
           proplink.css('color', '#495057');
@@ -7769,6 +7783,14 @@ content += '</section>';
         actions += '<i style="cursor:pointer" '+buildTitle('View in iTunes')+' onclick="javascript:linkOut(\'https://linkmaker.itunes.apple.com/en-us?term='+mtitle.replace('\'', '%27')+albumStr+'\')" class="fa fa-apple fa-lg"></i>';        
       }
 
+      var tools;
+      if(wikiPage){
+        if(!tools) tools = '';
+        else tools += '&nbsp;';
+        //tools += '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer"  style="cursor:pointer" '+buildTitle('View in Wikipedia')+' onclick="javascript:linkOut(\''+wikiPage+'\')" class="fa fa-wikipedia-w fa-lg"></i>';        
+        $('#angular_recordViewer').attr('src', wikiPage);
+      }
+
 
       uriLabel = '';
       for(i =0; i < uriLabalArray.length; i++){
@@ -7776,11 +7798,13 @@ content += '</section>';
       }
       uriLabel = uriLabel.trim();
 
-      $('#angular_recordViewer').append('<h3 onclick="javascript:linkOut();" '+buildTitle('Visit ' + sanitizeLabel(uri))+' style="cursor:pointer;padding-top:1em; padding-left:.55rem; padding-right:.55rem;">'+uriLabel+'</h3>'+ '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');//((body.children().length <= 0 && filterRecordViewFields)?'<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = false; describe(\''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-info"></i>':''));
-      if(hasImage){
-        desc = img + desc;
+      $('#angular_recordViewer').append('<h3 onclick="javascript:linkOut(\''+uri+'\');" '+buildTitle('Visit ' + sanitizeLabel(uri))+' style="cursor:pointer;padding-top:1em; padding-left:.55rem; padding-right:.55rem;">'+uriLabel+'</h3>'+(tools?tools:'')+ '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');//((body.children().length <= 0 && filterRecordViewFields)?'<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = false; describe(\''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-info"></i>':''));
+      if(desc) {
+        $('#angular_recordViewer').append('<div style="padding-left:.55rem; padding-right:.55rem; ">'+(img ? img + desc : desc)+'</div>');
       }
-      if(desc) $('#angular_recordViewer').append('<div style="padding-left:.55rem; padding-right:.55rem; ">'+desc+'</div>');
+      else if(img){
+        $('#angular_recordViewer').append('<div style="padding-left:.55rem; padding-right:.55rem; ">'+img+'</div>');
+      }
 
       if(long && lat){
         if(!actions) actions = '';
@@ -7795,14 +7819,38 @@ content += '</section>';
           content += $('#angular_recordViewer').append('<legend class="m-2 text-left text-dark">Categories</legend><div style="padding-left:.55rem; padding-right:.55rem; " >'+categoryBadges+'</div>');
       }
 
-
+ 
 
       table.append(body);
       $('#angular_recordViewer').removeClass('embed-responsive-1by1');
       $('#angular_recordViewer').append('<p/>');
       $('#angular_recordViewer').append('<p/>');
-      $('#angular_recordViewer').append(table);
-      if(hasClass) $('#angular_recordViewer').append('<div class="form-actions"><div class="text-center"><button _ngcontent-c7="" class="btn btn-info " role="button">New '+buttonLabel+'</button>&nbsp;<button _ngcontent-c7="" class="btn btn-inverse " role="button"> New Subclass </button></div></div>');
+      $('#angular_recordViewer').append('<div class="clearfix"><ul class="nav nav-tabs float-left" id="infoTabButton" role="tablist"> <li class="nav-item"> <a aria-controls="info" aria-expanded="true" class="nav-link active" data-toggle="tab" href="#info" id="info-tab" role="tab">Info</a></li><li class="nav-item"><a aria-controls="tools" aria-expanded="false" class="nav-link" data-toggle="tab" href="#tools" id="tools-tab" role="tab">Tools</a></li></ul></div>');
+      var d = $.createElement('div');
+d.addClass('tab-content');
+d.attr('id', 'infoTab');
+//.append('<div class="tab-content" id="infoTab">');
+var d2 = $.createElement('div');
+d2.attr('aria-expanded', 'true');
+d2.attr('aria-labelledby', 'info-tab');
+d2.addClass('tab-pane');
+d2.addClass('active');
+d2.addClass('in');
+d2.addClass('clearfix');
+d2.css('padding-top', '1em');
+d2.css('padding-left', '0px');
+d2.css('padding-right', '0px');
+d2.attr('id', 'info');
+d2.attr('role', 'tabpanel');
+//      var d2 = $('#angular_recordViewer').append('<div aria-expanded="true" aria-labelledby="info-tab" class="tab-pane active in clearfix" style="padding-top:0px" id="info" role="tabpanel">');
+      //$('#angular_recordViewer').append('<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');
+      d2.append(table);
+      if(hasClass) d2.append('<div class="form-actions"><div class="text-center"><button _ngcontent-c7="" class="btn btn-info " role="button">New '+buttonLabel+'</button>&nbsp;<button _ngcontent-c7="" class="btn btn-inverse " role="button"> New Subclass </button></div></div>');
+d.append(d2);
+//      $('#angular_recordViewer').append('</div></div>');
+      $('#angular_recordViewer').append(d);
+
+      //$('#angular_recordViewer').append(tabs);
       //if(!$('#angular_recordViewer').hasClass('embed-responsive-1by1')) $('#angular_recordViewer').addClass('embed-responsive-1by1');
     }
 $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
@@ -8381,7 +8429,7 @@ function describe(id, src, isGGGRecord){
 }
 
 function linkOut(src){
-    if(! src ) src = $('#angular_recordViewer').attr('iri');
+    if(! src ) src = $('#angular_recordViewer').attr('src');
     if(!src || src.length <= 0) return;
     var win = window.open(deSanitizeLabel(src), twin, 'width="'+window.outerWidth+'" height="'+window.outerHeight+'"');
     //win.blur();
@@ -8871,6 +8919,7 @@ if(false){
     }
 
     function setTitle(id, title, placement){
+      if(!placement) placement = 'top';
       $('#'+id).attr('title', title);
       if( !$('#'+id).attr('data-delay')  ){
         $('#'+id).attr('data-delay', '{ "show": "'+tooltipShowDelay+'", "hide": "'+tooltipHideDelay+'" }');
@@ -8880,6 +8929,19 @@ if(false){
         $('#'+id).removeAttr('data-original-title');
       //$('#'+id).tooltip();
     }
+
+    function setTitleOnElement(ele, title, placement){
+      if(!placement) placement = 'top';
+      ele.attr('title', title);
+      if( !ele.attr('data-delay')  ){
+        ele.attr('data-delay', '{ "show": "'+tooltipShowDelay+'", "hide": "'+tooltipHideDelay+'" }');
+        ele.attr('data-toggle', 'tooltip');
+        ele.attr('data-placement', placement);
+      }
+      ele.removeAttr('data-original-title');
+      //$('#'+id).tooltip();
+    }
+
 
     function setNavType(type){
       if(type) nav_type = type;
