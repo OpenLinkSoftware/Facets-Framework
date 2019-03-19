@@ -441,6 +441,7 @@ function fct_query(q, viewType, opt){
   q = fct_removeVariableData(q);
   var qstr = q.prop('outerHTML');
   var id = (qstr) ? (service_fct+qstr).hashCode() : 0;
+  q.attr('qid', id);
   setMutex(id, viewType);
   ha.push(id);
   q.attr('timeout', fct_queryTimeout); // add all neccessary variable data back to the query
@@ -496,7 +497,7 @@ function fct_query(q, viewType, opt){
   }
   var req = $.ajax({
       url: service_fct,
-      headers: {'X-VIOS-Type': 'fct', 'X-VIOS-QID': createId()},
+      headers: {'X-VIOS-Type': 'fct', 'X-VIOS-QID': id, 'X-VIOS-Dataspace-Label': getDataspaceLabel()},
       data: $(q).prop('outerHTML'), 
       type: 'POST',
       contentType: "text/xml",
@@ -656,7 +657,7 @@ function fct_sparql(sparql, opt){
   //var qstr = q.prop('outerHTML');
   var sparqlSvr = (opt.srv) ? opt.srv : service_sparql;
   var id = sparql ? (sparqlSvr + sparql).hashCode() : 0;
-  setMutex(id, opt.tar, true);
+  setMutex(id, opt.tar, opt.tar!='record');
   //q.attr('timeout', fct_queryTimeout);
   var resp;
   if(fct_isCache){
@@ -702,8 +703,9 @@ function fct_sparql(sparql, opt){
                 fct_handleSparqlSubject(resp, opt);
               }
               else if(opt.tar == 'record'){
-                if(getMutex(opt.tar, true) != id){
-                  //return;
+                if(getMutex(opt.tar, false) != id){
+                  $('#'+opt.srcId).removeClass('loading');
+                  return;
                 }
                 fct_handleSparqlDescribe(resp, opt);
               }
@@ -715,10 +717,11 @@ function fct_sparql(sparql, opt){
 
   var accept = 'application/sparql-results+xml';
   if(opt.tar == 'record') accept = 'application/rdf+xml';
+  var isMainQueryCount = opt && (opt.tar == 'showMeMenu' || opt.tar == 'groupByMenu');
   var req = $.ajax({
       url: sparqlSvr + "?query=" + encodeURIComponent(sparql),
       type: 'GET',
-      headers: {'Accept': accept, 'X-VIOS-Type': 'sparql', 'X-VIOS-QID': createId()},
+      headers: {'Accept': accept, 'X-VIOS-Type': 'sparql', 'X-VIOS-QID': (isMainQueryCount) ? getQuery().attr('qid') : id, 'X-VIOS-Dataspace-Label': getDataspaceLabel()},
       dataType: "text", // POI: can't do dataType: xml, since the service sometimes returns malformed XML
       beforeSend: function(jqXHR, settings) {
           jqXHR.url = settings.url;
@@ -757,10 +760,10 @@ function fct_sparql(sparql, opt){
                 fct_handleSparqlSubject(xml, opt);
               }
               else if(opt.tar == 'record'){
-                if(getMutex(opt.tar, true) != id){
-                  //return;
+                if(getMutex(opt.tar, false) != id){
+                  $('#'+opt.srcId).removeClass('loading');
                 }
-                fct_handleSparqlDescribe(xml, opt);
+                else fct_handleSparqlDescribe(xml, opt); // POI: be sure to cache the work
               }
             }
           //console.log('sparql results: ' + xml);
@@ -2170,6 +2173,8 @@ var GROUP_BY_NONE_VALUE = "GROUPBY-NONE";
 var GROUP_BY_TEXT_LABEL = "Text Matches";
 var GROUP_BY_TEXT_VALUE = "GROUPBY-TEXT";
 
+var DISCOVER_LABEL = 'Contents';
+
 var ID_SHOW_ME = "showMe";
 var ID_GROUP_BY = "groupBy";
 var ID_RECORD = "record";
@@ -2209,25 +2214,38 @@ var TABLE_HEADER_LABEL_TREE = 'Rollup Table';
 
 var preInitialized = false;
 
-var screenSz = screen.width;
-var SIZE_GROUP_BY = (screenSz < 1500) ? "3" : "2";
-var SIZE_SHOW_ME = (screenSz < 1500) ? "3" : "2";
-var SIZE_RECORD_VIEWER = (screenSz < 1500) ? "6" : "6";
 
-var SIZE_GROUP_BY_DETAIL_RESULTS = (screenSz < 1500) ? "9" : "5";
-var SIZE_SHOW_ME_DETAIL_RESULTS = (screenSz < 1500) ? "3" : "2";
-var SIZE_RECORD_VIEWER_DETAIL_RESULTS = (screenSz < 1500) ? "0" : "5";
+        function gcd (a, b) {
+            return (b == 0) ? a : gcd (b, a%b);
+        }
+
+
+// see here - https://stackoverflow.com/questions/1186414/whats-the-algorithm-to-calculate-aspect-ratio-i-need-an-output-like-43-169
+// and here - https://www.rapidtables.com/web/tools/screen-resolution.html
+        var r = gcd (screen.width, screen.height);
+        var aspect_width = screen.width / r;
+        var aspect_heigth = screen.height / r;
+
+var SIZE_MAX_SCREEN = 10;
+var screenSz = aspect_width;
+var SIZE_GROUP_BY = (screenSz < SIZE_MAX_SCREEN) ? "3" : "2";
+var SIZE_SHOW_ME = (screenSz < SIZE_MAX_SCREEN) ? "3" : "2";
+var SIZE_RECORD_VIEWER = (screenSz < SIZE_MAX_SCREEN) ? "6" : "6";
+
+var SIZE_GROUP_BY_DETAIL_RESULTS = (screenSz < SIZE_MAX_SCREEN) ? "9" : "5";
+var SIZE_SHOW_ME_DETAIL_RESULTS = (screenSz < SIZE_MAX_SCREEN) ? "3" : "2";
+var SIZE_RECORD_VIEWER_DETAIL_RESULTS = (screenSz < SIZE_MAX_SCREEN) ? "0" : "5";
 
 
 var groupByColumnWidth = SIZE_GROUP_BY;
 var showMeColumnWidth = SIZE_SHOW_ME;
 var recordViewerColumnWidth = SIZE_RECORD_VIEWER;
 
-var SIZE_RECORD_FORM = (screenSz < 1500) ? "6" : "6";
-var SIZE_LABEL = (screenSz < 1500) ? 22 : 30; // TODO: this constant is deprecated, using text-ellipsis now
-var SIZE_RESULT_SET = (screenSz < 1500) ? 15: 30;
-var SIZE_TABLE_RESULT_SET = (screenSz < 1500) ? 150: 75;
-var SIZE_MATRIX_RESULT_SET = (screenSz < 1500) ? 150: 75;
+var SIZE_RECORD_FORM = (screenSz < SIZE_MAX_SCREEN) ? "6" : "6";
+var SIZE_LABEL = (screenSz < SIZE_MAX_SCREEN) ? 22 : 30; // TODO: this constant is deprecated, using text-ellipsis now
+var SIZE_RESULT_SET = (screenSz < SIZE_MAX_SCREEN) ? 15: 30;
+var SIZE_TABLE_RESULT_SET = (screenSz < SIZE_MAX_SCREEN) ? 150: 75;
+var SIZE_MATRIX_RESULT_SET = (screenSz < SIZE_MAX_SCREEN) ? 150: 75;
 var SIZE_MIN_DIGITS = 7;
 var SIZE_MAX_DIGITS = 20;
 
@@ -2802,7 +2820,7 @@ gbcol += '<nav id="recordNavBar" class="navbar navbar-expand-lg navbar-light bg-
         gbcol += '<a id="ggg" class="nav-link" data-target="#">Edit</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Connections</a>';
+        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe( $(undefined, \'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
@@ -2964,7 +2982,7 @@ gbcol += '<div id="tabularResults" class="short-div hide"><section class="widget
 
 gbcol += '<header class="m-1" id="groupByTableHeader">';
         gbcol += '<h5>';
-          gbcol += '<h4><span id="tableCount" class="badge badge-info">0/0</span> '+GROUP_BY_NONE_LABEL+' - <span id="tableType" class="fw-semi-bold">'+((isChart()) ? TABLE_HEADER_LABEL_CHART : TABLE_HEADER_LABEL_DETAILS)+'</span></h4>';
+          gbcol += '<h4><span id="tableCount" class="badge badge-info">0/0</span> '+DISCOVER_LABEL+' - <span id="tableType" class="fw-semi-bold">'+((isChart()) ? TABLE_HEADER_LABEL_CHART : TABLE_HEADER_LABEL_DETAILS)+'</span></h4>';
         gbcol += '</h5>';
         gbcol += '<div class="widget-controls">';
           //gbcol += '<a href="#"><i class="glyphicon glyphicon-cog"></i></a>';
@@ -3167,7 +3185,7 @@ gbcol += '<nav id="recordNavBar" class="navbar navbar-expand-lg navbar-light bg-
         gbcol += '<a id="ggg" class="nav-link" data-target="#">Edit</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Connections</a>';
+        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe( $(undefined, \'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
@@ -3343,7 +3361,7 @@ gbcol += '<nav id="recordNavBar" class="navbar navbar-expand-lg navbar-light bg-
         gbcol += '<a id="ggg" class="nav-link" data-target="#">Edit</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Links</a>';
+        gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe( $(undefined, \'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
@@ -3483,9 +3501,9 @@ gbcol += '<div class="modal fade" id="helpModal" tabindex="-1" role="dialog" ari
       gbcol += '  </li><li>';
       gbcol += '  Use <i>&lt;</i>, <i>&gt;</i>, <i>left arrow</i>, and <i>right arrow</i> to page through list';
       gbcol += '  </li><li>';
-      gbcol += '  Use <i>K</i> or <i>L</i> keys to move up lists';
+      gbcol += '  Use <i>K</i> or <i>\'</i> (apostrophe) keys to move up lists';
       gbcol += '  </li><li>';
-      gbcol += '  Use <i>M</i> or <i>/</i> to move down lists';
+      gbcol += '  Use <i>M</i> or <i>/</i> keys to move down lists';
       gbcol += '  </li><li>';
       gbcol += '  Hold down <i>1</i> (number one) key, then click Field checkbox to prepend Field to filter collector';
       gbcol += '  </li><li>';
@@ -3750,6 +3768,7 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     addDataspace('demo.openlinksw.com','OpenLink Demo',false,true); // try to add OpenLink Demo
     addDataspace('linkeddata.uriburner.com','URIBurner',false,true); // try to add URI Burner
     addDataspace('data.vios.network','VIOS',false,true); // try to add VIOS
+    if(ds.length <= 0) selectDataspace('dbpedia.org', 'DBPedia', false, true);
 
     try{
       if(idx){
@@ -4376,6 +4395,8 @@ function addTab(fctId, tabCounter) {
 
     selectTab(tabCounter);
     $('[data-toggle="tooltip"]').tooltip();
+
+    //$(document).on('click touch', doCtrlMode);
 }
 
 
@@ -4840,7 +4861,10 @@ else {
 
 }
 
-document.onclick = doCtrlMode;
+$(document).ready(function() {
+  document.onclick = doCtrlMode;
+  document.ontouchstart = doCtrlMode;
+});
 
 function doCtrlMode(e){
   e = e || window.event;
