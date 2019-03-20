@@ -404,7 +404,7 @@ function getProxyEndpoint(url){
   url = url.replace('http://', 'http/');
   url = url.replace('https://', 'https/');
 //  return 'http://poc.vios.network/proxy/-start-'+url+'-end-';
-  return 'http://poc.vios.network/proxy/'+url;
+  return this_endpoint + '/proxy/'+url;
   //return url;
 }
 
@@ -1110,7 +1110,8 @@ function fct_handleSparqlResults(xml, opt) {
             return l.toUpperCase()
         });
         headerPrefix = (getMainFocus().children('property, property-of') && getMainFocus().children('property, property-of').length > 0 && $(getMainFocus().children('property, property-of')[0]).prop('nodeName').toLowerCase() == 'property-of' && !headerPrefix.toLowerCase().endsWith('of')) ? headerPrefix + ' Of' : headerPrefix;
-        $('#tableType').text(headerPrefix + ' ' + TABLE_HEADER_LABEL_CHART);
+        $('#tableType').text(TABLE_HEADER_LABEL_CHART);
+        $('#tableSubType').text(headerPrefix);
     } 
     else if(isRollup()){
         var headerPrefix = (getMainFocus().children('property, property-of') && getMainFocus().children('property, property-of').length > 0) ? $(getMainFocus().children('property, property-of')[0]).attr('label') : '';
@@ -1119,7 +1120,8 @@ function fct_handleSparqlResults(xml, opt) {
             return l.toUpperCase()
         });
         headerPrefix = (getMainFocus().children('property, property-of') && getMainFocus().children('property, property-of').length > 0 && $(getMainFocus().children('property, property-of')[0]).prop('nodeName').toLowerCase() == 'property-of' && !headerPrefix.toLowerCase().endsWith('of')) ? headerPrefix + ' Of' : headerPrefix;
-        $('#tableType').text(headerPrefix + ' ' + TABLE_HEADER_LABEL_TREE);
+        $('#tableType').text(TABLE_HEADER_LABEL_TREE);
+        $('#tableSubType').text(headerPrefix);
     }
     else {
         var headerPrefix = spaceCamelCase(getMainFocus().attr('label'));
@@ -1129,7 +1131,8 @@ function fct_handleSparqlResults(xml, opt) {
             return l.toUpperCase()
         });
         headerPrefix = (getMainFocus().prop('nodeName').toLowerCase() == 'property-of' && !headerPrefix.toLowerCase().endsWith('of')) ? headerPrefix + ' Of' : headerPrefix;       
-        $('#tableType').text(headerPrefix + ' ' + TABLE_HEADER_LABEL_DETAILS);
+        $('#tableType').text(TABLE_HEADER_LABEL_DETAILS);
+        $('#tableSubType').text(headerPrefix);
     }
 
     //tableResultsCt = $("result", results).length;
@@ -1303,7 +1306,7 @@ function fct_handleSparqlResults(xml, opt) {
 
     });
     if (!isChart()) $('#resultsTable > tbody').append(rows);
-    if (!isChart()) $('#resultsTable').removeClass('table-bordered');
+   if (!isChart()) $('#resultsTable').removeClass('table-bordered');
 
 
 
@@ -1313,7 +1316,7 @@ function fct_handleSparqlResults(xml, opt) {
         $('#resultsTable > tbody').empty();
         //$('#resultsTableFocus > thead').empty();
         //$('#resultsTableFocus > tbody').empty();
-        $('#resultsTable').addClass('table-bordered');
+        //$('#resultsTable').addClass('table-bordered');
         if (isVerticalChartHeaders()) $('#resultsTable').addClass('table-header-rotated');
         //$('#resultsTableFocus').addClass('table-header-rotated');
 
@@ -1387,7 +1390,7 @@ function fct_handleSparqlResults(xml, opt) {
                     //sanitizedLabel = sanitizeLabel(sanitizedLabel);
                 }
 
-                var cellVal = (matrixMap[matrixKeys[i].text()] && matrixMap[matrixKeys[i].text()].indexOfText(value) >= 0) ? '<span class="glyphicon glyphicon-ok"></span>' : ''; // la la-check glyphicon glyphicon-ok
+                var cellVal = (matrixMap[matrixKeys[i].text()] && matrixMap[matrixKeys[i].text()].indexOfText(value) >= 0) ? '<span class="la la-check"></span>' : ''; // la la-check glyphicon glyphicon-ok
                 var noLeftBorder = '';
                 if (j == 0) noLeftBorder = 'border-left:0px solid transparent; ';
                 r1.value += '<td style="' + noLeftBorder + 'vertical-align:middle;text-align:center;cursor:pointer;" onclick="javascript:setValue(\'mtxcolb-' + i + '-' + j + '\', \'' + sanitizeLabel(v) + '\', \'' + sanitizeLabel(labelKey) + '\', \'' + d + '\', \'\')">' + cellVal + '</td>';
@@ -2200,7 +2203,7 @@ var TAG_GRAPH = 'g';
 
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://myopenlink.net/DAV/home/sdmonroe/poc_draft.html";
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://poc.vios.network";
-var this_endpoint = 'http://poc.vios.network';
+var this_endpoint = 'http://alpha.vios.network';
 
 var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qPage, qshowMePage, qTimeout, qNavType, qSubjectBadges, qVerticalChartHeaders, qViewType, qIsChart, qIsRollup, qFilterRecordViewFields;
 
@@ -2210,7 +2213,7 @@ var icon_expand = "http://myopenlink.net/DAV/home/sdmonroe/img/expand.png";
 
 var TABLE_HEADER_LABEL_CHART = 'Chart';
 var TABLE_HEADER_LABEL_DETAILS = 'Details';
-var TABLE_HEADER_LABEL_TREE = 'Rollup Table';
+var TABLE_HEADER_LABEL_TREE = 'Rollup';
 
 var preInitialized = false;
 
@@ -2950,8 +2953,8 @@ gbcol += '<div class="row"><span style="padding-right:3em">thisIsAFacet</span><b
                         gbcol += '</section></div>';
 
 gbcol += '<div id="recordsListWidgetContainer" class="short-div"><section class="widget" widget>';
-gbcol += '<header id="groupByHeader" style="cursor:pointer;">';
-        gbcol += '<h4><span id="groupByCount" class="badge badge-info">0/0</span> '+GROUP_BY_NONE_LABEL+'</h4>';
+gbcol += '<header id="groupByHeader" style="cursor:pointer;" >';
+        gbcol += '<h4 id="contentsListHeader" onclick="javascript: var p = getMainFocus().children(\'property, property-of\'); if(p && p.length > 0){doGroup(p.attr(\'iri\'), p.attr(\'label\'), p.prop(\'nodeName\').toLowerCase() == \'property-of\');}else {}"><span id="groupByCount" class="badge badge-info">0/0</span> '+GROUP_BY_NONE_LABEL+'</h4>';
         gbcol += '<div class="widget-controls">';
           gbcol += '<a data-target="#" class="hide " '+buildTitle('')+' id="leftButton" onclick="javascript:pageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
           gbcol += '<a data-target="#" class="hide " '+buildTitle('')+' id="rightButton" onclick="javascript:pageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
@@ -2982,13 +2985,15 @@ gbcol += '<div id="tabularResults" class="short-div hide"><section class="widget
 
 gbcol += '<header class="m-1" id="groupByTableHeader">';
         gbcol += '<h5>';
-          gbcol += '<h4><span id="tableCount" class="badge badge-info">0/0</span> '+DISCOVER_LABEL+' - <span id="tableType" class="fw-semi-bold">'+((isChart()) ? TABLE_HEADER_LABEL_CHART : TABLE_HEADER_LABEL_DETAILS)+'</span></h4>';
+          gbcol += '<h4><span id="tableCount" class="badge badge-info">0/0</span> <span id="tableType">'+DISCOVER_LABEL+'</span> - <span id="tableSubType" class="fw-semi-bold">'+((isChart()) ? TABLE_HEADER_LABEL_CHART : TABLE_HEADER_LABEL_DETAILS)+'</span></h4>';
         gbcol += '</h5>';
         gbcol += '<div class="widget-controls">';
           //gbcol += '<a href="#"><i class="glyphicon glyphicon-cog"></i></a>';
           gbcol += '<a data-target="#" onclick="setRollup(false); setChart(false); doQuery(getQueryText());" class="text-secondary" id="tableButton"><i class="glyphicon glyphicon-th-list"></i></a>';
           gbcol += '<a data-target="#" onclick="setRollup(false); setChart(true); doQuery(getQueryText());" class="text-secondary" id="chartTableButton"><i class="fa fa-check"></i></a>';
           gbcol += '<a data-target="#" onclick="setRollup(true); setChart(false); selectMenuItem(\'showMeMenu\', VIEW_TYPE_CLASSES);" class="text-secondary" id="rollupTableButton"><i class="fa fa-sitemap"></i></a>';
+          gbcol += '<a data-target="#" onclick="" class="text-secondary" id="dashboardButton"><i class="glyphicon glyphicon-dashboard"></i></a>';
+
           gbcol += '<a data-target="#" disabled="true" class="disabled" id="leftTableButton" onclick="javascript:pageTableLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
           gbcol += '<a data-target="#" disabled="true" class="disabled" id="rightTableButton" onclick="javascript:pageTableRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
           gbcol += '<a data-target="#" data-widgster="close" onclick="undoTable()" class="text-secondary"><i class="glyphicon glyphicon-remove"></i></a>';
@@ -3036,7 +3041,7 @@ gbcol += '</td></tr></table>';
 
 */
 
-gbcol += '<table id="resultsTable" class="table table-hover table-striped table-sm mt-sm m-0" width="100%" style="border:0px solid transparent; border-right:0px solid transparent;">';
+gbcol += '<table id="resultsTable" class=" table table-hover table-striped table-sm mt-sm m-0" width="100%" style="border:0px solid transparent; border-right:0px solid transparent;">';
 gbcol += '<thead>';
 gbcol += '<tr>';
 gbcol += '<th>';
@@ -3054,65 +3059,10 @@ gbcol += '</tbody>';
 gbcol += '</table>';
 
 
-gbcol += '<br/>';
-
-
-
-gbcol += '<div class="clearfix" style="padding-bottom:2em; padding-top:2em;">';
-          gbcol += '<div class="pull-right">';
-            gbcol += '<button onclick="toggleChartHeaders();" class="btn btn-default btn-sm">';
-              gbcol += 'Toggle Headers';
-            gbcol += '</button>&nbsp;';
-            gbcol += '<button onclick="undoTable(); buildForm()" class="btn btn-default btn-sm">';
-              gbcol += 'Compose ...';
-            gbcol += '</button>&nbsp;';
-            gbcol += '<div class="btn-group" data-dropdown="">';
-              gbcol += '<button class="btn btn-sm btn-inverse dropdown-toggle" data-toggle="dropdown" aria-expanded="false">';
-                gbcol += '&nbsp; Export... &nbsp;';
-                gbcol += '<i class="fa fa-caret-down"></i>';
-              gbcol += '</button>';
-              gbcol += '<ul id="tableSaveOptions" class="dropdown-menu dropdown-menu-right" x-placement="top-end" style="position: absolute; transform: translate3d(-97px, -145px, 0px); top: 0px; left: 0px; will-change: transform;">';
-                gbcol += '<li><a class="dropdown-item" onclick="exportTableToCSV(\'results.csv\')">CSV</a></li>';
-                gbcol += '<li><a class="dropdown-item" href="#">XML</a></li>';
-                gbcol += '<li><a class="dropdown-item" href="#">JSON</a></li>';
-                gbcol += '<li class="dropdown-divider"></li>';
-                gbcol += '<li><a class="dropdown-item" href="#">Save to Data Space</a></li>';
-              gbcol += '</ul>';
-            gbcol += '</div>';
-          gbcol += '</div>';
-          gbcol += '<p id="resultsReport">query time: <span id="reportQueryTime"></span>, timeout: <span id="reportQueryTimeout"></span>, complete: <span id="reportQueryComplete"></span></p>';
-        gbcol += '</div>';
-
-            gbcol += '</div>';
-
-
-
-gbcol += '</section></div>';
-
 
 
 
 // CHARTS
-
-
-
-gbcol += '<div id="chartsResults" class="short-div hide"><section class="widget" widget>';
-
-gbcol += '<header id="chartsHeader">';
-        gbcol += '<h5>';
-          gbcol += '<h4><span id="chartsCount" class="badge badge-info">0/0</span> '+GROUP_BY_NONE_LABEL+' - <span id="tableType" class="fw-semi-bold">'+((isChart()) ? TABLE_HEADER_LABEL_CHART : TABLE_HEADER_LABEL_DETAILS)+'</span></h4>';
-        gbcol += '</h5>';
-        gbcol += '<div class="widget-controls">';
-          //gbcol += '<a href="#"><i class="glyphicon glyphicon-cog"></i></a>';
-          gbcol += '<a data-target="#" onclick="setRollup(false); setChart(false); doQuery(getQueryText());" class="text-secondary" id="tableButton"><i class="glyphicon glyphicon-th-list"></i></a>';
-          gbcol += '<a data-target="#" onclick="setRollup(false); setChart(true); doQuery(getQueryText());" class="text-secondary" id="chartTableButton"><i class="fa fa-check"></i></a>';
-          gbcol += '<a data-target="#" onclick="setRollup(true); setChart(false); selectMenuItem(\'showMeMenu\', VIEW_TYPE_CLASSES);" class="text-secondary" id="rollupTableButton"><i class="fa fa-sitemap"></i></a>';
-          gbcol += '<a data-target="#" disabled="true" class="disabled" id="leftTableButton" onclick="javascript:pageTableLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
-          gbcol += '<a data-target="#" disabled="true" class="disabled" id="rightTableButton" onclick="javascript:pageTableRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
-          gbcol += '<a data-target="#" data-widgster="close" onclick="undoTable()" class="text-secondary"><i class="glyphicon glyphicon-remove"></i></a>';
-        gbcol += '</div>';
-      gbcol += '</header>';
-        gbcol += '<div class="widget-body" >';
 
 
 gbcol += '<br/>';
@@ -4460,6 +4410,7 @@ function activate(){
       //widget.append(tabPanel);
       tabs.append( widget );
 
+
 }
 
   function doTable(){
@@ -4511,12 +4462,12 @@ function exportTableToCSV(filename) {
     downloadDataFile(csv.join("\n"), filename.replace('.cvs', + '_' + createId() + '.cvs'));
 }
 
-function downloadDataFile(csv, filename) {
+function downloadDataFile(csv, filename, fileType) {
     var csvFile;
     var downloadLink;
 
     // CSV file
-    csvFile = new Blob([csv], {type: "text/csv"});
+    csvFile = new Blob([csv], {type: ((fileType) ? fileType : "text/csv")});
 
     // Download link
     downloadLink = document.createElement("a");
@@ -6414,19 +6365,20 @@ function expand(propVal, datatype, lang, optsStr){
     //takeFocus(prop.parent(), q);
     //prop.attr('iri', groupByIRI);
 
+/*
     if(isReverse) prop = q.find('.'+getFocus(q).attr('class') + ' > property-of[iri="' +propIRI+ '"]');
     else {
       prop = q.find('.'+getFocus(q).attr('class') + ' > property[iri="' +propIRI+ '"]');
       if(!prop || prop.length == 0){
-        prop = $.createElement('property');
-        //prop.attr('class', id);
-        prop.attr('iri', propIRI);
-        prop.attr('label', 'test');
         //prop.attr('isGroupBy', 'true');
-        getFocus(q).append(prop);
+        //getFocus(q).append(prop);
       }
     }
-
+*/
+        prop = $.createElement(isReverse ? 'property-of' : 'property');
+        //prop.attr('class', id);
+        prop.attr('iri', propIRI);
+        prop.attr('label', 'groupby');
 
 
     var val = $.createElement('value');
@@ -6436,7 +6388,7 @@ function expand(propVal, datatype, lang, optsStr){
     //val.attr('op', '=');
     //val.attr('same_as', 'yes');
     prop.append(val);
-    //getFocus(q).append(prop);
+    getFocus(q).append(prop);
 
     $('#'+parentId+'').addClass('loading');
     //takeFocus(q, q);
@@ -7427,8 +7379,10 @@ var rowId = opts.parentId;
 
 var showRecordRoles = false;
 var filterRecordViewFields = true;
+var recordRDF;
 
 function loadDescribeResults(xml, opt){
+  recordRDF = xml;
       $('#angular_recordViewer').empty();
 
     if(showIDN){
@@ -7647,6 +7601,10 @@ content += '</section>';
       //var hasImage = false;
       var isOddClass = false;
       var img;
+      var isFastFood = false;
+
+      var phone;
+      var homepage;
 
       var rows = '';
       $('rdf\\:Description', xml).each(function(i){
@@ -7691,6 +7649,8 @@ content += '</section>';
             else if(objectIRI == 'http://www.wikidata.org/entity/Q482994')  isMusic = true;
             else if(objectIRI == 'http://dbpedia.org/class/yago/Album106591815')  {isMusic = true; isAlbum=true;}
 
+            else if(objectIRI == 'http://linkedgeodata.org/ontology/FastFood')  {isFastFood = true;}
+
 
           }
           if((namespaces[qname]+fragId) == 'http://www.w3.org/2000/01/rdf-schema#label' && !isRole) uriLabel = processLabel(  deSanitizeLabel(objectValue)).replace(/\b\w/g, function(l){ return l.toUpperCase() }) ;
@@ -7715,6 +7675,10 @@ content += '</section>';
 
           if((namespaces[qname]+fragId) == 'http://www.w3.org/ns/prov#wasDerivedFrom'.toLowerCase())  wikiPage = (!objectValue) ? objectIRI : objectValue;
           if((namespaces[qname]+fragId) == 'http://www.w3.org/ns/prov#hadPrimarySource'.toLowerCase())  wikiPage = (!objectValue) ? objectIRI : objectValue;
+
+          if((namespaces[qname]+fragId).toLowerCase() == 'http://xmlns.com/foaf/0.1/phone'.toLowerCase())  phone = objectValue;
+          if((namespaces[qname]+fragId).toLowerCase() == 'http://xmlns.com/foaf/0.1/homepage'.toLowerCase())  homepage = (!objectValue) ? objectIRI : objectValue;
+
 
           //if(objectIRI == uri && !propLabel.trim().toLowerCase().endsWith('of')) propLabel += ' of';
           if(propLabel == 'RDF:TYPE') propLabel = 'category';
@@ -7836,6 +7800,8 @@ content += '</section>';
         actions += '<i style="cursor:pointer" '+buildTitle('View on Google Maps')+' onclick="javascript:linkOut(\'https://www.google.com/maps/search/?api=1&query='+lat+','+long+'\')" class="fa fa-map-marker fa-lg"></i>';
       }
 
+
+
       if(actions && actions.length > 0){
           content += $('#angular_recordViewer').append('<legend class="m-2 text-left text-dark">Services</legend><div style="padding-left:.55rem; padding-right:.55rem; " >'+actions+'</div>');
       }
@@ -7849,7 +7815,15 @@ content += '</section>';
       $('#angular_recordViewer').removeClass('embed-responsive-1by1');
       $('#angular_recordViewer').append('<p/>');
       $('#angular_recordViewer').append('<p/>');
-      $('#angular_recordViewer').append('<div class="clearfix"><ul class="nav nav-tabs float-left" id="infoTabButton" role="tablist"> <li class="nav-item"> <a aria-controls="info" aria-expanded="true" class="nav-link active" data-toggle="tab" href="#info" id="info-tab" role="tab">Info</a></li><li class="nav-item"><a aria-controls="tools" aria-expanded="false" class="nav-link" data-toggle="tab" href="#tools" id="tools-tab" role="tab">Tools</a></li></ul></div>');
+      var tabs = '<div class="clearfix"><ul class="nav nav-tabs float-left" id="infoTabButton" role="tablist"> ';
+      if(isFastFood){
+        tabs += '<li class="nav-item"><a aria-controls="menu" aria-expanded="false" class="nav-link" data-toggle="tab" href="#menu" id="menu-tab" role="tab">Menu</a></li>';
+        tabs += '<li class="nav-item"><a aria-controls="review" aria-expanded="false" class="nav-link" data-toggle="tab" href="#review" id="review-tab" role="tab">Reviews</a></li>';
+      }
+      tabs += '<li class="nav-item"> <a aria-controls="info" aria-expanded="true" class="nav-link active" data-toggle="tab" href="#info" id="info-tab" role="tab">Info</a></li>';
+      tabs += '<li class="nav-item"><a aria-controls="tools" aria-expanded="false" class="nav-link" data-toggle="tab" href="#tools" id="tools-tab" role="tab">Options</a></li>';
+      tabs += '</ul></div>';
+      $('#angular_recordViewer').append(tabs);
       var d = $.createElement('div');
 d.addClass('tab-content');
 d.attr('id', 'infoTab');
@@ -7869,8 +7843,163 @@ d2.attr('role', 'tabpanel');
 //      var d2 = $('#angular_recordViewer').append('<div aria-expanded="true" aria-labelledby="info-tab" class="tab-pane active in clearfix" style="padding-top:0px" id="info" role="tabpanel">');
       //$('#angular_recordViewer').append('<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');
       d2.append(table);
+  d.append(d2);
+var d3 = $.createElement('div');
+//d3.attr('aria-expanded', 'true');
+d3.attr('aria-labelledby', 'tools-tab');
+d3.addClass('tab-pane');
+//d3.addClass('active');
+//d3.addClass('in');
+//d3.addClass('clearfix');
+d3.css('padding-top', '1em');
+d3.css('padding-left', '0px');
+d3.css('padding-right', '0px');
+d3.attr('id', 'tools');
+d3.attr('role', 'tabpanel');
+//d3.css('background-color', '#f9fbfd');
+
+
+
+var accordion = '';
+accordion += '<accordion class="mb-lg show panel-group" id="accordion276" role="tablist" style="display: block" ng-reflect-close-others="true" aria-multiselectable="true">';
+accordion += '<accordion-group class="panel" style="display: block">';
+accordion += '<div class="panel card panel-default" ng-reflect-klass="panel card" ng-reflect-ng-class="panel-default">';
+accordion += '<div class="panel-heading card-header" role="tab"><div class="panel-title">';
+accordion += '<div class="accordion-toggle" role="button" aria-expanded="false">';
+accordion += '<!--bindings={}-->';
+accordion += '<div accordion-heading=""> General <i class="fa fa-angle-down float-right"></i>';
+accordion += '</div>';
+accordion += '</div>';
+accordion += '</div>';
+accordion += '</div>';
+accordion += '<div class="panel-collapse collapse" role="tabpanel" ng-reflect-collapse="true" aria-expanded="false" aria-hidden="true" style="display: none; overflow: visible; height: auto;">';
+accordion += '<div class="panel-body card-block card-body"> Get base styles and flexible support for collapsible components like accordions and navigation. Using the collapse plugin, we built a simple accordion by extending the panel component. </div>';
+
+
+
+
+var recordToolBar = '';
+recordToolBar += '<div class="clearfix">';
+//recordToolBar += '<div class="btn-toolbar">';
+var sz = lengthInUtf8Bytes(recordRDF);
+recordToolBar += '<button _ngcontent-c9="" class="btn btn-inverse m-1 mb-xs" role="button" '+buildTitle(getBytesDenomination(sz)+' ' + getBytesDenominationUnit(sz))+' onclick="javascript:downloadRecordRDF();">';
+recordToolBar += 'Download Record';
+recordToolBar += '&nbsp;&nbsp;<i class="fa fa-file-code-o"></i>';
+recordToolBar += '</button>';
+if(isFastFood){
+  if(phone){
+
+/*    
+    recordToolBar += '<button _ngcontent-c9="" class="btn btn-primary m-1 mb-xs" role="button" href="javascript:downloadRecordRDF();">';
+    recordToolBar += 'Call for takeout';
+    recordToolBar += '&nbsp;&nbsp;<i class="fa fa-phone"></i>';
+    recordToolBar += '</button>';
+*/
+    recordToolBar += '<a class="btn btn-primary" href="tel:'+phone+'">';
+    recordToolBar += '  Call for takeout  ';
+    recordToolBar += '<i class="fa fa-phone"></i>';
+    recordToolBar += '</a>';
+  }
+  if(homepage){
+    /*
+    recordToolBar += '<button _ngcontent-c9="" class="btn btn-primary m-1 mb-xs" role="button" onclick="javascript:downloadRecordRDF();">';
+    recordToolBar += 'Order online';
+    recordToolBar += '&nbsp;&nbsp;<i class="fa fa-cutlery"></i>';
+    recordToolBar += '</button>';
+    */
+    if(phone) recordToolBar += '&nbsp';
+    recordToolBar += '<a class="btn btn-primary" href="'+homepage+'">';
+    recordToolBar += '  Order online  ';
+    recordToolBar += '<i class="fa fa-cutlery"></i>';
+    recordToolBar += '</a>';
+  }
+}
+//recordToolBar += '<a class="btn btn-default" href="#">&nbsp;&nbsp;Dance?&nbsp;&nbsp;</a>';
+//recordToolBar += '</div>';
+recordToolBar += '</div>';
+
+
+accordion += '</div>';
+accordion += '</div>';
+accordion += '</accordion-group>';
+accordion += '<accordion-group class="panel" style="display: block">';
+accordion += '<div class="panel card panel-default" ng-reflect-klass="panel card" ng-reflect-ng-class="panel-default"><div class="panel-heading card-header" role="tab">';
+accordion += '<div class="panel-title">';
+accordion += '<div class="accordion-toggle" role="button" aria-expanded="false">';
+accordion += '<!--bindings={}--><div accordion-heading=""> Order Food <i class="fa fa-angle-down float-right"></i>';
+accordion += '</div>';
+accordion += '</div>';
+accordion += '</div>';
+accordion += '</div>';
+accordion += '<div class="panel-collapse collapse" role="tabpanel" ng-reflect-collapse="true" aria-expanded="false" aria-hidden="true" style="display: none; overflow: visible; height: auto;">';
+accordion += '<div class="panel-body card-block card-body">';
+//accordion += '<p>Why don't use Lore Ipsum? I think if some one says don't use lore ipsum it's very controversial point. I think the opposite actually. Everyone knows what is lore ipsum - it is easy to understand if text is lore ipsum. You'll automatically skip - because you know - it's just non-informative stub. But what if there some text like this one? You start to read it! But the goal of this text is different. The goal is the example. So a bit of Lore Ipsum is always very good practice. Keep it in mind!</p>';';
+accordion += '</div>';
+accordion += '</div>';
+accordion += '</div>';
+accordion += '</accordion-group>';
+accordion += '<accordion-group class="panel" style="display: block">';
+accordion += '<div class="panel card panel-default" ng-reflect-klass="panel card" ng-reflect-ng-class="panel-default"><div class="panel-heading card-header" role="tab"><div class="panel-title">';
+accordion += '<div class="accordion-toggle" role="button" aria-expanded="false">';
+accordion += '<!--bindings={}-->';
+accordion += '<div accordion-heading=""> Check It <i class="fa fa-angle-down float-right"></i>';
+accordion += '</div>';
+accordion += '</div>';
+accordion += '</div>';
+accordion += '</div>';
+accordion += '<div class="panel-collapse collapse" role="tabpanel" ng-reflect-collapse="true" aria-expanded="false" aria-hidden="true" style="display: none; overflow: visible; height: auto;">';
+accordion += '<div class="panel-body card-block card-body"> ';
+//accordion += 'Why don't use Lore Ipsum? I think if some one says don't use lore ipsum it's very controversial point. I think the opposite actually. ';
+accordion += '</div>';
+accordion += '</div>';
+accordion += '</div>';
+accordion += '</accordion-group>';
+accordion += '</accordion>';
+
+//$('#angular_recordViewer').append(accordion);
+//d3.append(accordion);
+d3.append(recordToolBar);
+d.append(d3);
+
+if(isFastFood){
+  var d4 = $.createElement('div');
+  //d4.attr('aria-expanded', 'true');
+  d4.attr('aria-labelledby', 'menu-tab');
+  d4.addClass('tab-pane');
+  //d4.addClass('active');
+  //d4.addClass('in');
+  //d4.addClass('clearfix');
+  d4.css('padding-top', '1em');
+  d4.css('padding-left', '0px');
+  d4.css('padding-right', '0px');
+  d4.attr('id', 'menu');
+  d4.attr('role', 'tabpanel');
+  //      var d2 = $('#angular_recordViewer').append('<div aria-expanded="true" aria-labelledby="info-tab" class="tab-pane active in clearfix" style="padding-top:0px" id="info" role="tabpanel">');
+        //$('#angular_recordViewer').append('<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');
+        //d4.append(table);
+        d4.append('<div>');
+    d.append(d4);
+
+  d4 = $.createElement('div');
+  //d4.attr('aria-expanded', 'true');
+  d4.attr('aria-labelledby', 'review-tab');
+  d4.addClass('tab-pane');
+  //d4.addClass('active');
+  //d4.addClass('in');
+  //d4.addClass('clearfix');
+  d4.css('padding-top', '1em');
+  d4.css('padding-left', '0px');
+  d4.css('padding-right', '0px');
+  d4.attr('id', 'review');
+  d4.attr('role', 'tabpanel');
+  //      var d2 = $('#angular_recordViewer').append('<div aria-expanded="true" aria-labelledby="info-tab" class="tab-pane active in clearfix" style="padding-top:0px" id="info" role="tabpanel">');
+        //$('#angular_recordViewer').append('<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');
+        //d4.append(table);
+        d4.append('<div>');
+    d.append(d4);
+}
+
       if(hasClass) d2.append('<div class="form-actions"><div class="text-center"><button _ngcontent-c7="" class="btn btn-info " role="button">New '+buttonLabel+'</button>&nbsp;<button _ngcontent-c7="" class="btn btn-inverse " role="button"> New Subclass </button></div></div>');
-d.append(d2);
 //      $('#angular_recordViewer').append('</div></div>');
       $('#angular_recordViewer').append(d);
 
@@ -7884,6 +8013,30 @@ if(opt.srcId){
 }
 
 }//recordViewerColumn
+
+function getBytesDenominationUnit(sz){
+  if(sz < 1000) return 'bytes';
+  if(sz >= 1000 && sz < (1000*1000)) return 'KB';
+  if(sz >= (1000*1000) && sz < (1000*1000*1000)) return 'MB';
+  else return 'GB';
+}
+
+function getBytesDenomination(sz){
+  if(sz < 1000) return sz;
+  if(sz >= 1000 && sz < (1000*1000)) return sz/1000;
+  if(sz >= (1000*1000) && sz < (1000*1000*1000)) return sz/(1000*1000);
+  else return sz/(1000*1000*1000);
+}
+
+function lengthInUtf8Bytes(str) {
+  // Matches only the 10.. bytes that are non-initial characters in a multi-byte sequence.
+  var m = encodeURIComponent(str).match(/%[89ABab]/g);
+  return str.length + (m ? m.length : 0);
+}
+
+function downloadRecordRDF(){
+  downloadDataFile(recordRDF, 'record-' + createId() + '.rdf', 'text/xml');
+}
 
 function matchFocusProperties(propIRI, isReverse){
   return getMainFocus().children('property').filter(function() {

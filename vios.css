@@ -906,3 +906,14 @@ h6 {
 @media (min-width: 768px) {
     .search-result-item-heading {
       margin: 0; } }
+
+
+
+
+
+accordion .card-header {
+    background: #f8f9fa;
+    border-bottom: none;
+    cursor: pointer;
+    color: #495057;
+  }
