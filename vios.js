@@ -376,6 +376,8 @@ function fct_removeVariableData(query){
   query.removeAttr('label');
   query.removeAttr('varname');
   query.removeAttr('class');
+  query.removeAttr('timeout');
+  query.removeAttr('qid');
 
 
   query.find('*').removeAttr('class');
@@ -441,7 +443,7 @@ function fct_query(q, viewType, opt){
   q = fct_removeVariableData(q);
   var qstr = q.prop('outerHTML');
   var id = (qstr) ? (service_fct+qstr).hashCode() : 0;
-  q.attr('qid', id);
+  getQuery().attr('qid', id);
   setMutex(id, viewType);
   ha.push(id);
   q.attr('timeout', fct_queryTimeout); // add all neccessary variable data back to the query
@@ -497,7 +499,7 @@ function fct_query(q, viewType, opt){
   }
   var req = $.ajax({
       url: service_fct,
-      headers: {'X-VIOS-Type': 'fct', 'X-VIOS-QID': id, 'X-VIOS-Dataspace-Label': getDataspaceLabel()},
+      headers: {'X-VIOS-Type': 'fct', 'X-VIOS-QID': id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid},
       data: $(q).prop('outerHTML'), 
       type: 'POST',
       contentType: "text/xml",
@@ -721,7 +723,7 @@ function fct_sparql(sparql, opt){
   var req = $.ajax({
       url: sparqlSvr + "?query=" + encodeURIComponent(sparql),
       type: 'GET',
-      headers: {'Accept': accept, 'X-VIOS-Type': 'sparql', 'X-VIOS-QID': (isMainQueryCount) ? getQuery().attr('qid') : id, 'X-VIOS-Dataspace-Label': getDataspaceLabel()},
+      headers: {'Accept': accept, 'X-VIOS-Type': 'sparql', 'X-VIOS-QID': (isMainQueryCount) ? getQuery().attr('qid') : id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid},
       dataType: "text", // POI: can't do dataType: xml, since the service sometimes returns malformed XML
       beforeSend: function(jqXHR, settings) {
           jqXHR.url = settings.url;
@@ -1110,8 +1112,8 @@ function fct_handleSparqlResults(xml, opt) {
             return l.toUpperCase()
         });
         headerPrefix = (getMainFocus().children('property, property-of') && getMainFocus().children('property, property-of').length > 0 && $(getMainFocus().children('property, property-of')[0]).prop('nodeName').toLowerCase() == 'property-of' && !headerPrefix.toLowerCase().endsWith('of')) ? headerPrefix + ' Of' : headerPrefix;
-        $('#tableType').text(TABLE_HEADER_LABEL_CHART);
-        $('#tableSubType').text(headerPrefix);
+        $('#tableSubType').html(TABLE_HEADER_LABEL_CHART);
+        $('#tableType').html(deSanitizeLabel(headerPrefix));
     } 
     else if(isRollup()){
         var headerPrefix = (getMainFocus().children('property, property-of') && getMainFocus().children('property, property-of').length > 0) ? $(getMainFocus().children('property, property-of')[0]).attr('label') : '';
@@ -1120,8 +1122,8 @@ function fct_handleSparqlResults(xml, opt) {
             return l.toUpperCase()
         });
         headerPrefix = (getMainFocus().children('property, property-of') && getMainFocus().children('property, property-of').length > 0 && $(getMainFocus().children('property, property-of')[0]).prop('nodeName').toLowerCase() == 'property-of' && !headerPrefix.toLowerCase().endsWith('of')) ? headerPrefix + ' Of' : headerPrefix;
-        $('#tableType').text(TABLE_HEADER_LABEL_TREE);
-        $('#tableSubType').text(headerPrefix);
+        $('#tableSubType').html(TABLE_HEADER_LABEL_TREE);
+        $('#tableType').html(deSanitizeLabel(headerPrefix));
     }
     else {
         var headerPrefix = spaceCamelCase(getMainFocus().attr('label'));
@@ -1131,8 +1133,8 @@ function fct_handleSparqlResults(xml, opt) {
             return l.toUpperCase()
         });
         headerPrefix = (getMainFocus().prop('nodeName').toLowerCase() == 'property-of' && !headerPrefix.toLowerCase().endsWith('of')) ? headerPrefix + ' Of' : headerPrefix;       
-        $('#tableType').text(TABLE_HEADER_LABEL_DETAILS);
-        $('#tableSubType').text(headerPrefix);
+        $('#tableSubType').html(TABLE_HEADER_LABEL_DETAILS);
+        $('#tableType').html(deSanitizeLabel(headerPrefix));
     }
 
     //tableResultsCt = $("result", results).length;
@@ -2166,7 +2168,7 @@ function removeGraphFacet(){
 
 //** FILE: main.js **/
 
-var LABEL_ROOT = "Root";
+var LABEL_ROOT = "Origin";
 var LABEL_RECORD_NAME = 'name';
 var LABEL_KEYWORDS = 'keywords';
 
@@ -2212,8 +2214,8 @@ var icon_file = 'http://myopenlink.net/DAV/home/sdmonroe/img/blank-file-xxl.png'
 var icon_expand = "http://myopenlink.net/DAV/home/sdmonroe/img/expand.png";
 
 var TABLE_HEADER_LABEL_CHART = 'Chart';
-var TABLE_HEADER_LABEL_DETAILS = 'Details';
-var TABLE_HEADER_LABEL_TREE = 'Rollup';
+var TABLE_HEADER_LABEL_DETAILS = 'Table';
+var TABLE_HEADER_LABEL_TREE = 'Rollup Table';
 
 var preInitialized = false;
 
@@ -2365,6 +2367,21 @@ const ORIENTATION_TYPE_3 = 3;
 
 var orientationType = ORIENTATION_TYPE_1;
 
+
+  var client_sid;
+
+  function setSID(json) {
+    try{
+      var salt = localStorage.getItem('salt');
+      if(!salt) salt = createId();
+      localStorage.setItem('salt', salt); // attempt to claim memory before cache uses it all
+    }
+    catch(e){
+
+    }
+    client_sid = (json.ip + salt).hashCode();
+  }
+
 function init(){
     fct_init(); // this method must be the first method called by the implementation of the fct_ framework
 
@@ -2440,7 +2457,12 @@ if(!orientationType) orientationType = ORIENTATION_TYPE_2;
         link.src = 'https://demo.flatlogic.com/sing-app/angular/profile-profile-module.js';
         document.head.appendChild(link);
 
-
+/*
+        link = document.createElement('script');
+        link.type = 'application/javascript';
+        link.src = 'https://api.ipify.org?format=jsonp&callback=setSID';
+        document.head.appendChild(link);
+*/
 
 //alert('init() screen width: ' + screen.width);
 
@@ -2624,7 +2646,7 @@ if(!orientationType) orientationType = ORIENTATION_TYPE_2;
 
   $('#permalink').on('mouseover', function(e){
     get_short_url($('#permalink').attr('href'), function(short_url) {
-      $('#permalink').attr('href',  short_url); //+ '&idCt=' + idCt
+        $('#permalink').attr('href',  short_url); //+ '&idCt=' + idCt
 /*
       $('#permalink').unbind('click');
       $('#permalink').on('click', function(e){
@@ -2633,6 +2655,7 @@ if(!orientationType) orientationType = ORIENTATION_TYPE_2;
       */
     });
   });
+
 
   selectMenuItem('queryTimeout', '30000');
 
@@ -2643,6 +2666,7 @@ if(!orientationType) orientationType = ORIENTATION_TYPE_2;
 
 
   $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doFindDataspaces()">Find Dataspaces</a></li>');
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" href="http://data.vios.network/ods">Make Dataspace</a></li>');
   $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doRemoveDataspace()">Remove Dataspace</a></li>');
 
 
@@ -2785,7 +2809,7 @@ gbcol += '</app-navbar>';
 
 
 
-gbcol = '<div class="col-lg-12 col-12"><ul class="steps" id="angular_breadcrumbBar">';
+gbcol = '<div class="col-lg-12 col-xl-12 col-12"><ul class="steps" id="angular_breadcrumbBar">';
 
 
 /*
@@ -2804,7 +2828,7 @@ $('#angular_breadcrumbs').append(gbcol);
 
 if(orientationType == ORIENTATION_TYPE_3){
 
-gbcol = '<div id="recordViewerColumn" class="hide col-lg-'+recordViewerColumnWidth+' col-12"><section class="widget" widget>';
+gbcol = '<div id="recordViewerColumn" class="hide col-xl-6 col-lg-6 col-12"><section class="widget" widget>';
 
         gbcol += '<div class="widget-body  p-0 ">';
        // gbcol += '<div class="widget-body p-0">';
@@ -2925,7 +2949,7 @@ $('#dataCanvas').append(gbcol);
 }
 
 
-gbcol = '<div id="groupByColumn" class="hide col-lg-'+groupByColumnWidth+' col-12">';
+gbcol = '<div id="groupByColumn" class="hide col-xl-3 col-lg-3 col-12">';
 gbcol += '<div id="facetCollectorWidgetContainer" class="short-div"><section class="widget bg-info text-white focusHeaderSec" widget>';
 gbcol += '<header id="focusHeader">';
         gbcol += '<h3 id="angular_focusCollector" class="fw-semi-bold">'+LABEL_ROOT+'</h3>';
@@ -2975,7 +2999,7 @@ gbcol += '<header id="groupByHeader" style="cursor:pointer;" >';
             gbcol += '<input class="form-control form-control-sm" placeholder="Filter" type="search">';
             gbcol += '</footer>';
 
-                        gbcol += '</section></div>';
+            gbcol += '</section></div>';
 
 
 
@@ -2985,7 +3009,7 @@ gbcol += '<div id="tabularResults" class="short-div hide"><section class="widget
 
 gbcol += '<header class="m-1" id="groupByTableHeader">';
         gbcol += '<h5>';
-          gbcol += '<h4><span id="tableCount" class="badge badge-info">0/0</span> <span id="tableType">'+DISCOVER_LABEL+'</span> - <span id="tableSubType" class="fw-semi-bold">'+((isChart()) ? TABLE_HEADER_LABEL_CHART : TABLE_HEADER_LABEL_DETAILS)+'</span></h4>';
+          gbcol += '<h4><span id="tableCount" class="badge badge-info">0/0</span> <span id="tableType"  class="fw-semi-bold">'+DISCOVER_LABEL+'</span> <span id="tableSubType">'+((isChart()) ? TABLE_HEADER_LABEL_CHART : TABLE_HEADER_LABEL_DETAILS)+'</span></h4>';
         gbcol += '</h5>';
         gbcol += '<div class="widget-controls">';
           //gbcol += '<a href="#"><i class="glyphicon glyphicon-cog"></i></a>';
@@ -3116,7 +3140,7 @@ $('#dataCanvas').append(gbcol);
 
 if(orientationType == ORIENTATION_TYPE_2){
 
-gbcol = '<div id="recordViewerColumn" class="hide col-lg-'+recordViewerColumnWidth+' col-12"><section class="widget" widget>';
+gbcol = '<div id="recordViewerColumn" class="hide col-xl-6 col-lg-6 col-12"><section class="widget" widget>';
 
         gbcol += '<div class="widget-body  p-0 ">';
        // gbcol += '<div class="widget-body p-0">';
@@ -3239,7 +3263,7 @@ $('#dataCanvas').append(gbcol);
 
 
 
-gbcol = '<div id="showMeColumn" class="hide col-lg-'+showMeColumnWidth+' col-12"><section class="widget" widget>';
+gbcol = '<div id="showMeColumn" class="hide col-xl-3 col-lg-3 col-12"><section class="widget" widget>';
 gbcol += '<header id="showMeHeader">';
         gbcol += '<h4><span id="showMeCount" class="badge badge-info">0/0</span>&nbsp;<span id="showMeMenuSelectLabel">Categories</span></h4>';
 
@@ -3292,7 +3316,7 @@ $('#dataCanvas').append(gbcol);
 
 if(orientationType == ORIENTATION_TYPE_1){
 
-gbcol = '<div id="recordViewerColumn" class="hide col-lg-'+recordViewerColumnWidth+' col-12"><section class="widget" widget>';
+gbcol = '<div id="recordViewerColumn" class="hide col-xl-6 col-lg-6 col-12"><section class="widget" widget>';
 
         gbcol += '<div class="widget-body  p-0 ">';
        // gbcol += '<div class="widget-body p-0">';
@@ -4417,8 +4441,10 @@ function activate(){
     setNavType(NAV_TYPE_2);
     doQuery(getQueryText());
     $('#recordViewerColumn').addClass('hide');
-    $('#groupByColumn').removeClass('col-lg-'+SIZE_GROUP_BY);
-    $('#groupByColumn').addClass('col-lg-'+(parseInt(SIZE_GROUP_BY)+parseInt(SIZE_RECORD_VIEWER)));
+    $('#groupByColumn').removeClass('col-lg-3');
+    $('#groupByColumn').removeClass('col-lg-3');
+    $('#groupByColumn').addClass('col-lg-'+(3+parseInt(SIZE_RECORD_VIEWER)));
+    $('#groupByColumn').addClass('col-xl-'+(3+parseInt(SIZE_RECORD_VIEWER)));
     $('#tabularResults').removeClass('hide');
     $('#recordsListWidgetContainer').addClass('hide');
     if(nav_type == NAV_TYPE_3) $('#facetCollectorWidgetContainer').addClass('hide');
@@ -4430,8 +4456,10 @@ function activate(){
 
   function undoTable(){
     $('#recordViewerColumn').removeClass('hide');
-    $('#groupByColumn').removeClass('col-lg-'+(parseInt(SIZE_GROUP_BY)+parseInt(SIZE_RECORD_VIEWER)));
-    $('#groupByColumn').addClass('col-lg-'+SIZE_GROUP_BY);
+    $('#groupByColumn').removeClass('col-lg-'+(3+parseInt(SIZE_RECORD_VIEWER)));
+    $('#groupByColumn').removeClass('col-xl-'+(3+parseInt(SIZE_RECORD_VIEWER)));
+    $('#groupByColumn').addClass('col-lg-3');
+    $('#groupByColumn').addClass('col-xl-3');
     $('#tabularResults').addClass('hide');
     $('#recordsListWidgetContainer').removeClass('hide');
     if(nav_type == NAV_TYPE_3) $('#facetCollectorWidgetContainer').removeClass('hide');
@@ -5026,12 +5054,13 @@ function updatePermalink(){
       '&filterRecordViewFields=' + filterRecordViewFields + 
       '&qxml=' + encodeURIComponent(_root.find('query').prop('outerHTML'));
   
-    $('#permalink').attr('href',  long_url); // use long url by default in case of rate limit
+    $('#permalink').attr('href', long_url); // use long url by default in case of rate limit
     $('#permalink').unbind('mouseover');
     $('#permalink').unbind('mouseout');
 
   $('#permalink').on('mouseover', function(e){
     if(!mouseOnPermalink){
+      mouseOnPermalink = true;
       get_short_url(long_url, function(short_url) {
         $('#permalink').attr('href',  short_url); //+ '&idCt=' + idCt
   /*
@@ -5043,11 +5072,10 @@ function updatePermalink(){
         */
       });
     }
-        mouseOnPermalink = true;
 
   });
 
-  $('#permalink').on('mouseout', function(e){
+  $('#permalink').mouseleave(function(e){ // mouse entirely out
     mouseOnPermalink = false;
   });
 
@@ -5391,11 +5419,11 @@ function selectDataspace(url, label, silent){
   //service_sparql = $('#dataSpaceMenu :selected').attr('value') + '/sparql';
   service_fct = getProxyEndpoint(url) + '/fct/service';
   service_sparql = getProxyEndpoint(url) + '/sparql';
-  LABEL_ROOT = getDataspaceLabel();//.toUpperCase(); //<i class="fa fa-home" style="padding-bottom:4px;padding-right:2px;"></i>
+  LABEL_ROOT = '<i class="fa fa-cube" style="padding-bottom:4px;padding-right:2px;"></i>Root';// getDataspaceLabel();//.toUpperCase(); //<i class="fa fa-home" style="padding-bottom:4px;padding-right:2px;"></i>
 
   //if(url.indexOf('data.vios.network') >= 0) LABEL_ROOT = 'VIOS';
 
-  $('#dataSpaceLabel').text(LABEL_ROOT );
+  $('#dataSpaceLabel').text( getDataspaceLabel() );
   if(!silent) doQuery(getQueryText());
 
   try{
@@ -7879,11 +7907,12 @@ accordion += '<div class="panel-body card-block card-body"> Get base styles and 
 
 
 var recordToolBar = '';
-recordToolBar += '<div class="clearfix">';
+var opt_pad = (screenSz < SIZE_MAX_SCREEN) ? 10 : 30;
+recordToolBar += '<div class="clearfix" style="padding-left:'+opt_pad+'em; padding-right:'+opt_pad+'em;">';
 //recordToolBar += '<div class="btn-toolbar">';
 var sz = lengthInUtf8Bytes(recordRDF);
-recordToolBar += '<button _ngcontent-c9="" class="btn btn-inverse m-1 mb-xs" role="button" '+buildTitle(getBytesDenomination(sz)+' ' + getBytesDenominationUnit(sz))+' onclick="javascript:downloadRecordRDF();">';
-recordToolBar += 'Download Record';
+recordToolBar += '<button _ngcontent-c9="" class="btn btn-block btn-inverse mb-xs" role="button" onclick="javascript:downloadRecordRDF();">';
+recordToolBar += 'Download Record - ' +getBytesDenomination(sz)+' ' + getBytesDenominationUnit(sz)+ '';
 recordToolBar += '&nbsp;&nbsp;<i class="fa fa-file-code-o"></i>';
 recordToolBar += '</button>';
 if(isFastFood){
@@ -7895,9 +7924,9 @@ if(isFastFood){
     recordToolBar += '&nbsp;&nbsp;<i class="fa fa-phone"></i>';
     recordToolBar += '</button>';
 */
-    recordToolBar += '<a class="btn btn-primary" href="tel:'+phone+'">';
-    recordToolBar += '  Call for takeout  ';
-    recordToolBar += '<i class="fa fa-phone"></i>';
+    recordToolBar += '<a class="btn btn-block btn-primary" href="tel:'+phone+'">';
+    recordToolBar += '  Call for takeout - ' + phone;
+    recordToolBar += '&nbsp;&nbsp;<i class="fa fa-phone"></i>';
     recordToolBar += '</a>';
   }
   if(homepage){
@@ -7907,10 +7936,10 @@ if(isFastFood){
     recordToolBar += '&nbsp;&nbsp;<i class="fa fa-cutlery"></i>';
     recordToolBar += '</button>';
     */
-    if(phone) recordToolBar += '&nbsp';
-    recordToolBar += '<a class="btn btn-primary" href="'+homepage+'">';
-    recordToolBar += '  Order online  ';
-    recordToolBar += '<i class="fa fa-cutlery"></i>';
+    //if(phone) recordToolBar += '&nbsp';
+    recordToolBar += '<a class="btn btn-block btn-primary" href="'+homepage+'">';
+    recordToolBar += '  Order online - ' + getHostName(homepage);
+    recordToolBar += '&nbsp;&nbsp;<i class="fa fa-cutlery"></i>';
     recordToolBar += '</a>';
   }
 }
@@ -9180,6 +9209,10 @@ return ret;
 
 function get_short_url(long_url, func)
 {
+    $('#permalink').removeClass('text-info');
+    $('#permalink').addClass('text-default');
+    $('#permalink > i').removeClass('la-chain');
+    $('#permalink > i').addClass('la-chain-broken');
     $.getJSON(
         "http://vio.sn/c/create?uri="+ encodeURIComponent( long_url ), 
         { 
@@ -9187,6 +9220,10 @@ function get_short_url(long_url, func)
         function(response)
         {
             if(response.c_uri) func(response.c_uri);
+            $('#permalink').removeClass('text-default');
+            $('#permalink').addClass('text-info');
+            $('#permalink > i').removeClass('la-chain-broken');
+            $('#permalink > i').addClass('la-chain');
         }
     );
 }
