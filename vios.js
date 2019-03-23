@@ -425,6 +425,7 @@ function getGGGURL(url){
 
 
 var mainSparql = '';
+var bid = createId();
 function fct_query(q, viewType, opt){
   var tstamp = new Date().getTime();
   if(!opt) opt = new Object();
@@ -499,7 +500,7 @@ function fct_query(q, viewType, opt){
   }
   var req = $.ajax({
       url: service_fct,
-      headers: {'X-VIOS-Type': 'fct', 'X-VIOS-QID': id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid},
+      headers: {'X-VIOS-Type': 'fct', 'X-VIOS-QID': id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid, 'X-VIOS-BID': bid},
       data: $(q).prop('outerHTML'), 
       type: 'POST',
       contentType: "text/xml",
@@ -723,7 +724,7 @@ function fct_sparql(sparql, opt){
   var req = $.ajax({
       url: sparqlSvr + "?query=" + encodeURIComponent(sparql),
       type: 'GET',
-      headers: {'Accept': accept, 'X-VIOS-Type': 'sparql', 'X-VIOS-QID': (isMainQueryCount) ? getQuery().attr('qid') : id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid},
+      headers: {'Accept': accept, 'X-VIOS-Type': 'sparql', 'X-VIOS-QID': (isMainQueryCount) ? getQuery().attr('qid') : id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid, 'X-VIOS-BID': bid},
       dataType: "text", // POI: can't do dataType: xml, since the service sometimes returns malformed XML
       beforeSend: function(jqXHR, settings) {
           jqXHR.url = settings.url;
@@ -1392,7 +1393,7 @@ function fct_handleSparqlResults(xml, opt) {
                     //sanitizedLabel = sanitizeLabel(sanitizedLabel);
                 }
 
-                var cellVal = (matrixMap[matrixKeys[i].text()] && matrixMap[matrixKeys[i].text()].indexOfText(value) >= 0) ? '<span class="la la-check"></span>' : ''; // la la-check glyphicon glyphicon-ok
+                var cellVal = (matrixMap[matrixKeys[i].text()] && matrixMap[matrixKeys[i].text()].indexOfText(value) >= 0) ? '<span class="glyphicon glyphicon-ok"></span>' : ''; // la la-check glyphicon glyphicon-ok
                 var noLeftBorder = '';
                 if (j == 0) noLeftBorder = 'border-left:0px solid transparent; ';
                 r1.value += '<td style="' + noLeftBorder + 'vertical-align:middle;text-align:center;cursor:pointer;" onclick="javascript:setValue(\'mtxcolb-' + i + '-' + j + '\', \'' + sanitizeLabel(v) + '\', \'' + sanitizeLabel(labelKey) + '\', \'' + d + '\', \'\')">' + cellVal + '</td>';
@@ -2233,8 +2234,8 @@ var preInitialized = false;
 
 var SIZE_MAX_SCREEN = 10;
 var screenSz = aspect_width;
-var SIZE_GROUP_BY = (screenSz < SIZE_MAX_SCREEN) ? "3" : "2";
-var SIZE_SHOW_ME = (screenSz < SIZE_MAX_SCREEN) ? "3" : "2";
+var SIZE_GROUP_BY = (screenSz < SIZE_MAX_SCREEN) ? "3" : "3";
+var SIZE_SHOW_ME = (screenSz < SIZE_MAX_SCREEN) ? "3" : "3";
 var SIZE_RECORD_VIEWER = (screenSz < SIZE_MAX_SCREEN) ? "6" : "6";
 
 var SIZE_GROUP_BY_DETAIL_RESULTS = (screenSz < SIZE_MAX_SCREEN) ? "9" : "5";
@@ -2248,7 +2249,7 @@ var recordViewerColumnWidth = SIZE_RECORD_VIEWER;
 
 var SIZE_RECORD_FORM = (screenSz < SIZE_MAX_SCREEN) ? "6" : "6";
 var SIZE_LABEL = (screenSz < SIZE_MAX_SCREEN) ? 22 : 30; // TODO: this constant is deprecated, using text-ellipsis now
-var SIZE_RESULT_SET = (screenSz < SIZE_MAX_SCREEN) ? 15: 30;
+var SIZE_RESULT_SET = (screenSz < SIZE_MAX_SCREEN) ? 15: 15;
 var SIZE_TABLE_RESULT_SET = (screenSz < SIZE_MAX_SCREEN) ? 150: 75;
 var SIZE_MATRIX_RESULT_SET = (screenSz < SIZE_MAX_SCREEN) ? 150: 75;
 var SIZE_MIN_DIGITS = 7;
@@ -2390,9 +2391,26 @@ function init(){
 
       try{
         orientationType = localStorage.getItem('orientationType');
-//        orientationLeft = localStorage.getItem('orientationLeft') == 'true';
-if(!orientationType) orientationType = ORIENTATION_TYPE_2;
+        var colSz = localStorage.getItem('colSz.'+screenSz);
+        SIZE_RESULT_SET = localStorage.getItem('SIZE_RESULT_SET.'+screenSz);
+        //        orientationLeft = localStorage.getItem('orientationLeft') == 'true';
+        if(!orientationType) orientationType = ORIENTATION_TYPE_2;
+        if(!colSz) {
+          SIZE_GROUP_BY = 3;
+          SIZE_SHOW_ME = 3;
+          SIZE_RECORD_VIEWER = 6;
+        } 
+        else {
+          SIZE_GROUP_BY = colSz;
+          SIZE_SHOW_ME = colSz;
+          //SIZE_RESULT_SET = 15;
+          //SIZE_RECORD_VIEWER = colSz;
+        }
+        if(!SIZE_RESULT_SET) SIZE_RESULT_SET = 15;
+        setViewLimit(SIZE_RESULT_SET);
         localStorage.setItem('orientationType', orientationType); // attempt to claim memory before cache uses it all
+        localStorage.setItem('colSz.'+screenSz, colSz); // attempt to claim memory before cache uses it all
+        localStorage.setItem('SIZE_RESULT_SET.'+screenSz, SIZE_RESULT_SET); // attempt to claim memory before cache uses it all
       }
       catch(e){
 
@@ -2666,7 +2684,7 @@ if(!orientationType) orientationType = ORIENTATION_TYPE_2;
 
 
   $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doFindDataspaces()">Find Dataspaces</a></li>');
-  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" href="http://data.vios.network/ods">Make Dataspace</a></li>');
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" href="http://data.vios.network/ods">Create Dataspace</a></li>');
   $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doRemoveDataspace()">Remove Dataspace</a></li>');
 
 
@@ -2828,13 +2846,13 @@ $('#angular_breadcrumbs').append(gbcol);
 
 if(orientationType == ORIENTATION_TYPE_3){
 
-gbcol = '<div id="recordViewerColumn" class="hide col-xl-6 col-lg-6 col-12"><section class="widget" widget>';
+gbcol = '<div id="recordViewerColumn" class="hide col-xl-'+SIZE_RECORD_VIEWER+' col-lg-6 col-12"><section class="widget" widget>';
 
         gbcol += '<div class="widget-body  p-0 ">';
        // gbcol += '<div class="widget-body p-0">';
 
 
-gbcol += '<nav id="recordNavBar" class="navbar navbar-expand-lg navbar-light bg-light">';
+gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg-light">';
   gbcol += '<a  style="margin-left: 7px;" class="navbar-brand" data-target="#" onclick="javascript:buildForm()">Compose</a>';
   gbcol += '<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">';
     gbcol += '<i class="glyphicon glyphicon-tree-conifer"></i>';
@@ -2844,13 +2862,16 @@ gbcol += '<nav id="recordNavBar" class="navbar navbar-expand-lg navbar-light bg-
   gbcol += '<div class="collapse navbar-collapse" id="navbarSupportedContent">';
     gbcol += '<ul class="navbar-nav mr-auto">';
       gbcol += '<li class="nav-item active">';
-        gbcol += '<a id="ggg" class="nav-link" data-target="#">Edit</a>';
+        gbcol += '<a id="edit" class="nav-link" data-target="#">Edit</a>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item active">';
+        gbcol += '<a id="view" class="nav-link" data-target="#">View</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe( $(undefined, \'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
+        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
@@ -2949,7 +2970,7 @@ $('#dataCanvas').append(gbcol);
 }
 
 
-gbcol = '<div id="groupByColumn" class="hide col-xl-3 col-lg-3 col-12">';
+gbcol = '<div id="groupByColumn" class="hide col-xl-'+SIZE_GROUP_BY+' col-lg-3 col-12">';
 gbcol += '<div id="facetCollectorWidgetContainer" class="short-div"><section class="widget bg-info text-white focusHeaderSec" widget>';
 gbcol += '<header id="focusHeader">';
         gbcol += '<h3 id="angular_focusCollector" class="fw-semi-bold">'+LABEL_ROOT+'</h3>';
@@ -3140,13 +3161,13 @@ $('#dataCanvas').append(gbcol);
 
 if(orientationType == ORIENTATION_TYPE_2){
 
-gbcol = '<div id="recordViewerColumn" class="hide col-xl-6 col-lg-6 col-12"><section class="widget" widget>';
+gbcol = '<div id="recordViewerColumn" class="hide col-xl-'+SIZE_RECORD_VIEWER+' col-lg-6 col-12"><section class="widget" widget>';
 
         gbcol += '<div class="widget-body  p-0 ">';
        // gbcol += '<div class="widget-body p-0">';
 
 
-gbcol += '<nav id="recordNavBar" class="navbar navbar-expand-lg navbar-light bg-light">';
+gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg-light">';
   gbcol += '<a  style="margin-left: 7px;" class="navbar-brand" data-target="#" onclick="javascript:buildForm()">Compose</a>';
   gbcol += '<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">';
     gbcol += '<i class="glyphicon glyphicon-tree-conifer"></i>';
@@ -3156,13 +3177,16 @@ gbcol += '<nav id="recordNavBar" class="navbar navbar-expand-lg navbar-light bg-
   gbcol += '<div class="collapse navbar-collapse" id="navbarSupportedContent">';
     gbcol += '<ul class="navbar-nav mr-auto">';
       gbcol += '<li class="nav-item active">';
-        gbcol += '<a id="ggg" class="nav-link" data-target="#">Edit</a>';
+        gbcol += '<a id="edit" class="nav-link" data-target="#">Edit</a>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item active">';
+        gbcol += '<a id="view" class="nav-link" data-target="#">View</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe( $(undefined, \'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
+        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
@@ -3263,7 +3287,7 @@ $('#dataCanvas').append(gbcol);
 
 
 
-gbcol = '<div id="showMeColumn" class="hide col-xl-3 col-lg-3 col-12"><section class="widget" widget>';
+gbcol = '<div id="showMeColumn" class="hide col-xl-'+SIZE_SHOW_ME+' col-lg-3 col-12"><section class="widget" widget>';
 gbcol += '<header id="showMeHeader">';
         gbcol += '<h4><span id="showMeCount" class="badge badge-info">0/0</span>&nbsp;<span id="showMeMenuSelectLabel">Categories</span></h4>';
 
@@ -3316,13 +3340,13 @@ $('#dataCanvas').append(gbcol);
 
 if(orientationType == ORIENTATION_TYPE_1){
 
-gbcol = '<div id="recordViewerColumn" class="hide col-xl-6 col-lg-6 col-12"><section class="widget" widget>';
+gbcol = '<div id="recordViewerColumn" class="hide col-xl-'+SIZE_RECORD_VIEWER+' col-lg-6 col-12"><section class="widget" widget>';
 
         gbcol += '<div class="widget-body  p-0 ">';
        // gbcol += '<div class="widget-body p-0">';
 
 
-gbcol += '<nav id="recordNavBar" class="navbar navbar-expand-lg navbar-light bg-light">';
+gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg-light">';
   gbcol += '<a  style="margin-left: 7px;" class="navbar-brand" data-target="#" onclick="javascript:buildForm()">Compose</a>';
   gbcol += '<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">';
     gbcol += '<i class="glyphicon glyphicon-tree-conifer"></i>';
@@ -3332,13 +3356,16 @@ gbcol += '<nav id="recordNavBar" class="navbar navbar-expand-lg navbar-light bg-
   gbcol += '<div class="collapse navbar-collapse" id="navbarSupportedContent">';
     gbcol += '<ul class="navbar-nav mr-auto">';
       gbcol += '<li class="nav-item active">';
-        gbcol += '<a id="ggg" class="nav-link" data-target="#">Edit</a>';
+        gbcol += '<a id="edit" class="nav-link" data-target="#">Edit</a>';
+      gbcol += '</li>';
+      gbcol += '<li class="nav-item active">';
+        gbcol += '<a id="view" class="nav-link" data-target="#">View</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe( $(undefined, \'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
+        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
@@ -3470,6 +3497,8 @@ gbcol += '<div class="modal fade" id="helpModal" tabindex="-1" role="dialog" ari
       gbcol += '  Press <i>O</i> key to change orientation';
       gbcol += '  </li><li>';
       gbcol += '  Press <i>S</i> key to toggle Subject badges';
+      gbcol += '  </li><li>';
+      gbcol += '  Press <i>-</i> or <i>+</i> keys to resize columns';
       gbcol += '  </li><li>';
       gbcol += '  Press <i>C</i>, <i>T</i>, <i>F</i>, <i>R</i> or <i>L</i> keys to switch CTRL lists';
       gbcol += '  </li><li>';
@@ -3742,6 +3771,7 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     addDataspace('demo.openlinksw.com','OpenLink Demo',false,true); // try to add OpenLink Demo
     addDataspace('linkeddata.uriburner.com','URIBurner',false,true); // try to add URI Burner
     addDataspace('data.vios.network','VIOS',false,true); // try to add VIOS
+    addDataspace('ggg.vios.network','GGG',false,true); // try to add GGG
     if(ds.length <= 0) selectDataspace('dbpedia.org', 'DBPedia', false, true);
 
     try{
@@ -4442,9 +4472,9 @@ function activate(){
     doQuery(getQueryText());
     $('#recordViewerColumn').addClass('hide');
     $('#groupByColumn').removeClass('col-lg-3');
-    $('#groupByColumn').removeClass('col-lg-3');
+    $('#groupByColumn').removeClass('col-xl-'+SIZE_GROUP_BY);
     $('#groupByColumn').addClass('col-lg-'+(3+parseInt(SIZE_RECORD_VIEWER)));
-    $('#groupByColumn').addClass('col-xl-'+(3+parseInt(SIZE_RECORD_VIEWER)));
+    $('#groupByColumn').addClass('col-xl-'+(parseInt(SIZE_GROUP_BY)+parseInt(SIZE_RECORD_VIEWER)));
     $('#tabularResults').removeClass('hide');
     $('#recordsListWidgetContainer').addClass('hide');
     if(nav_type == NAV_TYPE_3) $('#facetCollectorWidgetContainer').addClass('hide');
@@ -4457,9 +4487,9 @@ function activate(){
   function undoTable(){
     $('#recordViewerColumn').removeClass('hide');
     $('#groupByColumn').removeClass('col-lg-'+(3+parseInt(SIZE_RECORD_VIEWER)));
-    $('#groupByColumn').removeClass('col-xl-'+(3+parseInt(SIZE_RECORD_VIEWER)));
+    $('#groupByColumn').removeClass('col-xl-'+(parseInt(SIZE_GROUP_BY)+parseInt(SIZE_RECORD_VIEWER)));
     $('#groupByColumn').addClass('col-lg-3');
-    $('#groupByColumn').addClass('col-xl-3');
+    $('#groupByColumn').addClass('col-xl-'+SIZE_GROUP_BY);
     $('#tabularResults').addClass('hide');
     $('#recordsListWidgetContainer').removeClass('hide');
     if(nav_type == NAV_TYPE_3) $('#facetCollectorWidgetContainer').removeClass('hide');
@@ -4752,33 +4782,68 @@ if(!$('input[type="text"], input[type="search"]').is(":focus")){
     else if(e.keyCode == '74' || e.keyCode == '75' || e.keyCode == '186' || e.keyCode == '222') { // J key or K key or : key or ' key
       var rec = $('.record-active');
       if(rec.prop('nodeName').toLowerCase() == 'td'){
-        if(!rec.parent().prev() || rec.parent().prev().length <= 0 || rec.parent().prev().prop('nodeName').toLowerCase() != 'tr') return;
+        var prv = rec.parent().prevAll('tr > td[iri]'); // POI: skip literals
+        if(!prv || prv.length <= 0) return;
         //rec.removeClass('record-active');
         //rec.parent().prev().children('td').addClass('record-active');
-        describe(rec.parent().prev().children('td').attr('id'), rec.parent().prev().children('td').children('h6').attr('data-original-title'));
+        describe(prv.attr('id'), prv.attr('iri'));
       }
       else if(rec.prop('nodeName').toLowerCase() == 'a'){
-        if(!rec.prev() || rec.prev().length <= 0 || rec.prev().prop('nodeName').toLowerCase() != 'a') return;
+        var prv = rec.prevAll('a[iri]'); // POI: skip literals
+        if(!prv || prv.length <= 0) return;
         //rec.removeClass('record-active');
         //rec.prev().addClass('record-active');
-        describe(rec.prev().attr('id'), rec.prev().find('h6 > span').attr('data-original-title'));
+        describe(prv.attr('id'), prv.attr('iri'));
       }
     }
     else if(e.keyCode == '77' || e.keyCode == '191') { // M key or ? key
-      var rec = $('.record-active');
+      var rec = $('.record-active'); // POI: skip literals
       if(rec.prop('nodeName').toLowerCase() == 'td'){
-        if(!rec.parent().next() || rec.parent().next().length <=0 || rec.parent().next().prop('nodeName').toLowerCase() != 'tr') return;
+        var nxt = rec.parent().nextAll('tr > td[iri]');
+        if(!nxt || nxt.length <=0) return;
         //rec.removeClass('record-active');
         //rec.parent().next().children('td').addClass('record-active');
-        describe(rec.parent().next().children('td').attr('id'), rec.parent().next().children('td').children('h6').attr('data-original-title'));
+        describe(nxt.attr('id'), nxt.attr('iri'));
       }
       else if(rec.prop('nodeName').toLowerCase() == 'a'){
-        if(!rec.next() || rec.next().length <= 0 || rec.next().prop('nodeName').toLowerCase() != 'a') return;
+        var nxt = rec.nextAll('a[iri]'); // POI: skip literals
+        if(!nxt || nxt.length <= 0) return;
         //rec.removeClass('record-active');
         //rec.next().addClass('record-active');
-        describe(rec.next().attr('id'), rec.next().find('h6 > span').attr('data-original-title'));
+        describe(nxt.attr('id'), nxt.attr('iri'));
       }
     }
+
+
+        else if(e.keyCode == '189') { // - key
+          var colSz = 2;
+          SIZE_GROUP_BY = colSz;
+          SIZE_SHOW_ME = colSz;
+          SIZE_RESULT_SET = 15;
+          //SIZE_RECORD_VIEWER = colSz;
+          try{
+            localStorage.setItem('colSz.'+screenSz, colSz); // attempt to claim memory before cache uses it all
+            //localStorage.setItem('SIZE_RESULT_SET.'+screenSz, SIZE_RESULT_SET); // attempt to claim memory before cache uses it all
+          }
+          catch(e){
+          }
+          window.location = window.location;
+        }
+        else if(e.keyCode == '187') { // + key
+          var colSz = 3;
+          SIZE_RESULT_SET = 30;
+          SIZE_GROUP_BY = colSz;
+          SIZE_SHOW_ME = colSz;
+          //SIZE_RECORD_VIEWER = colSz;
+          try{
+            localStorage.setItem('colSz.'+screenSz, colSz); // attempt to claim memory before cache uses it all
+            l//ocalStorage.setItem('SIZE_RESULT_SET.'+screenSz, SIZE_RESULT_SET); // attempt to claim memory before cache uses it all
+          }
+          catch(e){
+          }
+          window.location = window.location;
+        }
+
 
 
     else if(e.keyCode == '78') { // N key
@@ -4933,15 +4998,14 @@ return iri;
 function processLabel(label, value, datatype, lang, labelSize){
     if(value == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type') label = 'category'; //POI: type is named Category across the UI
     if(!labelSize) labelSize = SIZE_LABEL;
-    label = label.trim();
 
-    label = label.replaceAll('&#39;', '&apos;');
-
-    if(label.length <= 0){
+    if(!label || label.length <= 0){
       label = value;
     }
 
     if(!label) return ''; 
+    label = label.trim();
+    label = label.replaceAll('&#39;', '&apos;');
 
     while(label.indexOf('/') >= 0){
       if(label.endsWith("/")){
@@ -5595,9 +5659,10 @@ function loadTextResults(xml){
 
 
 
-
+          var iriAttr = '';
 
           if(!datatype) datatype = '';
+          if(datatype == 'uri') iriAttr = ' iri="' + value + '"';
 
           if(value.length <= 0 && label.length <= 0 && ct<= 1){
               //rows += '<tr><td class="up" id="gbr_'+id+'"><span style="font-size:smaller;font-family:Consolas,Courier New; color: #000" id="'+id+'">';
@@ -5672,7 +5737,7 @@ var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'p
                 rows += '</div>';
                 rows += '</button>';
 */
-rows +=  '<a id="'+opts.parentId+'" class="up list-group-item'+((recordActive)?' record-active':'')+'" data-target="#">';
+rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item'+((recordActive)?' record-active':'')+'" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr-1">';
 
 /*
@@ -5999,7 +6064,9 @@ function loadGroupByResults(xml, focusVarName){
               }
           });
 
+          var iriAttr = '';
           if(!datatype) datatype = '';
+          if(datatype == 'uri') iriAttr = ' iri="' + value + '"';
 
           if(value.length <= 0 && label.length <= 0 && ct<= 1){
               //rows += '<tr><td class="up" id="gbr_'+id+'"><span style="font-size:smaller;font-family:Consolas,Courier New; color: #000" id="'+id+'">';
@@ -6025,7 +6092,7 @@ function loadGroupByResults(xml, focusVarName){
                     $('.record-active').removeClass('record-active');
 
 
-    if(showIDN){
+    if(showIDN && false){
 
 detailResultsColumnWidths();
 
@@ -6200,7 +6267,7 @@ var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'p
                 rows += '</div>';
                 rows += '</button>';
 */
-rows +=  '<a id="'+opts.parentId+'" class="up list-group-item'+((recordActive)?' record-active':'')+'" data-target="#">';
+rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item'+((recordActive)?' record-active':'')+'" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left m-0 mr-1">';
 
 /*
@@ -6743,11 +6810,17 @@ function loadCategoriesResults(xml){
               val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
               //console.log(val);
               switch(j){
-                case 0: uri = val; break;
+                case 0: uri = val; shortform = $(this).attr('shortform'); datatype = $(this).attr('datatype'); break;
                 case 1: label = val; break;
                 case 2: ct = val; break;
               }
           });
+
+          var iriAttr = ' iri="' + uri + '"';
+          if(!datatype) datatype = '';
+
+
+
           label = processLabel(label, uri, datatype);
           label = spaceCamelCase(label);
               setLabel(uri, label);
@@ -6760,7 +6833,7 @@ function loadCategoriesResults(xml){
           opts.contextId = id;
 
 
-rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
+rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
                                     //rows +=  '<img alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
 //                                    rows +=  '<span _ngcontent-c9="" class="badge badge-pill badge-info" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addClassFacet(\''+id+'\', \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</span>';
@@ -6961,7 +7034,7 @@ function loadPropertiesResults(xml){
               val = val.replace("&lt;![CDATA[","").replace("]]&gt;","");
               //console.log(val);
               switch(j){
-                case 0: propIRI = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); break;
+                case 0: propIRI = val; shortform = $(this).attr('shortform'); datatype = $(this).attr('datatype'); break;
                 case 1: propLabel = val; break;
                 case 2: ct = val; break;
               }
@@ -6969,6 +7042,10 @@ function loadPropertiesResults(xml){
           //label = processLabel(label, uri, datatype);
           //var id = createId();
           //console.log($(col[0]));
+
+          var iriAttr = ' iri="' + propIRI + '"';
+          if(!datatype) datatype='';
+          
           isCategory = (propIRI == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type');
           var holdRows = '';
           if(isCategory && false){
@@ -6998,7 +7075,7 @@ if(isCategory && false) {
 }
 
 
-rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
+rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
                                     //rows +=  '<img alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
                                    // rows +=  '<span _ngcontent-c9="" class="badge badge-pill badge-info" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addPropertyFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\');">'+ct+'</span>';
@@ -7168,6 +7245,9 @@ function loadPropertiesInResults(xml){
           });
           //label = processLabel(label, uri, datatype);
           //var id = createId();
+          var iriAttr = ' iri="' + propIRI + '"';
+          if(!datatype) datatype = '';
+
           //console.log($(col[0]));
           propLabel = processLabel(propLabel, propIRI, datatype);
               setLabel(propIRI, propLabel);
@@ -7186,7 +7266,7 @@ function loadPropertiesInResults(xml){
           var rowId = opts.parentId;
 
 
-rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
+rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
 
@@ -7316,6 +7396,10 @@ function loadGraphResults(xml){
           //label = processLabel(label, uri, datatype);
           //var id = createId();
           //console.log($(col[0]));
+
+          var iriAttr = ' iri="' + graphIRI + '"';
+          if(!datatype) datatype = '';
+
           if(!graphIRI || graphIRI.length == 0) return; // continue the loop
           graphLabel = processLabel(graphLabel, graphIRI, datatype);
           graphLabel = getLibraryLabel(graphLabel);
@@ -7332,7 +7416,7 @@ function loadGraphResults(xml){
           opts.propLabel = graphLabel;
 
 
-rows +=  '<a id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
+rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
                                // rows +=  '<span class="thumb-sm float-left mr">';
 
 
@@ -7409,13 +7493,254 @@ var showRecordRoles = false;
 var filterRecordViewFields = true;
 var recordRDF;
 
-function loadDescribeResults(xml, opt){
-  recordRDF = xml;
-      $('#angular_recordViewer').empty();
+function loadDescribeResults(xml, opt) {
+    recordRDF = xml;
+    $('#angular_recordViewer').empty();
 
-    if(showIDN){
 
-      /*
+
+    xml = xml.replaceAll('xml\\:lang', 'lang');
+    xml = xml.substring(xml.indexOf('<rdf:'));
+    xml = '<t>' + xml + '</t>';
+
+    var uri = $('#angular_recordViewer').attr('iri');
+    var uriLabel = uri;
+    if (getLabel(uri)) uriLabel = getLabel(uri);
+    uriLabel = processLabel(uriLabel).replace(/\b\w/g, function(l) {
+        return l.toUpperCase()
+    });
+
+    //xml = xml.replaceAll('rdf\\:RDF', 'rdf');
+    showRecordRoles = $('#showMeMenu').val() == VIEW_TYPE_PROPERTIES_IN;
+    var content = "";
+    //var description = $(xml).children('rdf\\:Description')[0];
+    //var triples = description.children();
+    var table = $.createElement('table');
+    table.addClass('table');
+    table.addClass('table-hover');
+    table.addClass('table-striped');
+
+    var header = $.createElement('thead');
+    var body = $.createElement('tbody');
+    table.append(header);
+    var row = $.createElement('tr');
+    var col = $.createElement('th');
+    col.addClass('d-none');
+    col.addClass('d-md-table-cell');
+    col.css('cursor', 'pointer');
+
+    col.append((showRecordRoles ? '... Is A' : 'Field')); //&nbsp;<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\''+ sanitizeLabel(uri)+'\')" class="pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'secondary')+'"></i>
+    row.append(col);
+
+    col = $.createElement('th');
+    col.addClass('d-none');
+    col.addClass('d-md-table-cell');
+    col.text((showRecordRoles ? 'Of This' : 'Content'));
+    row.append(col);
+
+    //header.append(row);
+    var namespaces = {};
+
+    $('rdf\\:RDF', xml).each(function() {
+        // this.attributes is not a plain object, but an array
+        // of attribute nodes, which contain both the name and value
+        for (i = 0; i < this.attributes.length; i++) {
+            var att = this.attributes[i];
+            if (att && att.specified) {
+                var name = att.name;
+                var val = att.value;
+                name = name.replace('xmlns:', '');
+                namespaces[name] = val;
+
+            }
+        }
+
+    });
+
+
+    var desc;
+    var categoryBadges = '';
+    var actions;
+    var long;
+    var lat;
+    var isMovie = false;
+    var isMusic = false;
+    var isAlbum = false;
+    var wikiPage;
+    var name;
+    var title;
+    var headerAdded = false;
+    var hasClass = false;
+    //var hasImage = false;
+    var isOddClass = false;
+    var img;
+    var imgIri;
+    var isFastFood = false;
+
+    var phone;
+    var homepage;
+
+    var rows = '';
+    $('rdf\\:Description', xml).each(function(i) {
+        var subject = $(this).attr('rdf:about');
+        var subLabel = subject;
+        if (getLabel(subject)) subLabel = getLabel(subject);
+        $('*', this).each(function(j) {
+
+            var objectIRI = $(this).attr('rdf:resource');
+            var objLabel = objectIRI;
+            if (getLabel(objectIRI)) objLabel = getLabel(objectIRI);
+            var objectValue = $(this).text();
+            var propLabel = $(this).prop('nodeName').toLowerCase();
+            var qname = propLabel.substring(0, propLabel.indexOf(':'));
+            var fragId = propLabel.substring(propLabel.indexOf(':') + 1);
+            var lang = ($(this).attr('lang') && $(this).attr('lang').length > 0) ? $(this).attr('lang') : undefined;
+            if (lang && lang != 'en') return;
+
+            var isRole = objectIRI == uri; //propLabel.trim().toLowerCase().endsWith('of') || 
+
+            var proplink = $.createElement('a');
+            proplink.attr('href', namespaces[qname] + fragId);
+            setTitleOnElement(proplink, namespaces[qname] + fragId);
+            if (propLabel == 'rdf:type') {
+                if (categoryBadges.length > 0) categoryBadges += '&nbsp;'; //;'<strong class="text-dark">&middot;</strong>';
+
+                var focusTarget = (getMainFocus().attr('class') == ID_QUERY + "") ? 'focusHeader' : 'focusValue';
+                var focusTargetClass = (getMainFocus().attr('class') == ID_QUERY + "") ? 'queryFocus' : 'queryFocusValue';
+                categoryBadges += '<a class="link-category' + ((isOddClass) ? '-odd' : '') + '" onclick="javascript: $(\'#' + focusTarget + '\').removeClass(\'' + focusTargetClass + '\'); var cid = createId(); addClassFacet(cid, \'' + objectIRI + '\', \'' + sanitizeLabel(processLabel(objLabel)) + '\')"> ' + processLabel(objLabel) + ' </a>'; //class="badge badge-inverse fw-semi-bold rounded-0" 
+                propLabel = 'category';
+                isOddClass = !isOddClass;
+                if (objectIRI == 'http://dbpedia.org/class/yago/Movie106613686') isMovie = true;
+                else if (objectIRI == 'http://schema.org/Movie') isMovie = true;
+                else if (objectIRI == 'http://dbpedia.org/ontology/Film') isMovie = true;
+                else if (objectIRI == 'http://www.wikidata.org/entity/Q11424') isMovie = true;
+                else if (objectIRI == 'http://schema.org/TVEpisode') isMovie = true;
+                else if (objectIRI == 'http://www.wikidata.org/entity/Q1983062') isMovie = true;
+
+
+                else if (objectIRI == 'http://dbpedia.org/ontology/Album') {
+                    isMusic = true;
+                    isAlbum = true;
+                } else if (objectIRI == 'http://dbpedia.org/ontology/MusicalWork') isMusic = true;
+                else if (objectIRI == 'http://www.wikidata.org/entity/Q482994') isMusic = true;
+                else if (objectIRI == 'http://dbpedia.org/class/yago/Album106591815') {
+                    isMusic = true;
+                    isAlbum = true;
+                } else if (objectIRI == 'http://linkedgeodata.org/ontology/FastFood') {
+                    isFastFood = true;
+                }
+
+
+            }
+            if ((namespaces[qname] + fragId) == 'http://www.w3.org/2000/01/rdf-schema#label' && !isRole) uriLabel = processLabel(deSanitizeLabel(objectValue)).replace(/\b\w/g, function(l) {
+                return l.toUpperCase()
+            });
+            if ((namespaces[qname] + fragId) == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' && objectIRI == 'http://www.w3.org/2002/07/owl#Class') hasClass = true;
+            if ((namespaces[qname] + fragId) == 'http://xmlns.com/foaf/0.1/depiction') { //|| (namespaces[qname]+fragId) == 'http://dbpedia.org/property/logo'
+                //hasImage = true;
+                img = '<div class="pull-right"><img onclick="javascript:linkOut(\'' + objectIRI + '\');" style="cursor:pointer;width:200px; margin-left:.55em;" class="class="rounded img-thumbnail" src="' + objectIRI + '"/></div>';
+                imgIri = objectIRI;
+            }
+            if (!desc && propLabel.endsWith(':comment')) desc = objectValue;
+            if (!desc && propLabel.endsWith(':abstract')) desc = objectValue;
+            if (!desc && propLabel.endsWith(':description')) desc = objectValue;
+            if (propLabel.endsWith(':long')) long = objectValue;
+            if (propLabel.endsWith(':lat')) lat = objectValue;
+            if (propLabel.endsWith(':name')) name = objectValue;
+            if (propLabel.endsWith(':title')) title = objectValue;
+            if (propLabel.endsWith(':isbn')) {
+                if (!actions) actions = '';
+                else actions += '&nbsp;';
+                actions += '<i style="cursor:pointer" ' + buildTitle('View on Amazon') + ' onclick="javascript:linkOut(\'https://www.amazon.com/s?i=stripbooks&rh=p_66:' + objectValue.replaceAll('-', '') + '\')" class="fa fa-amazon fa-lg"></i>';
+            }
+
+
+            if ((namespaces[qname] + fragId) == 'http://www.w3.org/ns/prov#wasDerivedFrom'.toLowerCase()) wikiPage = (!objectValue) ? objectIRI : objectValue;
+            if ((namespaces[qname] + fragId) == 'http://www.w3.org/ns/prov#hadPrimarySource'.toLowerCase()) wikiPage = (!objectValue) ? objectIRI : objectValue;
+
+            if ((namespaces[qname] + fragId).toLowerCase() == 'http://xmlns.com/foaf/0.1/phone'.toLowerCase()) phone = objectValue;
+            if ((namespaces[qname] + fragId).toLowerCase() == 'http://xmlns.com/foaf/0.1/homepage'.toLowerCase()) homepage = (!objectValue) ? objectIRI : objectValue;
+
+
+            //if(objectIRI == uri && !propLabel.trim().toLowerCase().endsWith('of')) propLabel += ' of';
+            if (propLabel == 'RDF:TYPE') propLabel = 'category';
+            proplink.css('color', '#495057');
+            proplink.css('text-decoration', 'none');
+            propLabel = propLabel.toLowerCase();
+
+
+
+            if (isRole && !showRecordRoles) return;
+            if (!isRole && showRecordRoles) return;
+            var propIRI = namespaces[qname] + fragId;
+            var facets = matchFocusProperties(propIRI);
+            var ctxId = (facets && facets.length > 0) ? facets.attr('class') : createId();
+            if (facets && facets.length > 0) propIRI = facets.attr('iri');
+            if (filterRecordViewFields && (!facets || facets.length <= 0)) return;
+            if (propLabel == 'category') return;
+
+            if (getLabel(propIRI)) propLabel = getLabel(propIRI);
+            proplink.text(propLabel);
+
+            if (!headerAdded) {
+                header.append(row);
+                headerAdded = true;
+            }
+
+            row = $.createElement('tr');
+            col = $.createElement('td');
+            //col.css('font-weight', '400');
+            //col.addClass('d-none');
+            //col.addClass('d-md-table-cell');
+            col.append(proplink);
+            row.append(col);
+
+            col = $.createElement('td');
+            var cid = 'copy_' + createId();
+            col.on('mouseover', function() {
+                $('#' + cid).removeClass('hide');
+            });
+            col.on('mouseout', function() {
+                $('#' + cid).addClass('hide');
+            });
+            //col.attr('width', '100%');
+            //col.addClass('d-none');
+            //col.addClass('d-md-table-cell');
+            if (objectIRI == uri) {
+                if (subject) {
+                    col.html('<a style="text-decoration:none;" href="' + subject + '">' + processLabel(subLabel) + '</a>&nbsp;<img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(subject) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
+                } else col.html(objectValue);
+            } else {
+                if (objectIRI) {
+                    col.html('<a style="text-decoration:none;" href="' + objectIRI + '">' + processLabel(objLabel) + '</a>&nbsp;<img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(objectIRI) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
+                } else {
+                    col.html('<span style="cursor:pointer" class="pull-right icon-literal glyphicon glyphicon-tag" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + sanitizeLabel(objectValue) + '\', \'uri\', \'' + lang + '\');"></span>' + objectValue + '&nbsp;&nbsp;<i id="' + cid + '" onmouseout="$(\'#' + cid + '\').tooltip(\'hide\');$(\'#' + cid + '\').attr(\'data-original-title\', \'Copy to clipboard\');$(\'#' + cid + '\').tooltip();" ' + buildTitle('Copy to clipboard') + ' onclick="javascript:$(\'#' + cid + '\').tooltip(\'hide\');copy(\'' + sanitizeLabel(objectValue) + '\'); $(\'#' + cid + '\').attr(\'data-original-title\', \'Copied\');$(\'#' + cid + '\').tooltip(\'show\');" style="cursor:pointer;" class="hide fa fa-copy fa-sm"></i>');
+                }
+            }
+            row.append(col);
+
+            body.append(row);
+        });
+    });
+
+    uriLabel = uriLabel.replace('\'S', '\'s');
+    uriLabel = uriLabel.replace('\'T', '\'t');
+
+    uriLabel = uriLabel.trim();
+
+    var uriLabalArray = uriLabel.split(' ');
+    var buttonLabel = uriLabel;
+
+
+    if (showIDN) {
+
+        uriLabel = '';
+        for (i = 0; i < uriLabalArray.length; i++) {
+            uriLabel += ' ' + ((i == uriLabalArray.length - 1) ? '<span class="fw-semi-bold">' + uriLabalArray[i] + '</span>' : uriLabalArray[i]);
+        }
+        uriLabel = uriLabel.trim();
+
+        /*
 content += '<section class="search-result-item">';
 content += '<a class="image-link" >';
 content += '<img class="image" src="https://demo.flatlogic.com/sing-app/angular/assets/img/pictures/1.jpg">';
@@ -7436,87 +7761,88 @@ content += '</div>';
 content += '</section>';
 */
 
-//    content += '<section class="widget">';
-//    content += '<div class="widget-body">';
+        //    content += '<section class="widget">';
+        //    content += '<div class="widget-body">';
 
-    content += '<div class="widget-top-overflow text-white">';
-    content += '<div class="height-250 overflow-hidden">';
-    content += '<img class="img-fluid" src="https://demo.flatlogic.com/sing-app/angular/assets/img/pictures/3.jpg">';//assets/img/pictures/19.jpg
-    content += '</div>';
-    content += '<div class="btn-toolbar">';
-    content += '<a class="btn btn-outline btn-sm pull-right" href="#">';
-    content += '<i class="glyphicon glyphicon-glyph-bell mr-xs"></i> Subscribe ';
-    content += '</a>';
-    content += '</div>';
-    content += '</div>';
+        content += '<div class="widget-top-overflow text-white">';
+        content += '<div class="height-250 overflow-hidden">';
+        content += '<img class="img-fluid" src="'+imgIri+'">';//https://demo.flatlogic.com/sing-app/angular/assets/img/pictures/3.jpg //assets/img/pictures/19.jpg
+        content += '</div>';
+        content += '<div class="btn-toolbar">';
+        content += '<a class="btn btn-outline btn-sm pull-right" href="#">';
+        content += '<i class="glyphicon glyphicon-glyph-bell mr-xs"></i> Subscribe ';
+        content += '</a>';
+        content += '</div>';
+        content += '</div>';
 
-    content += '<div class="row">';
-    content += '<div class="col-md-5 col-12 text-center">';
-    content += '<div class="post-user post-user-profile">';
-    content += '<span class="thumb-xl"><img alt="..." class="rounded-circle" src="assets/img/people/a5.jpg"></span>';
-    content += '<h5 class="fw-normal">Digital <span class="fw-semi-bold">Camera</span></h5>';
-    content += '<p>Owner: jnash</p>';
-    content += '<a class="btn btn-danger btn-sm mt-sm" href="#"> &nbsp;Private Message <i class="fa fa-envelope ml-xs"></i>&nbsp; </a>';
-    content += '<ul class="contacts">';
-/*    content += '<li><i class="fa fa-lg fa-phone fa-fw mr-xs"></i><a href="#"> +375 29 555-55-55</a></li>';
-    content += '<li><i class="fa fa-lg fa-envelope fa-fw mr-xs"></i><a href="#"> psmith@example.com</a></li>';*/
-    
-    content += '<li><i class="fa fa-lg fa-map-marker fa-fw mr-xs"></i><a href="#"> Minsk, Belarus</a></li>';
-    content += '</ul>';
-    content += '</div>';
-    content += '</div>';
-    content += '<div class="col-md-7 col-12">';
-    content += '<div class="stats-row stats-row-profile mt text-left">';
-    content += '<div class="stat-item">';
-    content += '<p class="value text-left">9, 700</p>';
-    content += '<h6 class="name">AVI</h6>';
-    content += '</div>';
-    content += '<div class="stat-item">';
-    content += '<p class="value text-left">9.38%</p>';
-    content += '<h6 class="name">Prevelance</h6>';
-    content += '</div>';
-    content += '<div class="stat-item">';
-    content += '<p class="value text-left">842</p>';
-    content += '<h6 class="name">Performance</h6>';
-    content += '</div>';
-    content += '</div>';
-    content += '<p class="text-left mt-lg">';
-    content += '<a class="badge badge-warning rounded-0" href="#"> Device </a>';
-    content += '<a class="badge badge-danger rounded-0 ml-xs" href="#"> Class </a>';
-    content += '<a class="badge badge-default rounded-0 ml-xs" href="#"> Artifact </a>';
-    content += '</p>';
-    content += '<p class="lead mt-lg"> Digital and movie cameras share an optical system, typically using a lens with a variable diaphragm to focus light onto an image pickup device. </p>';
-    content += '<p> The history of the digital camera began with Eugene F. Lally of the Jet Propulsion Laboratory, who was thinking about how to use a mosaic photosensor to capture digital images. His 1961 idea was to take pictures of the planets and stars while travelling through space to give information about the astronauts\' position. </p>';
-    content += '</div>';
-    content += '</div>';
+        content += '<div class="row">';
+        content += '<div class="col-md-5 col-12 text-center">';
+        content += '<div class="post-user post-user-profile">';
+        content += '<span class="thumb-xl"><img alt="..." class="rounded-circle" src="assets/img/people/a5.jpg"></span>';
+        content += '<h5 class="fw-normal">IDN: '+uriLabel+'</h5>';
+        content += '<p>Owner: jnash</p>';
+        content += '<a class="btn btn-danger btn-sm mt-sm" href="#"> &nbsp;Private Message <i class="fa fa-envelope ml-xs"></i>&nbsp; </a>';
+        content += '<ul class="contacts">';
+        /*    content += '<li><i class="fa fa-lg fa-phone fa-fw mr-xs"></i><a href="#"> +375 29 555-55-55</a></li>';
+            content += '<li><i class="fa fa-lg fa-envelope fa-fw mr-xs"></i><a href="#"> psmith@example.com</a></li>';*/
+
+        content += '<li><i class="fa fa-lg fa-map-marker fa-fw mr-xs"></i><a href="#"> Minsk, Belarus</a></li>';
+        content += '</ul>';
+        content += '</div>';
+        content += '</div>';
+        content += '<div class="col-md-7 col-12">';
+        content += '<div class="stats-row stats-row-profile mt text-left">';
+        content += '<div class="stat-item">';
+        content += '<p class="value text-left">9, 700</p>';
+        content += '<h6 class="name">AVI</h6>';
+        content += '</div>';
+        content += '<div class="stat-item">';
+        content += '<p class="value text-left">9.38%</p>';
+        content += '<h6 class="name">Prevelance</h6>';
+        content += '</div>';
+        content += '<div class="stat-item">';
+        content += '<p class="value text-left">842</p>';
+        content += '<h6 class="name">Performance</h6>';
+        content += '</div>';
+        content += '</div>';
+        content += '<p class="text-left mt-lg">';
+        content += '<a class="badge badge-warning rounded-0" href="#"> Identity </a>';
+        content += '<a class="badge badge-danger rounded-0 ml-xs" href="#"> Genesis </a>';
+        content += '<a class="badge badge-default rounded-0 ml-xs" href="#"> Not claimed </a>';
+        content += '</p>';
+        if(desc) content += '<p class="lead mt-lg"> '+desc+' </p>';
+        content += '<legend> About </legend>';
+        content += '<p>An identity node (IDN) is a non-fungible token that represents a data asset (e.g. the URI of a physical location). VIOS Network data assets are assigned unique identifiers which are linked to a non-fungible token called an Identity Node (aka IDN). The IDN is a VIP 181 token. </p>';
+        content += '</div>';
+        content += '</div>';
 
 
 
-/*
+        /*
 
-    content += '<div class="widget-top-overflow text-white">';
-    content += '<div class="height-250 overflow-hidden bg-info">';
-    content += '<!--<img class="img-responsive" src="assets/img/pictures/19.jpg">-->';//assets/img/pictures/19.jpg
-    content += '</div>';
-    content += '<div class="btn-toolbar">';
-    content += '<a class="btn btn-outline btn-sm pull-right" href="#">';
-    content += '<i class="glyphicon glyphicon-glyph-bell mr-xs"></i> Subscribe ';
-    content += '</a>';
-    content += '</div>';
-    content += '</div>';
+            content += '<div class="widget-top-overflow text-white">';
+            content += '<div class="height-250 overflow-hidden bg-info">';
+            content += '<!--<img class="img-responsive" src="assets/img/pictures/19.jpg">-->';//assets/img/pictures/19.jpg
+            content += '</div>';
+            content += '<div class="btn-toolbar">';
+            content += '<a class="btn btn-outline btn-sm pull-right" href="#">';
+            content += '<i class="glyphicon glyphicon-glyph-bell mr-xs"></i> Subscribe ';
+            content += '</a>';
+            content += '</div>';
+            content += '</div>';
 
-    content += '<div class="row">';
-    content += '<div class="col-md-5 col-12 text-center">';
-    content += '<div class="post-user post-user-profile">';
-    content += '<span class="thumb-xl"><img alt="..." class="rounded-circle" src="assets/img/people/a5.jpg"></span>';
-    content += '<h5 class="fw-normal">Smart Folder <span class="fw-semi-bold">Request</span></h5>';
-    content += '<p>Sponsor: jnash</p>';
-    content += '<a class="btn btn-danger btn-sm mt-sm" href="#"> &nbsp;Private Message <i class="fa fa-envelope ml-xs mr-2"></i>&nbsp; </a>';
-    content += '<ul class="contacts">';
-    */
-/*    content += '<li><i class="fa fa-lg fa-phone fa-fw mr-xs"></i><a href="#"> +375 29 555-55-55</a></li>';
-    content += '<li><i class="fa fa-lg fa-envelope fa-fw mr-xs"></i><a href="#"> psmith@example.com</a></li>';*/
-    /*
+            content += '<div class="row">';
+            content += '<div class="col-md-5 col-12 text-center">';
+            content += '<div class="post-user post-user-profile">';
+            content += '<span class="thumb-xl"><img alt="..." class="rounded-circle" src="assets/img/people/a5.jpg"></span>';
+            content += '<h5 class="fw-normal">Smart Folder <span class="fw-semi-bold">Request</span></h5>';
+            content += '<p>Sponsor: jnash</p>';
+            content += '<a class="btn btn-danger btn-sm mt-sm" href="#"> &nbsp;Private Message <i class="fa fa-envelope ml-xs mr-2"></i>&nbsp; </a>';
+            content += '<ul class="contacts">';
+            */
+        /*    content += '<li><i class="fa fa-lg fa-phone fa-fw mr-xs"></i><a href="#"> +375 29 555-55-55</a></li>';
+            content += '<li><i class="fa fa-lg fa-envelope fa-fw mr-xs"></i><a href="#"> psmith@example.com</a></li>';*/
+        /*
     content += '<li><i class="fa fa-lg fa-map-marker fa-fw mr-xs"></i><a href="#"> Minsk, Belarus</a></li>';
     content += '</ul>';
     content += '</div>';
@@ -7547,501 +7873,275 @@ content += '</section>';
     content += '</div>';
 */
 
-    $('#angular_recordViewer').removeClass('embed-responsive-1by1');
-    $('#angular_recordViewer').append(content);
+        $('#angular_recordViewer').removeClass('embed-responsive-1by1');
+        $('#angular_recordViewer').append(content);
 
-//    content += '</div>';
-//    content += '</section>';
+        //    content += '</div>';
+        //    content += '</section>';
 
     } //
-
     else {
-      xml = xml.replaceAll('xml\\:lang', 'lang');
-      xml = xml.substring(xml.indexOf('<rdf:'));
-      xml = '<t>' + xml + '</t>';
 
-      var uri = $('#angular_recordViewer').attr('iri');
-      var uriLabel = uri;
-      if(getLabel(uri)) uriLabel = getLabel(uri);
-      uriLabel = processLabel(uriLabel).replace(/\b\w/g, function(l){ return l.toUpperCase() }) ;    
-
-    //xml = xml.replaceAll('rdf\\:RDF', 'rdf');
-      showRecordRoles = $('#showMeMenu').val() == VIEW_TYPE_PROPERTIES_IN;
-      var content = "";
-      //var description = $(xml).children('rdf\\:Description')[0];
-      //var triples = description.children();
-      var table = $.createElement('table');
-      table.addClass('table');
-      table.addClass('table-hover');
-      table.addClass('table-striped');
-
-      var header = $.createElement('thead');
-      var body = $.createElement('tbody');
-      table.append(header);
-      var row = $.createElement('tr');
-      var col = $.createElement('th');
-      col.addClass('d-none');
-      col.addClass('d-md-table-cell');
-      col.css('cursor', 'pointer');
-
-      col.append((showRecordRoles ? '... Is A' : 'Field')); //&nbsp;<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\''+ sanitizeLabel(uri)+'\')" class="pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'secondary')+'"></i>
-      row.append(col);
-
-      col = $.createElement('th');
-      col.addClass('d-none');
-      col.addClass('d-md-table-cell');
-      col.text((showRecordRoles ? 'Of This' : 'Content'));
-      row.append(col);
-
-      //header.append(row);
-      var namespaces = {};
-
-      $('rdf\\:RDF', xml).each(function() {
-        // this.attributes is not a plain object, but an array
-        // of attribute nodes, which contain both the name and value
-        for(i=0; i < this.attributes.length; i++){
-          var att = this.attributes[i];
-          if(att && att.specified) {
-            var name = att.name;
-            var val = att.value;
-            name = name.replace('xmlns:', '');
-            namespaces[name] = val;
-
-          }
+        if (isMovie) {
+            if (!actions) actions = '';
+            else actions += '&nbsp;';
+            var mtitle = name;
+            if (!mtitle) mtitle = title;
+            if (!mtitle) mtitle = uriLabel;
+            actions += '<i style="cursor:pointer" ' + buildTitle('View on IMDB') + ' onclick="javascript:linkOut(\'http://www.imdb.com/find?q=' + mtitle.replace('\'', '%27') + '\')" class="fa fa-imdb fa-lg"></i>';
+        }
+        if (isMusic) {
+            if (!actions) actions = '';
+            else actions += '&nbsp;';
+            var mtitle = name;
+            if (!mtitle) mtitle = title;
+            if (!mtitle) mtitle = uriLabel;
+            var albumStr = (isAlbum) ? '&type=album' : '';
+            actions += '<i style="cursor:pointer" ' + buildTitle('View in iTunes') + ' onclick="javascript:linkOut(\'https://linkmaker.itunes.apple.com/en-us?term=' + mtitle.replace('\'', '%27') + albumStr + '\')" class="fa fa-apple fa-lg"></i>';
         }
 
-      });
+        var tools;
+        if (wikiPage) {
+            if (!tools) tools = '';
+            else tools += '&nbsp;';
+            //tools += '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer"  style="cursor:pointer" '+buildTitle('View in Wikipedia')+' onclick="javascript:linkOut(\''+wikiPage+'\')" class="fa fa-wikipedia-w fa-lg"></i>';        
+            $('#angular_recordViewer').attr('src', wikiPage);
+        }
 
 
-      var desc;
-      var categoryBadges = '';
-      var actions;
-      var long;
-      var lat;
-      var isMovie = false;
-      var isMusic = false;
-      var isAlbum = false;
-      var wikiPage;
-      var name;
-      var title;
-      var headerAdded = false;
-      var hasClass = false;
-      //var hasImage = false;
-      var isOddClass = false;
-      var img;
-      var isFastFood = false;
+        uriLabel = '';
+        for (i = 0; i < uriLabalArray.length; i++) {
+            uriLabel += ' ' + ((i == uriLabalArray.length - 1) ? '<span class="fw-semi-bold">' + uriLabalArray[i] + '</span>' : uriLabalArray[i]);
+        }
+        uriLabel = uriLabel.trim();
 
-      var phone;
-      var homepage;
+        $('#angular_recordViewer').append('<h3 onclick="javascript:linkOut(\'' + uri + '\');" ' + buildTitle('Visit ' + sanitizeLabel(uri)) + ' style="cursor:pointer;padding-top:1em; padding-left:.55rem; padding-right:.55rem;">' + uriLabel + '</h3>' + (tools ? tools : '') + '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \'' + sanitizeLabel(uri) + '\')" class="p-2 glyphicon glyphicon-filter text-' + ((filterRecordViewFields) ? 'info' : 'muted') + '"></i>'); //((body.children().length <= 0 && filterRecordViewFields)?'<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = false; describe(\''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-info"></i>':''));
+        if (desc) {
+            $('#angular_recordViewer').append('<div style="padding-left:.55rem; padding-right:.55rem; ">' + (img ? img + desc : desc) + '</div>');
+        } else if (img) {
+            $('#angular_recordViewer').append('<div style="padding-left:.55rem; padding-right:.55rem; ">' + img + '</div>');
+        }
 
-      var rows = '';
-      $('rdf\\:Description', xml).each(function(i){
-        var subject = $(this).attr('rdf:about');
-        var subLabel = subject;
-        if(getLabel(subject)) subLabel = getLabel(subject);
-        $('*', this).each(function(j){
-
-          var objectIRI = $(this).attr('rdf:resource');
-          var objLabel = objectIRI;
-          if(getLabel(objectIRI)) objLabel = getLabel(objectIRI);
-          var objectValue = $(this).text();
-          var propLabel = $(this).prop('nodeName').toLowerCase();
-          var qname = propLabel.substring(0, propLabel.indexOf(':'));
-          var fragId = propLabel.substring(propLabel.indexOf(':') + 1);
-          var lang = ( $(this).attr('lang') && $(this).attr('lang').length > 0 ) ? $(this).attr('lang') : undefined ;
-          if(lang && lang != 'en') return;
-
-          var isRole = objectIRI == uri; //propLabel.trim().toLowerCase().endsWith('of') || 
-
-          var proplink = $.createElement('a');
-          proplink.attr('href', namespaces[qname]+fragId);
-          setTitleOnElement(proplink, namespaces[qname]+fragId);
-          if(propLabel == 'rdf:type'){
-            if(categoryBadges.length > 0) categoryBadges += '&nbsp;';//;'<strong class="text-dark">&middot;</strong>';
-
-            var focusTarget = (getMainFocus().attr('class') == ID_QUERY+"") ? 'focusHeader' : 'focusValue';
-            var focusTargetClass = (getMainFocus().attr('class') == ID_QUERY+"") ? 'queryFocus' : 'queryFocusValue';
-            categoryBadges += '<a class="link-category'+((isOddClass)? '-odd' :'')+'" onclick="javascript: $(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\'); var cid = createId(); addClassFacet(cid, \''+objectIRI+'\', \''+sanitizeLabel(processLabel(objLabel))+'\')"> '+processLabel(objLabel)+' </a>'; //class="badge badge-inverse fw-semi-bold rounded-0" 
-            propLabel = 'category';
-            isOddClass = !isOddClass;
-            if(objectIRI == 'http://dbpedia.org/class/yago/Movie106613686') isMovie = true;
-            else if(objectIRI == 'http://schema.org/Movie')  isMovie = true;
-            else if(objectIRI == 'http://dbpedia.org/ontology/Film')  isMovie = true;
-            else if(objectIRI == 'http://www.wikidata.org/entity/Q11424')  isMovie = true;
-            else if(objectIRI == 'http://schema.org/TVEpisode')  isMovie = true;
-            else if(objectIRI == 'http://www.wikidata.org/entity/Q1983062')  isMovie = true;
-
-
-            else if(objectIRI == 'http://dbpedia.org/ontology/Album')  {isMusic = true; isAlbum=true;}
-            else if(objectIRI == 'http://dbpedia.org/ontology/MusicalWork')  isMusic = true;
-            else if(objectIRI == 'http://www.wikidata.org/entity/Q482994')  isMusic = true;
-            else if(objectIRI == 'http://dbpedia.org/class/yago/Album106591815')  {isMusic = true; isAlbum=true;}
-
-            else if(objectIRI == 'http://linkedgeodata.org/ontology/FastFood')  {isFastFood = true;}
-
-
-          }
-          if((namespaces[qname]+fragId) == 'http://www.w3.org/2000/01/rdf-schema#label' && !isRole) uriLabel = processLabel(  deSanitizeLabel(objectValue)).replace(/\b\w/g, function(l){ return l.toUpperCase() }) ;
-          if((namespaces[qname]+fragId) == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' && objectIRI == 'http://www.w3.org/2002/07/owl#Class') hasClass = true;
-          if((namespaces[qname]+fragId) == 'http://xmlns.com/foaf/0.1/depiction' ) { //|| (namespaces[qname]+fragId) == 'http://dbpedia.org/property/logo'
-            //hasImage = true;
-            img = '<div class="pull-right"><img onclick="javascript:linkOut(\''+objectIRI+'\');" style="cursor:pointer;width:200px; margin-left:.55em;" class="class="rounded img-thumbnail" src="'+objectIRI+'"/></div>';
-          }
-          if(!desc && propLabel.endsWith(':comment')) desc = objectValue;
-          if(!desc && propLabel.endsWith(':abstract')) desc = objectValue;
-          if(!desc && propLabel.endsWith(':description')) desc = objectValue;
-          if(propLabel.endsWith(':long')) long = objectValue;
-          if(propLabel.endsWith(':lat')) lat = objectValue;
-          if(propLabel.endsWith(':name')) name = objectValue;
-          if(propLabel.endsWith(':title')) title = objectValue;
-          if(propLabel.endsWith(':isbn')) {
-            if(!actions) actions = '';
+        if (long && lat) {
+            if (!actions) actions = '';
             else actions += '&nbsp;';
-            actions += '<i style="cursor:pointer" '+buildTitle('View on Amazon')+' onclick="javascript:linkOut(\'https://www.amazon.com/s?i=stripbooks&rh=p_66:'+objectValue.replaceAll('-', '')+'\')" class="fa fa-amazon fa-lg"></i>';
-          }
-
-
-          if((namespaces[qname]+fragId) == 'http://www.w3.org/ns/prov#wasDerivedFrom'.toLowerCase())  wikiPage = (!objectValue) ? objectIRI : objectValue;
-          if((namespaces[qname]+fragId) == 'http://www.w3.org/ns/prov#hadPrimarySource'.toLowerCase())  wikiPage = (!objectValue) ? objectIRI : objectValue;
-
-          if((namespaces[qname]+fragId).toLowerCase() == 'http://xmlns.com/foaf/0.1/phone'.toLowerCase())  phone = objectValue;
-          if((namespaces[qname]+fragId).toLowerCase() == 'http://xmlns.com/foaf/0.1/homepage'.toLowerCase())  homepage = (!objectValue) ? objectIRI : objectValue;
-
-
-          //if(objectIRI == uri && !propLabel.trim().toLowerCase().endsWith('of')) propLabel += ' of';
-          if(propLabel == 'RDF:TYPE') propLabel = 'category';
-          proplink.css('color', '#495057');
-          proplink.css('text-decoration','none');
-          propLabel = propLabel.toLowerCase();
+            actions += '<i style="cursor:pointer" ' + buildTitle('View on Google Maps') + ' onclick="javascript:linkOut(\'https://www.google.com/maps/search/?api=1&query=' + lat + ',' + long + '\')" class="fa fa-map-marker fa-lg"></i>';
+        }
 
 
 
-          if(isRole && !showRecordRoles) return;
-          if(!isRole && showRecordRoles) return;
-          var propIRI = namespaces[qname]+fragId;
-          var facets = matchFocusProperties(propIRI);
-          var ctxId = (facets && facets.length > 0) ? facets.attr('class') : createId();
-          if(facets && facets.length > 0) propIRI = facets.attr('iri');
-          if(filterRecordViewFields && (!facets || facets.length <= 0) ) return;
-          if(propLabel == 'category') return;
+        if (actions && actions.length > 0) {
+            content += $('#angular_recordViewer').append('<legend class="m-2 text-left text-dark">Services</legend><div style="padding-left:.55rem; padding-right:.55rem; " >' + actions + '</div>');
+        }
+        if (categoryBadges.length > 0) {
+            content += $('#angular_recordViewer').append('<legend class="m-2 text-left text-dark">Categories</legend><div style="padding-left:.55rem; padding-right:.55rem; " >' + categoryBadges + '</div>');
+        }
 
-          if(getLabel(propIRI)) propLabel = getLabel(propIRI);
-          proplink.text(propLabel);
 
-          if(!headerAdded){
-            header.append(row);
-            headerAdded = true;
-          }
 
-          row = $.createElement('tr');
-          col = $.createElement('td');
-          //col.css('font-weight', '400');
-          //col.addClass('d-none');
-          //col.addClass('d-md-table-cell');
-          col.append(proplink);
-          row.append(col);
+        table.append(body);
+        $('#angular_recordViewer').removeClass('embed-responsive-1by1');
+        $('#angular_recordViewer').append('<p/>');
+        $('#angular_recordViewer').append('<p/>');
+        var tabs = '<div class="clearfix"><ul class="nav nav-tabs float-left" id="infoTabButton" role="tablist"> ';
+        if (isFastFood) {
+            tabs += '<li class="nav-item"><a aria-controls="menu" aria-expanded="false" class="nav-link" data-toggle="tab" href="#menu" id="menu-tab" role="tab">Menu</a></li>';
+            tabs += '<li class="nav-item"><a aria-controls="review" aria-expanded="false" class="nav-link" data-toggle="tab" href="#review" id="review-tab" role="tab">Reviews</a></li>';
+        }
+        tabs += '<li class="nav-item"> <a aria-controls="info" aria-expanded="true" class="nav-link active" data-toggle="tab" href="#info" id="info-tab" role="tab">Info</a></li>';
+        tabs += '<li class="nav-item"><a aria-controls="tools" aria-expanded="false" class="nav-link" data-toggle="tab" href="#tools" id="tools-tab" role="tab">Options</a></li>';
+        tabs += '</ul></div>';
+        $('#angular_recordViewer').append(tabs);
+        var d = $.createElement('div');
+        d.addClass('tab-content');
+        d.attr('id', 'infoTab');
+        //.append('<div class="tab-content" id="infoTab">');
+        var d2 = $.createElement('div');
+        d2.attr('aria-expanded', 'true');
+        d2.attr('aria-labelledby', 'info-tab');
+        d2.addClass('tab-pane');
+        d2.addClass('active');
+        d2.addClass('in');
+        d2.addClass('clearfix');
+        d2.css('padding-top', '1em');
+        d2.css('padding-left', '0px');
+        d2.css('padding-right', '0px');
+        d2.attr('id', 'info');
+        d2.attr('role', 'tabpanel');
+        //      var d2 = $('#angular_recordViewer').append('<div aria-expanded="true" aria-labelledby="info-tab" class="tab-pane active in clearfix" style="padding-top:0px" id="info" role="tabpanel">');
+        //$('#angular_recordViewer').append('<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');
+        d2.append(table);
+        d.append(d2);
+        var d3 = $.createElement('div');
+        //d3.attr('aria-expanded', 'true');
+        d3.attr('aria-labelledby', 'tools-tab');
+        d3.addClass('tab-pane');
+        //d3.addClass('active');
+        //d3.addClass('in');
+        //d3.addClass('clearfix');
+        d3.css('padding-top', '1em');
+        d3.css('padding-left', '0px');
+        d3.css('padding-right', '0px');
+        d3.attr('id', 'tools');
+        d3.attr('role', 'tabpanel');
+        //d3.css('background-color', '#f9fbfd');
 
-          col = $.createElement('td');
-              var cid = 'copy_' + createId();
-              col.on('mouseover', function(){
-                $('#'+cid).removeClass('hide');
-              });
-              col.on('mouseout', function(){
-                $('#'+cid).addClass('hide');
-              });
-          //col.attr('width', '100%');
-          //col.addClass('d-none');
-          //col.addClass('d-md-table-cell');
-          if(objectIRI == uri){
-            if(subject) {
-              col.html('<a style="text-decoration:none;" href="'+subject + '">' +processLabel(subLabel)+ '</a>&nbsp;<img style="cursor:pointer" class="pull-right" src="'+getFaviconUrl(subject)+'" onclick="javascript: remove(\''+facets.attr('class')+'\'); var pid = createId(); setPropertyValue(pid, \''+NODE_TYPE_PROPERTY+'\', \''+ctxId+'\', \''+propIRI+'\', \''+propLabel+'\', \''+objectIRI+'\', \''+processLabel(objLabel)+'\', \'uri\', \''+lang+'\');"/>');
-            }        
-            else col.html(objectValue);
-          }
-          else {
-            if(objectIRI) {
-              col.html('<a style="text-decoration:none;" href="'+objectIRI + '">' +processLabel(objLabel)+ '</a>&nbsp;<img style="cursor:pointer" class="pull-right" src="'+getFaviconUrl(objectIRI)+'" onclick="javascript: remove(\''+facets.attr('class')+'\'); var pid = createId(); setPropertyValue(pid, \''+NODE_TYPE_PROPERTY+'\', \''+ctxId+'\', \''+propIRI+'\', \''+propLabel+'\', \''+objectIRI+'\', \''+processLabel(objLabel)+'\', \'uri\', \''+lang+'\');"/>');
-            }        
-            else { 
-              col.html('<span style="cursor:pointer" class="pull-right icon-literal glyphicon glyphicon-tag" onclick="javascript: remove(\''+facets.attr('class')+'\'); var pid = createId(); setPropertyValue(pid, \''+NODE_TYPE_PROPERTY+'\', \''+ctxId+'\', \''+propIRI+'\', \''+propLabel+'\', \''+objectValue+'\', \''+sanitizeLabel(objectValue)+'\', \'uri\', \''+lang+'\');"></span>' + objectValue + '&nbsp;&nbsp;<i id="'+cid+'" onmouseout="$(\'#'+cid+'\').tooltip(\'hide\');$(\'#'+cid+'\').attr(\'data-original-title\', \'Copy to clipboard\');$(\'#'+cid+'\').tooltip();" '+buildTitle('Copy to clipboard')+' onclick="javascript:$(\'#'+cid+'\').tooltip(\'hide\');copy(\''+sanitizeLabel(objectValue)+'\'); $(\'#'+cid+'\').attr(\'data-original-title\', \'Copied\');$(\'#'+cid+'\').tooltip(\'show\');" style="cursor:pointer;" class="hide fa fa-copy fa-sm"></i>');
+
+
+        var accordion = '';
+        accordion += '<accordion class="mb-lg show panel-group" id="accordion276" role="tablist" style="display: block" ng-reflect-close-others="true" aria-multiselectable="true">';
+        accordion += '<accordion-group class="panel" style="display: block">';
+        accordion += '<div class="panel card panel-default" ng-reflect-klass="panel card" ng-reflect-ng-class="panel-default">';
+        accordion += '<div class="panel-heading card-header" role="tab"><div class="panel-title">';
+        accordion += '<div class="accordion-toggle" role="button" aria-expanded="false">';
+        accordion += '<!--bindings={}-->';
+        accordion += '<div accordion-heading=""> General <i class="fa fa-angle-down float-right"></i>';
+        accordion += '</div>';
+        accordion += '</div>';
+        accordion += '</div>';
+        accordion += '</div>';
+        accordion += '<div class="panel-collapse collapse" role="tabpanel" ng-reflect-collapse="true" aria-expanded="false" aria-hidden="true" style="display: none; overflow: visible; height: auto;">';
+        accordion += '<div class="panel-body card-block card-body"> Get base styles and flexible support for collapsible components like accordions and navigation. Using the collapse plugin, we built a simple accordion by extending the panel component. </div>';
+
+
+
+
+        var recordToolBar = '';
+        var opt_pad = (screenSz < SIZE_MAX_SCREEN) ? 10 : 30;
+        recordToolBar += '<div class="clearfix" style="padding-left:' + opt_pad + 'em; padding-right:' + opt_pad + 'em;">';
+        //recordToolBar += '<div class="btn-toolbar">';
+        var sz = lengthInUtf8Bytes(recordRDF);
+        recordToolBar += '<button _ngcontent-c9="" class="btn btn-block btn-inverse mb-xs" role="button" onclick="javascript:downloadRecordRDF();">';
+        recordToolBar += 'Download Record - ' + getBytesDenomination(sz) + ' ' + getBytesDenominationUnit(sz) + '';
+        recordToolBar += '&nbsp;&nbsp;<i class="fa fa-file-code-o"></i>';
+        recordToolBar += '</button>';
+        if (isFastFood) {
+            if (phone) {
+
+                /*    
+                    recordToolBar += '<button _ngcontent-c9="" class="btn btn-primary m-1 mb-xs" role="button" href="javascript:downloadRecordRDF();">';
+                    recordToolBar += 'Call for takeout';
+                    recordToolBar += '&nbsp;&nbsp;<i class="fa fa-phone"></i>';
+                    recordToolBar += '</button>';
+                */
+                recordToolBar += '<a class="btn btn-block btn-primary" href="tel:' + phone + '">';
+                recordToolBar += '  Call for takeout - ' + phone;
+                recordToolBar += '&nbsp;&nbsp;<i class="fa fa-phone"></i>';
+                recordToolBar += '</a>';
             }
-          }
-          row.append(col);
-
-          body.append(row);
-        });
-      });
-
-      uriLabel = uriLabel.replace('\'S', '\'s');
-      uriLabel = uriLabel.replace('\'T', '\'t');
-
-      uriLabel = uriLabel.trim();
-
-      var uriLabalArray = uriLabel.split(' ');
-      var buttonLabel = uriLabel;
-
-
-      if(isMovie){
-        if(!actions) actions = '';
-        else actions += '&nbsp;';
-        var mtitle = name;
-        if(!mtitle) mtitle = title;
-        if(!mtitle) mtitle = uriLabel;
-        actions += '<i style="cursor:pointer" '+buildTitle('View on IMDB')+' onclick="javascript:linkOut(\'http://www.imdb.com/find?q='+mtitle.replace('\'', '%27')+'\')" class="fa fa-imdb fa-lg"></i>';        
-      }
-      if(isMusic){
-        if(!actions) actions = '';
-        else actions += '&nbsp;';
-        var mtitle = name;
-        if(!mtitle) mtitle = title;
-        if(!mtitle) mtitle = uriLabel;
-        var albumStr = (isAlbum) ? '&type=album' : '';
-        actions += '<i style="cursor:pointer" '+buildTitle('View in iTunes')+' onclick="javascript:linkOut(\'https://linkmaker.itunes.apple.com/en-us?term='+mtitle.replace('\'', '%27')+albumStr+'\')" class="fa fa-apple fa-lg"></i>';        
-      }
-
-      var tools;
-      if(wikiPage){
-        if(!tools) tools = '';
-        else tools += '&nbsp;';
-        //tools += '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer"  style="cursor:pointer" '+buildTitle('View in Wikipedia')+' onclick="javascript:linkOut(\''+wikiPage+'\')" class="fa fa-wikipedia-w fa-lg"></i>';        
-        $('#angular_recordViewer').attr('src', wikiPage);
-      }
+            if (homepage) {
+                /*
+                recordToolBar += '<button _ngcontent-c9="" class="btn btn-primary m-1 mb-xs" role="button" onclick="javascript:downloadRecordRDF();">';
+                recordToolBar += 'Order online';
+                recordToolBar += '&nbsp;&nbsp;<i class="fa fa-cutlery"></i>';
+                recordToolBar += '</button>';
+                */
+                //if(phone) recordToolBar += '&nbsp';
+                recordToolBar += '<a class="btn btn-block btn-primary" href="' + homepage + '">';
+                recordToolBar += '  Order online - ' + getHostName(homepage);
+                recordToolBar += '&nbsp;&nbsp;<i class="fa fa-cutlery"></i>';
+                recordToolBar += '</a>';
+            }
+        }
+        //recordToolBar += '<a class="btn btn-default" href="#">&nbsp;&nbsp;Dance?&nbsp;&nbsp;</a>';
+        //recordToolBar += '</div>';
+        recordToolBar += '</div>';
 
 
-      uriLabel = '';
-      for(i =0; i < uriLabalArray.length; i++){
-        uriLabel += ' ' + ( (i == uriLabalArray.length - 1) ? '<span class="fw-semi-bold">' +uriLabalArray[i]+ '</span>' : uriLabalArray[i] );
-      }
-      uriLabel = uriLabel.trim();
+        accordion += '</div>';
+        accordion += '</div>';
+        accordion += '</accordion-group>';
+        accordion += '<accordion-group class="panel" style="display: block">';
+        accordion += '<div class="panel card panel-default" ng-reflect-klass="panel card" ng-reflect-ng-class="panel-default"><div class="panel-heading card-header" role="tab">';
+        accordion += '<div class="panel-title">';
+        accordion += '<div class="accordion-toggle" role="button" aria-expanded="false">';
+        accordion += '<!--bindings={}--><div accordion-heading=""> Order Food <i class="fa fa-angle-down float-right"></i>';
+        accordion += '</div>';
+        accordion += '</div>';
+        accordion += '</div>';
+        accordion += '</div>';
+        accordion += '<div class="panel-collapse collapse" role="tabpanel" ng-reflect-collapse="true" aria-expanded="false" aria-hidden="true" style="display: none; overflow: visible; height: auto;">';
+        accordion += '<div class="panel-body card-block card-body">';
+        //accordion += '<p>Why don't use Lore Ipsum? I think if some one says don't use lore ipsum it's very controversial point. I think the opposite actually. Everyone knows what is lore ipsum - it is easy to understand if text is lore ipsum. You'll automatically skip - because you know - it's just non-informative stub. But what if there some text like this one? You start to read it! But the goal of this text is different. The goal is the example. So a bit of Lore Ipsum is always very good practice. Keep it in mind!</p>';';
+        accordion += '</div>';
+        accordion += '</div>';
+        accordion += '</div>';
+        accordion += '</accordion-group>';
+        accordion += '<accordion-group class="panel" style="display: block">';
+        accordion += '<div class="panel card panel-default" ng-reflect-klass="panel card" ng-reflect-ng-class="panel-default"><div class="panel-heading card-header" role="tab"><div class="panel-title">';
+        accordion += '<div class="accordion-toggle" role="button" aria-expanded="false">';
+        accordion += '<!--bindings={}-->';
+        accordion += '<div accordion-heading=""> Check It <i class="fa fa-angle-down float-right"></i>';
+        accordion += '</div>';
+        accordion += '</div>';
+        accordion += '</div>';
+        accordion += '</div>';
+        accordion += '<div class="panel-collapse collapse" role="tabpanel" ng-reflect-collapse="true" aria-expanded="false" aria-hidden="true" style="display: none; overflow: visible; height: auto;">';
+        accordion += '<div class="panel-body card-block card-body"> ';
+        //accordion += 'Why don't use Lore Ipsum? I think if some one says don't use lore ipsum it's very controversial point. I think the opposite actually. ';
+        accordion += '</div>';
+        accordion += '</div>';
+        accordion += '</div>';
+        accordion += '</accordion-group>';
+        accordion += '</accordion>';
 
-      $('#angular_recordViewer').append('<h3 onclick="javascript:linkOut(\''+uri+'\');" '+buildTitle('Visit ' + sanitizeLabel(uri))+' style="cursor:pointer;padding-top:1em; padding-left:.55rem; padding-right:.55rem;">'+uriLabel+'</h3>'+(tools?tools:'')+ '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');//((body.children().length <= 0 && filterRecordViewFields)?'<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = false; describe(\''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-info"></i>':''));
-      if(desc) {
-        $('#angular_recordViewer').append('<div style="padding-left:.55rem; padding-right:.55rem; ">'+(img ? img + desc : desc)+'</div>');
-      }
-      else if(img){
-        $('#angular_recordViewer').append('<div style="padding-left:.55rem; padding-right:.55rem; ">'+img+'</div>');
-      }
+        //$('#angular_recordViewer').append(accordion);
+        //d3.append(accordion);
+        d3.append(recordToolBar);
+        d.append(d3);
 
-      if(long && lat){
-        if(!actions) actions = '';
-        else actions += '&nbsp;';
-        actions += '<i style="cursor:pointer" '+buildTitle('View on Google Maps')+' onclick="javascript:linkOut(\'https://www.google.com/maps/search/?api=1&query='+lat+','+long+'\')" class="fa fa-map-marker fa-lg"></i>';
-      }
+        if (isFastFood) {
+            var d4 = $.createElement('div');
+            //d4.attr('aria-expanded', 'true');
+            d4.attr('aria-labelledby', 'menu-tab');
+            d4.addClass('tab-pane');
+            //d4.addClass('active');
+            //d4.addClass('in');
+            //d4.addClass('clearfix');
+            d4.css('padding-top', '1em');
+            d4.css('padding-left', '0px');
+            d4.css('padding-right', '0px');
+            d4.attr('id', 'menu');
+            d4.attr('role', 'tabpanel');
+            //      var d2 = $('#angular_recordViewer').append('<div aria-expanded="true" aria-labelledby="info-tab" class="tab-pane active in clearfix" style="padding-top:0px" id="info" role="tabpanel">');
+            //$('#angular_recordViewer').append('<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');
+            //d4.append(table);
+            d4.append('<div>');
+            d.append(d4);
 
+            d4 = $.createElement('div');
+            //d4.attr('aria-expanded', 'true');
+            d4.attr('aria-labelledby', 'review-tab');
+            d4.addClass('tab-pane');
+            //d4.addClass('active');
+            //d4.addClass('in');
+            //d4.addClass('clearfix');
+            d4.css('padding-top', '1em');
+            d4.css('padding-left', '0px');
+            d4.css('padding-right', '0px');
+            d4.attr('id', 'review');
+            d4.attr('role', 'tabpanel');
+            //      var d2 = $('#angular_recordViewer').append('<div aria-expanded="true" aria-labelledby="info-tab" class="tab-pane active in clearfix" style="padding-top:0px" id="info" role="tabpanel">');
+            //$('#angular_recordViewer').append('<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');
+            //d4.append(table);
+            d4.append('<div>');
+            d.append(d4);
+        }
 
+        if (hasClass) d2.append('<div class="form-actions"><div class="text-center"><button _ngcontent-c7="" class="btn btn-info " role="button">New ' + buttonLabel + '</button>&nbsp;<button _ngcontent-c7="" class="btn btn-inverse " role="button"> New Subclass </button></div></div>');
+        //      $('#angular_recordViewer').append('</div></div>');
+        $('#angular_recordViewer').append(d);
 
-      if(actions && actions.length > 0){
-          content += $('#angular_recordViewer').append('<legend class="m-2 text-left text-dark">Services</legend><div style="padding-left:.55rem; padding-right:.55rem; " >'+actions+'</div>');
-      }
-      if(categoryBadges.length > 0){
-          content += $('#angular_recordViewer').append('<legend class="m-2 text-left text-dark">Categories</legend><div style="padding-left:.55rem; padding-right:.55rem; " >'+categoryBadges+'</div>');
-      }
-
- 
-
-      table.append(body);
-      $('#angular_recordViewer').removeClass('embed-responsive-1by1');
-      $('#angular_recordViewer').append('<p/>');
-      $('#angular_recordViewer').append('<p/>');
-      var tabs = '<div class="clearfix"><ul class="nav nav-tabs float-left" id="infoTabButton" role="tablist"> ';
-      if(isFastFood){
-        tabs += '<li class="nav-item"><a aria-controls="menu" aria-expanded="false" class="nav-link" data-toggle="tab" href="#menu" id="menu-tab" role="tab">Menu</a></li>';
-        tabs += '<li class="nav-item"><a aria-controls="review" aria-expanded="false" class="nav-link" data-toggle="tab" href="#review" id="review-tab" role="tab">Reviews</a></li>';
-      }
-      tabs += '<li class="nav-item"> <a aria-controls="info" aria-expanded="true" class="nav-link active" data-toggle="tab" href="#info" id="info-tab" role="tab">Info</a></li>';
-      tabs += '<li class="nav-item"><a aria-controls="tools" aria-expanded="false" class="nav-link" data-toggle="tab" href="#tools" id="tools-tab" role="tab">Options</a></li>';
-      tabs += '</ul></div>';
-      $('#angular_recordViewer').append(tabs);
-      var d = $.createElement('div');
-d.addClass('tab-content');
-d.attr('id', 'infoTab');
-//.append('<div class="tab-content" id="infoTab">');
-var d2 = $.createElement('div');
-d2.attr('aria-expanded', 'true');
-d2.attr('aria-labelledby', 'info-tab');
-d2.addClass('tab-pane');
-d2.addClass('active');
-d2.addClass('in');
-d2.addClass('clearfix');
-d2.css('padding-top', '1em');
-d2.css('padding-left', '0px');
-d2.css('padding-right', '0px');
-d2.attr('id', 'info');
-d2.attr('role', 'tabpanel');
-//      var d2 = $('#angular_recordViewer').append('<div aria-expanded="true" aria-labelledby="info-tab" class="tab-pane active in clearfix" style="padding-top:0px" id="info" role="tabpanel">');
-      //$('#angular_recordViewer').append('<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');
-      d2.append(table);
-  d.append(d2);
-var d3 = $.createElement('div');
-//d3.attr('aria-expanded', 'true');
-d3.attr('aria-labelledby', 'tools-tab');
-d3.addClass('tab-pane');
-//d3.addClass('active');
-//d3.addClass('in');
-//d3.addClass('clearfix');
-d3.css('padding-top', '1em');
-d3.css('padding-left', '0px');
-d3.css('padding-right', '0px');
-d3.attr('id', 'tools');
-d3.attr('role', 'tabpanel');
-//d3.css('background-color', '#f9fbfd');
-
-
-
-var accordion = '';
-accordion += '<accordion class="mb-lg show panel-group" id="accordion276" role="tablist" style="display: block" ng-reflect-close-others="true" aria-multiselectable="true">';
-accordion += '<accordion-group class="panel" style="display: block">';
-accordion += '<div class="panel card panel-default" ng-reflect-klass="panel card" ng-reflect-ng-class="panel-default">';
-accordion += '<div class="panel-heading card-header" role="tab"><div class="panel-title">';
-accordion += '<div class="accordion-toggle" role="button" aria-expanded="false">';
-accordion += '<!--bindings={}-->';
-accordion += '<div accordion-heading=""> General <i class="fa fa-angle-down float-right"></i>';
-accordion += '</div>';
-accordion += '</div>';
-accordion += '</div>';
-accordion += '</div>';
-accordion += '<div class="panel-collapse collapse" role="tabpanel" ng-reflect-collapse="true" aria-expanded="false" aria-hidden="true" style="display: none; overflow: visible; height: auto;">';
-accordion += '<div class="panel-body card-block card-body"> Get base styles and flexible support for collapsible components like accordions and navigation. Using the collapse plugin, we built a simple accordion by extending the panel component. </div>';
-
-
-
-
-var recordToolBar = '';
-var opt_pad = (screenSz < SIZE_MAX_SCREEN) ? 10 : 30;
-recordToolBar += '<div class="clearfix" style="padding-left:'+opt_pad+'em; padding-right:'+opt_pad+'em;">';
-//recordToolBar += '<div class="btn-toolbar">';
-var sz = lengthInUtf8Bytes(recordRDF);
-recordToolBar += '<button _ngcontent-c9="" class="btn btn-block btn-inverse mb-xs" role="button" onclick="javascript:downloadRecordRDF();">';
-recordToolBar += 'Download Record - ' +getBytesDenomination(sz)+' ' + getBytesDenominationUnit(sz)+ '';
-recordToolBar += '&nbsp;&nbsp;<i class="fa fa-file-code-o"></i>';
-recordToolBar += '</button>';
-if(isFastFood){
-  if(phone){
-
-/*    
-    recordToolBar += '<button _ngcontent-c9="" class="btn btn-primary m-1 mb-xs" role="button" href="javascript:downloadRecordRDF();">';
-    recordToolBar += 'Call for takeout';
-    recordToolBar += '&nbsp;&nbsp;<i class="fa fa-phone"></i>';
-    recordToolBar += '</button>';
-*/
-    recordToolBar += '<a class="btn btn-block btn-primary" href="tel:'+phone+'">';
-    recordToolBar += '  Call for takeout - ' + phone;
-    recordToolBar += '&nbsp;&nbsp;<i class="fa fa-phone"></i>';
-    recordToolBar += '</a>';
-  }
-  if(homepage){
-    /*
-    recordToolBar += '<button _ngcontent-c9="" class="btn btn-primary m-1 mb-xs" role="button" onclick="javascript:downloadRecordRDF();">';
-    recordToolBar += 'Order online';
-    recordToolBar += '&nbsp;&nbsp;<i class="fa fa-cutlery"></i>';
-    recordToolBar += '</button>';
-    */
-    //if(phone) recordToolBar += '&nbsp';
-    recordToolBar += '<a class="btn btn-block btn-primary" href="'+homepage+'">';
-    recordToolBar += '  Order online - ' + getHostName(homepage);
-    recordToolBar += '&nbsp;&nbsp;<i class="fa fa-cutlery"></i>';
-    recordToolBar += '</a>';
-  }
-}
-//recordToolBar += '<a class="btn btn-default" href="#">&nbsp;&nbsp;Dance?&nbsp;&nbsp;</a>';
-//recordToolBar += '</div>';
-recordToolBar += '</div>';
-
-
-accordion += '</div>';
-accordion += '</div>';
-accordion += '</accordion-group>';
-accordion += '<accordion-group class="panel" style="display: block">';
-accordion += '<div class="panel card panel-default" ng-reflect-klass="panel card" ng-reflect-ng-class="panel-default"><div class="panel-heading card-header" role="tab">';
-accordion += '<div class="panel-title">';
-accordion += '<div class="accordion-toggle" role="button" aria-expanded="false">';
-accordion += '<!--bindings={}--><div accordion-heading=""> Order Food <i class="fa fa-angle-down float-right"></i>';
-accordion += '</div>';
-accordion += '</div>';
-accordion += '</div>';
-accordion += '</div>';
-accordion += '<div class="panel-collapse collapse" role="tabpanel" ng-reflect-collapse="true" aria-expanded="false" aria-hidden="true" style="display: none; overflow: visible; height: auto;">';
-accordion += '<div class="panel-body card-block card-body">';
-//accordion += '<p>Why don't use Lore Ipsum? I think if some one says don't use lore ipsum it's very controversial point. I think the opposite actually. Everyone knows what is lore ipsum - it is easy to understand if text is lore ipsum. You'll automatically skip - because you know - it's just non-informative stub. But what if there some text like this one? You start to read it! But the goal of this text is different. The goal is the example. So a bit of Lore Ipsum is always very good practice. Keep it in mind!</p>';';
-accordion += '</div>';
-accordion += '</div>';
-accordion += '</div>';
-accordion += '</accordion-group>';
-accordion += '<accordion-group class="panel" style="display: block">';
-accordion += '<div class="panel card panel-default" ng-reflect-klass="panel card" ng-reflect-ng-class="panel-default"><div class="panel-heading card-header" role="tab"><div class="panel-title">';
-accordion += '<div class="accordion-toggle" role="button" aria-expanded="false">';
-accordion += '<!--bindings={}-->';
-accordion += '<div accordion-heading=""> Check It <i class="fa fa-angle-down float-right"></i>';
-accordion += '</div>';
-accordion += '</div>';
-accordion += '</div>';
-accordion += '</div>';
-accordion += '<div class="panel-collapse collapse" role="tabpanel" ng-reflect-collapse="true" aria-expanded="false" aria-hidden="true" style="display: none; overflow: visible; height: auto;">';
-accordion += '<div class="panel-body card-block card-body"> ';
-//accordion += 'Why don't use Lore Ipsum? I think if some one says don't use lore ipsum it's very controversial point. I think the opposite actually. ';
-accordion += '</div>';
-accordion += '</div>';
-accordion += '</div>';
-accordion += '</accordion-group>';
-accordion += '</accordion>';
-
-//$('#angular_recordViewer').append(accordion);
-//d3.append(accordion);
-d3.append(recordToolBar);
-d.append(d3);
-
-if(isFastFood){
-  var d4 = $.createElement('div');
-  //d4.attr('aria-expanded', 'true');
-  d4.attr('aria-labelledby', 'menu-tab');
-  d4.addClass('tab-pane');
-  //d4.addClass('active');
-  //d4.addClass('in');
-  //d4.addClass('clearfix');
-  d4.css('padding-top', '1em');
-  d4.css('padding-left', '0px');
-  d4.css('padding-right', '0px');
-  d4.attr('id', 'menu');
-  d4.attr('role', 'tabpanel');
-  //      var d2 = $('#angular_recordViewer').append('<div aria-expanded="true" aria-labelledby="info-tab" class="tab-pane active in clearfix" style="padding-top:0px" id="info" role="tabpanel">');
-        //$('#angular_recordViewer').append('<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');
-        //d4.append(table);
-        d4.append('<div>');
-    d.append(d4);
-
-  d4 = $.createElement('div');
-  //d4.attr('aria-expanded', 'true');
-  d4.attr('aria-labelledby', 'review-tab');
-  d4.addClass('tab-pane');
-  //d4.addClass('active');
-  //d4.addClass('in');
-  //d4.addClass('clearfix');
-  d4.css('padding-top', '1em');
-  d4.css('padding-left', '0px');
-  d4.css('padding-right', '0px');
-  d4.attr('id', 'review');
-  d4.attr('role', 'tabpanel');
-  //      var d2 = $('#angular_recordViewer').append('<div aria-expanded="true" aria-labelledby="info-tab" class="tab-pane active in clearfix" style="padding-top:0px" id="info" role="tabpanel">');
-        //$('#angular_recordViewer').append('<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');
-        //d4.append(table);
-        d4.append('<div>');
-    d.append(d4);
-}
-
-      if(hasClass) d2.append('<div class="form-actions"><div class="text-center"><button _ngcontent-c7="" class="btn btn-info " role="button">New '+buttonLabel+'</button>&nbsp;<button _ngcontent-c7="" class="btn btn-inverse " role="button"> New Subclass </button></div></div>');
-//      $('#angular_recordViewer').append('</div></div>');
-      $('#angular_recordViewer').append(d);
-
-      //$('#angular_recordViewer').append(tabs);
-      //if(!$('#angular_recordViewer').hasClass('embed-responsive-1by1')) $('#angular_recordViewer').addClass('embed-responsive-1by1');
+        //$('#angular_recordViewer').append(tabs);
+        //if(!$('#angular_recordViewer').hasClass('embed-responsive-1by1')) $('#angular_recordViewer').addClass('embed-responsive-1by1');
     }
-$('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
+    $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
 
-if(opt.srcId){
-  $('#'+opt.srcId).removeClass('loading');
-}
+    if (opt.srcId) {
+        $('#' + opt.srcId).removeClass('loading');
+    }
 
-}//recordViewerColumn
+} //recordViewerColumn
 
 function getBytesDenominationUnit(sz){
   if(sz < 1000) return 'bytes';
@@ -8277,11 +8377,17 @@ function loadPropertyValues(xml, opts){
               val = val.replace("&lt;![CDATA[","").replace("]]&gt;","");
               //console.log(val);
               switch(j){
-                case 0: value = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); lang = $(this).attr('lang'); break;
+                case 0: value = val; shortform = $(this).attr('shortform'); datatype = $(this).attr('datatype'); lang = $(this).attr('lang'); break;
                 case 1: label = val; break;
                 case 2: ct = val; break;
               }
           });
+
+
+          var iriAttr = '';
+          if(!datatype) datatype = '';
+          if(datatype == 'uri') iriAttr = ' iri="' +value+ '"';
+
           label = processLabel(label, value, datatype, lang);
           var id = createId();
           //console.log($(col[0]));
@@ -8299,7 +8405,7 @@ function loadPropertyValues(xml, opts){
               }
 
 
-rows += '<tr><td id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+'>';
+rows += '<tr><td '+iriAttr+' id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+'>';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 if(datatype == 'uri'){
@@ -8385,11 +8491,18 @@ function loadPropertyOfValues(xml, opts){
               val = val.replace("&lt;![CDATA[","").replace("]]&gt;","");
               //console.log(val);
               switch(j){
-                case 0: value = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); break;
+                case 0: value = val; shortform = $(this).attr('shortform'); datatype = $(this).attr('datatype'); break;
                 case 1: label = val; break;
                 case 2: ct = val; break;
               }
           });
+
+
+          var iriAttr = '';
+          if(!datatype) datatype = '';
+          if(datatype == 'uri') iriAttr = ' iri="' +value+ '"';
+
+
           label = processLabel(label, value, datatype);
           var id = createId();
           //console.log($(col[0]));
@@ -8407,7 +8520,7 @@ function loadPropertyOfValues(xml, opts){
               }
 
 
-rows += '<tr><td id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+'>';
+rows += '<tr><td '+iriAttr+' id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+'>';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
@@ -8479,11 +8592,17 @@ var loadedUri = false;
               val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
               //console.log(val);
               switch(j){
-                case 0: value = val; shortform = $(this).attr('datatype'); datatype = $(this).attr('datatype'); lang = $(this).attr('lang'); break;
+                case 0: value = val; shortform = $(this).attr('shortform'); datatype = $(this).attr('datatype'); lang = $(this).attr('lang'); break;
                 case 1: label = val; break;
                 case 2: ct = val; break;
               }
           });
+
+
+          var iriAttr = '';
+          if(!datatype) datatype = '';
+          if(datatype == 'uri') iriAttr = ' iri="' +value+ '"';
+
           label = processLabel(label, value, datatype);
           var id = createId();
           //console.log($(col[0]));
@@ -8505,7 +8624,7 @@ var loadedUri = false;
           var focusTarget = 'focusValue';
           var focusTargetClass = 'queryFocusValue';
 
-rows += '<tr><td id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+'>';
+rows += '<tr><td '+iriAttr+' id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+'>';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
@@ -8590,7 +8709,7 @@ $(document).ready(function () {
 });
 
 function describe(id, src, isGGGRecord){
-    if(id && id != 'recordNavBar' && $('#'+id) && $('#'+id).length > 0){
+    if(id && id != 'recordNavBar' && $('#'+id+'[iri]') && $('#'+id+'[iri]').length > 0){
       var rec = $('.record-active');
       if($('#'+id).prop('nodeName').toLowerCase() == 'td'){
         if(!$('#'+id).parent() || $('#'+id).parent().length <=0 || $('#'+id).parent().prop('nodeName').toLowerCase() != 'tr') return;
@@ -8626,9 +8745,11 @@ function describe(id, src, isGGGRecord){
 
     var opt = new Object();
     opt.tar = 'record';
-    if(isGGGRecord) opt.srv = 'http://linkeddata.uriburner.com/sparql';
+    if(isGGGRecord) opt.srv = getProxyEndpoint( 'http://linkeddata.uriburner.com/sparql' );
     if(id) {
       opt.srcId = id;
+      //if(id == 'recordNavBar') $('.'+id).addClass('loading');
+      //else 
       $('#'+id).addClass('loading');
     }
     if(!isTableShowing()) fct_sparql(getSPARQLDescribe(src, isGGGRecord), opt);
@@ -8661,6 +8782,13 @@ function loadInstances(xml, opts){
                 case 2: ct = val; break;
               }
           });
+
+
+          var iriAttr = '';
+          if(!datatype) datatype = '';
+          if(datatype == 'uri') iriAttr = ' iri="' +value+ '"';
+
+
           label = processLabel(label, value, datatype);
           var id = createId();
           var rowId = 'r_' + createId();
@@ -8682,7 +8810,7 @@ function loadInstances(xml, opts){
 
               var color = 'success';
 
-rows += '<tr><td id="'+rowId+'"  '+((recordActive)?' class="record-active"':'')+'>';
+rows += '<tr><td '+iriAttr+' id="'+rowId+'"  '+((recordActive)?' class="record-active"':'')+'>';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
