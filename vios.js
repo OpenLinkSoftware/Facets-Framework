@@ -2275,14 +2275,6 @@ var labels = {};
   var email = '';
   var fullName = '';
 
-var showSubjectBadges = false;
-
-var showChart = false;
-var chartProperty;
-var verticalChartHeaders = false;
-var showRollup = false;
-var showIDN = false;
-
 function setShowIDN(b){
   showIDN = b;  
   if(showIDN) $('#idnButton').text('Record');
@@ -2298,11 +2290,11 @@ function toggleIDN(){
   }
   if(showIDN){
     $('#idnButton').text('Record');
-    detailResultsColumnWidths();
+    //detailResultsColumnWidths();
   }
   else {
     $('#idnButton').text('IDN');
-    resetColumnWidths();
+    //resetColumnWidths();
   }
   describe(undefined, $('#angular_recordViewer').attr('iri') );
   updatePermalink();
@@ -2397,6 +2389,16 @@ var orientationType = ORIENTATION_TYPE_1;
     client_sid = (json.ip + salt).hashCode();
   }
 
+
+
+var showSubjectBadges = false;
+
+var showChart = false;
+var chartProperty;
+var verticalChartHeaders = false;
+var showRollup = false;
+var showIDN = false;
+
 function init(){
     fct_init(); // this method must be the first method called by the implementation of the fct_ framework
 
@@ -2404,7 +2406,7 @@ function init(){
 
 
       try{
-        showIDN = localStorage.getItem('showIDN');
+        showIDN = localStorage.getItem('showIDN') == 'true';
         orientationType = localStorage.getItem('orientationType');
         var colSz = localStorage.getItem('colSz.'+screenSz);
         SIZE_RESULT_SET = localStorage.getItem('SIZE_RESULT_SET.'+screenSz);
@@ -2905,7 +2907,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
           gbcol += 'Pair';
         gbcol += '</a>';
         gbcol += '<div class="dropdown-menu" aria-labelledby="navbarDropdown">';
-          gbcol += '<a class="dropdown-item" data-target="#">Browser Window</a>';
+          gbcol += '<a class="dropdown-item" data-target="#" onclick="javascript:interlinked = ! interlinked">Browser Window</a>';
           gbcol += '<a class="dropdown-item" data-target="#">Device</a>';
           gbcol += '<div class="dropdown-divider"></div>';
           gbcol += '<a class="dropdown-item" data-target="#">New Data Canvas</a>';
@@ -3220,7 +3222,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
           gbcol += 'Pair';
         gbcol += '</a>';
         gbcol += '<div class="dropdown-menu" aria-labelledby="navbarDropdown">';
-          gbcol += '<a class="dropdown-item" data-target="#">Browser Window</a>';
+          gbcol += '<a class="dropdown-item" data-target="#" onclick="javascript:interlinked = ! interlinked">Browser Window</a>';
           gbcol += '<a class="dropdown-item" data-target="#">Device</a>';
           gbcol += '<div class="dropdown-divider"></div>';
           gbcol += '<a class="dropdown-item" data-target="#">New Data Canvas</a>';
@@ -3399,7 +3401,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
           gbcol += 'Pair';
         gbcol += '</a>';
         gbcol += '<div class="dropdown-menu" aria-labelledby="navbarDropdown">';
-          gbcol += '<a class="dropdown-item" data-target="#">Browser Window</a>';
+          gbcol += '<a class="dropdown-item" data-target="#" onclick="javascript:interlinked = ! interlinked">Browser Window</a>';
           gbcol += '<a class="dropdown-item" data-target="#">Device</a>';
           gbcol += '<div class="dropdown-divider"></div>';
           gbcol += '<a class="dropdown-item" data-target="#">New Data Canvas</a>';
@@ -6907,7 +6909,7 @@ if(true){
           //rows += '<img title="view instances" class="count" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
 //          rows += '<a title="view instances" class="count" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>';
           //rows += '</td></tr>';
-          rows += '<i '+buildTitle('preview category members')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('preview category members')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+uri+'\', \''+label+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
 
           rows +='</h6>';
             rows +=  '</div>';
@@ -7148,7 +7150,7 @@ var rowId = opts.parentId;
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
               //rows += '<img title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
-          rows += '<i '+buildTitle('preview field values')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('preview field values')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+propLabel+'\' , \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
 //              rows += '<a title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>&nbsp;';
           if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the contents list by \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\')" ></i>';
           }
@@ -7321,7 +7323,7 @@ var ckcolor = 'primary';
           rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\');}"/>&nbsp;';//generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
-          rows += '<i '+buildTitle('preview rolees')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('preview rolees')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+propLabel+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
               //rows += '<img title="shows up in the \''+propLabel+'\' field of these records" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
           if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the contents list by role: \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\', true)" ></i>';
           }
@@ -7519,6 +7521,12 @@ var showRecordRoles = false;
 var filterRecordViewFields = true;
 var recordRDF;
 
+function updateInfoTab(b){
+  showRecordRoles = b;
+  describe(undefined, $('#angular_recordViewer').attr('iri') );
+  updatePermalink();
+}
+
 function loadDescribeResults(xml, opt) {
     recordRDF = xml;
     $('#angular_recordViewer').empty();
@@ -7537,7 +7545,7 @@ function loadDescribeResults(xml, opt) {
     });
 
     //xml = xml.replaceAll('rdf\\:RDF', 'rdf');
-    showRecordRoles = $('#showMeMenu').val() == VIEW_TYPE_PROPERTIES_IN;
+    //showRecordRoles = $('#showMeMenu').val() == VIEW_TYPE_PROPERTIES_IN;
     var content = "";
     //var description = $(xml).children('rdf\\:Description')[0];
     //var triples = description.children();
@@ -7695,10 +7703,11 @@ function loadDescribeResults(xml, opt) {
 
 
 
+            // skip the row if...
             if (isRole && !showRecordRoles) return;
             if (!isRole && showRecordRoles) return;
             var propIRI = namespaces[qname] + fragId;
-            var facets = matchFocusProperties(propIRI);
+            var facets = matchFocusProperties(propIRI, showRecordRoles);
             var ctxId = (facets && facets.length > 0) ? facets.attr('class') : createId();
             if (facets && facets.length > 0) propIRI = facets.attr('iri');
             if (filterRecordViewFields && (!facets || facets.length <= 0)) return;
@@ -7981,8 +7990,14 @@ content += '</section>';
             tabs += '<li class="nav-item"><a aria-controls="menu" aria-expanded="false" class="nav-link" data-toggle="tab" href="#menu" id="menu-tab" role="tab">Menu</a></li>';
             tabs += '<li class="nav-item"><a aria-controls="review" aria-expanded="false" class="nav-link" data-toggle="tab" href="#review" id="review-tab" role="tab">Reviews</a></li>';
         }
-        tabs += '<li class="nav-item"> <a aria-controls="info" aria-expanded="true" class="nav-link active" data-toggle="tab" href="#info" id="info-tab" role="tab">Info</a></li>';
-        tabs += '<li class="nav-item"><a aria-controls="tools" aria-expanded="false" class="nav-link" data-toggle="tab" href="#tools" id="tools-tab" role="tab">Options</a></li>';
+        //tabs += '<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"> Dropdown <b class="caret"></b></a><div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 45px, 0px); top: 0px; left: 0px; will-change: transform;"><a aria-controls="dropdown1" aria-expanded="true" class="dropdown-item show" data-toggle="tab" href="#dropdown1" id="dropdown1-tab" role="tab" aria-selected="true">@fat</a><a aria-controls="dropdown2" aria-expanded="true" class="dropdown-item active show" data-toggle="tab" href="#dropdown2" id="dropdown2-tab" role="tab" aria-selected="true">@mdo</a></div></li>
+        tabs += '<li class="nav-item dropdown">';
+        tabs += '<a aria-controls="info" aria-haspopup="true" aria-expanded="true" class="nav-link dropdown-toggle active" data-toggle="dropdown" href="#info" id="info-tab" role="button"> Info <b class="caret"></b></a>';
+        tabs += '<div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 45px, 0px); top: 0px; left: 0px; will-change: transform;">';
+        tabs += '<a onclick="javascript:updateInfoTab(false);" aria-controls="fields" aria-expanded="false" class="dropdown-item show'+((showRecordRoles) ? '' : ' active')+'" data-toggle="tab" href="#fields" id="fields-tab" role="tab" aria-selected="'+((showRecordRoles) ? 'false' : 'true')+'">Fields</a>';
+        tabs += '<a onclick="javascript:updateInfoTab(true);" aria-controls="roles" aria-expanded="false" class="dropdown-item show'+((showRecordRoles) ? ' active' : '')+'" data-toggle="tab" href="#roles" id="roles-tab" role="tab" aria-selected="'+((showRecordRoles) ? 'true' : 'false')+'">Roles</a></div>';
+        tabs += '</li>';
+        tabs += '<li class="nav-item"><a aria-controls="tools" aria-expanded="false" class="nav-link" data-toggle="tab" href="#tools" id="tools-tab" role="tab"> Options </a></li>';
         tabs += '</ul></div>';
         $('#angular_recordViewer').append(tabs);
         var d = $.createElement('div');
@@ -7991,7 +8006,7 @@ content += '</section>';
         //.append('<div class="tab-content" id="infoTab">');
         var d2 = $.createElement('div');
         d2.attr('aria-expanded', 'true');
-        d2.attr('aria-labelledby', 'info-tab');
+        d2.attr('aria-labelledby', (showRecordRoles ? 'roles' : 'fields' ) + '-tab');
         d2.addClass('tab-pane');
         d2.addClass('active');
         d2.addClass('in');
@@ -7999,7 +8014,7 @@ content += '</section>';
         d2.css('padding-top', '1em');
         d2.css('padding-left', '0px');
         d2.css('padding-right', '0px');
-        d2.attr('id', 'info');
+        d2.attr('id', (showRecordRoles ? 'roles' : 'fields' ));
         d2.attr('role', 'tabpanel');
         //      var d2 = $('#angular_recordViewer').append('<div aria-expanded="true" aria-labelledby="info-tab" class="tab-pane active in clearfix" style="padding-top:0px" id="info" role="tabpanel">');
         //$('#angular_recordViewer').append('<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');
@@ -8201,7 +8216,7 @@ function downloadRecordRDF(){
 }
 
 function matchFocusProperties(propIRI, isReverse){
-  return getMainFocus().children('property').filter(function() {
+  return getMainFocus().children('property' + (isReverse ? '-of' : '') ).filter(function() {
             return $(this).attr('iri').toLowerCase() == propIRI.toLowerCase();
           });
 }
@@ -8318,7 +8333,7 @@ exitGroupBy();
 
 
 
-function expandShowMe(v, datatype, optsStr){
+function expandShowMe(v, vLabel, datatype, optsStr){
     var opts = toJSONObject(optsStr);    
     var childrenId = opts.childrenId;
     var parentId = opts.parentId;
@@ -8354,18 +8369,24 @@ function expandShowMe(v, datatype, optsStr){
     if(opts.tag == TAG_PROPERTY) {
       prop = $.createElement('property');
       prop.attr('iri', v);
+      prop.attr('label', vLabel);
+
       getFocus(q).append(prop);
       takeFocus(prop, q);
     }
     else if(opts.tag == TAG_PROPERTY_OF) {
       prop = $.createElement('property-of');
       prop.attr('iri', v);
+      prop.attr('label', vLabel);
+
       getFocus(q).append(prop);
       takeFocus(prop, q);
     }
     else if(opts.tag == TAG_CLASS) {
       prop = $.createElement('class');
       prop.attr('iri', v);
+      prop.attr('label', vLabel);
+
       getFocus(q).append(prop);
       // leave the focus where it is
     }
@@ -8741,6 +8762,12 @@ $(document).ready(function () {
     });
 });
 
+var interlinked = false;
+
+function isInterlinked(){
+  return interlinked;
+}
+
 function describe(id, src, isGGGRecord){
     if(id && id != 'recordNavBar' && $('#'+id) && $('#'+id).length > 0){
       var rec = $('.record-active');
@@ -8771,9 +8798,12 @@ function describe(id, src, isGGGRecord){
     $('#angular_recordViewer').attr('src', linkOutURI); // deprecated
     //$('#recordLabel').val(label);
 
-    //var win = window.open(src, twin, 'width="'+window.outerWidth+'" height="'+window.outerHeight+'"');
-    //win.blur();
-    //this.window.focus();
+    if(isInterlinked()){
+        //popUnder(src, window.outerWidth, window.outerHeight);
+        var win = window.open(src, twin, 'width="'+window.outerWidth+'" height="'+window.outerHeight+'"');
+        win.blur();
+        this.window.focus();
+    }
 
 
     var opt = new Object();
@@ -8787,6 +8817,28 @@ function describe(id, src, isGGGRecord){
     }
     if(!isTableShowing()) fct_sparql(getSPARQLDescribe(src, isGGGRecord), opt);
 }
+
+
+function popUnder(url, width, height) {
+    var popUnderWin, nav = navigator.userAgent,
+        isGecko = /rv:[2-9]/.exec(nav),
+        hackString;
+
+    hackString = nav.indexOf('Chrome') > -1 ? "scrollbar=yes" : "toolbar=0,statusbar=1,resizable=1,scrollbars=0,menubar=0,location=1,directories=0";
+
+    popUnderWin = window.open("about:blank", twin, hackString + ",height=" + height + ",width=" + width);
+
+    if (isGecko) {
+        popUnderWin.window.open("about:blank").close();
+    }
+
+    popUnderWin.document.location.href = url;
+
+    setTimeout(window.focus);
+    window.focus();
+    popUnderWin.blur();
+}
+
 
 function linkOut(src){
     if(! src ) src = $('#angular_recordViewer').attr('src');
