@@ -373,7 +373,8 @@ try{
 }
 
 function fct_removeVariableData(query){
-  query.removeAttr('label');
+  //query.removeAttr('label');
+  //query.removeAttr('graphLabel');
   query.removeAttr('varname');
   query.removeAttr('class');
   query.removeAttr('timeout');
@@ -381,7 +382,7 @@ function fct_removeVariableData(query){
 
 
   query.find('*').removeAttr('class');
-  query.find('*').removeAttr('label');
+  //query.find('*').removeAttr('label');
   query.find('*').removeAttr('varname');
   query.find('*').removeAttr('isGroupBy');
   query.removeAttr('timeout');
@@ -447,7 +448,7 @@ function fct_query(q, viewType, opt){
   getQuery().attr('qid', id);
   setMutex(id, viewType);
   ha.push(id);
-  q.attr('timeout', fct_queryTimeout); // add all neccessary variable data back to the query
+  q.attr('timeout', fct_queryTimeout); // add all neccessary variable data back to the query, if possible
   var resp;
   if(fct_isCache){
     try{
@@ -1053,7 +1054,7 @@ col.css('background-color', '#ffffff');
 
 
     col = $.createElement('td');
-          colStr = '<button id="focusTableValue'+id+'" class="btn-rounded-f btn btn-'+outline+'default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">';
+          colStr = '<button id="focusTableValue'+id+'" class="btn-rounded-f btn btn-'+outline+'default btn-block text-ellipsis btn-sm m-0" onclick="javascript:takeMainFocus(\''+id+'\')">';
           colStr += processLabel(valStr);
           colStr += '</button>';
   col.html(colStr);
@@ -1247,6 +1248,7 @@ function fct_handleSparqlResults(xml, opt) {
             //console.log('fcthsr: header2: ' + header);
             col = cols[header];
             if (col) {
+                col.css('cursor', 'pointer');
                 //                col.append("<span>"+value+"</span>");
 
                 var id = createId();
@@ -1289,7 +1291,7 @@ function fct_handleSparqlResults(xml, opt) {
 
 
                 label = deSanitizeLabel(label);
-                if(datatype == 'uri') label = '<a href="#">' + label + '</a>';
+                //if(datatype == 'uri') label = '<a href="#">' + label + '</a>';
                 var labelLink = (datatype == 'uri') ? '' + buildTitle($(this).text()) : '';
                 //str += '<h6 >';
                 str += '<span ' + onclick + ' ' + labelLink + '>' + label + '</span>';
@@ -1611,7 +1613,7 @@ if(isRollup()){
         }
 
         // only root classes
-        sparql = sparql.replace('a ' + focus + ' .', 'a ' + focus + ' . FILTER NOT EXISTS {'+focus+' a '+focus+'class. FILTER('+focus+'class != <http://www.w3.org/2000/01/rdf-schema#Class>)}');
+        sparql = sparql.replace('a ' + focus + ' .', 'a ' + focus + ' . SERVICE <http://data.vios.network/sparql> {FILTER NOT EXISTS {'+focus+' a '+focus+'class. FILTER('+focus+'class != <http://www.w3.org/2000/01/rdf-schema#Class>)}}');
 
 
         $('#groupByTableHeader').addClass('loading');
@@ -2208,7 +2210,7 @@ var TAG_GRAPH = 'g';
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://poc.vios.network";
 var this_endpoint = 'http://alpha.vios.network';
 
-var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qPage, qshowMePage, qTimeout, qNavType, qSubjectBadges, qVerticalChartHeaders, qViewType, qIsChart, qIsRollup, qFilterRecordViewFields;
+var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qPage, qshowMePage, qTimeout, qNavType, qSubjectBadges, qVerticalChartHeaders, qViewType, qIsChart, qIsRollup, qShowIDN, qFilterRecordViewFields;
 
 var icon_folder_black = 'http://icon-park.com/imagefiles/folder_icon_black.png';
 var icon_file = 'http://myopenlink.net/DAV/home/sdmonroe/img/blank-file-xxl.png';
@@ -2250,8 +2252,8 @@ var recordViewerColumnWidth = SIZE_RECORD_VIEWER;
 var SIZE_RECORD_FORM = (screenSz < SIZE_MAX_SCREEN) ? "6" : "6";
 var SIZE_LABEL = (screenSz < SIZE_MAX_SCREEN) ? 22 : 30; // TODO: this constant is deprecated, using text-ellipsis now
 var SIZE_RESULT_SET = (screenSz < SIZE_MAX_SCREEN) ? 15: 15;
-var SIZE_TABLE_RESULT_SET = (screenSz < SIZE_MAX_SCREEN) ? 150: 75;
-var SIZE_MATRIX_RESULT_SET = (screenSz < SIZE_MAX_SCREEN) ? 150: 75;
+var SIZE_TABLE_RESULT_SET = (screenSz < SIZE_MAX_SCREEN) ? 15: 30;
+var SIZE_MATRIX_RESULT_SET = (screenSz < SIZE_MAX_SCREEN) ? 15: 30;
 var SIZE_MIN_DIGITS = 7;
 var SIZE_MAX_DIGITS = 20;
 
@@ -2281,8 +2283,19 @@ var verticalChartHeaders = false;
 var showRollup = false;
 var showIDN = false;
 
+function setShowIDN(b){
+  showIDN = b;  
+  if(showIDN) $('#idnButton').text('Record');
+}
+
 function toggleIDN(){
   showIDN = !showIDN;
+  try{
+    localStorage.setItem('showIDN', showIDN);
+  }
+  catch(e){
+
+  }
   if(showIDN){
     $('#idnButton').text('Record');
     detailResultsColumnWidths();
@@ -2291,8 +2304,9 @@ function toggleIDN(){
     $('#idnButton').text('IDN');
     resetColumnWidths();
   }
-  //describe( $('#angular_recordViewer').attr(iri) );
-  doQuery(getQueryText());
+  describe(undefined, $('#angular_recordViewer').attr('iri') );
+  updatePermalink();
+  //doQuery(getQueryText());
 }
 
 function setLabel(iri, label){
@@ -2390,6 +2404,7 @@ function init(){
 
 
       try{
+        showIDN = localStorage.getItem('showIDN');
         orientationType = localStorage.getItem('orientationType');
         var colSz = localStorage.getItem('colSz.'+screenSz);
         SIZE_RESULT_SET = localStorage.getItem('SIZE_RESULT_SET.'+screenSz);
@@ -2909,7 +2924,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a class="nav-link disabled" data-target="#">Edit</a>';
       gbcol += '</li>';
     gbcol += '</ul>';
-      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">IDN</button>';
+      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">'+(showIDN ? 'Record' : 'IDN')+'</button>';
 //    gbcol += '<form class="form-inline my-2 my-lg-0">';
       //gbcol += '<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">';
 //    gbcol += '</form>';
@@ -3224,7 +3239,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a class="nav-link disabled" data-target="#">Edit</a>';
       gbcol += '</li>';
     gbcol += '</ul>';
-      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">IDN</button>';
+      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">'+(showIDN ? 'Record' : 'IDN')+'</button>';
 //    gbcol += '<form class="form-inline my-2 my-lg-0">';
       //gbcol += '<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">';
 //    gbcol += '</form>';
@@ -3403,7 +3418,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a class="nav-link disabled" data-target="#">Edit</a>';
       gbcol += '</li>';
     gbcol += '</ul>';
-      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">IDN</button>';
+      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">'+(showIDN ? 'Record' : 'IDN')+'</button>';
 //    gbcol += '<form class="form-inline my-2 my-lg-0">';
       //gbcol += '<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">';
 //    gbcol += '</form>';
@@ -3696,6 +3711,7 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     qshowMePage = fct_getUrlParameter('ctrlPage');
     qViewType = fct_getUrlParameter('viewType');
     qIsChart = fct_getUrlParameter('isChart');
+    qShowIDN = fct_getUrlParameter('showIDN');
     qSubjectBadges = fct_getUrlParameter('subjectBadges');
     qFilterRecordViewFields = fct_getUrlParameter('filterRecordViewFields');
 
@@ -3714,6 +3730,10 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     if(qNavType && qNavType.length > 0) {
       setNavType(qNavType);
       qNavType = null;
+    }
+    if(qShowIDN && qShowIDN.length > 0) {
+      showIDN = (qShowIDN == 'true');
+      qShowIDN = null;
     }
     if(qSearchAllFields && qSearchAllFields.length > 0 && qSearchAllFields.toLowerCase() == 'true'){
       isExpandSearch = true;
@@ -4782,7 +4802,7 @@ if(!$('input[type="text"], input[type="search"]').is(":focus")){
     else if(e.keyCode == '74' || e.keyCode == '75' || e.keyCode == '186' || e.keyCode == '222') { // J key or K key or : key or ' key
       var rec = $('.record-active');
       if(rec.prop('nodeName').toLowerCase() == 'td'){
-        var prv = rec.parent().prevAll('tr > td[iri]'); // POI: skip literals
+        var prv = rec.parent().prevAll('tr').children('td[iri]'); // POI: skip literals
         if(!prv || prv.length <= 0) return;
         //rec.removeClass('record-active');
         //rec.parent().prev().children('td').addClass('record-active');
@@ -4799,7 +4819,7 @@ if(!$('input[type="text"], input[type="search"]').is(":focus")){
     else if(e.keyCode == '77' || e.keyCode == '191') { // M key or ? key
       var rec = $('.record-active'); // POI: skip literals
       if(rec.prop('nodeName').toLowerCase() == 'td'){
-        var nxt = rec.parent().nextAll('tr > td[iri]');
+        var nxt = rec.parent().nextAll('tr').children('td[iri]');
         if(!nxt || nxt.length <=0) return;
         //rec.removeClass('record-active');
         //rec.parent().next().children('td').addClass('record-active');
@@ -4995,7 +5015,7 @@ iri = decodeURIComponent(iri);
 return iri;
 }
 
-function processLabel(label, value, datatype, lang, labelSize){
+function processLabel(label, value, datatype, lang, labelSize, includeHostName){
     if(value == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type') label = 'category'; //POI: type is named Category across the UI
     if(!labelSize) labelSize = SIZE_LABEL;
 
@@ -5006,6 +5026,11 @@ function processLabel(label, value, datatype, lang, labelSize){
     if(!label) return ''; 
     label = label.trim();
     label = label.replaceAll('&#39;', '&apos;');
+
+    var host = '';
+    if(isUri(label) && includeHostName){
+      label += ' (' + getHostName(label) + ')';
+    }
 
     while(label.indexOf('/') >= 0){
       if(label.endsWith("/")){
@@ -5115,6 +5140,7 @@ function updatePermalink(){
       '&verticalChartHeaders=' + isVerticalChartHeaders() + 
       '&isRollup=' + isRollup() + 
       '&isChart=' + isChart() + 
+      '&showIDN=' + showIDN + 
       '&filterRecordViewFields=' + filterRecordViewFields + 
       '&qxml=' + encodeURIComponent(_root.find('query').prop('outerHTML'));
   
@@ -5773,7 +5799,7 @@ if(true){
 
               if(datatype=='uri') {
                 rows += '<img style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
-                                  rows +=  '<i class="status status-bottom bg-'+color+'"></i>';
+                                  //rows +=  '<i class="status status-bottom bg-'+color+'"></i>';
               }
               else {
                 rows += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="icon-literal glyphicon glyphicon-tag"></span>';
@@ -7661,7 +7687,6 @@ function loadDescribeResults(xml, opt) {
             if ((namespaces[qname] + fragId).toLowerCase() == 'http://xmlns.com/foaf/0.1/phone'.toLowerCase()) phone = objectValue;
             if ((namespaces[qname] + fragId).toLowerCase() == 'http://xmlns.com/foaf/0.1/homepage'.toLowerCase()) homepage = (!objectValue) ? objectIRI : objectValue;
 
-
             //if(objectIRI == uri && !propLabel.trim().toLowerCase().endsWith('of')) propLabel += ' of';
             if (propLabel == 'RDF:TYPE') propLabel = 'category';
             proplink.css('color', '#495057');
@@ -7709,12 +7734,14 @@ function loadDescribeResults(xml, opt) {
             if (objectIRI == uri) {
                 if (subject) {
                     col.html('<a style="text-decoration:none;" href="' + subject + '">' + processLabel(subLabel) + '</a>&nbsp;<img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(subject) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
-                } else col.html(objectValue);
+                } else col.text(objectValue);
             } else {
                 if (objectIRI) {
                     col.html('<a style="text-decoration:none;" href="' + objectIRI + '">' + processLabel(objLabel) + '</a>&nbsp;<img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(objectIRI) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
                 } else {
-                    col.html('<span style="cursor:pointer" class="pull-right icon-literal glyphicon glyphicon-tag" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + sanitizeLabel(objectValue) + '\', \'uri\', \'' + lang + '\');"></span>' + objectValue + '&nbsp;&nbsp;<i id="' + cid + '" onmouseout="$(\'#' + cid + '\').tooltip(\'hide\');$(\'#' + cid + '\').attr(\'data-original-title\', \'Copy to clipboard\');$(\'#' + cid + '\').tooltip();" ' + buildTitle('Copy to clipboard') + ' onclick="javascript:$(\'#' + cid + '\').tooltip(\'hide\');copy(\'' + sanitizeLabel(objectValue) + '\'); $(\'#' + cid + '\').attr(\'data-original-title\', \'Copied\');$(\'#' + cid + '\').tooltip(\'show\');" style="cursor:pointer;" class="hide fa fa-copy fa-sm"></i>');
+                    col.text(objectValue); 
+                    col.prepend('<span style="cursor:pointer" class="pull-right icon-literal glyphicon glyphicon-tag" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + sanitizeLabel(objectValue) + '\', \'uri\', \'' + lang + '\');"></span>' );
+                    col.append('&nbsp;&nbsp;<i id="' + cid + '" onmouseout="$(\'#' + cid + '\').tooltip(\'hide\');$(\'#' + cid + '\').attr(\'data-original-title\', \'Copy to clipboard\');$(\'#' + cid + '\').tooltip();" ' + buildTitle('Copy to clipboard') + ' onclick="javascript:$(\'#' + cid + '\').tooltip(\'hide\');copy(\'' + sanitizeLabel(objectValue) + '\'); $(\'#' + cid + '\').attr(\'data-original-title\', \'Copied\');$(\'#' + cid + '\').tooltip(\'show\');" style="cursor:pointer;" class="hide fa fa-copy fa-sm"></i>');
                 }
             }
             row.append(col);
@@ -7764,13 +7791,17 @@ content += '</section>';
         //    content += '<section class="widget">';
         //    content += '<div class="widget-body">';
 
+        //imgIri = 'https://api.unsplash.com/search/photos?page=1&query='+buttonLabel;
+
+
+
         content += '<div class="widget-top-overflow text-white">';
         content += '<div class="height-250 overflow-hidden">';
         content += '<img class="img-fluid" src="'+imgIri+'">';//https://demo.flatlogic.com/sing-app/angular/assets/img/pictures/3.jpg //assets/img/pictures/19.jpg
         content += '</div>';
         content += '<div class="btn-toolbar">';
-        content += '<a class="btn btn-outline btn-sm pull-right" href="#">';
-        content += '<i class="glyphicon glyphicon-glyph-bell mr-xs"></i> Subscribe ';
+        content += '<a class="btn btn-outline btn-sm pull-right mr-1" href="#">';
+        content += '<i class="glyphicon glyphicon-shopping-cart mr-xs"></i> Buy Now ';
         content += '</a>';
         content += '</div>';
         content += '</div>';
@@ -7781,6 +7812,8 @@ content += '</section>';
         content += '<span class="thumb-xl"><img alt="..." class="rounded-circle" src="assets/img/people/a5.jpg"></span>';
         content += '<h5 class="fw-normal">IDN: '+uriLabel+'</h5>';
         content += '<p>Owner: jnash</p>';
+        content += '<p>Price: 0.03 ETH</p>';
+        content += '<p>Price Valid Through: 10/03/2020</p>';
         content += '<a class="btn btn-danger btn-sm mt-sm" href="#"> &nbsp;Private Message <i class="fa fa-envelope ml-xs"></i>&nbsp; </a>';
         content += '<ul class="contacts">';
         /*    content += '<li><i class="fa fa-lg fa-phone fa-fw mr-xs"></i><a href="#"> +375 29 555-55-55</a></li>';
@@ -7808,7 +7841,7 @@ content += '</section>';
         content += '<p class="text-left mt-lg">';
         content += '<a class="badge badge-warning rounded-0" href="#"> Identity </a>';
         content += '<a class="badge badge-danger rounded-0 ml-xs" href="#"> Genesis </a>';
-        content += '<a class="badge badge-default rounded-0 ml-xs" href="#"> Not claimed </a>';
+        content += '<a class="badge badge-success rounded-0 ml-xs" href="#"> Claimed </a>';
         content += '</p>';
         if(desc) content += '<p class="lead mt-lg"> '+desc+' </p>';
         content += '<legend> About </legend>';
@@ -8709,7 +8742,7 @@ $(document).ready(function () {
 });
 
 function describe(id, src, isGGGRecord){
-    if(id && id != 'recordNavBar' && $('#'+id+'[iri]') && $('#'+id+'[iri]').length > 0){
+    if(id && id != 'recordNavBar' && $('#'+id) && $('#'+id).length > 0){
       var rec = $('.record-active');
       if($('#'+id).prop('nodeName').toLowerCase() == 'td'){
         if(!$('#'+id).parent() || $('#'+id).parent().length <=0 || $('#'+id).parent().prop('nodeName').toLowerCase() != 'tr') return;
