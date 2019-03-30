@@ -446,7 +446,7 @@ function fct_query(q, viewType, opt){
   var qstr = q.prop('outerHTML');
   var id = (qstr) ? (service_fct+qstr).hashCode() : 0;
   getQuery().attr('qid', id);
-  setMutex(id, viewType);
+  if(!opt.branches) setMutex(id, viewType);
   ha.push(id);
   q.attr('timeout', fct_queryTimeout); // add all neccessary variable data back to the query, if possible
   var resp;
@@ -573,7 +573,7 @@ function fct_query(q, viewType, opt){
             }
           }
         }
-              if(getMutex(viewType) != id){ // POI: make sure to cache the results always!, i.e. place this after the cache above
+              if(!opt.branches && getMutex(viewType) != id){ // POI: make sure to cache the results always!, i.e. place this after the cache above
                 return;
               }
         
@@ -1497,12 +1497,8 @@ function fct_handleError(xhr, ajaxOptions, thrownError){
 }
 
 function fct_handleListResults(xml, opt){
-          loadInstances(xml, opt);
-          $('#' + opt.parentId).removeClass('loading');
-          $('#groupByHeader').removeClass('loading');
-
-
-
+  // TODO: VIEW_TYPE_LIST query returns incorrect results, see this query
+  // http://alpha.vios.network/?&dataSpace=http%3A%2F%2Flod.openlinksw.com&dataSpaceLabel=LOD&groupBy=%7B%22label%22%3A%22predecessor%22%2C%22iri%22%3A%22http%3A%2F%2Fdbpedia.org%2Fontology%2Fpredecessor%22%7D&showMe=properties&searchAllFields=false&timeout=8280&navType=2&page=0&ctrlPage=0&viewType=default&subjectBadges=false&verticalChartHeaders=false&isRollup=false&isChart=false&showIDN=false&filterRecordViewFields=true&qxml=%3Cquery%20class%3D%220%22%20label%3D%22%27wilson%27%22%20qid%3D%22594942060%22%20varname%3D%22s3%22%3E%3Ctext%20class%3D%221%22%20label%3D%22wilson%22%20property%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23label%22%3Ewilson%3C%2Ftext%3E%3Cproperty%20class%3D%22-578692554%22%20iri%3D%22http%3A%2F%2Fpurl.org%2Fdc%2Fterms%2Fsubject%22%20label%3D%22subject%22%3E%3C%2Fproperty%3E%3Cview%20class%3D%222%22%20limit%3D%2215%22%20type%3D%22%22%20offset%3D%220%22%3E%3C%2Fview%3E%3Cproperty%20class%3D%22177442208%22%20iri%3D%22http%3A%2F%2Fdbpedia.org%2Fontology%2Fpredecessor%22%20label%3D%22predecessor%22%3E%3C%2Fproperty%3E%3C%2Fquery%3E 
 }
 
 function fct_handleListCountResults(xml, opt){
@@ -1531,6 +1527,17 @@ function fct_handleListCountResults(xml, opt){
           $('#groupByHeader').removeClass('loading');
       }
     
+  }
+
+  else if(opt && opt.instances){
+    loadInstances(xml, opt);
+    $('#' + opt.parentId).removeClass('loading');
+    $('#groupByHeader').removeClass('loading');
+  }
+
+  else if(opt && opt.branches){
+    // loading animation is cancled by opt.instances == true, see expand()
+    loadBranches(xml, opt);
   }
       else {
         $('#angular_recordViewer').attr('src', '');
@@ -2037,7 +2044,7 @@ function setValue(id, val, valLabel, datatype, lang){
   //getFocus(query).append(p);
 }
 
-function setPropertyValue(id, nodeName, contextId, propIRI, propLabel, val, valLabel, datatype, lang){
+function setPropertyValue(id, nodeName, contextId, propIRI, propLabel, val, valLabel, datatype, lang, silent){
     exitGroupBy(id);
 
   if(propIRI) propIRI = deSanitizeLabel(propIRI);
@@ -2068,7 +2075,7 @@ function setPropertyValue(id, nodeName, contextId, propIRI, propLabel, val, valL
   //if(fct_isDebug) console.log('setView query: ' + query.html());
   //query = _root.find('query');
 
-  doQuery(getQueryText());
+  if(!silent) doQuery(getQueryText());
 
   //getFocus(query).append(p);
 }
@@ -2399,6 +2406,19 @@ var verticalChartHeaders = false;
 var showRollup = false;
 var showIDN = false;
 
+function bookmark(){
+    get_short_url(window.location, function(short_url) {
+        //$('#permalink').attr('href',  short_url); //+ '&idCt=' + idCt
+      /*
+      $('#permalink').unbind('click');
+      $('#permalink').on('click', function(e){
+        linkOut(short_url);
+      });
+      */
+      linkOut('http://data.vios.network/bookmark/1/bookmarks.vspx?URL='+short_url+'&TITLE='+document.title);
+    });
+}
+
 function init(){
     fct_init(); // this method must be the first method called by the implementation of the fct_ framework
 
@@ -2651,9 +2671,9 @@ function init(){
 
 */
 
-      var fastForwardButton = '<li class="nav-item d-none d-md-block"><a onclick="javascript:save($(\'#keywords\').text()); $(\'keywords\').text(\'\');" class="nav-link pl-2 text-info" id="favButton" ><i class="la la-angle-double-right la-lg text-default"></i></a></li>'; //la-heart-o
+      var bookmarkButton = '<li class="nav-item d-none d-md-block"><a onclick="javascript:bookmark();" class="nav-link pl-2 text-info" id="favButton" ><i class="la la-bookmark la-lg text-info"></i></a></li>'; //la-heart-o
 
-      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(fastForwardButton);
+      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(bookmarkButton);
 
 
       var glossaryButton = '<li class="nav-item d-none d-md-block"><a  id="glossaryButton" '+buildTitle('Find a Glossary')+' class="hide nav-link pl-2 text-info" onclick="javascript: isExpandSearch = true; var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/Glossary106420781\', \'Glossary\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\'); takeMainFocus(pid);" style="cursor:pointer;"><i class="la la-book la-lg text-info"></i></a></li>'; //la-heart-o
@@ -2663,9 +2683,9 @@ function init(){
 
 
 
-      var favButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" onclick="javascript:save($(\'#keywords\').text()); $(\'keywords\').text(\'\');" class="nav-link pl-2 text-info" id="favButton" ><i class="la la-save la-lg text-default"></i></a></li>'; //la-heart-o
+      var demoButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" href="http://vio.sn/c/9LK72AN" class="nav-link pl-2 text-info" id="demoButton" ><i class="la la-map-signs la-lg text-info"></i></a></li>'; //la-heart-o
 
-      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(favButton);
+      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(demoButton);
 
 
   //$('#queryTimeout').unbind('click');  
@@ -2888,7 +2908,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
+        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG Cluster</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
@@ -3336,7 +3356,7 @@ gbcol += '<select onchange="javascript: selectShowMe()" id="showMeMenu">';
 
         gbcol += '<div class="widget-body  p-0">';
       //  gbcol += '<div class="widget-body p-0">';
-            gbcol += '<div id="angular_showMeList" class="list-group fs-mini">';
+            gbcol += '<div id="angular_showMeList" class="list-group list-group-lg">'; //fs-mini
 
 
 
@@ -4360,7 +4380,7 @@ function addTab(fctId, tabCounter) {
     footer += '<div class="clearfix">';
     footer += '<div _ngcontent-c4="" class="btn-group dropdown" dropdown="">';
     footer += '<button _ngcontent-c4="" class="btn btn-default btn-sm" id="dropdown-btn-three">Vocabularies</button>';
-    footer += '<button _ngcontent-c4="" class="btn btn-default dropdown-toggle btn-sm" dropdowntoggle="" aria-haspopup="true">';
+    footer += '<button _ngcontent-c4="" class="btn btn-default dropdown-toggle btn-sm" dropdowntoggle="" aria-haspopup="true" style="border-top-right-radius: 0;border-bottom-right-radius: 0;">';
     footer += '<i _ngcontent-c4="" class="fa fa-caret-down"></i>';
     footer += '</button>';
     footer += '<button _ngcontent-c4="" '+buildTitle('Vocabulary Search')+ ' onclick="javascript:window.open(\'https://lov.linkeddata.es\', \'vios.vocab\', \'width=\\\''+window.outerWidth+'\\\' height=\\\''+window.outerHeight+'\\\'\')" class="btn btn-default btn-sm">';
@@ -4371,13 +4391,13 @@ function addTab(fctId, tabCounter) {
     footer += '<div class="pull-right">';
 
     footer += '<button class="btn btn-default btn-sm">';
-    footer += 'Category&nbsp;<i class="fa fa-plus-square text-info"></i>';
+    footer += '<i class="fa fa-magic text-info"></i>&nbsp;Category';
     footer += '</button>&nbsp;';
     footer += '<button class="btn btn-default btn-sm">';
-    footer += 'Field&nbsp;<i class="fa fa-plus-square text-info"></i>';
+    footer += '<i class="fa fa-magic text-info"></i>&nbsp;Field';
     footer += '</button>&nbsp;';
     footer += '<button class="btn btn-default btn-sm">';
-    footer += 'Role&nbsp;<i class="fa fa-plus-square text-info"></i>';
+    footer += '<i class="fa fa-magic text-info"></i>&nbsp;Role';
     footer += '</button>&nbsp;';
     footer += '&nbsp;&nbsp;&nbsp;&nbsp;';
 
@@ -5017,6 +5037,23 @@ iri = decodeURIComponent(iri);
 return iri;
 }
 
+
+function spaceCamelCase(label){
+    // insert a space before all caps
+    ///*
+    if(label.toUpperCase() != label){
+    //label = label.replace(/([A-Z])([a-z])(.*)/g, ' $1$2$3')
+
+    // see here: https://stackoverflow.com/questions/5020906/python-convert-camel-case-to-space-delimited-using-regex-and-taking-acronyms-in
+    label = label.replace(/((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))/g, ' $1')
+    // uppercase the first character
+    .replace(/^./, function(str){ return str.toUpperCase(); });
+    }
+    //*/
+    return label.trim();
+}
+
+
 function processLabel(label, value, datatype, lang, labelSize, includeHostName){
     if(value == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type') label = 'category'; //POI: type is named Category across the UI
     if(!labelSize) labelSize = SIZE_LABEL;
@@ -5079,7 +5116,7 @@ function processLabel(label, value, datatype, lang, labelSize, includeHostName){
 
 
     var re = /[^0-9](?=[0-9])/g; 
-    label = label.replace(re, '$& ');
+    //label = label.replace(re, '$& ');
     try{
       var varInt = parseInt(label.trim());
       if(!varInt){
@@ -5182,16 +5219,6 @@ function updatePermalink(){
       );
       
     }
-}
-
-function spaceCamelCase(label){
-    // insert a space before all caps
-    if(label.toUpperCase() != label){
-    label = label.replace(/([A-Z])/g, ' $1')
-    // uppercase the first character
-    .replace(/^./, function(str){ return str.toUpperCase(); });
-    }
-    return label.trim();
 }
 
 
@@ -6425,8 +6452,6 @@ function loadSubjectBadge(iri, id){
   fct_sparql('select distinct ?o ?lab ?p WHERE { {<'+iri+'> <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject> ?o. OPTIONAL{?o <http://www.w3.org/2000/01/rdf-schema#label> ?lab. <'+iri+'> ?p ?o. FILTER langMatches( lang(?lab), "EN" )}} UNION {<'+iri+'> <http://purl.org/dc/terms/subject> ?o. OPTIONAL{?o <http://www.w3.org/2000/01/rdf-schema#label> ?lab. <'+iri+'> ?p ?o. FILTER langMatches( lang(?lab), "EN" )}}  } limit 2', opt);
 }
 
-
-
 function addSubResults(opt){
     var table = $.createElement('table');
     table.attr('id', opt.childrenId);
@@ -6441,18 +6466,20 @@ function addSubResults(opt){
     $('#'+opt.parentId+'').after(table);
 }
 
-function expand(propVal, datatype, lang, optsStr){
-    optsStr = deSanitizeLabel(optsStr);
-    var opts = toJSONObject(optsStr);
-    var childrenId = opts.childrenId;
-    var parentId = opts.parentId;
+function expand(propVal, datatype, lang, optStr){
+    optStr = deSanitizeLabel(optStr);
+    var opt = toJSONObject(optStr);
+    var childrenId = opt.childrenId;
+    var parentId = opt.parentId;
+    opt.instances = true;
+    opt.tag = undefined;
     propVal = deSanitizeLabel(propVal);
     if($('#'+parentId+'').hasClass('up')){
         $('#'+parentId+'').removeClass('up');
         $('#'+parentId+'').addClass('down');
     }
     else{
-        collapse(opts);
+        collapse(opt);
         return;
     }
     //console.log('user expanded: ' + childrenId);
@@ -6515,7 +6542,26 @@ function expand(propVal, datatype, lang, optsStr){
 
     $('#'+parentId+'').addClass('loading');
     //takeFocus(q, q);
-    fct_query(q, VIEW_TYPE_LIST,opts);
+
+
+    fct_query(q, VIEW_TYPE_LIST_COUNT,opt);
+
+
+    var q2 = q.clone();
+    var prop2 = getFocus(q2).find((isReverse ? 'property-of' : 'property')+'[iri=\''+propIRI+'\']').filter(function() {return $(this).children('value').text() === propVal;});
+    // branches query
+    var p = $.createElement('property-of');
+    p.attr('iri', prop2.attr('iri'));
+    p.attr('label', prop2.attr('label'));
+    getFocus(q2).append(p);
+    takeFocus(p, q2);
+    
+    var branch_opt = new Object();
+    branch_opt.parentId = opt.parentId;
+    branch_opt.childrenId = opt.childrenId;
+    branch_opt.branches = true;
+    fct_query(q2, VIEW_TYPE_LIST_COUNT, branch_opt);
+
 
 }
 
@@ -7613,6 +7659,7 @@ function loadDescribeResults(xml, opt) {
 
     var phone;
     var homepage;
+    var url;
 
     var rows = '';
     $('rdf\\:Description', xml).each(function(i) {
@@ -7622,6 +7669,7 @@ function loadDescribeResults(xml, opt) {
         $('*', this).each(function(j) {
 
             var objectIRI = $(this).attr('rdf:resource');
+            if(!objectIRI) objectIRI = $(this).attr('rdf:nodeID');
             var objLabel = objectIRI;
             if (getLabel(objectIRI)) objLabel = getLabel(objectIRI);
             var objectValue = $(this).text();
@@ -7670,7 +7718,7 @@ function loadDescribeResults(xml, opt) {
                 return l.toUpperCase()
             });
             if ((namespaces[qname] + fragId) == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' && objectIRI == 'http://www.w3.org/2002/07/owl#Class') hasClass = true;
-            if ((namespaces[qname] + fragId) == 'http://xmlns.com/foaf/0.1/depiction') { //|| (namespaces[qname]+fragId) == 'http://dbpedia.org/property/logo'
+            if ((namespaces[qname] + fragId) == 'http://xmlns.com/foaf/0.1/depiction'){// || (namespaces[qname]+fragId) == 'http://xmlns.com/foaf/0.1/logo' ){
                 //hasImage = true;
                 img = '<div class="pull-right"><img onclick="javascript:linkOut(\'' + objectIRI + '\');" style="cursor:pointer;width:200px; margin-left:.55em;" class="class="rounded img-thumbnail" src="' + objectIRI + '"/></div>';
                 imgIri = objectIRI;
@@ -7691,6 +7739,7 @@ function loadDescribeResults(xml, opt) {
 
             if ((namespaces[qname] + fragId) == 'http://www.w3.org/ns/prov#wasDerivedFrom'.toLowerCase()) wikiPage = (!objectValue) ? objectIRI : objectValue;
             if ((namespaces[qname] + fragId) == 'http://www.w3.org/ns/prov#hadPrimarySource'.toLowerCase()) wikiPage = (!objectValue) ? objectIRI : objectValue;
+            if ((namespaces[qname] + fragId).toLowerCase() == 'http://schema.org/url'.toLowerCase()) url = (!objectValue) ? objectIRI : objectValue;
 
             if ((namespaces[qname] + fragId).toLowerCase() == 'http://xmlns.com/foaf/0.1/phone'.toLowerCase()) phone = objectValue;
             if ((namespaces[qname] + fragId).toLowerCase() == 'http://xmlns.com/foaf/0.1/homepage'.toLowerCase()) homepage = (!objectValue) ? objectIRI : objectValue;
@@ -7731,22 +7780,27 @@ function loadDescribeResults(xml, opt) {
 
             col = $.createElement('td');
             var cid = 'copy_' + createId();
+            var loid = 'linkout_' + createId();
             col.on('mouseover', function() {
                 $('#' + cid).removeClass('hide');
+                $('#' + loid).removeClass('hide');
             });
             col.on('mouseout', function() {
                 $('#' + cid).addClass('hide');
+                $('#' + loid).addClass('hide');
             });
             //col.attr('width', '100%');
             //col.addClass('d-none');
             //col.addClass('d-md-table-cell');
             if (objectIRI == uri) {
                 if (subject) {
-                    col.html('<a style="text-decoration:none;" href="' + subject + '">' + processLabel(subLabel) + '</a>&nbsp;<img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(subject) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
+                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + subject + '\', \'' + processLabel(subLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(subLabel) + '</a>&nbsp;<img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(subject) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
+                    col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide link-field fa fa-external-link fa-sm" onclick="linkOut(\''+subject+'\')"></i>');
                 } else col.text(objectValue);
             } else {
                 if (objectIRI) {
-                    col.html('<a style="text-decoration:none;" href="' + objectIRI + '">' + processLabel(objLabel) + '</a>&nbsp;<img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(objectIRI) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
+                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(objLabel) + '</a>&nbsp;<img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(objectIRI) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
+                    col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide link-field fa fa-external-link fa-sm" onclick="linkOut(\''+objectIRI+'\')"></i>');
                 } else {
                     col.text(objectValue); 
                     col.prepend('<span style="cursor:pointer" class="pull-right icon-literal glyphicon glyphicon-tag" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + sanitizeLabel(objectValue) + '\', \'uri\', \'' + lang + '\');"></span>' );
@@ -7949,6 +8003,10 @@ content += '</section>';
             //tools += '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer"  style="cursor:pointer" '+buildTitle('View in Wikipedia')+' onclick="javascript:linkOut(\''+wikiPage+'\')" class="fa fa-wikipedia-w fa-lg"></i>';        
             $('#angular_recordViewer').attr('src', wikiPage);
         }
+        if (url) {
+            $('#angular_recordViewer').attr('src', url);
+        }
+
 
 
         uriLabel = '';
@@ -8188,6 +8246,17 @@ content += '</section>';
     if (opt.srcId) {
         $('#' + opt.srcId).removeClass('loading');
     }
+
+
+
+    if(isInterlinked()){
+        //popUnder(src, window.outerWidth, window.outerHeight);
+        var win = window.open($('#angular_recordViewer').attr('src'), twin, 'width="'+window.outerWidth+'" height="'+window.outerHeight+'"');
+        win.blur();
+        this.window.focus();
+    }
+
+
 
 } //recordViewerColumn
 
@@ -8461,7 +8530,7 @@ function loadPropertyValues(xml, opts){
 
 rows += '<tr><td '+iriAttr+' id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+'>';
 //rows +=  '<a class="list-group-item" data-target="#">';
-                                rows +=  '<span class="thumb-sm float-left mr">';
+                                rows +=  '<span class="thumb-sm float-left ">';
 if(datatype == 'uri'){
                   rows += '<img style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\'); takeMainFocus(\''+opts.contextId+'\')" src="'+getFaviconUrl(value)+'">';
                                     //rows +=  '<i class="status status-bottom bg-success"></i>';
@@ -8576,7 +8645,7 @@ function loadPropertyOfValues(xml, opts){
 
 rows += '<tr><td '+iriAttr+' id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+'>';
 //rows +=  '<a class="list-group-item" data-target="#">';
-                                rows +=  '<span class="thumb-sm float-left mr">';
+                                rows +=  '<span class="thumb-sm float-left ">';
 
                   rows += '<img style="cursor:pointer" onclick="javascript:setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY_OF+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\'); takeMainFocus(\''+opts.contextId+'\')" src="'+getFaviconUrl(value)+'">';
                                     //rows +=  '<i class="status status-bottom bg-success"></i>';
@@ -8680,7 +8749,7 @@ var loadedUri = false;
 
 rows += '<tr><td '+iriAttr+' id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+'>';
 //rows +=  '<a class="list-group-item" data-target="#">';
-                                rows +=  '<span class="thumb-sm float-left mr">';
+                                rows +=  '<span class="thumb-sm float-left ">';
 
                   rows += '<img style="cursor:pointer" onmouseover="javascript:$(\'#'+focusTarget+'\').addClass(\''+focusTargetClass+'\')" onmouseout="javascript:$(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" src="'+getFaviconUrl(value)+'">';
                                     //rows +=  '<i class="status status-bottom bg-success"></i>';
@@ -8798,13 +8867,6 @@ function describe(id, src, isGGGRecord){
     $('#angular_recordViewer').attr('src', linkOutURI); // deprecated
     //$('#recordLabel').val(label);
 
-    if(isInterlinked()){
-        //popUnder(src, window.outerWidth, window.outerHeight);
-        var win = window.open(src, twin, 'width="'+window.outerWidth+'" height="'+window.outerHeight+'"');
-        win.blur();
-        this.window.focus();
-    }
-
 
     var opt = new Object();
     opt.tar = 'record';
@@ -8897,7 +8959,7 @@ function loadInstances(xml, opts){
 
 rows += '<tr><td '+iriAttr+' id="'+rowId+'"  '+((recordActive)?' class="record-active"':'')+'>';
 //rows +=  '<a class="list-group-item" data-target="#">';
-                                rows +=  '<span class="thumb-sm float-left mr">';
+                                rows +=  '<span class="thumb-sm float-left ">';
 
                 if(datatype=='uri') {
                   rows += '<img style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:remove('+getMainFocus().attr('class')+', true);setValue(\''+id+'\', \''+sanitizeLabel(value)+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
@@ -8912,7 +8974,7 @@ rows += '</span>';
 
           rows +=  '<h6 class="row-result"  style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+rowId+'\', \''+sanitizeLabel(value)+'\');">'+label+'</h6>';
               var badgeId = createId();
-              rows +=  '<p style="cursor:pointer" class="text-ellipsis m-0" id="'+badgeId+'"></p><script type="text/javascript">loadSubjectBadge(\''+value+'\', \''+badgeId+'\');</script>'; //
+              rows +=  '<p style="cursor:pointer" class="text-ellipsis m-0" id="'+badgeId+'"></p><script type="text/javascript">loadSubjectBadge(\''+value+'\', \''+label+'\', \''+badgeId+'\');</script>'; //
 rows += '</td></tr>';
 
 
@@ -8947,6 +9009,119 @@ rows += '</td></tr>';
 
 
 }
+
+
+function loadBranches(xml, opt){
+      if(true) return;
+      var rows = "";
+      var result = $(xml).find("fct\\:result")[0];
+      var value, datatype, lang, shortform, label, ct;
+      var loadedUri = false;
+      $("fct\\:row", result).each(function(i) {
+          //console.log($(this).html());
+          var col = $(this).find("fct\\:column");
+          $("fct\\:column", this).each(function(j) {
+              // can't figure out how to access CDATA value of the element, tried many combinations of accessors, none worked
+              // seems like jquery is commenting out the CDATA
+              val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
+              //console.log(val);
+              switch(j){
+                case 0: value = val; shortform = $(this).attr('shortform'); datatype = $(this).attr('datatype'); lang = $(this).attr('lang'); break;
+                case 1: label = val; break;
+                case 2: ct = val; break;
+              }
+          });
+
+
+          var iriAttr = '';
+          if(!datatype) datatype = '';
+          if(datatype == 'uri') iriAttr = ' iri="' +value+ '"';
+
+
+          label = processLabel(label, value, datatype);
+          var id = createId();
+          var rowId = 'r_' + createId();
+          var recordActive = false;
+          //console.log($(col[0]));
+
+              if(!loadedUri) {
+                  if(datatype === 'uri'){
+                    loadedUri = true;
+                    describe(rowId, value);
+                    recordActive = true;
+                    $('.record-active').removeClass('record-active');
+                  } 
+              }
+
+              var propIRI = $('#groupByMenu :selected').attr('value');
+              var propLabel = $('#groupByMenu :selected').text();
+              var contextId = $('#groupByMenu :selected').attr('id');
+                var gbjson = JSON.parse( $('#groupByMenu :selected').attr('json') ) ;
+                var isReverse = (!gbjson) ? false :  gbjson.isReverse;
+              //if(propIRI != GROUP_BY_NONE_VALUE && propIRI != GROUP_BY_TEXT_VALUE) {
+                var addPropOrPropOf = (isReverse) ? "addPropertyOfFacet" : "addPropertyFacet";
+                var propOrPropOf = (isReverse) ? "property-of" : "property";
+                var nodeType = (isReverse) ? NODE_TYPE_PROPERTY_OF: NODE_TYPE_PROPERTY;
+
+              var color = 'success';
+
+rows += '<tr><td '+iriAttr+' id="'+rowId+'"  '+((recordActive)?' class="record-active"':'')+'>';
+//rows +=  '<a class="list-group-item" data-target="#">';
+
+
+
+                                rows +=  '<span class="thumb-sm float-left ">';
+                rows +=  '<span style="cursor:pointer" _ngcontent-c9="" class="badge badge-default" onclick="javascript: removeEmptyFacet(\''+propOrPropOf+'\',\''+propIRI+'\', true); '+addPropOrPropOf+'(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\', \''+lang+'\'); selectMenuItem(\''+id+'\', \''+propIRI+'\');">'+ct+'</span>';
+/*
+                if(datatype=='uri') {
+                  rows += '<img style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:remove('+getMainFocus().attr('class')+', true);setValue(\''+id+'\', \''+sanitizeLabel(value)+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
+                                    //rows +=  '<i class="status status-bottom bg-'+color+'"></i>';
+                }
+                else {
+                  rows += '<span style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:remove('+getMainFocus().attr('class')+', true);setValue(\''+id+'\', \''+sanitizeLabel(value)+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="icon-literal glyphicon glyphicon-tag"></span>';
+                }
+*/
+rows += '</span>';
+//rows += '</a>';
+
+          rows +=  '<h6 class="row-result"  style="cursor:pointer" '+buildTitle(value)+' onclick="javascript:describe(\''+rowId+'\', \''+sanitizeLabel(value)+'\');">'+label+'</h6>';
+              var badgeId = createId();
+              rows +=  '<p style="cursor:pointer" class="text-ellipsis m-0" id="'+badgeId+'"></p><script type="text/javascript">loadSubjectBadge(\''+value+'\', \''+label+'\', \''+badgeId+'\');</script>'; //
+rows += '</td></tr>';
+
+
+
+
+
+
+/*
+
+
+          rows += '<tr><td class="instance" id="'+id+'"><span id="'+id+'">';
+          rows += '<a title="'+value+'" onclick="javascript:describe(\''+value+'\');">'+label+'</a>&nbsp;';
+          rows += '</span></td><td style="vertical-align:top;">';
+          rows += '<a onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\')">'+getFavicon(value)+'</a>&nbsp;';
+          rows += '</td></tr>';
+
+*/
+
+      });
+
+
+
+        // todo: load the first record
+ 
+
+      //console.log(rows);
+      //addSubResults(opt);
+          $('#'+opt.childrenId+' > tbody').append(rows);
+
+        //$('#groupby').append(rows);
+        //return total;
+
+}
+
+
 
 
 //** FILE: nav.js **/
