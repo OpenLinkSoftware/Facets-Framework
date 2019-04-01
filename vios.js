@@ -5474,14 +5474,15 @@ function savePermalink(name){
 }
 
 
-function doRemoveDataspace(){
-  var idx = ds.indexOfDataspace(dataspace);
-  $('a#dataSpaceMenu').parent().children('.dropdown-menu').children('li').children('a[url="'+dataspace+'"]').remove();
+function doRemoveDataspace(dsurl, silent){
+  if(!dsurl) dsurl = dataspace;
+  var idx = ds.indexOfDataspace(dsurl);
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').children('li').children('a[url="'+dsurl+'"]').remove();
   ds.splice(idx, 1);
   if(idx >= ds.length) idx = ds.length - 1;
   if(idx < 0) idx = 0;  
   if(ds.length > 0) {
-    selectDataspace(ds[idx][0], ds[idx][1]);
+    selectDataspace(ds[idx][0], ds[idx][1], silent);
   }
   else {
     addDataspace('dbpedia.org','DBPedia',false,false); // try to add DBPedia
@@ -6439,12 +6440,19 @@ if(true){
               else {
                 var dataserverClass = getQuery().children('class');
                 if(dataserverClass && dataserverClass.length > 0){
-                  var isNewDataserver = getMainFocus().parent().attr('class') == ID_QUERY;
-                  isNewDataserver = isNewDataserver && getMainFocus().attr('iri', 'http://www.vios.network/o/DataServer/Index/dataserver');
-                  isNewDataserver = isNewDataserver && ds.indexOfDataspace(value) < 0;
-                  if(isNewDataserver && dataserverClass.attr('iri') == 'http://www.vios.network/o/DataServer/Index'){
+                  var isDataserver = getMainFocus().parent().attr('class') == ID_QUERY;
+                  isDataserver = isDataserver && getMainFocus().attr('iri')=='http://www.vios.network/o/DataServer/Index/dataserver';
+                  //isNewDataserver = isNewDataserver;
+                  if(isDataserver && dataserverClass.attr('iri') == 'http://www.vios.network/o/DataServer/Index'){
 //                  if(dataserverClass.attr('iri') == 'http://www.vios.network/o/DataServer'){
-                    rows += '<i '+buildTitle('Add dataspace', 'right')+'  onclick="javascript:addDataspace(\''+value+'\', \''+label+'\');takeMainFocus(ID_QUERY); clearFacets();" class="fa fa-plus-circle fa-lg text-inverse"></i>';
+
+          checked=(ds.indexOfDataspace(value) >= 0) ? ' checked="checked"': '';
+          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-warning">';
+          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {doRemoveDataspace(\''+value+'\', true);}else{addDataspace(\''+value+'\', \''+label+'\', false, true);}" />&nbsp;';
+          rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
+          rows += '</div>';
+
+                    //rows += '<i '+buildTitle('Add dataspace', 'right')+'  onclick="javascript:addDataspace(\''+value+'\', \''+label+'\');takeMainFocus(ID_QUERY); clearFacets();" class="fa fa-plus-circle fa-lg text-inverse"></i>';
                   }
                 }
               }
