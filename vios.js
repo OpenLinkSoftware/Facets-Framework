@@ -2175,8 +2175,9 @@ function removeGraphFacet(){
   doQuery(getQueryText());
 }
 
-function clearFacets(){
-  _root.children('query').children('property, property-of, class').remove();
+function clearFacets(silent){
+  _root.children('query').children('property, property-of, class, value').remove();
+  if(!silent) doQuery(getQueryText());
 }
 
 //** FILE: main.js **/
@@ -2679,14 +2680,14 @@ function init(){
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(bookmarkButton);
 
 
-      var glossaryButton = '<li class="nav-item d-none d-md-block"><a  id="glossaryButton" '+buildTitle('Find a Glossary')+' class="hide nav-link pl-2 text-info" onclick="javascript: isExpandSearch = true; takeMainFocus(ID_QUERY); clearFacets(); var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/Glossary106420781\', \'Glossary\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\'); takeMainFocus(pid);" style="cursor:pointer;"><i class="la la-book la-lg text-info"></i></a></li>'; //la-heart-o
+      var glossaryButton = '<li class="nav-item d-none d-md-block"><a  id="glossaryButton" '+buildTitle('Find a Glossary')+' class="hide nav-link pl-2 text-info" onclick="javascript: isExpandSearch = true; takeMainFocus(ID_QUERY); clearFacets(true); var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/Glossary106420781\', \'Glossary\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\'); takeMainFocus(pid);" style="cursor:pointer;"><i class="la la-book la-lg text-info"></i></a></li>'; //la-heart-o
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(glossaryButton);
 
 
 
 
-      var demoButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" class="nav-link pl-2 text-info" id="demoButton"  onclick="javascript:selectDataspace(\'http://data.vios.network\', \'VIOS\'); clearKeywords(); var cid = createId(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(); addClassFacet(cid, \'http://schema.org/Bookmark\', \'Bookmark\');"><i class="la la-map-signs la-lg text-info"></i></a></li>'; //la-heart-o
+      var demoButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" class="nav-link pl-2 text-info" id="demoButton" '+buildTitle('Click WWW on the next canvas to visit the demo smart folders')+' onclick="javascript:selectDataspace(\'http://data.vios.network\', \'VIOS\'); clearKeywords(); var cid = createId(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(true); addClassFacet(cid, \'http://schema.org/Bookmark\', \'Bookmark\');"><i class="la la-map-signs la-lg text-info"></i></a></li>'; //la-heart-o
 //href="http://vio.sn/c/9LK72AN"
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(demoButton);
 
@@ -3812,11 +3813,11 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     }
 
     addDataspace('dbpedia.org','DBPedia',false,true); // try to add DBPedia
-    addDataspace('lod.openlinksw.com','LOD',false,true); // try to add LOD Cloud Cache
-    addDataspace('demo.openlinksw.com','OpenLink Demo',false,true); // try to add OpenLink Demo
-    addDataspace('linkeddata.uriburner.com','URIBurner',false,true); // try to add URI Burner
-    addDataspace('data.vios.network','VIOS',false,true); // try to add VIOS
-    addDataspace('ggg.vios.network','GGG',false,true); // try to add GGG
+    //addDataspace('lod.openlinksw.com','LOD',false,true); // try to add LOD Cloud Cache
+    //addDataspace('demo.openlinksw.com','OpenLink Demo',false,true); // try to add OpenLink Demo
+    //addDataspace('linkeddata.uriburner.com','URIBurner',false,true); // try to add URI Burner
+    //addDataspace('data.vios.network','VIOS',false,true); // try to add VIOS
+    //addDataspace('ggg.vios.network','GGG',false,true); // try to add GGG
     if(ds.length <= 0) selectDataspace('dbpedia.org', 'DBPedia', false, true);
 
     try{
@@ -3915,19 +3916,6 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
 //var countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Anguilla","Antigua &amp; Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia &amp; Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Cayman Islands","Central Arfrican Republic","Chad","Chile","China","Colombia","Congo","Cook Islands","Costa Rica","Cote D Ivoire","Croatia","Cuba","Curacao","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Ethiopia","Falkland Islands","Faroe Islands","Fiji","Finland","France","French Polynesia","French West Indies","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guam","Guatemala","Guernsey","Guinea","Guinea Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Isle of Man","Israel","Italy","Jamaica","Japan","Jersey","Jordan","Kazakhstan","Kenya","Kiribati","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Macau","Macedonia","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Montserrat","Morocco","Mozambique","Myanmar","Namibia","Nauro","Nepal","Netherlands","Netherlands Antilles","New Caledonia","New Zealand","Nicaragua","Niger","Nigeria","North Korea","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Puerto Rico","Qatar","Reunion","Romania","Russia","Rwanda","Saint Pierre &amp; Miquelon","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","St Kitts &amp; Nevis","St Lucia","St Vincent","Sudan","Suriname","Swaziland","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor L'Este","Togo","Tonga","Trinidad &amp; Tobago","Tunisia","Turkey","Turkmenistan","Turks &amp; Caicos","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States of America","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Virgin Islands (US)","Yemen","Zambia","Zimbabwe"];
 
 
-function doRemoveDataspace(){
-  var idx = ds.indexOfDataspace(dataspace);
-  $('a#dataSpaceMenu').parent().children('.dropdown-menu').children('li').children('a[url="'+dataspace+'"]').remove();
-  ds.splice(idx, 1);
-  if(idx >= ds.length) idx = ds.length - 1;
-  if(idx < 0) idx = 0;  
-  if(ds.length > 0) {
-    selectDataspace(ds[idx][0], ds[idx][1]);
-  }
-  else {
-    addDataspace('lod.openlinksw.com','LOD',false,false); // try to add LOD Cloud Cache
-  }
-}
 
 function showProfileManagerPreview(){
   var isProfileManagerOpen = $('.avatar').parent().parent().hasClass('open');
@@ -5485,7 +5473,42 @@ function savePermalink(name){
 
 }
 
-function doFindDataspaces(){}
+
+function doRemoveDataspace(){
+  var idx = ds.indexOfDataspace(dataspace);
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').children('li').children('a[url="'+dataspace+'"]').remove();
+  ds.splice(idx, 1);
+  if(idx >= ds.length) idx = ds.length - 1;
+  if(idx < 0) idx = 0;  
+  if(ds.length > 0) {
+    selectDataspace(ds[idx][0], ds[idx][1]);
+  }
+  else {
+    addDataspace('dbpedia.org','DBPedia',false,false); // try to add DBPedia
+  }
+
+    try{
+      localStorage.setItem('dataspaces', JSON.stringify(ds));
+    }
+    catch(err){
+      if(fct_isDebug) console.log('Dataspace cache failed: ' + err);
+    }
+}
+
+function doFindDataspaces(){
+  if(ds.indexOfDataspace('http://data.vios.network') < 0) {
+    addDataspace('http://data.vios.network', 'VIOS');
+  }
+  else selectDataspace('http://data.vios.network', 'VIOS');
+  takeMainFocus(ID_QUERY); 
+  clearFacets(true); 
+  var cid = createId(); 
+  setQueryText($('#keywords').val()); 
+  addClassFacet(cid, 'http://www.vios.network/o/DataServer/Index', 'Indexed Content', true);  
+  var pid = createId(); 
+  addPropertyFacet(pid, 'http://www.vios.network/o/DataServer/Index/dataserver', 'dataserver');
+  takeMainFocus(pid);
+}
 
 function addDataspace(url, label, secure, silent){  
   var protocol = (secure) ? 'https://' : 'http://';
@@ -6383,6 +6406,7 @@ if(true){
                 else {
                   rows += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="icon-literal glyphicon glyphicon-tag"></span>';
                 }
+
               }
                                 rows +=  '</span>';
 
@@ -6410,6 +6434,19 @@ if(true){
 //                 rows += '<img title="click to drop-down" class="count" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
                  // rows += '<a title="click to drop-down" class="count" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"><img width="16" height="16"/>&nbsp;&nbsp;</a>&nbsp;';
           rows += '<i '+buildTitle('acts as \''+propLabel+'\' of these things')+' class="expand la la-bars la-lg" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\')"></i>' + ((i==0) ? '<script type="text/javascript">expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\');</script>' :'');
+              }
+
+              else {
+                var dataserverClass = getQuery().children('class');
+                if(dataserverClass && dataserverClass.length > 0){
+                  var isNewDataserver = getMainFocus().parent().attr('class') == ID_QUERY;
+                  isNewDataserver = isNewDataserver && getMainFocus().attr('iri', 'http://www.vios.network/o/DataServer/Index/dataserver');
+                  isNewDataserver = isNewDataserver && ds.indexOfDataspace(value) < 0;
+                  if(isNewDataserver && dataserverClass.attr('iri') == 'http://www.vios.network/o/DataServer/Index'){
+//                  if(dataserverClass.attr('iri') == 'http://www.vios.network/o/DataServer'){
+                    rows += '<i '+buildTitle('Add dataspace', 'right')+'  onclick="javascript:addDataspace(\''+value+'\', \''+label+'\');takeMainFocus(ID_QUERY); clearFacets();" class="fa fa-plus-circle fa-lg text-inverse"></i>';
+                  }
+                }
               }
              // rows += '</td></tr>';
 
