@@ -1257,7 +1257,7 @@ function fct_handleSparqlResults(xml, opt) {
                 //str += '<a data-target="#">';
 
 
-                if(j == 0 && isRollup()) str += '<i class="la la-bars expand float-right"></i>';
+                if(j == 0 && isRollup()) str += '<i class="la la-bars expand float-right la-lg"></i>';
                 //str += '<span class="thumb-sm float-left mr">';
                 var onclick = 'onclick="javascript:setValue(\'' + id + '\', \'' + value + '\', \'' + label + '\', \'' + datatype + '\', \'' + lang + '\')"';
                 if(isRollup() && j == 0) onclick = 'onclick="javascript: addClassFacet(\''+id+'\', \''+sanitizeLabel($(this).text())+'\', \''+sanitizeLabel(label)+'\')"';
@@ -2175,6 +2175,9 @@ function removeGraphFacet(){
   doQuery(getQueryText());
 }
 
+function clearFacets(){
+  _root.children('query').children('property, property-of, class').remove();
+}
 
 //** FILE: main.js **/
 
@@ -2676,15 +2679,15 @@ function init(){
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(bookmarkButton);
 
 
-      var glossaryButton = '<li class="nav-item d-none d-md-block"><a  id="glossaryButton" '+buildTitle('Find a Glossary')+' class="hide nav-link pl-2 text-info" onclick="javascript: isExpandSearch = true; var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/Glossary106420781\', \'Glossary\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\'); takeMainFocus(pid);" style="cursor:pointer;"><i class="la la-book la-lg text-info"></i></a></li>'; //la-heart-o
+      var glossaryButton = '<li class="nav-item d-none d-md-block"><a  id="glossaryButton" '+buildTitle('Find a Glossary')+' class="hide nav-link pl-2 text-info" onclick="javascript: isExpandSearch = true; takeMainFocus(ID_QUERY); clearFacets(); var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/Glossary106420781\', \'Glossary\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\'); takeMainFocus(pid);" style="cursor:pointer;"><i class="la la-book la-lg text-info"></i></a></li>'; //la-heart-o
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(glossaryButton);
 
 
 
 
-      var demoButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" href="http://vio.sn/c/9LK72AN" class="nav-link pl-2 text-info" id="demoButton" ><i class="la la-map-signs la-lg text-info"></i></a></li>'; //la-heart-o
-
+      var demoButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" class="nav-link pl-2 text-info" id="demoButton"  onclick="javascript:selectDataspace(\'http://data.vios.network\', \'VIOS\'); clearKeywords(); var cid = createId(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(); addClassFacet(cid, \'http://schema.org/Bookmark\', \'Bookmark\');"><i class="la la-map-signs la-lg text-info"></i></a></li>'; //la-heart-o
+//href="http://vio.sn/c/9LK72AN"
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(demoButton);
 
 
@@ -3904,7 +3907,13 @@ $('.avatar').parent().children('.circle').each(async (i) => {
 $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
 
 
+//autocomplete(document.getElementById("keywords"), countries);
+
+
 }
+
+//var countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Anguilla","Antigua &amp; Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia &amp; Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Cayman Islands","Central Arfrican Republic","Chad","Chile","China","Colombia","Congo","Cook Islands","Costa Rica","Cote D Ivoire","Croatia","Cuba","Curacao","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Ethiopia","Falkland Islands","Faroe Islands","Fiji","Finland","France","French Polynesia","French West Indies","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guam","Guatemala","Guernsey","Guinea","Guinea Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Isle of Man","Israel","Italy","Jamaica","Japan","Jersey","Jordan","Kazakhstan","Kenya","Kiribati","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Macau","Macedonia","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Montserrat","Morocco","Mozambique","Myanmar","Namibia","Nauro","Nepal","Netherlands","Netherlands Antilles","New Caledonia","New Zealand","Nicaragua","Niger","Nigeria","North Korea","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Puerto Rico","Qatar","Reunion","Romania","Russia","Rwanda","Saint Pierre &amp; Miquelon","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","St Kitts &amp; Nevis","St Lucia","St Vincent","Sudan","Suriname","Swaziland","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor L'Este","Togo","Tonga","Trinidad &amp; Tobago","Tunisia","Turkey","Turkmenistan","Turks &amp; Caicos","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States of America","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Virgin Islands (US)","Yemen","Zambia","Zimbabwe"];
+
 
 function doRemoveDataspace(){
   var idx = ds.indexOfDataspace(dataspace);
@@ -6400,7 +6409,7 @@ if(true){
           rows += '</div>';
 //                 rows += '<img title="click to drop-down" class="count" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
                  // rows += '<a title="click to drop-down" class="count" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"><img width="16" height="16"/>&nbsp;&nbsp;</a>&nbsp;';
-          rows += '<i '+buildTitle('acts as \''+propLabel+'\' of these things')+' class="expand la la-bars" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\')"></i>' + ((i==0) ? '<script type="text/javascript">expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\');</script>' :'');
+          rows += '<i '+buildTitle('acts as \''+propLabel+'\' of these things')+' class="expand la la-bars la-lg" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\')"></i>' + ((i==0) ? '<script type="text/javascript">expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\');</script>' :'');
               }
              // rows += '</td></tr>';
 
@@ -6546,7 +6555,7 @@ function expand(propVal, datatype, lang, optStr){
 
     fct_query(q, VIEW_TYPE_LIST_COUNT,opt);
 
-
+/*
     var q2 = q.clone();
     var prop2 = getFocus(q2).find((isReverse ? 'property-of' : 'property')+'[iri=\''+propIRI+'\']').filter(function() {return $(this).children('value').text() === propVal;});
     // branches query
@@ -6561,7 +6570,7 @@ function expand(propVal, datatype, lang, optStr){
     branch_opt.childrenId = opt.childrenId;
     branch_opt.branches = true;
     fct_query(q2, VIEW_TYPE_LIST_COUNT, branch_opt);
-
+*/
 
 }
 
@@ -6955,7 +6964,7 @@ if(true){
           //rows += '<img title="view instances" class="count" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
 //          rows += '<a title="view instances" class="count" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>';
           //rows += '</td></tr>';
-          rows += '<i '+buildTitle('preview category members')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+uri+'\', \''+label+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('preview category members')+' class="expand la la-bars la-lg" onclick="javascript:expandShowMe(\''+uri+'\', \''+label+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
 
           rows +='</h6>';
             rows +=  '</div>';
@@ -7196,7 +7205,7 @@ var rowId = opts.parentId;
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
               //rows += '<img title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
-          rows += '<i '+buildTitle('preview field values')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+propLabel+'\' , \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('preview field values')+' class="expand la la-bars la-lg" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+propLabel+'\' , \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
 //              rows += '<a title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>&nbsp;';
           if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the contents list by \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\')" ></i>';
           }
@@ -7369,7 +7378,7 @@ var ckcolor = 'primary';
           rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\');}"/>&nbsp;';//generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
-          rows += '<i '+buildTitle('preview rolees')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+propLabel+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('preview rolees')+' class="expand la la-bars la-lg" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+propLabel+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
               //rows += '<img title="shows up in the \''+propLabel+'\' field of these records" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
           if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the contents list by role: \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\', true)" ></i>';
           }
@@ -9614,4 +9623,110 @@ function get_short_url(long_url, func)
             $('#permalink > i').addClass('la-chain');
         }
     );
+}
+
+
+
+
+
+
+
+
+
+
+function autocomplete(inp, arr) {
+  /*the autocomplete function takes two arguments,
+  the text field element and an array of possible autocompleted values:*/
+  var currentFocus;
+  /*execute a function when someone writes in the text field:*/
+  inp.addEventListener("input", function(e) {
+      var a, b, i, val = this.value;
+      /*close any already open lists of autocompleted values*/
+      closeAllLists();
+      if (!val) { return false;}
+      currentFocus = -1;
+      /*create a DIV element that will contain the items (values):*/
+      a = document.createElement("DIV");
+      a.setAttribute("id", this.id + "autocomplete-list");
+      a.setAttribute("class", "autocomplete-items");
+      /*append the DIV element as a child of the autocomplete container:*/
+      this.parentNode.appendChild(a);
+      /*for each item in the array...*/
+      for (i = 0; i < arr.length; i++) {
+        /*check if the item starts with the same letters as the text field value:*/
+        if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+          /*create a DIV element for each matching element:*/
+          b = document.createElement("DIV");
+          /*make the matching letters bold:*/
+          b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
+          b.innerHTML += arr[i].substr(val.length);
+          /*insert a input field that will hold the current array item's value:*/
+          b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+          /*execute a function when someone clicks on the item value (DIV element):*/
+              b.addEventListener("click", function(e) {
+              /*insert the value for the autocomplete text field:*/
+              inp.value = this.getElementsByTagName("input")[0].value;
+              /*close the list of autocompleted values,
+              (or any other open lists of autocompleted values:*/
+              closeAllLists();
+          });
+          a.appendChild(b);
+        }
+      }
+  });
+  /*execute a function presses a key on the keyboard:*/
+  inp.addEventListener("keydown", function(e) {
+      var x = document.getElementById(this.id + "autocomplete-list");
+      if (x) x = x.getElementsByTagName("div");
+      if (e.keyCode == 40) {
+        /*If the arrow DOWN key is pressed,
+        increase the currentFocus variable:*/
+        currentFocus++;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 38) { //up
+        /*If the arrow UP key is pressed,
+        decrease the currentFocus variable:*/
+        currentFocus--;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 13) {
+        /*If the ENTER key is pressed, prevent the form from being submitted,*/
+        e.preventDefault();
+        if (currentFocus > -1) {
+          /*and simulate a click on the "active" item:*/
+          if (x) x[currentFocus].click();
+        }
+      }
+  });
+  function addActive(x) {
+    /*a function to classify an item as "active":*/
+    if (!x) return false;
+    /*start by removing the "active" class on all items:*/
+    removeActive(x);
+    if (currentFocus >= x.length) currentFocus = 0;
+    if (currentFocus < 0) currentFocus = (x.length - 1);
+    /*add class "autocomplete-active":*/
+    x[currentFocus].classList.add("autocomplete-active");
+  }
+  function removeActive(x) {
+    /*a function to remove the "active" class from all autocomplete items:*/
+    for (var i = 0; i < x.length; i++) {
+      x[i].classList.remove("autocomplete-active");
+    }
+  }
+  function closeAllLists(elmnt) {
+    /*close all autocomplete lists in the document,
+    except the one passed as an argument:*/
+    var x = document.getElementsByClassName("autocomplete-items");
+    for (var i = 0; i < x.length; i++) {
+      if (elmnt != x[i] && elmnt != inp) {
+      x[i].parentNode.removeChild(x[i]);
+    }
+  }
+}
+/*execute a function when someone clicks in the document:*/
+document.addEventListener("click", function (e) {
+    closeAllLists(e.target);
+});
 }
