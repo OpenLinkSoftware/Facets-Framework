@@ -233,6 +233,22 @@ function setQueryGraph(g, label){
   clearLibrary.parent().removeClass('hide');
 }
 
+function stackQueryGraph(g, label){
+  var ancestors = _root.find('query').attr('graphAncestors');
+  if(ancestors && ancestors.length > 0) ancestors += ', ';
+  else ancestors = '';
+  ancestors += _root.find('query').attr('graph');
+
+  var ancestorLabels = _root.find('query').attr('graphAncestors');
+  if(ancestorLabels && ancestorLabels.length > 0) ancestorLabels += ', ';
+  else ancestorLabels = '';
+  ancestorLabels += _root.find('query').attr(ATTR_GRAPH_LABEL);
+
+  _root.find('query').attr('graphAncestors', ancestors);
+  _root.find('query').attr('graphAncestorLabels', ancestorLabels);
+  setQueryGraph(g, label);
+}
+
 function clearQueryGraph(){
   _root.find('query').removeAttr('graph');
   _root.find('query').removeAttr(ATTR_GRAPH_LABEL);
@@ -438,7 +454,7 @@ function setMainSparql(s){
   }
   $('#metaKeywords').attr('content', getQueryText());
   $('.searchActionObject').remove();
-  getQuery().children('class').each(function(i){
+  getMainFocus().children('class').each(function(i){
       $('#copyQuery').append('<span property="object" class="hide searchActionObject">'+$(this).attr('iri')+'</span>');
   });
   $('title').text(queryArticulation);
@@ -464,7 +480,7 @@ function fct_query(q, viewType, opt){
   var qstr = q.prop('outerHTML');
   var id = (qstr) ? (service_fct+qstr).hashCode() : 0;
   getQuery().attr('qid', id);
-  if(!opt.branches) setMutex(id, viewType);
+  if(!opt.branches && opt.tar != 'countIncrementProperty') setMutex(id, viewType);
   ha.push(id);
   q.attr('timeout', fct_queryTimeout); // add all neccessary variable data back to the query, if possible
   var resp;
@@ -482,38 +498,43 @@ function fct_query(q, viewType, opt){
   $('#dataSpaceLabel').parent().children('i').removeClass('text-danger');
 
   if (resp != null) { // if exist on cache
-        switch(viewType){
-          case VIEW_TYPE_LIST: {
-            setMainSparql( getSparql(resp) );
-            fct_handleListResults(resp, opt);
-          } break;
-          case VIEW_TYPE_LIST_COUNT: {
-            setMainSparql( getSparql(resp) );
-            fct_handleListCountResults(resp, opt);
-          } break;
-          case VIEW_TYPE_TEXT: {
-            fct_handleTextResults(resp, opt);
-          }; break;
-          case VIEW_TYPE_CLASSES: {
-            fct_handleClassesResults(resp, opt);
-          }; break;
-          case VIEW_TYPE_PROPERTIES: {
-            fct_handlePropertiesResults(resp, opt);
-          }; break;
-          case VIEW_TYPE_PROPERTIES_IN: {
-            fct_handlePropertiesInResults(resp, opt);
-          }; break;
-          case VIEW_TYPE_TEXT_PROPERTIES: {
-            fct_handleTextPropertiesResults(resp, opt);
-          }; break;
-          case VIEW_TYPE_GRAPHS: {
-            fct_handleGraphResults(resp, opt);
-          }; break;
-          case VIEW_TYPE_GEO_LIST: {
-            fct_handleGeoListResults(resp, opt);
-          }; break;
+    if(opt.tar == 'countIncrementProperty'){
+        fct_handleIncrementPropertyResults(resp, opt);
     }
-  $('[data-toggle="tooltip"]').tooltip();
+    else {
+      switch(viewType){
+        case VIEW_TYPE_LIST: {
+          setMainSparql( getSparql(resp) );
+          fct_handleListResults(resp, opt);
+        } break;
+        case VIEW_TYPE_LIST_COUNT: {
+          setMainSparql( getSparql(resp) );
+          fct_handleListCountResults(resp, opt);
+        } break;
+        case VIEW_TYPE_TEXT: {
+          fct_handleTextResults(resp, opt);
+        }; break;
+        case VIEW_TYPE_CLASSES: {
+          fct_handleClassesResults(resp, opt);
+        }; break;
+        case VIEW_TYPE_PROPERTIES: {
+          fct_handlePropertiesResults(resp, opt);
+        }; break;
+        case VIEW_TYPE_PROPERTIES_IN: {
+          fct_handlePropertiesInResults(resp, opt);
+        }; break;
+        case VIEW_TYPE_TEXT_PROPERTIES: {
+          fct_handleTextPropertiesResults(resp, opt);
+        }; break;
+        case VIEW_TYPE_GRAPHS: {
+          fct_handleGraphResults(resp, opt);
+        }; break;
+        case VIEW_TYPE_GEO_LIST: {
+          fct_handleGeoListResults(resp, opt);
+        }; break;
+      }
+    }
+    $('[data-toggle="tooltip"]').tooltip();
     updatePermalink();
     return;
   }
@@ -591,41 +612,50 @@ function fct_query(q, viewType, opt){
             }
           }
         }
+
+            if(opt.tar == 'countIncrementProperty'){
+              fct_handleIncrementPropertyResults(xml, opt);
+            }
+
+            else {
               if(!opt.branches && getMutex(viewType) != id){ // POI: make sure to cache the results always!, i.e. place this after the cache above
                 return;
               }
         
-        switch(viewType){
-          case VIEW_TYPE_LIST: {
-            setMainSparql( sparql );
-            fct_handleListResults(xml, opt);
-          } break;
-          case VIEW_TYPE_LIST_COUNT: {
-            setMainSparql( sparql );
-            fct_handleListCountResults(xml, opt);
-          } break;
-          case VIEW_TYPE_TEXT: {
-            fct_handleTextResults(xml, opt);
-          }; break;
-          case VIEW_TYPE_CLASSES: {
-            fct_handleClassesResults(xml, opt);
-          }; break;
-          case VIEW_TYPE_PROPERTIES: {
-            fct_handlePropertiesResults(xml, opt);
-          }; break;
-          case VIEW_TYPE_PROPERTIES_IN: {
-            fct_handlePropertiesInResults(xml, opt);
-          }; break;
-          case VIEW_TYPE_TEXT_PROPERTIES: {
-            fct_handleTextPropertiesResults(xml, opt);
-          }; break;
-          case VIEW_TYPE_GRAPHS: {
-            fct_handleGraphResults(xml, opt);
-          }; break;
-          case VIEW_TYPE_GEO_LIST: {
-            fct_handleGeoListResults(xml, opt);
-          }; break;
-        }
+              switch(viewType){
+                case VIEW_TYPE_LIST: {
+                  setMainSparql( sparql );
+                  fct_handleListResults(xml, opt);
+                } break;
+                case VIEW_TYPE_LIST_COUNT: {
+                  setMainSparql( sparql );
+                  fct_handleListCountResults(xml, opt);
+                } break;
+                case VIEW_TYPE_TEXT: {
+                  fct_handleTextResults(xml, opt);
+                }; break;
+                case VIEW_TYPE_CLASSES: {
+                  fct_handleClassesResults(xml, opt);
+                }; break;
+                case VIEW_TYPE_PROPERTIES: {
+                  fct_handlePropertiesResults(xml, opt);
+                }; break;
+                case VIEW_TYPE_PROPERTIES_IN: {
+                  fct_handlePropertiesInResults(xml, opt);
+                }; break;
+                case VIEW_TYPE_TEXT_PROPERTIES: {
+                  fct_handleTextPropertiesResults(xml, opt);
+                }; break;
+                case VIEW_TYPE_GRAPHS: {
+                  fct_handleGraphResults(xml, opt);
+                }; break;
+                case VIEW_TYPE_GEO_LIST: {
+                  fct_handleGeoListResults(xml, opt);
+                }; break;
+              }
+
+            }
+
                 
   $('[data-toggle="tooltip"]').tooltip();
       },
@@ -679,7 +709,7 @@ function fct_sparql(sparql, opt){
   //var qstr = q.prop('outerHTML');
   var sparqlSvr = (opt.srv) ? opt.srv : service_sparql;
   var id = sparql ? (sparqlSvr + sparql).hashCode() : 0;
-  setMutex(id, opt.tar, opt.tar!='record');
+  setMutex(id, opt.tar, opt.tar!='record' && opt.tar != 'countLibraries' && opt.tar != 'countGlossaries' && opt.tar != 'countHelp');
   //q.attr('timeout', fct_queryTimeout);
   var resp;
   if(fct_isCache){
@@ -730,6 +760,15 @@ function fct_sparql(sparql, opt){
                   return;
                 }
                 fct_handleSparqlDescribe(resp, opt);
+              }
+              else if(opt.tar == 'countLibraries'){
+                fct_handleSparqlLibraryCount(resp, opt);
+              }
+              else if(opt.tar == 'countGlossaries'){
+                fct_handleSparqlGlossaryCount(resp, opt);
+              }
+              else if(opt.tar == 'countHelp'){
+                fct_handleSparqlHelpCount(resp, opt);
               }
             }
 
@@ -786,6 +825,15 @@ function fct_sparql(sparql, opt){
                   $('#'+opt.srcId).removeClass('loading');
                 }
                 else fct_handleSparqlDescribe(xml, opt); // POI: be sure to cache the work
+              }
+              else if(opt.tar == 'countLibraries'){
+                fct_handleSparqlLibraryCount(xml, opt);
+              }
+              else if(opt.tar == 'countGlossaries'){
+                fct_handleSparqlGlossaryCount(xml, opt);
+              }
+              else if(opt.tar == 'countHelp'){
+                fct_handleSparqlHelpCount(xml, opt);
               }
             }
           //console.log('sparql results: ' + xml);
@@ -855,6 +903,66 @@ function fct_handleSparqlTableCount(xml, opt){
     $('#tableCount').text( x + ' / ' + ct);
   });
   tablePage();
+}
+
+
+function fct_handleSparqlLibraryCount(xml, opt){
+  var results = $(xml).find('results');
+  $('result', results).each(function(i){
+    var ct = $(this).text().trim();
+    if(ct <= 0){
+      $('#libraryButton').addClass('hide');
+    }
+    else {
+      if( 
+        !_root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]') || 
+        _root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]').length <= 0
+        
+        ){
+        $('#libraryButton').removeClass('hide');
+      }
+      else if( !$('#libraryButton').hasClass('hide') ){
+        $('#libraryButton').addClass('hide');
+      }
+    }
+  });
+}
+
+
+function fct_handleSparqlGlossaryCount(xml, opt){
+  var results = $(xml).find('results');
+  $('result', results).each(function(i){
+    var ct = $(this).text().trim();
+    if(ct <= 0){
+      $('#glossaryButton').addClass('hide');
+    }
+    else {
+      if( 
+        !_root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]') || 
+        _root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]').length <= 0
+        
+        ){
+        $('#glossaryButton').removeClass('hide');
+      }
+      else if( !$('#glossaryButton').hasClass('hide') ){
+        $('#glossaryButton').addClass('hide');
+      }
+    }
+  });
+}
+
+
+function fct_handleSparqlHelpCount(xml, opt){
+  var results = $(xml).find('results');
+  $('result', results).each(function(i){
+    var ct = $(this).text().trim();
+    if(ct <= 0 || getQueryGraph() == 'dsn:'+dataspace.replace('http://', '').replace('https://', '')+'/help'){
+      $('#helpButton').addClass('hide');
+    }
+    else {
+      $('#helpButton').removeClass('hide');
+    }
+  });
 }
 
 /*
@@ -949,6 +1057,17 @@ function fct_handleSparqlSubject(xml, opt){
 
 function fct_handleSparqlDescribe(xml, opt){
   loadDescribeResults(xml, opt);
+}
+
+function fct_handleIncrementPropertyResults(xml, opt){
+    var result = $(xml).find("fct\\:result")[0];
+    var ct = $("fct\\:row", result).length;
+    if(ct <= 0){
+      $('.la-arrow-right').parent().addClass('hide');
+    }
+    else {
+      $('.la-arrow-right').parent().removeClass('hide');
+    }
 }
 
 function fct_handleGeoListResults(xml, opt){
@@ -2188,6 +2307,11 @@ function setGraphFacet(graph, graphLabel, silent){
   if(!silent) doQuery(getQueryText());
 }
 
+function stackGraphFacet(graph, graphLabel, silent){
+  stackQueryGraph(graph, graphLabel);
+  if(!silent) doQuery(getQueryText());
+}
+
 function removeGraphFacet(silent){
   clearQueryGraph();
   if(!silent) doQuery(getQueryText());
@@ -2668,9 +2792,9 @@ function init(){
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(copyButton);
 
-      var libraryButton = '<li class="nav-item d-none d-md-block"><a '+buildTitle('Visit Library')+' onclick="javascript:clearKeywords(); var cid = createId(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(true); clearQueryGraph(true); addClassFacet(cid, \'http://www.w3.org/ns/sparql-service-description#NamedGraph\', \'Library\');" class="hide nav-link pl-2 text-info" id="libraryButton" ><i class="la la-bank la-lg text-info"></i></a></li>'; //la-heart-o
+      var libraryButton = '<li class="nav-item d-none d-md-block"><a '+buildTitle('List Libraries')+' onclick="javascript:clearKeywords(); var cid = createId(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(true); addClassFacet(cid, \'http://www.w3.org/ns/sparql-service-description#NamedGraph\', \'Library\');" class="hide nav-link pl-2" id="libraryButton" ><i class="la la-arrow-up la-lg"></i></a></li>'; //la-heart-o
 
-      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(libraryButton);
+      $('.page-controls > .navbar-nav .la-chain').parent().parent().prev().before(libraryButton);
 
 /*
   var fastForwardButton = '';
@@ -2716,7 +2840,7 @@ function init(){
 
 
 
-      var demoButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" class="nav-link pl-2 text-info" id="demoButton" '+buildTitle('Click WWW on the next canvas to visit the demo smart folders')+' onclick="javascript:selectDataspace(\'http://data.vios.network\', \'VIOS\'); clearKeywords(); var cid = createId(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(true); clearQueryGraph(true); addClassFacet(cid, \'http://schema.org/Bookmark\', \'Bookmark\');"><i class="la la-question la-lg text-info"></i></a></li>'; //la-heart-o la-map-signs
+      var demoButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" class="hide nav-link pl-2 text-info" id="helpButton" '+buildTitle('Click WWW on the next canvas to visit the demo smart folders')+' onclick="javascript:clearKeywords(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(true); clearQueryGraph(true); doSetLibrary();"><i class="la la-question la-lg text-info"></i></a></li>'; //la-heart-o la-map-signs
 //href="http://vio.sn/c/9LK72AN"
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(demoButton);
 
@@ -2745,11 +2869,22 @@ function init(){
     });
   });
 
+  $('.la-arrow-right').parent().on('click', function(e){
+    if(getMainFocus().attr('class') == ID_QUERY){
+
+    }
+    else {
+      var pid = createId();
+      addPropertyFacet(pid, getMainFocus().attr('iri'), getMainFocus().attr('label'), undefined, undefined, undefined, undefined, true);
+      takeMainFocus(pid);
+    }
+  });
+
 
   selectMenuItem('queryTimeout', '30000');
 
+  $('dashboard').append('<div class="row" id="angular_libraries"></div>');
   $('dashboard').append('<div class="row" id="angular_breadcrumbs"></div>');
-  $('dashboard').append('<div class="row" id="angular_facets"></div>');
   $('dashboard').append('<div class="row" id="dataCanvas"></div>');
   $('#queryTimeout').val('30000');
 
@@ -2898,19 +3033,11 @@ gbcol += '</app-navbar>';
 
 
 
+gbcol = '<div class="col-lg-12 col-xl-12 col-12"><ul class="libraries" id="angular_libraryBar">';
+gbcol += '</ul></div>';
+$('#angular_libraries').append(gbcol);
+
 gbcol = '<div class="col-lg-12 col-xl-12 col-12"><ul class="steps" id="angular_breadcrumbBar">';
-
-
-/*
-  gbcol += '<li><a  title=""><em>keywords</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-primary btn-block text-ellipsis" onclick="javascript:takeMainFocus(\'0\')">Et nequ a quam turpis duisi</button></li>';
-  gbcol += '<li><a  title=""><em>distributor</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-outline-default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\'0\')">'+VALUE_ANON_NODE+'</button></li>';
-//  gbcol += '<li><a  title=""><em>Step 2: XXXXXXXX</em><span>Et nequ a quam turpis duisi</span></a></li>';
-  gbcol += '<li class="current"><a  title=""><em>Step 3: XXXXXXXX</em><span>Et nequ a quam turpis duisi</span></a></li>';
-  gbcol += '<li><a  title=""><em>keywords</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\'0\')">metropolis</button></li>';
-  gbcol += '<li><a  title=""><em>distributor</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-outline-default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\'0\')">'+VALUE_ANON_NODE+'</button></li>';
-
-*/
-
 gbcol += '</ul></div>';
 $('#angular_breadcrumbs').append(gbcol);
 
@@ -5491,13 +5618,21 @@ function doQuery(keywords) {
     checkTextProperties();
     checkGlossaryButton();
     checkLibraryButton();
+    checkArrowRightButton();
+    checkArrowLeftButton();
+    checkHelpButton();
 
     /* TODO: use qTip for tooltips, see http://qtip2.com/api
     $('[title!=""]').qtip();
     */
 }
 
-function checkGlossaryButton(){
+function checkHelpButton(){
+  var sparql = 'select count(distinct *) where {graph <dsn:'+dataspace.replace('http://', '').replace('https://', '')+'/help> { ?s ?p ?o}}';
+  var opt = new Object();
+  opt.tar = 'countHelp';
+  fct_sparql(sparql, opt);
+  /*
   if( ( dataspace == 'http://dbpedia.org' || dataspace == 'http://data.vios.network' || dataspace == 'http://lod.openlinksw.com')  && (
     !_root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]') || 
     _root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]').length <= 0
@@ -5508,9 +5643,34 @@ function checkGlossaryButton(){
   else if( !$('#glossaryButton').hasClass('hide') ){
     $('#glossaryButton').addClass('hide');
   }
+  */
+}
+
+function checkGlossaryButton(){
+  var sparql = 'select count(distinct *) where {?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/class/yago/Glossary106420781>}';
+  var opt = new Object();
+  opt.tar = 'countGlossaries';
+  fct_sparql(sparql, opt);
+  /*
+  if( ( dataspace == 'http://dbpedia.org' || dataspace == 'http://data.vios.network' || dataspace == 'http://lod.openlinksw.com')  && (
+    !_root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]') || 
+    _root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]').length <= 0
+    )
+    ){
+    $('#glossaryButton').removeClass('hide');
+  }
+  else if( !$('#glossaryButton').hasClass('hide') ){
+    $('#glossaryButton').addClass('hide');
+  }
+  */
 }
 
 function checkLibraryButton(){
+  var sparql = 'select count(distinct *) where {?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/sparql-service-description#NamedGraph>}';
+  var opt = new Object();
+  opt.tar = 'countLibraries';
+  fct_sparql(sparql, opt);
+/*
   if( 
     !_root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]') || 
     _root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]').length <= 0
@@ -5521,8 +5681,46 @@ function checkLibraryButton(){
   else if( !$('#libraryButton').hasClass('hide') ){
     $('#libraryButton').addClass('hide');
   }
+*/  
 }
 
+function checkArrowRightButton(){
+  if(getMainFocus().attr('class') == ID_QUERY){
+    $('.la-arrow-right').parent().addClass('hide');
+  }
+  else {
+    var q = getQuery().clone();
+    var p = $.createElement(getMainFocus().prop('nodeName').toLowerCase());
+    var pid = createId();
+    p.attr('class', pid);
+    p.attr('iri', getMainFocus().attr('iri'));
+    p.attr('label', getMainFocus().attr('label'));
+    getFocus(q).append(p);
+    takeFocus(p, q);
+
+    q.find('view').attr('limit', '1');
+
+    var opt = new Object();
+    opt.tar = 'countIncrementProperty';
+    fct_query(q, VIEW_TYPE_LIST_COUNT, opt);
+  }
+
+  /*
+
+  if(getMainFocus().attr('class') == ID_QUERY){
+    $('.la-arrow-right').parent().addClass('hide');
+  }
+  else {
+    $('.la-arrow-right').parent().removeClass('hide');
+  }
+
+  */
+
+}
+
+function checkArrowLeftButton(){
+    $('.la-arrow-left').parent().addClass('hide');
+}
 
 function checkTextProperties(){
   if(!isExpandSearch || getMainFocus() != ID_QUERY){
@@ -5564,6 +5762,10 @@ function doRemoveDataspace(dsurl, silent){
     catch(err){
       if(fct_isDebug) console.log('Dataspace cache failed: ' + err);
     }
+}
+
+function doSetLibrary(){
+  setGraphFacet('dsn:'+dataspace.replace('http://', '').replace('https://', '')+'/help', 'Help Contents');
 }
 
 function doFindDataspaces(){
@@ -6514,13 +6716,13 @@ if(true){
               }
 
               else {
-                var dataserverClass = getQuery().children('class');
+                var dataserverClass = getQuery().children('class[iri="http://www.vios.network/o/DataServer/Index"]');
                 if(dataserverClass && dataserverClass.length > 0){
 
                   var isDataserver = getMainFocus().parent().attr('class') == ID_QUERY;
-                  isDataserver = isDataserver && getMainFocus().attr('iri')=='http://www.vios.network/o/DataServer/Index/dataserver';
+                  //isDataserver = isDataserver && getMainFocus().attr('iri')=='http://www.vios.network/o/DataServer/Index/dataserver';
                   //isNewDataserver = isNewDataserver;
-                  if(isDataserver && dataserverClass.attr('iri') == 'http://www.vios.network/o/DataServer/Index'){
+                  if(isDataserver && getMainFocus().attr('iri')=='http://www.vios.network/o/DataServer/Index/dataserver'){
 //                  if(dataserverClass.attr('iri') == 'http://www.vios.network/o/DataServer'){
 
           checked=(ds.indexOfDataspace(value) >= 0) ? ' checked="checked"': '';
@@ -6532,16 +6734,20 @@ if(true){
                     //rows += '<i '+buildTitle('Add dataspace', 'right')+'  onclick="javascript:addDataspace(\''+value+'\', \''+label+'\');takeMainFocus(ID_QUERY); clearFacets();" class="fa fa-plus-circle fa-lg text-inverse"></i>';
                   }
 
-                  else if(dataserverClass.attr('iri') == 'http://www.w3.org/ns/sparql-service-description#NamedGraph'){
-                    rows += '<div class="form-check-inline abc-checkbox abc-checkbox-circle abc-checkbox-info">';
-                    rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {removeGraphFacet();}else{takeMainFocus(ID_QUERY); clearFacets(true); clearQueryGraph(true); setGraphFacet(\''+value+'\', \''+label+'\');}" />&nbsp;';
-                    rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
-                    rows += '</div>';
-                  }
-
 
 
                 }
+                  else {
+                      var libraryClass = getMainFocus().children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]');
+
+                        if(libraryClass && libraryClass.length > 0){
+                          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-circle abc-checkbox-info">';
+                          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {removeGraphFacet();}else{takeMainFocus(ID_QUERY); clearFacets(true); clearQueryGraph(true); stackGraphFacet(\''+value+'\', \''+label+'\');}" />&nbsp;';
+                          rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
+                          rows += '</div>';
+                        }
+                  }
+
               }
              // rows += '</td></tr>';
 
@@ -9300,12 +9506,13 @@ rows += '</td></tr>';
     // POI: this function is responsible for building the breadcrumbs and facetCollector
     function buildNavPath(){
       queryArticulation = '';
+      $('#libraryPanel').removeClass('hide');
       $('#breadcrumbPanel').removeClass('hide');
 
       //var breadcrumbs = $('#breadcrumbs');
       //var facetCollector = $('#facetCollector');
       //var focusCollector = $('#focusCollector');
-      var breadcrumbs, facetCollector,focusCollector;
+      var breadcrumbs, facetCollector,focusCollector, libraries;
       if(nav_type == NAV_TYPE_1){
         $('#facetCollectorWidgetContainer').addClass('hide');
 
@@ -9315,16 +9522,19 @@ rows += '</td></tr>';
         breadcrumbs  = $('#angular_breadcrumbBar');
         facetCollector = $('#angular_breadcrumbBar');
         focusCollector = $('#angular_breadcrumbBar');
+        libraries = $('#angular_libraryBar');
       }
       else if(nav_type == NAV_TYPE_3){
         $('#facetCollectorWidgetContainer').removeClass('hide');
         breadcrumbs  = $('#angular_breadcrumbBar');
         facetCollector = $('#angular_facetCollector');
         focusCollector = $('#angular_focusCollector');
+        libraries = $('#angular_libraryBar');
       }
       breadcrumbs.empty();
       facetCollector.empty();
       focusCollector.empty();
+      libraries.empty();
       
       var isRootWithoutProps = true;
       $(getMainFocus().children('property, property-of')).each(function(i) {
@@ -9375,6 +9585,18 @@ rows += '</td></tr>';
 $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
 //var obj = { "show": 5000, "hide": 0 };
 //$('[data-toggle="tooltip"]').attr('data-delay',obj);
+
+
+          // build library breadcrumbs
+
+          var graphLabel = getQueryGraphLabel();
+          if(!graphLabel || graphLabel.length <= 0) graphLabel = getQueryGraph();
+
+          if(graphLabel && graphLabel.length > 0){
+            libraries.append('<li><a href="#">'+graphLabel+'</a></li>');
+          }
+
+
 
     }
 
@@ -9516,56 +9738,29 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
             searchLabel = 'contain keywords';
           }
 
-          var libdiv = '&nbsp;<i class="fa fa-chevron-right"></i>&nbsp;';
+          //var libdiv = '&nbsp;<i class="fa fa-chevron-right"></i>&nbsp;';
+
+          var graphLabel = getQueryGraphLabel();
+          if(!graphLabel || graphLabel.length <= 0) graphLabel = getQueryGraph();
 
           if(v.attr('datatype') == 'uri'){
               tooltip = 'the record for ' + val;
               desc = 'Record';
-              if(getQueryGraphLabel() && getQueryGraphLabel().length > 0) {
-                desc = getQueryGraphLabel() + libdiv + desc;
-              }
-              else if(getQueryGraph() && getQueryGraph().length > 0) {
-                desc = getQueryGraph() + libdiv + desc;
-              }
               if(getQueryText() && getQueryText().length){
                 tooltip = tooltip + ' '+searchLabel+': \'' + getQueryText() + '\'';
               }
           }
           else if(val){
               tooltip = 'what records '+searchLabel+': ' + val;
-              if(getQueryGraphLabel() && getQueryGraphLabel().length > 0) {
-                tooltip += ', in library: ' + getQueryGraphLabel();
-                desc = getQueryGraphLabel() + libdiv + desc;
-              }
-              else if(getQueryGraph() && getQueryGraph().length > 0) {
-                tooltip += ', in library: ' + getQueryGraph();
-                desc = getQueryGraph() + libdiv + desc;
-              }
           }
           else {
               tooltip = 'any record';
               if(!cval) {
-                  if(getQueryGraphLabel() && getQueryGraphLabel().length > 0) {
-                    tooltip += ', in library: ' + getQueryGraphLabel();
-                    desc = getQueryGraphLabel() + libdiv + desc;
-                  }
-                  else if(getQueryGraph() && getQueryGraph().length > 0) {
-                    tooltip += ', in library: ' + getQueryGraph();
-                    desc = getQueryGraph() + libdiv + desc;
-                  }
-                  else desc = LABEL_ROOT;
-              }
-              else {
-                  if(getQueryGraphLabel() && getQueryGraphLabel().length > 0) {
-                    tooltip += ', in library: ' + getQueryGraphLabel();
-                    desc = getQueryGraphLabel() + libdiv + desc;
-                  }
-                  else if(getQueryGraph() && getQueryGraph().length > 0) {
-                    tooltip += ', in library: ' + getQueryGraph();
-                    desc = getQueryGraph() + libdiv + desc;
-                  }
+                  desc = LABEL_ROOT;
               }
           }
+          if(graphLabel && graphLabel.length > 0) tooltip += ', in library: ' + graphLabel;
+
             if(cval){
 
                 tooltip += ', and each of them is';

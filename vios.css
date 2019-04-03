@@ -921,6 +921,78 @@ accordion .card-header {
 
 
 
+ .libraries { 
+  list-style: none; 
+  overflow: hidden; 
+  /*font: 18px Helvetica, Arial, Sans-Serif;*/
+  /*margin: 40px;*/
+  font-weight: bold;
+  padding: 0;
+}
+.libraries li { 
+  float: left; 
+}
+.libraries li a {
+  color: white;
+  text-decoration: none; 
+  padding: 10px 0 10px 55px;
+  background: red; /* fallback color */
+  background: hsla(34,85%,35%,1); 
+  position: relative; 
+  display: block;
+  float: left;
+}
+.libraries li a:after { 
+  content: " "; 
+  display: block; 
+  width: 0; 
+  height: 0;
+  border-top: 50px solid transparent;           /* Go big on the size, and let overflow hide */
+  border-bottom: 50px solid transparent;
+  border-left: 30px solid hsla(34,85%,35%,1);
+  position: absolute;
+  top: 50%;
+  margin-top: -50px; 
+  left: 100%;
+  z-index: 2; 
+}   
+.libraries li a:before { 
+  content: " "; 
+  display: block; 
+  width: 0; 
+  height: 0;
+  border-top: 50px solid transparent;           /* Go big on the size, and let overflow hide */
+  border-bottom: 50px solid transparent;
+  border-left: 30px solid white;
+  position: absolute;
+  top: 50%;
+  margin-top: -50px; 
+  margin-left: 1px;
+  left: 100%;
+  z-index: 1; 
+}   
+.libraries li:first-child a {
+  padding-left: 10px;
+  border-top-left-radius: 0.25rem;
+  border-bottom-left-radius: 0.25rem;
+}
+.libraries li:nth-child(2) a       { background:        hsla(34,85%,45%,1); }
+.libraries li:nth-child(2) a:after { border-left-color: hsla(34,85%,45%,1); }
+.libraries li:nth-child(3) a       { background:        hsla(34,85%,55%,1); }
+.libraries li:nth-child(3) a:after { border-left-color: hsla(34,85%,55%,1); }
+.libraries li:nth-child(4) a       { background:        hsla(34,85%,65%,1); }
+.libraries li:nth-child(4) a:after { border-left-color: hsla(34,85%,65%,1); }
+.libraries li:nth-child(5) a       { background:        hsla(34,85%,75%,1); }
+.libraries li:nth-child(5) a:after { border-left-color: hsla(34,85%,75%,1); }
+/*.libraries li:last-child a {
+  background: transparent !important;
+  color: black;
+  pointer-events: none;
+  cursor: default;
+}
+.libraries li:last-child a:after { border: 0; }*/
+.libraries li a:hover { background: hsla(34,85%,25%,1); }
+.libraries li a:hover:after { border-left-color: hsla(34,85%,25%,1) !important; }
 
 
 /*  * { box-sizing: border-box; }*/
