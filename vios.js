@@ -426,6 +426,24 @@ function getGGGURL(url){
 
 
 var mainSparql = '';
+function setMainSparql(s){
+  mainSparql = s;
+  $('#query').text(s);
+  $('#queryTarget').text(dataspace + "/sparql");
+  $('#queryDescription').text(queryArticulation);
+  if(!getQueryText() || getQueryText().length < 0) $('#queryKeywords').removeAttr('property');
+  else {
+    $('#queryKeywords').attr('property', 'object');
+    $('#queryKeywords').text(getQueryText());
+  }
+  $('#metaKeywords').attr('content', getQueryText());
+  $('.searchActionObject').remove();
+  getQuery().children('class').each(function(i){
+      $('#copyQuery').append('<span property="object" class="hide searchActionObject">'+$(this).attr('iri')+'</span>');
+  });
+  $('title').text(queryArticulation);
+}
+
 var bid = createId();
 function fct_query(q, viewType, opt){
   var tstamp = new Date().getTime();
@@ -466,11 +484,11 @@ function fct_query(q, viewType, opt){
   if (resp != null) { // if exist on cache
         switch(viewType){
           case VIEW_TYPE_LIST: {
-            mainSparql = getSparql(resp);
+            setMainSparql( getSparql(resp) );
             fct_handleListResults(resp, opt);
           } break;
           case VIEW_TYPE_LIST_COUNT: {
-            mainSparql = getSparql(resp);
+            setMainSparql( getSparql(resp) );
             fct_handleListCountResults(resp, opt);
           } break;
           case VIEW_TYPE_TEXT: {
@@ -579,11 +597,11 @@ function fct_query(q, viewType, opt){
         
         switch(viewType){
           case VIEW_TYPE_LIST: {
-            mainSparql = sparql;
+            setMainSparql( sparql );
             fct_handleListResults(xml, opt);
           } break;
           case VIEW_TYPE_LIST_COUNT: {
-            mainSparql = sparql;
+            setMainSparql( sparql );
             fct_handleListCountResults(xml, opt);
           } break;
           case VIEW_TYPE_TEXT: {
@@ -681,7 +699,7 @@ function fct_sparql(sparql, opt){
     //console.log('sparql results: ' + resp);
 
             if(!opt.tar){
-                mainSparql = sparql;
+                setMainSparql( sparql );
                fct_handleSparqlResults(resp, opt);
             }
             else {
@@ -737,7 +755,7 @@ function fct_sparql(sparql, opt){
             xml = xml.replaceAll('xml:lang', 'lang');
 
             if(!opt.tar){
-              mainSparql = sparql;
+              setMainSparql( sparql );
               fct_handleSparqlResults(xml, opt);
             }
             else {
@@ -2165,14 +2183,14 @@ function addClassFacet(id, clazz, label, silent){
   if(!silent) doQuery(getQueryText());
 }
 
-function setGraphFacet(graph, graphLabel){
+function setGraphFacet(graph, graphLabel, silent){
   setQueryGraph(graph, graphLabel);
-  doQuery(getQueryText());
+  if(!silent) doQuery(getQueryText());
 }
 
-function removeGraphFacet(){
+function removeGraphFacet(silent){
   clearQueryGraph();
-  doQuery(getQueryText());
+  if(!silent) doQuery(getQueryText());
 }
 
 function clearFacets(silent){
@@ -2219,7 +2237,7 @@ var TAG_GRAPH = 'g';
 
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://myopenlink.net/DAV/home/sdmonroe/poc_draft.html";
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://poc.vios.network";
-var this_endpoint = 'http://alpha.vios.network';
+var this_endpoint = 'http://dev.vios.network';
 
 var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qPage, qshowMePage, qTimeout, qNavType, qSubjectBadges, qVerticalChartHeaders, qViewType, qIsChart, qIsRollup, qShowIDN, qFilterRecordViewFields;
 
@@ -2482,9 +2500,16 @@ function init(){
         link.id = 'id2';
         link.rel = 'stylesheet';
         link.type = 'text/css';
-        link.href = 'http://data.vios.network/DAV/home/vios/css/vios.css';
+        link.href = 'http://data.vios.network/DAV/home/vios/dev/css/vios.css';
         document.head.appendChild(link);
     }  
+
+
+        link = document.createElement('meta');
+        link.id = 'metaKeywords';
+        link.name = 'keywords';
+        document.head.appendChild(link);
+
 
         link = document.createElement('script');
         link.type = 'text/javascript';
@@ -2632,16 +2657,20 @@ function init(){
   });
 */
 
-      var copyButton = '<li class="nav-item d-none d-md-block"><a class="nav-link pl-2 text-info" ><i id="copySPARQL" onmouseout="$(\'#copySPARQL\').tooltip(\'hide\');$(\'#copySPARQL\').attr(\'data-original-title\', \'Copy SPARQL to clipboard\');$(\'#copySPARQL\').tooltip();" '+buildTitle('Copy SPARQL to clipboard')+' onclick="javascript:$(\'#copySPARQL\').tooltip(\'hide\');copySPARQL(); $(\'#copySPARQL\').attr(\'data-original-title\', \'Copied\');$(\'#copySPARQL\').tooltip(\'show\');" style="cursor:pointer;" class="la la-copy fa-lg"></i></a></li>'; //la-heart-o
+      var copyButton = '<li class="nav-item d-none d-md-block"><a id="copyQuery" vocab="http://schema.org/" typeOf="FindAction" class="nav-link pl-2 text-info" >';
+      copyButton += '<span id="query" class="hide" property="query"></span>';
+      copyButton += '<span id="queryDescription" class="hide" property="http://purl.org/dc/terms/description"></span>';
+      copyButton += '<span id="queryTarget" class="hide" property="target"></span>';
+      copyButton += '<span id="queryUrl" class="hide"></span>';
+      copyButton += '<span id="queryKeywords" property="object" class="hide"></span>';
+      copyButton += '<i id="copySPARQL" onmouseout="$(\'#copySPARQL\').tooltip(\'hide\');$(\'#copySPARQL\').attr(\'data-original-title\', \'Copy SPARQL to clipboard\');$(\'#copySPARQL\').tooltip();" '+buildTitle('Copy SPARQL to clipboard')+' onclick="javascript:$(\'#copySPARQL\').tooltip(\'hide\');copySPARQL(); $(\'#copySPARQL\').attr(\'data-original-title\', \'Copied\');$(\'#copySPARQL\').tooltip(\'show\');" style="cursor:pointer;" class="la la-copy fa-lg"></i>';
+      copyButton += '</a></li>'; //la-heart-o
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(copyButton);
 
+      var libraryButton = '<li class="nav-item d-none d-md-block"><a '+buildTitle('Visit Library')+' onclick="javascript:clearKeywords(); var cid = createId(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(true); clearQueryGraph(true); addClassFacet(cid, \'http://www.w3.org/ns/sparql-service-description#NamedGraph\', \'Library\');" class="hide nav-link pl-2 text-info" id="libraryButton" ><i class="la la-bank la-lg text-info"></i></a></li>'; //la-heart-o
 
-
-
-      var bountyButton = '<li class="nav-item d-none d-md-block"><a '+buildTitle('Publish a Bounty')+' onclick="javascript:save($(\'#keywords\').text()); $(\'keywords\').text(\'\');" class="nav-link pl-2 text-info" id="favButton" ><i class="la la-bullhorn la-lg text-default"></i></a></li>'; //la-heart-o
-
-      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(bountyButton);
+      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(libraryButton);
 
 /*
   var fastForwardButton = '';
@@ -2680,14 +2709,14 @@ function init(){
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(bookmarkButton);
 
 
-      var glossaryButton = '<li class="nav-item d-none d-md-block"><a  id="glossaryButton" '+buildTitle('Find a Glossary')+' class="hide nav-link pl-2 text-info" onclick="javascript: isExpandSearch = true; takeMainFocus(ID_QUERY); clearFacets(true); var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/Glossary106420781\', \'Glossary\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\'); takeMainFocus(pid);" style="cursor:pointer;"><i class="la la-book la-lg text-info"></i></a></li>'; //la-heart-o
+      var glossaryButton = '<li class="nav-item d-none d-md-block"><a  id="glossaryButton" '+buildTitle('Find a Glossary')+' class="hide nav-link pl-2 text-info" onclick="javascript: isExpandSearch = true; takeMainFocus(ID_QUERY); clearFacets(true); clearQueryGraph(true); var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/Glossary106420781\', \'Glossary\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\'); takeMainFocus(pid);" style="cursor:pointer;"><i class="la la-book la-lg text-info"></i></a></li>'; //la-heart-o
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(glossaryButton);
 
 
 
 
-      var demoButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" class="nav-link pl-2 text-info" id="demoButton" '+buildTitle('Click WWW on the next canvas to visit the demo smart folders')+' onclick="javascript:selectDataspace(\'http://data.vios.network\', \'VIOS\'); clearKeywords(); var cid = createId(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(true); addClassFacet(cid, \'http://schema.org/Bookmark\', \'Bookmark\');"><i class="la la-map-signs la-lg text-info"></i></a></li>'; //la-heart-o
+      var demoButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" class="nav-link pl-2 text-info" id="demoButton" '+buildTitle('Click WWW on the next canvas to visit the demo smart folders')+' onclick="javascript:selectDataspace(\'http://data.vios.network\', \'VIOS\'); clearKeywords(); var cid = createId(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(true); clearQueryGraph(true); addClassFacet(cid, \'http://schema.org/Bookmark\', \'Bookmark\');"><i class="la la-question la-lg text-info"></i></a></li>'; //la-heart-o la-map-signs
 //href="http://vio.sn/c/9LK72AN"
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(demoButton);
 
@@ -2702,6 +2731,7 @@ function init(){
   //$('a#dataSpaceMenu').parent().children('.dropdown-menu').prepend('<li><a id="dataspace-oplkdemo" class="dropdown-item" onclick="selectDataspace(\'http://poc.vios.network/proxy/-start-http://demo.openlinksw.com-end-\', \'openlinksw\')">OpenLink Demo</a></li>');
   //$('a#dataSpaceMenu').parent().children('.dropdown-menu').prepend('<li><a id="dataspace-dbp" class="dropdown-item" onclick="selectDataspace(\'http://poc.vios.network/proxyDBPedia\', \'dbpedia\')">Dbpedia</a></li>');
   //$('a#dataSpaceMenu').parent().children('.dropdown-menu').prepend('<li><a id="dataspace-vios" class="dropdown-item" onclick="selectDataspace(\'http://poc.vios.network/proxy/-start-http://data.vios.network-end-\', \'vios\')">VIOS</a></li>');
+
 
   $('#permalink').on('mouseover', function(e){
     get_short_url($('#permalink').attr('href'), function(short_url) {
@@ -2911,11 +2941,18 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
       gbcol += '</li>';
-      gbcol += '<li class="nav-item">';
-        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG Cluster</a>';
+      gbcol += '<li class="nav-item dropdown">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="altDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'Alt';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="altDropdown">';
+        gbcol += '<a id="ggg" class="ggg-toolbar-item dropdown-item" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
+        gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="www-toolbar-item dropdown-item" data-target="#" onclick="linkOut()">WWW</a>';
+        gbcol += '<div class="dropdown-divider"></div>';
+        gbcol += '<a class="dropdown-item" data-target="#">Library</a>';
+        gbcol += '</div>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
       gbcol += '</li>';
       /*
       gbcol += '<li class="nav-item">';
@@ -3038,7 +3075,7 @@ gbcol += '<div class="row"><span style="padding-right:3em">thisIsAFacet</span><b
 
                         gbcol += '</section></div>';
 
-gbcol += '<div id="recordsListWidgetContainer" class="short-div"><section class="widget" widget>';
+gbcol += '<div id="recordsListWidgetContainer" vocab="http://schema.org/" typeof="ItemList" class="short-div"><section class="widget" widget>';
 gbcol += '<header id="groupByHeader" style="cursor:pointer;" >';
         gbcol += '<h4 id="contentsListHeader" onclick="javascript: var p = getMainFocus().children(\'property, property-of\'); if(p && p.length > 0){doGroup(p.attr(\'iri\'), p.attr(\'label\'), p.prop(\'nodeName\').toLowerCase() == \'property-of\');}else {}"><span id="groupByCount" class="badge badge-info">0/0</span> '+GROUP_BY_NONE_LABEL+'</h4>';
         gbcol += '<div class="widget-controls">';
@@ -3226,11 +3263,16 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
       gbcol += '</li>';
-      gbcol += '<li class="nav-item">';
-        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
-      gbcol += '</li>';
-      gbcol += '<li class="nav-item">';
-        gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
+      gbcol += '<li class="nav-item dropdown">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="altDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'Alt';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="altDropdown">';
+        gbcol += '<a id="ggg" class="ggg-toolbar-item dropdown-item" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
+        gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="www-toolbar-item dropdown-item" data-target="#" onclick="linkOut()">WWW</a>';
+          gbcol += '<div class="dropdown-divider"></div>';
+          gbcol += '<a class="dropdown-item" data-target="#">Library</a>';
+        gbcol += '</div>';
       gbcol += '</li>';
       /*
       gbcol += '<li class="nav-item">';
@@ -3405,11 +3447,16 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
       gbcol += '</li>';
-      gbcol += '<li class="nav-item">';
-        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
-      gbcol += '</li>';
-      gbcol += '<li class="nav-item">';
-        gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
+      gbcol += '<li class="nav-item dropdown">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="altDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'Alt';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="altDropdown">';
+        gbcol += '<a id="ggg" class="ggg-toolbar-item dropdown-item" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
+        gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="www-toolbar-item dropdown-item" data-target="#" onclick="linkOut()">WWW</a>';
+          gbcol += '<div class="dropdown-divider"></div>';
+          gbcol += '<a class="dropdown-item" data-target="#">Library</a>';
+        gbcol += '</div>';
       gbcol += '</li>';
       /*
       gbcol += '<li class="nav-item">';
@@ -3632,11 +3679,14 @@ $('.avatar').parent().parent().append(gbcol);
 //widget shadows interfer with the breadcrumbs
 $('.widget').css('box-shadow', '');
 $('.widget').css('-webkit-box-shadow', '');
+$('.avatar').parent().parent().remove();
+
+/*
 $('.avatar').parent().children('.small').css('padding-left', '8px');
     $('.avatar').parent().children('.small').text('Sign In');
-    $('.avatar').children('img').attr('src', 'https://solid.inrupt.com/themes/custom/solid/logo.svg');// 'http://www.gravatar.com/avatar/' + ('info@vios.network'));
+    $('.avatar').children('img').remove();//.attr('src', 'https://solid.inrupt.com/themes/custom/solid/logo.svg');// 'http://www.gravatar.com/avatar/' + ('info@vios.network'));
     //$('.avatar').children('img').attr('width', '24');
-    $('.avatar').children('img').addClass('rounded-circle');
+   // $('.avatar').children('img').addClass('rounded-circle');
 //    $('.avatar').children('img').attr('height', '24');
     $('.avatar').parent().children('.circle').addClass('hide');
     $('.avatar').removeClass('mr-2');
@@ -3654,7 +3704,7 @@ $('.avatar').parent().children('.caret').on('click', function(e){
   showProfileManagerPreview();
 
 });
-
+*/
 $('#profileName').on('click', function(e){
   //solid.auth.popupLogin({ "popupUri":"http://data.vios.network/DAV/home/vios/popup.html" });
   solid.auth.popupLogin({ "popupUri":"https://solid.github.io/solid-auth-client/dist/popup.html" });
@@ -5061,6 +5111,9 @@ function processLabel(label, value, datatype, lang, labelSize, includeHostName){
 
     if(!label) return ''; 
     label = label.trim();
+
+    label = label.replace(/\[.+\]\s+/g, '');
+
     label = label.replaceAll('&#39;', '&apos;');
 
     var host = '';
@@ -5162,7 +5215,7 @@ function updatePermalink(){
     else if(isFormShowing()) canvasViewType = 'form';
 
     var long_url = this_endpoint + '?' + 
-      '&dataSpace=' + encodeURIComponent( dataspace ) + 
+      'dataSpace=' + encodeURIComponent( dataspace ) + 
       '&dataSpaceLabel=' + encodeURIComponent( getDataspaceLabel() ) + 
       '&groupBy=' + encodeURIComponent( $('#groupByMenu :selected').attr('json') ) + 
       '&showMe=' + $('#showMeMenu :selected').attr('value') + 
@@ -5189,6 +5242,8 @@ function updatePermalink(){
       mouseOnPermalink = true;
       get_short_url(long_url, function(short_url) {
         $('#permalink').attr('href',  short_url); //+ '&idCt=' + idCt
+        $('#queryUrl').text(short_url);
+        $('#queryUrl').attr('property', 'url'); // url property only visiable to human users, after URL has been shortened - we assume the caller of this page has the long URL, if they want the short one, they need to call vio.sn/c/create
   /*
         $('#permalink').removeAttr('href');
         $('#permalink').unbind('click');
@@ -5435,6 +5490,7 @@ function doQuery(keywords) {
 
     checkTextProperties();
     checkGlossaryButton();
+    checkLibraryButton();
 
     /* TODO: use qTip for tooltips, see http://qtip2.com/api
     $('[title!=""]').qtip();
@@ -5453,6 +5509,20 @@ function checkGlossaryButton(){
     $('#glossaryButton').addClass('hide');
   }
 }
+
+function checkLibraryButton(){
+  if( 
+    !_root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]') || 
+    _root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]').length <= 0
+    
+    ){
+    $('#libraryButton').removeClass('hide');
+  }
+  else if( !$('#libraryButton').hasClass('hide') ){
+    $('#libraryButton').addClass('hide');
+  }
+}
+
 
 function checkTextProperties(){
   if(!isExpandSearch || getMainFocus() != ID_QUERY){
@@ -5503,6 +5573,7 @@ function doFindDataspaces(){
   else selectDataspace('http://data.vios.network', 'VIOS');
   takeMainFocus(ID_QUERY); 
   clearFacets(true); 
+  clearKeywords();
   var cid = createId(); 
   setQueryText($('#keywords').val()); 
   addClassFacet(cid, 'http://www.vios.network/o/DataServer/Index', 'Indexed Content', true);  
@@ -6355,8 +6426,13 @@ var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'p
                 rows += '</div>';
                 rows += '</button>';
 */
-rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item'+((recordActive)?' record-active':'')+'" data-target="#">';
-                                rows +=  '<span class="thumb-sm float-left m-0 mr-1">';
+rows += '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item'+((recordActive)?' record-active':'')+'" data-target="#">';
+rows += '<div property="itemListElement" typeOf="Thing" class="hide">';
+rows += '<img property="logo" src="'+getFaviconUrl(value)+'" />';
+if(datatype == 'uri') rows += '<span property="url">'+value+'</span>';
+rows += '<span property="title">'+label+'</span>';
+rows += '</div>';
+                                rows +=  '<span class="thumb-sm float-left">';
 
 /*
 
@@ -6434,12 +6510,13 @@ if(true){
           rows += '</div>';
 //                 rows += '<img title="click to drop-down" class="count" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
                  // rows += '<a title="click to drop-down" class="count" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"><img width="16" height="16"/>&nbsp;&nbsp;</a>&nbsp;';
-          rows += '<i '+buildTitle('acts as \''+propLabel+'\' of these things')+' class="expand la la-bars la-lg" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\')"></i>' + ((i==0) ? '<script type="text/javascript">expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\');</script>' :'');
+          rows += '<i '+buildTitle('acts as \''+propLabel+'\' of these things')+' class="expand la la-bars la-lg" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\')"></i>' + ((i==0 && page==0) ? '<script type="text/javascript">expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\');</script>' :'');
               }
 
               else {
                 var dataserverClass = getQuery().children('class');
                 if(dataserverClass && dataserverClass.length > 0){
+
                   var isDataserver = getMainFocus().parent().attr('class') == ID_QUERY;
                   isDataserver = isDataserver && getMainFocus().attr('iri')=='http://www.vios.network/o/DataServer/Index/dataserver';
                   //isNewDataserver = isNewDataserver;
@@ -6447,13 +6524,23 @@ if(true){
 //                  if(dataserverClass.attr('iri') == 'http://www.vios.network/o/DataServer'){
 
           checked=(ds.indexOfDataspace(value) >= 0) ? ' checked="checked"': '';
-          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-warning">';
+          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-circle abc-checkbox-info">';
           rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {doRemoveDataspace(\''+value+'\', true);}else{addDataspace(\''+value+'\', \''+label+'\', false, true);}" />&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
 
                     //rows += '<i '+buildTitle('Add dataspace', 'right')+'  onclick="javascript:addDataspace(\''+value+'\', \''+label+'\');takeMainFocus(ID_QUERY); clearFacets();" class="fa fa-plus-circle fa-lg text-inverse"></i>';
                   }
+
+                  else if(dataserverClass.attr('iri') == 'http://www.w3.org/ns/sparql-service-description#NamedGraph'){
+                    rows += '<div class="form-check-inline abc-checkbox abc-checkbox-circle abc-checkbox-info">';
+                    rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {removeGraphFacet();}else{takeMainFocus(ID_QUERY); clearFacets(true); clearQueryGraph(true); setGraphFacet(\''+value+'\', \''+label+'\');}" />&nbsp;';
+                    rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
+                    rows += '</div>';
+                  }
+
+
+
                 }
               }
              // rows += '</td></tr>';
@@ -8056,9 +8143,23 @@ content += '</section>';
             else tools += '&nbsp;';
             //tools += '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer"  style="cursor:pointer" '+buildTitle('View in Wikipedia')+' onclick="javascript:linkOut(\''+wikiPage+'\')" class="fa fa-wikipedia-w fa-lg"></i>';        
             $('#angular_recordViewer').attr('src', wikiPage);
+            if(wikiPage.startsWith('dsn://')) {
+              $('.www-toolbar-item').addClass('hide');
+            }
+            else {
+              $('.www-toolbar-item').removeClass('hide');
+              $('.www-toolbar-item').text('WWW - ' + wikiPage);
+            }
         }
         if (url) {
             $('#angular_recordViewer').attr('src', url);
+            if(url.startsWith('dsn://')) {
+              $('.www-toolbar-item').addClass('hide');
+            }
+            else {
+              $('.www-toolbar-item').removeClass('hide');
+              $('.www-toolbar-item').text('WWW - ' + url);
+            }
         }
 
 
@@ -8921,6 +9022,16 @@ function describe(id, src, isGGGRecord){
     $('#angular_recordViewer').attr('src', linkOutURI); // deprecated
     //$('#recordLabel').val(label);
 
+    $('.www-toolbar-item').text('WWW - ' + linkOutURI);
+    $('.ggg-toolbar-item').text('GGG - ' + linkOutURI);
+    if(linkOutURI.startsWith('dsn://')) {
+      $('.www-toolbar-item').addClass('hide');
+    }
+    else {
+      $('.www-toolbar-item').removeClass('hide');
+      $('.www-toolbar-item').text('WWW - ' + linkOutURI);
+    }
+
 
     var opt = new Object();
     opt.tar = 'record';
@@ -9184,9 +9295,11 @@ rows += '</td></tr>';
   var BC_FACET_TYPE_FACET = 1;
   var BC_FACET_TYPE_FOCUS = 2;
 
+  var queryArticulation = '';
 
     // POI: this function is responsible for building the breadcrumbs and facetCollector
     function buildNavPath(){
+      queryArticulation = '';
       $('#breadcrumbPanel').removeClass('hide');
 
       //var breadcrumbs = $('#breadcrumbs');
@@ -9478,6 +9591,10 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
 
         // update root
         getQuery().attr('label', (desc == 'name' || desc == 'keywords') ? val : desc);
+
+        // POI: the breadcrumb iterator builds from leaf to root
+        if(queryArticulation.length > 0) queryArticulation = ', ' + queryArticulation;
+        queryArticulation = tooltip + queryArticulation;
 
         //var slash = (!isFacet) ? '/' : '';
 
