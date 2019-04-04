@@ -2827,7 +2827,7 @@ function init(){
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(copyButton);
 
-      var libraryButton = '<li class="nav-item d-none d-md-block"><a '+buildTitle('List Libraries')+' onclick="javascript:clearKeywords(); var cid = createId(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(true); addClassFacet(cid, \'http://www.w3.org/ns/sparql-service-description#NamedGraph\', \'Library\');" class="hide nav-link pl-2" id="libraryButton" ><i class="la la-arrow-up la-lg"></i></a></li>'; //la-heart-o
+      var libraryButton = '<li class="nav-item d-none d-md-block"><a '+buildTitle('List Libraries')+' onclick="javascript:clearKeywords(); var cid = createId(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(true); addClassFacet(cid, \'http://www.w3.org/ns/sparql-service-description#NamedGraph\', \'Library\');" class="hide nav-link pl-2 text-warning" id="libraryButton" ><i class="la la-compress la-lg"></i></a></li>'; //la-heart-o
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().prev().before(libraryButton);
 
@@ -5699,7 +5699,12 @@ function checkGlossaryButton(){
 
 function checkLibraryButton(){
   $('#libraryButton').removeClass('hide');
-  var sparql = 'select count(distinct *) where {?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/sparql-service-description#NamedGraph>}';
+  var where = '?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/sparql-service-description#NamedGraph>';
+  if(getQueryGraph() && getQueryGraph().length > 0){
+    where = '{graph <'+getQueryGraph()+'> {' + where + '}}';
+  }
+  else where = '{' + where + '}';
+  var sparql = 'select count(distinct *) where ' + where;
   var opt = new Object();
   opt.tar = 'countLibraries';
   fct_sparql(sparql, opt);
@@ -6776,7 +6781,7 @@ if(true){
                       var libraryClass = getMainFocus().children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]');
 
                         if(libraryClass && libraryClass.length > 0){
-                          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-circle abc-checkbox-info">';
+                          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-circle abc-checkbox-warning">';
                           rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {removeGraphFacet();}else{takeMainFocus(ID_QUERY); clearFacets(true); stackGraphFacet(\''+value+'\', \''+label+'\');}" />&nbsp;';
                           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
                           rows += '</div>';
