@@ -937,7 +937,8 @@ accordion .card-header {
   text-decoration: none; 
   padding: 10px 0 10px 55px;
   background: red; /* fallback color */
-  background: hsla(34,85%,35%,1); 
+/*  background: hsla(34,85%,35%,1); */
+  background: hsla(45, 100%, 55%, 1);
   position: relative; 
   display: block;
   float: left;
@@ -949,7 +950,8 @@ accordion .card-header {
   height: 0;
   border-top: 50px solid transparent;           /* Go big on the size, and let overflow hide */
   border-bottom: 50px solid transparent;
-  border-left: 30px solid hsla(34,85%,35%,1);
+/*  border-left: 30px solid hsla(34,85%,35%,1);*/
+  border-left: 30px solid hsla(45, 100%, 55%, 1);
   position: absolute;
   top: 50%;
   margin-top: -50px; 
@@ -976,6 +978,9 @@ accordion .card-header {
   border-top-left-radius: 0.25rem;
   border-bottom-left-radius: 0.25rem;
 }
+
+
+/*
 .libraries li:nth-child(2) a       { background:        hsla(34,85%,45%,1); }
 .libraries li:nth-child(2) a:after { border-left-color: hsla(34,85%,45%,1); }
 .libraries li:nth-child(3) a       { background:        hsla(34,85%,55%,1); }
@@ -984,6 +989,18 @@ accordion .card-header {
 .libraries li:nth-child(4) a:after { border-left-color: hsla(34,85%,65%,1); }
 .libraries li:nth-child(5) a       { background:        hsla(34,85%,75%,1); }
 .libraries li:nth-child(5) a:after { border-left-color: hsla(34,85%,75%,1); }
+*/
+
+.libraries li:nth-child(2) a       { background:        hsla(45,100%,65%,1); }
+.libraries li:nth-child(2) a:after { border-left-color: hsla(45,100%,65%,1); }
+.libraries li:nth-child(3) a       { background:        hsla(45,100%,75%,1); color: hsla(45,100%,45%,1);}
+.libraries li:nth-child(3) a:after { border-left-color: hsla(45,100%,75%,1); }
+.libraries li:nth-child(4) a       { background:        hsla(45,100%,85%,1); color: hsla(45,100%,50%,1);}
+.libraries li:nth-child(4) a:after { border-left-color: hsla(45,100%,85%,1); }
+.libraries li:nth-child(5) a       { background:        hsla(45,100%,95%,1); color: hsla(45,100%,55%,1);}
+.libraries li:nth-child(5) a:after { border-left-color: hsla(45,100%,95%,1); }
+
+
 /*.libraries li:last-child a {
   background: transparent !important;
   color: black;

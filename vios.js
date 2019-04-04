@@ -233,27 +233,62 @@ function setQueryGraph(g, label){
   clearLibrary.parent().removeClass('hide');
 }
 
+function popQueryGraph(){
+  var ancestors = _root.children('query').attr('graphAncestors');
+  var ancestorLabels = _root.children('query').attr('graphAncestorLabels');
+  var next = '';
+  var nextLabel = '';
+  if(ancestors && ancestors.length > 0){
+    next = ancestors.substring(ancestors.lastIndexOf(',')+1);
+    ancestors = ancestors.substring(0, ancestors.lastIndexOf(','));
+    nextLabel = ancestorLabels.substring(ancestorLabels.lastIndexOf(',')+1);
+    ancestorLabels = ancestorLabels.substring(0, ancestorLabels.lastIndexOf(','));
+    setQueryGraph(next, nextLabel);
+    _root.children('query').attr('graphAncestors', ancestors);
+    _root.children('query').attr('graphAncestorLabels', ancestorLabels);
+  }
+  else { 
+    _root.find('query').removeAttr('graph');
+    _root.find('query').removeAttr(ATTR_GRAPH_LABEL);
+    _root.find('query').removeAttr('graphAncestors');
+    _root.find('query').removeAttr('graphAncestorLabels');
+  }
+}
+
 function stackQueryGraph(g, label){
-  var ancestors = _root.find('query').attr('graphAncestors');
-  if(ancestors && ancestors.length > 0) ancestors += ', ';
-  else ancestors = '';
-  ancestors += _root.find('query').attr('graph');
+  if(getQueryGraph() && getQueryGraph().length > 0){
+    var ancestors = _root.children('query').attr('graphAncestors');
+    if(ancestors && ancestors.length > 0) ancestors += ', ';
+    else ancestors = '';
 
-  var ancestorLabels = _root.find('query').attr('graphAncestors');
-  if(ancestorLabels && ancestorLabels.length > 0) ancestorLabels += ', ';
-  else ancestorLabels = '';
-  ancestorLabels += _root.find('query').attr(ATTR_GRAPH_LABEL);
+    var ancestorLabels = _root.children('query').attr('graphAncestors');
+    if(ancestorLabels && ancestorLabels.length > 0) ancestorLabels += ', ';
+    else ancestorLabels = '';
 
-  _root.find('query').attr('graphAncestors', ancestors);
-  _root.find('query').attr('graphAncestorLabels', ancestorLabels);
+    ancestors += getQueryGraph();
+    ancestorLabels += getQueryGraphLabel();
+
+    _root.find('query').attr('graphAncestors', ancestors);
+    _root.find('query').attr('graphAncestorLabels', ancestorLabels);
+  }
+
   setQueryGraph(g, label);
 }
 
 function clearQueryGraph(){
-  _root.find('query').removeAttr('graph');
+/*  _root.find('query').removeAttr('graph');
   _root.find('query').removeAttr(ATTR_GRAPH_LABEL);
+  _root.find('query').removeAttr('graphAncestors');
+  _root.find('query').removeAttr('graphAncestorLabels');*/
+  popQueryGraph();
   var clearLibrary = $('span.clear-data').filter(function() {return $(this).text().indexOf('Library') >= 0;});
-  clearLibrary.parent().addClass('hide');
+
+  if(getQueryGraph() && getQueryGraph().length > 0) {
+    clearLibrary.parent().removeClass('hide');
+  }
+  else{
+    clearLibrary.parent().addClass('hide');
+  }
 }
 
 function getQueryText(){
@@ -4924,11 +4959,6 @@ if(!$('input[type="text"], input[type="search"]').is(":focus")){
   }
   else {
     if (e.keyCode == '8') { // Delete key
-        clearKeywords();
-        doQuery($('#keywords').val());
-        //$('#keywords').removeAttr('disabled');
-        //$('#keywords').removeClass('disabled');
-        //$('#keywords').focus(); 
     }
     else if (e.keyCode == '16') { // Shift key
     }
@@ -5628,6 +5658,7 @@ function doQuery(keywords) {
 }
 
 function checkHelpButton(){
+  $('#helpButton').removeClass('hide');
   var sparql = 'select count(distinct *) where {graph <dsn:'+dataspace.replace('http://', '').replace('https://', '')+'/help> { ?s ?p ?o}}';
   var opt = new Object();
   opt.tar = 'countHelp';
@@ -5647,6 +5678,7 @@ function checkHelpButton(){
 }
 
 function checkGlossaryButton(){
+  $('#glossaryButton').removeClass('hide');
   var sparql = 'select count(distinct *) where {?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/class/yago/Glossary106420781>}';
   var opt = new Object();
   opt.tar = 'countGlossaries';
@@ -5666,6 +5698,7 @@ function checkGlossaryButton(){
 }
 
 function checkLibraryButton(){
+  $('#libraryButton').removeClass('hide');
   var sparql = 'select count(distinct *) where {?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/sparql-service-description#NamedGraph>}';
   var opt = new Object();
   opt.tar = 'countLibraries';
@@ -5685,6 +5718,7 @@ function checkLibraryButton(){
 }
 
 function checkArrowRightButton(){
+  $('.la-arrow-right').removeClass('hide');
   if(getMainFocus().attr('class') == ID_QUERY){
     $('.la-arrow-right').parent().addClass('hide');
   }
@@ -5719,7 +5753,8 @@ function checkArrowRightButton(){
 }
 
 function checkArrowLeftButton(){
-    $('.la-arrow-left').parent().addClass('hide');
+  $('.la-arrow-left').removeClass('hide');
+  $('.la-arrow-left').parent().addClass('hide');
 }
 
 function checkTextProperties(){
@@ -6742,7 +6777,7 @@ if(true){
 
                         if(libraryClass && libraryClass.length > 0){
                           rows += '<div class="form-check-inline abc-checkbox abc-checkbox-circle abc-checkbox-info">';
-                          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {removeGraphFacet();}else{takeMainFocus(ID_QUERY); clearFacets(true); clearQueryGraph(true); stackGraphFacet(\''+value+'\', \''+label+'\');}" />&nbsp;';
+                          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {removeGraphFacet();}else{takeMainFocus(ID_QUERY); clearFacets(true); stackGraphFacet(\''+value+'\', \''+label+'\');}" />&nbsp;';
                           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
                           rows += '</div>';
                         }
@@ -9594,6 +9629,15 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
 
           if(graphLabel && graphLabel.length > 0){
             libraries.append('<li><a href="#">'+graphLabel+'</a></li>');
+            var graphAncestors = getQuery().attr('graphAncestors');
+            var graphAncestorLabels = getQuery().attr('graphAncestorLabels');
+            if(graphAncestors && graphAncestors.length > 0){
+              var ga = graphAncestors.split(',');
+              var gal = graphAncestorLabels.split(',');
+              for(i = 0; i < ga.length; i++){
+                libraries.prepend('<li><a href="#">'+gal[i]+'</a></li>');
+              }
+            }
           }
 
 
