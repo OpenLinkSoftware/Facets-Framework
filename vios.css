@@ -928,6 +928,8 @@ accordion .card-header {
   /*margin: 40px;*/
   font-weight: bold;
   padding: 0;
+  margin-top:0;
+  margin-bottom: 1rem;
 }
 .libraries li { 
   float: left; 
@@ -1011,6 +1013,10 @@ accordion .card-header {
 .libraries li a:hover { background: hsla(34,85%,25%,1); }
 .libraries li a:hover:after { border-left-color: hsla(34,85%,25%,1) !important; }
 
+.btn-enter-lib{
+    position: absolute;
+    right: 10px;
+}
 
 /*  * { box-sizing: border-box; }*/
 /*body {
@@ -1062,4 +1068,9 @@ input[type=submit] {
   /*when navigating through the items using the arrow keys:*/
   background-color: DodgerBlue !important; 
   color: #ffffff; 
+}
+
+
+.breadcrumb-item+.breadcrumb-item {
+    /* padding-left: .5rem; */
 }

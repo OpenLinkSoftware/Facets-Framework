@@ -273,6 +273,21 @@ function stackQueryGraph(g, label){
   }
 
   setQueryGraph(g, label);
+
+  // ELF
+  checkLibraries();
+}
+
+function checkLibraries(){
+  var sparql = buildTypeCountQuery('http://www.w3.org/ns/sparql-service-description#NamedGraph');
+  var opt = new Object();
+  opt.tar = 'countDefaultLoadLibraries';
+  fct_sparql(sparql, opt);
+
+  var sparql = buildTypeCountQuery('dsn:data.vios.network/o/Origin');
+  opt = new Object();
+  opt.tar = 'countDefaultLoadOriginLibraries';
+  fct_sparql(sparql, opt);
 }
 
 function clearQueryGraph(){
@@ -289,6 +304,7 @@ function clearQueryGraph(){
   else{
     clearLibrary.parent().addClass('hide');
   }
+  checkLibraries();
 }
 
 function getQueryText(){
@@ -430,6 +446,9 @@ function fct_removeVariableData(query){
   query.removeAttr('class');
   query.removeAttr('timeout');
   query.removeAttr('qid');
+  query.removeAttr('graphAncestors');
+  query.removeAttr('graphLabel');
+  query.removeAttr('graphAncestorLabels');
 
 
   query.find('*').removeAttr('class');
@@ -744,7 +763,9 @@ function fct_sparql(sparql, opt){
   //var qstr = q.prop('outerHTML');
   var sparqlSvr = (opt.srv) ? opt.srv : service_sparql;
   var id = sparql ? (sparqlSvr + sparql).hashCode() : 0;
-  setMutex(id, opt.tar, opt.tar!='record' && opt.tar != 'countLibraries' && opt.tar != 'countGlossaries' && opt.tar != 'countHelp');
+
+  // need to use a register pattern for these
+  setMutex(id, opt.tar, opt.tar!='record' && opt.tar != 'countLibraries' && opt.tar != 'countGlossaries' && opt.tar != 'countHelp' && opt.tar != 'countDefaultLoadLibraries' && opt.tar != 'countDefaultLoadOriginLibraries');
   //q.attr('timeout', fct_queryTimeout);
   var resp;
   if(fct_isCache){
@@ -804,6 +825,12 @@ function fct_sparql(sparql, opt){
               }
               else if(opt.tar == 'countHelp'){
                 fct_handleSparqlHelpCount(resp, opt);
+              }
+              else if(opt.tar == 'countDefaultLoadLibraries'){
+                fct_handleSparqlDefaultLoadLibrariesCount(resp, opt);
+              }
+              else if(opt.tar == 'countDefaultLoadOriginLibraries'){
+                fct_handleSparqlDefaultLoadOriginLibrariesCount(resp, opt);
               }
             }
 
@@ -869,6 +896,12 @@ function fct_sparql(sparql, opt){
               }
               else if(opt.tar == 'countHelp'){
                 fct_handleSparqlHelpCount(xml, opt);
+              }
+              else if(opt.tar == 'countDefaultLoadLibraries'){
+                fct_handleSparqlDefaultLoadLibrariesCount(xml, opt);
+              }              
+              else if(opt.tar == 'countDefaultLoadOriginLibraries'){
+                fct_handleSparqlDefaultLoadOriginLibrariesCount(xml, opt);
               }
             }
           //console.log('sparql results: ' + xml);
@@ -958,6 +991,40 @@ function fct_handleSparqlLibraryCount(xml, opt){
       }
       else if( !$('#libraryButton').hasClass('hide') ){
         $('#libraryButton').addClass('hide');
+      }
+    }
+  });
+}
+
+
+function fct_handleSparqlDefaultLoadLibrariesCount(xml, opt){
+  var results = $(xml).find('results');
+  $('result', results).each(function(i){
+    var ct = $(this).text().trim();
+    if(ct > 0){
+      if(
+        !_root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]') || 
+        _root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]').length <= 0
+      ) {
+        addClassFacet(createId(), 'http://www.w3.org/ns/sparql-service-description#NamedGraph', 'Library');
+        if( !$('#libraryButton').hasClass('hide') ){
+          $('#libraryButton').addClass('hide');
+        }
+      }
+    }
+  });
+}
+
+function fct_handleSparqlDefaultLoadOriginLibrariesCount(xml, opt){
+  var results = $(xml).find('results');
+  $('result', results).each(function(i){
+    var ct = $(this).text().trim();
+    if(ct > 0){
+      if(
+        !_root.children('query').children('class[iri="dsn:data.vios.network/o/Origin"]') || 
+        _root.children('query').children('class[iri="dsn:data.vios.network/o/Origin"]').length <= 0
+      ) {
+        addClassFacet(createId(), 'dsn:data.vios.network/o/Origin', 'Origin');
       }
     }
   });
@@ -2669,7 +2736,7 @@ function init(){
         link.name = 'keywords';
         document.head.appendChild(link);
 
-
+/*
         link = document.createElement('script');
         link.type = 'text/javascript';
         link.src = 'http://data.vios.network/DAV/home/vios/js/solid-auth-client.bundle.js';
@@ -2694,6 +2761,7 @@ function init(){
         link.type = 'text/javascript';
         link.src = 'http://data.vios.network/DAV/home/vios/js/jquery.capslockstate.js';
         document.head.appendChild(link);
+        */
 
         link = document.createElement('script');
         link.type = 'text/javascript';
@@ -2719,6 +2787,11 @@ function init(){
 
 
 // Q&D data canvas ******************//
+
+  $('.la-arrow-left').removeClass('hide');
+  $('.la-arrow-left').parent().addClass('hide');
+  $('.la-arrow-right').removeClass('hide');
+  $('.la-arrow-right').parent().addClass('hide');
 
 
   //$('body').attr('oncontextmenu', 'return false;');
@@ -2827,7 +2900,7 @@ function init(){
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(copyButton);
 
-      var libraryButton = '<li class="nav-item d-none d-md-block"><a '+buildTitle('List Libraries')+' onclick="javascript:clearKeywords(); var cid = createId(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(true); addClassFacet(cid, \'http://www.w3.org/ns/sparql-service-description#NamedGraph\', \'Library\');" class="hide nav-link pl-2 text-warning" id="libraryButton" ><i class="la la-compress la-lg"></i></a></li>'; //la-heart-o
+      var libraryButton = '<li class="nav-item d-none d-md-block"><a '+buildTitle('List Libraries')+' onclick="javascript:doLoadLibraries()" class="hide nav-link pl-2 text-warning" id="libraryButton" ><i class="la la-compress la-lg"></i></a></li>'; //la-heart-o
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().prev().before(libraryButton);
 
@@ -2875,7 +2948,7 @@ function init(){
 
 
 
-      var demoButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" class="hide nav-link pl-2 text-info" id="helpButton" '+buildTitle('Click WWW on the next canvas to visit the demo smart folders')+' onclick="javascript:clearKeywords(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(true); clearQueryGraph(true); doSetLibrary();"><i class="la la-question la-lg text-info"></i></a></li>'; //la-heart-o la-map-signs
+      var demoButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" class="hide nav-link pl-2 text-info" id="helpButton" '+buildTitle('Click WWW on the next canvas to visit the demo smart folders')+' onclick="javascript:clearKeywords(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(true); clearQueryGraph(true); doSetLibrary(); checkLibraries();"><i class="la la-question la-lg text-info"></i></a></li>'; //la-heart-o la-map-signs
 //href="http://vio.sn/c/9LK72AN"
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(demoButton);
 
@@ -2960,7 +3033,12 @@ function init(){
     //icl.addClass('fa-times-circle');
 
     clearKeywords.text('Clear Keywords');
-    clearLibrary.text('Clear Library');
+    clearKeywords.parent().removeClass('btn-default');
+    clearKeywords.parent().addClass('btn-danger');
+
+    clearLibrary.text('Exit Library');
+    clearLibrary.parent().removeClass('btn-default');
+    clearLibrary.parent().addClass('btn-danger');
 
     //ict.css('font-family', 'Montserrat, sans-serif');
     //icl.css('font-family', 'Montserrat, sans-serif');
@@ -4119,6 +4197,8 @@ $('.avatar').parent().children('.circle').each(async (i) => {
 
 $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
 
+
+checkLibraryButton();
 
 //autocomplete(document.getElementById("keywords"), countries);
 
@@ -5651,10 +5731,20 @@ function doQuery(keywords) {
     checkArrowRightButton();
     checkArrowLeftButton();
     checkHelpButton();
+    checkLibraryBreadCrumbs();
 
     /* TODO: use qTip for tooltips, see http://qtip2.com/api
     $('[title!=""]').qtip();
     */
+}
+
+function checkLibraryBreadCrumbs(){
+  if(!getQueryGraph() || getQueryGraph().length <= 0){
+    $('#angular_libraries').addClass('hide');
+  }
+  else {
+    $('#angular_libraries').removeClass('hide'); // TODO: the hide class is also removed in buildNavPath(), need to determine where this needs to happen
+  }
 }
 
 function checkHelpButton(){
@@ -5663,6 +5753,9 @@ function checkHelpButton(){
   var opt = new Object();
   opt.tar = 'countHelp';
   fct_sparql(sparql, opt);
+
+  //checkLibraries();
+
   /*
   if( ( dataspace == 'http://dbpedia.org' || dataspace == 'http://data.vios.network' || dataspace == 'http://lod.openlinksw.com')  && (
     !_root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]') || 
@@ -5679,7 +5772,8 @@ function checkHelpButton(){
 
 function checkGlossaryButton(){
   $('#glossaryButton').removeClass('hide');
-  var sparql = 'select count(distinct *) where {?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/class/yago/Glossary106420781>}';
+  var sparql = buildTypeCountQuery('http://dbpedia.org/class/yago/Glossary106420781');
+
   var opt = new Object();
   opt.tar = 'countGlossaries';
   fct_sparql(sparql, opt);
@@ -5699,12 +5793,7 @@ function checkGlossaryButton(){
 
 function checkLibraryButton(){
   $('#libraryButton').removeClass('hide');
-  var where = '?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/sparql-service-description#NamedGraph>';
-  if(getQueryGraph() && getQueryGraph().length > 0){
-    where = '{graph <'+getQueryGraph()+'> {' + where + '}}';
-  }
-  else where = '{' + where + '}';
-  var sparql = 'select count(distinct *) where ' + where;
+  var sparql = buildTypeCountQuery('http://www.w3.org/ns/sparql-service-description#NamedGraph');
   var opt = new Object();
   opt.tar = 'countLibraries';
   fct_sparql(sparql, opt);
@@ -5806,6 +5895,31 @@ function doRemoveDataspace(dsurl, silent){
 
 function doSetLibrary(){
   setGraphFacet('dsn:'+dataspace.replace('http://', '').replace('https://', '')+'/help', 'Help Contents');
+}
+
+function buildTypeCountQuery(clazz){
+  var where = '?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <'+clazz+'>';
+  if(getQueryGraph() && getQueryGraph().length > 0){
+    where = '{graph <'+getQueryGraph()+'> {' + where + '}}';
+  }
+  else where = '{' + where + '}';
+
+  return 'select count(distinct *) where ' + where;;
+}
+
+function doLoadLibraries(){
+  // an ELF revealed the button that calls this method, so we are certain Libraries exist in this context
+  clearKeywords(); 
+  var cid = createId(); 
+  setQueryText(''); 
+  takeMainFocus(ID_QUERY); 
+  clearFacets(true); 
+  addClassFacet(cid, 'http://www.w3.org/ns/sparql-service-description#NamedGraph', 'Library');
+
+  var sparql = buildTypeCountQuery('dsn:data.vios.network/o/Origin');
+  var opt = new Object();
+  opt.tar = 'countDefaultLoadOriginLibraries';
+  fct_sparql(sparql, opt);  
 }
 
 function doFindDataspaces(){
@@ -6781,10 +6895,13 @@ if(true){
                       var libraryClass = getMainFocus().children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]');
 
                         if(libraryClass && libraryClass.length > 0){
+                          /*
                           rows += '<div class="form-check-inline abc-checkbox abc-checkbox-circle abc-checkbox-warning">';
                           rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {removeGraphFacet();}else{takeMainFocus(ID_QUERY); clearFacets(true); stackGraphFacet(\''+value+'\', \''+label+'\');}" />&nbsp;';
                           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
-                          rows += '</div>';
+                          rows += '</div>';*/
+
+                          rows += '<button class="btn btn-warning btn-xs mb-xs btn-enter-lib" type="button" onclick="javascript:takeMainFocus(ID_QUERY); clearFacets(true); stackGraphFacet(\''+value+'\', \''+label+'\');">Enter</button>';
                         }
                   }
 
@@ -9883,7 +10000,7 @@ if(false){
           }
 
           var roleBadge = '';// '&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>';
-          ret = '<li '+buildTitle(tooltip)+' class="breadcrumb-item'+focusClass+'" id="nav'+id+'"><a ><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?roleBadge:'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
+          ret = '<li '+buildTitle(tooltip)+' class="'+focusClass+'" id="nav'+id+'"><a ><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?roleBadge:'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
 
 
         }
@@ -9897,7 +10014,7 @@ if(false){
           }
           else { // isBreadCrumb
             //ret = '<li class="breadcrumb-item"><div class="row" style="background-color:transparent;" title="'+tooltip+'" id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6>' + ''+desc+'</h6></div><button class="btn-rounded-f  btn btn-'+outline+'default btn-block btn-xs text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div></li>';
-    ret = '<li '+buildTitle(tooltip)+' class="breadcrumb-item" id="nav'+id+'"><a><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?roleBadge:'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
+    ret = '<li '+buildTitle(tooltip)+' class="" id="nav'+id+'"><a><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?roleBadge:'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
   //  gbcol += '<li class="breadcrumb-item"><a  title=""><em>distributor</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-outline-default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\'0\')">'+VALUE_ANON_NODE+'</button></li>';
           }
 
