@@ -279,6 +279,7 @@ function stackQueryGraph(g, label){
 }
 
 function checkLibraries(){
+  if(getMainFocus().attr('class') != ID_QUERY) return;
   var sparql = buildTypeCountQuery('http://www.w3.org/ns/sparql-service-description#NamedGraph');
   var opt = new Object();
   opt.tar = 'countDefaultLoadLibraries';
@@ -304,7 +305,6 @@ function clearQueryGraph(){
   else{
     clearLibrary.parent().addClass('hide');
   }
-  checkLibraries();
 }
 
 function getQueryText(){
@@ -2726,7 +2726,7 @@ function init(){
         link.id = 'id2';
         link.rel = 'stylesheet';
         link.type = 'text/css';
-        link.href = 'http://data.vios.network/DAV/home/vios/dev/css/vios.css';
+        link.href = 'https://raw.githubusercontent.com/Vacuity/vios/master/vios.css';
         document.head.appendChild(link);
     }  
 
@@ -2941,7 +2941,7 @@ function init(){
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(bookmarkButton);
 
 
-      var glossaryButton = '<li class="nav-item d-none d-md-block"><a  id="glossaryButton" '+buildTitle('Find a Glossary')+' class="hide nav-link pl-2 text-info" onclick="javascript: isExpandSearch = true; takeMainFocus(ID_QUERY); clearFacets(true); clearQueryGraph(true); var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/Glossary106420781\', \'Glossary\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\'); takeMainFocus(pid);" style="cursor:pointer;"><i class="la la-book la-lg text-info"></i></a></li>'; //la-heart-o
+      var glossaryButton = '<li class="nav-item d-none d-md-block"><a  id="glossaryButton" '+buildTitle('Find a Glossary')+' class="hide nav-link pl-2 text-info" onclick="javascript: isExpandSearch = true; takeMainFocus(ID_QUERY); clearFacets(true); var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/Glossary106420781\', \'Glossary\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\'); takeMainFocus(pid);" style="cursor:pointer;"><i class="la la-book la-lg text-info"></i></a></li>'; //la-heart-o
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(glossaryButton);
 
@@ -3040,6 +3040,15 @@ function init(){
     clearLibrary.parent().removeClass('btn-default');
     clearLibrary.parent().addClass('btn-danger');
 
+    clearLibrary.parent().on('click', function(e){
+      if(!getQueryGraph() || getQueryGraph().length <= 0) {
+        //getMainFocus().children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]').remove();
+        //getMainFocus().children('class[iri="dsn:data.vios.network/o/Origin"]').remove();
+        //return;
+      }
+      checkLibraries();
+    });
+
     //ict.css('font-family', 'Montserrat, sans-serif');
     //icl.css('font-family', 'Montserrat, sans-serif');
 
@@ -3124,10 +3133,10 @@ gbcol += '<button _ngcontent-c4="" class="btn btn-gray" onclick="javascript:clea
           gbcol += '</button>';
  gbcol += '&nbsp;&nbsp;&nbsp;';
 
-gbcol += '<button _ngcontent-c4="" class="btn btn-gray" onclick="javascript:clearQueryGraph();doQuery($(\'#keywords\').val())">';
+gbcol += '<button _ngcontent-c4="" class="btn btn-gray" onclick="javascript:clearQueryGraph(true); checkLibraries(); doQuery($(\'#keywords\').val())">';
             /*gbcol += '<i _ngcontent-c4="" class="fa fa-ban text-danger"></i>';
             gbcol += ' <i _ngcontent-c4="" class="fa fa-bank text"></i>';*/
-            gbcol += 'Clear libraries';
+            gbcol += 'Exit Library';
           gbcol += '</button>';
 
           gbcol += '</div>';
@@ -5793,6 +5802,7 @@ function checkGlossaryButton(){
 
 function checkLibraryButton(){
   $('#libraryButton').removeClass('hide');
+  if(getMainFocus().attr('class') != ID_QUERY) return;
   var sparql = buildTypeCountQuery('http://www.w3.org/ns/sparql-service-description#NamedGraph');
   var opt = new Object();
   opt.tar = 'countLibraries';
