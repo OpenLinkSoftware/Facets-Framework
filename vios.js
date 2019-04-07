@@ -284,11 +284,6 @@ function checkLibraries(){
   var opt = new Object();
   opt.tar = 'countDefaultLoadLibraries';
   fct_sparql(sparql, opt);
-
-  var sparql = buildTypeCountQuery('dsn:data.vios.network/o/Origin');
-  opt = new Object();
-  opt.tar = 'countDefaultLoadOriginLibraries';
-  fct_sparql(sparql, opt);
 }
 
 function clearQueryGraph(){
@@ -297,6 +292,13 @@ function clearQueryGraph(){
   _root.find('query').removeAttr('graphAncestors');
   _root.find('query').removeAttr('graphAncestorLabels');*/
   popQueryGraph();
+}
+
+function emptyQueryGraph(){
+  _root.find('query').removeAttr('graph');
+  _root.find('query').removeAttr(ATTR_GRAPH_LABEL);
+  _root.find('query').removeAttr('graphAncestors');
+  _root.find('query').removeAttr('graphAncestorLabels');
   var clearLibrary = $('span.clear-data').filter(function() {return $(this).text().indexOf('Library') >= 0;});
 
   if(getQueryGraph() && getQueryGraph().length > 0) {
@@ -477,7 +479,7 @@ function getProxyEndpoint(url){
   url = url.replace('http://', 'http/');
   url = url.replace('https://', 'https/');
 //  return 'http://poc.vios.network/proxy/-start-'+url+'-end-';
-  return this_endpoint + '/proxy/'+url;
+  return this_endpoint + '/rudi/'+url;
   //return url;
 }
 
@@ -534,7 +536,7 @@ function fct_query(q, viewType, opt){
   var qstr = q.prop('outerHTML');
   var id = (qstr) ? (service_fct+qstr).hashCode() : 0;
   getQuery().attr('qid', id);
-  if(!opt.branches && opt.tar != 'countIncrementProperty') setMutex(id, viewType);
+  if(!opt.branches && opt.tar != 'countIncrementProperty' && opt.tar != 'fetchIndex') setMutex(id, viewType);
   ha.push(id);
   q.attr('timeout', fct_queryTimeout); // add all neccessary variable data back to the query, if possible
   var resp;
@@ -554,6 +556,9 @@ function fct_query(q, viewType, opt){
   if (resp != null) { // if exist on cache
     if(opt.tar == 'countIncrementProperty'){
         fct_handleIncrementPropertyResults(resp, opt);
+    }
+    else if(opt.tar == 'fetchIndex'){
+        fct_handleIndexResults(resp, opt);
     }
     else {
       switch(viewType){
@@ -670,6 +675,9 @@ function fct_query(q, viewType, opt){
             if(opt.tar == 'countIncrementProperty'){
               fct_handleIncrementPropertyResults(xml, opt);
             }
+            else if(opt.tar == 'fetchIndex'){
+                fct_handleIndexResults(xml, opt);
+            }
 
             else {
               if(!opt.branches && getMutex(viewType) != id){ // POI: make sure to cache the results always!, i.e. place this after the cache above
@@ -750,7 +758,8 @@ function fct_sparql(sparql, opt){
   if(!opt) opt = new Object();
   fct_isCache = $('#isCache').is(':checked');
   fct_isDebug = $('#isDebug').is(':checked');
-  fct_queryTimeout = $('#queryTimeout :selected').attr('value');
+//  fct_queryTimeout = $('#queryTimeout :selected').attr('value');
+  fct_queryTimeout = getQueryTimeout();
   //console.clear();
   //setViewType(viewType, q);
   //q = _root.find('query *').removeAttr('class'); // be sure semantically equivalent queries are non-unique
@@ -842,7 +851,7 @@ function fct_sparql(sparql, opt){
   if(opt.tar == 'record') accept = 'application/rdf+xml';
   var isMainQueryCount = opt && (opt.tar == 'showMeMenu' || opt.tar == 'groupByMenu');
   var req = $.ajax({
-      url: sparqlSvr + "?query=" + encodeURIComponent(sparql),
+      url: sparqlSvr + '?query=' + encodeURIComponent(sparql) + '&timeout='+fct_queryTimeout,
       type: 'GET',
       headers: {'Accept': accept, 'X-VIOS-Type': 'sparql', 'X-VIOS-QID': (isMainQueryCount) ? getQuery().attr('qid') : id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid, 'X-VIOS-BID': bid},
       dataType: "text", // POI: can't do dataType: xml, since the service sometimes returns malformed XML
@@ -991,6 +1000,11 @@ function fct_handleSparqlLibraryCount(xml, opt){
       }
       else if( !$('#libraryButton').hasClass('hide') ){
         $('#libraryButton').addClass('hide');
+
+        var sparql = buildTypeCountQuery('dsn:data.vios.network/o/Origin');
+        var opt = new Object();
+        opt.tar = 'countDefaultLoadOriginLibraries';
+        fct_sparql(sparql, opt);
       }
     }
   });
@@ -1006,6 +1020,7 @@ function fct_handleSparqlDefaultLoadLibrariesCount(xml, opt){
         !_root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]') || 
         _root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]').length <= 0
       ) {
+        clearFacets(true);
         addClassFacet(createId(), 'http://www.w3.org/ns/sparql-service-description#NamedGraph', 'Library');
         if( !$('#libraryButton').hasClass('hide') ){
           $('#libraryButton').addClass('hide');
@@ -1159,6 +1174,31 @@ function fct_handleSparqlSubject(xml, opt){
 
 function fct_handleSparqlDescribe(xml, opt){
   loadDescribeResults(xml, opt);
+}
+
+function fct_handleIndexResults(xml, opt){
+    var result = $(xml).find("fct\\:result")[0];
+      $("fct\\:row", result).each(function(i) {
+          //console.log($(this).html());
+          var col = $(this).find("fct\\:column");
+
+          // shortform can be used in lieu of the label for URI values
+          var value, datatype, shortform, label, lang, ct; // TODO: need to utilize the lang property for filtering results for the user
+          
+          $("fct\\:column", this).each(function(j) {
+              // can't figure out how to access CDATA value of the element, tried many combinations of accessors, none worked
+              val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
+              val = val.replace("&lt;![CDATA[","").replace("]]&gt;","");
+              //console.log(val);
+              switch(j){
+                case 0: value = val; shortform = $(this).attr('shortform'); datatype = $(this).attr('datatype'); lang = $(this).attr('lang'); break;
+                case 1: label = val; break;
+                case 2: ct = val; break;
+              }
+          });
+
+          doRobot(value);
+      });
 }
 
 function fct_handleIncrementPropertyResults(xml, opt){
@@ -1801,7 +1841,7 @@ function fct_handleListCountResults(xml, opt){
         sparqlMap[opt.focusId] = sparql;
         fct_sparql(getSparqlCount(sparql, VIEW_TYPE_PROPERTIES), opt);
 
-        loadGroupByResults(xml, focus);
+        loadContents(xml, focus);
         $('#groupByHeader').removeClass('loading');
         //$('#focusHeader').removeClass('loading');
 
@@ -2055,7 +2095,7 @@ function fct_handleClassesResults(xml, opt){
         }
         if(!opt || !opt.isTablePaging) pageTable = 0;
 */
-        //loadGroupByResults(xml, focus);
+        //loadContents(xml, focus);
         //$('#groupByHeader').removeClass('loading');
         //$('#focusHeader').removeClass('loading');
         //if(!opt) opt = new Object();
@@ -2463,7 +2503,7 @@ var TAG_GRAPH = 'g';
 
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://myopenlink.net/DAV/home/sdmonroe/poc_draft.html";
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://poc.vios.network";
-var this_endpoint = 'http://dev.vios.network';
+var this_endpoint = 'https://dev.vios.network';
 
 var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qPage, qshowMePage, qTimeout, qNavType, qSubjectBadges, qVerticalChartHeaders, qViewType, qIsChart, qIsRollup, qShowIDN, qFilterRecordViewFields;
 
@@ -2726,7 +2766,7 @@ function init(){
         link.id = 'id2';
         link.rel = 'stylesheet';
         link.type = 'text/css';
-        link.href = 'https://raw.githubusercontent.com/Vacuity/vios/master/vios.css';
+        link.href = 'https://data.vios.network/DAV/home/vios/dev/css/vios.css';
         document.head.appendChild(link);
     }  
 
@@ -5432,8 +5472,8 @@ function processLabel(label, value, datatype, lang, labelSize, includeHostName){
 //var beep1Str = '//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vmz+Zt//+mm3Wm3Q576v////+32///5/EOgAAADVghQAAAAA//uQZAUAB1WI0PZugAAAAAoQwAAAEk3nRd2qAAAAACiDgAAAAAAABCqEEQRLCgwpBGMlJkIz8jKhGvj4k6jzRnqasNKIeoh5gI7BJaC1A1AoNBjJgbyApVS4IDlZgDU5WUAxEKDNmmALHzZp0Fkz1FMTmGFl1FMEyodIavcCAUHDWrKAIA4aa2oCgILEBupZgHvAhEBcZ6joQBxS76AgccrFlczBvKLC0QI2cBoCFvfTDAo7eoOQInqDPBtvrDEZBNYN5xwNwxQRfw8ZQ5wQVLvO8OYU+mHvFLlDh05Mdg7BT6YrRPpCBznMB2r//xKJjyyOh+cImr2/4doscwD6neZjuZR4AgAABYAAAABy1xcdQtxYBYYZdifkUDgzzXaXn98Z0oi9ILU5mBjFANmRwlVJ3/6jYDAmxaiDG3/6xjQQCCKkRb/6kg/wW+kSJ5//rLobkLSiKmqP/0ikJuDaSaSf/6JiLYLEYnW/+kXg1WRVJL/9EmQ1YZIsv/6Qzwy5qk7/+tEU0nkls3/zIUMPKNX/6yZLf+kFgAfgGyLFAUwY//uQZAUABcd5UiNPVXAAAApAAAAAE0VZQKw9ISAAACgAAAAAVQIygIElVrFkBS+Jhi+EAuu+lKAkYUEIsmEAEoMeDmCETMvfSHTGkF5RWH7kz/ESHWPAq/kcCRhqBtMdokPdM7vil7RG98A2sc7zO6ZvTdM7pmOUAZTnJW+NXxqmd41dqJ6mLTXxrPpnV8avaIf5SvL7pndPvPpndJR9Kuu8fePvuiuhorgWjp7Mf/PRjxcFCPDkW31srioCExivv9lcwKEaHsf/7ow2Fl1T/9RkXgEhYElAoCLFtMArxwivDJJ+bR1HTKJdlEoTELCIqgEwVGSQ+hIm0NbK8WXcTEI0UPoa2NbG4y2K00JEWbZavJXkYaqo9CRHS55FcZTjKEk3NKoCYUnSQ0rWxrZbFKbKIhOKPZe1cJKzZSaQrIyULHDZmV5K4xySsDRKWOruanGtjLJXFEmwaIbDLX0hIPBUQPVFVkQkDoUNfSoDgQGKPekoxeGzA4DUvnn4bxzcZrtJyipKfPNy5w+9lnXwgqsiyHNeSVpemw4bWb9psYeq//uQZBoABQt4yMVxYAIAAAkQoAAAHvYpL5m6AAgAACXDAAAAD59jblTirQe9upFsmZbpMudy7Lz1X1DYsxOOSWpfPqNX2WqktK0DMvuGwlbNj44TleLPQ+Gsfb+GOWOKJoIrWb3cIMeeON6lz2umTqMXV8Mj30yWPpjoSa9ujK8SyeJP5y5mOW1D6hvLepeveEAEDo0mgCRClOEgANv3B9a6fikgUSu/DmAMATrGx7nng5p5iimPNZsfQLYB2sDLIkzRKZOHGAaUyDcpFBSLG9MCQALgAIgQs2YunOszLSAyQYPVC2YdGGeHD2dTdJk1pAHGAWDjnkcLKFymS3RQZTInzySoBwMG0QueC3gMsCEYxUqlrcxK6k1LQQcsmyYeQPdC2YfuGPASCBkcVMQQqpVJshui1tkXQJQV0OXGAZMXSOEEBRirXbVRQW7ugq7IM7rPWSZyDlM3IuNEkxzCOJ0ny2ThNkyRai1b6ev//3dzNGzNb//4uAvHT5sURcZCFcuKLhOFs8mLAAEAt4UWAAIABAAAAAB4qbHo0tIjVkUU//uQZAwABfSFz3ZqQAAAAAngwAAAE1HjMp2qAAAAACZDgAAAD5UkTE1UgZEUExqYynN1qZvqIOREEFmBcJQkwdxiFtw0qEOkGYfRDifBui9MQg4QAHAqWtAWHoCxu1Yf4VfWLPIM2mHDFsbQEVGwyqQoQcwnfHeIkNt9YnkiaS1oizycqJrx4KOQjahZxWbcZgztj2c49nKmkId44S71j0c8eV9yDK6uPRzx5X18eDvjvQ6yKo9ZSS6l//8elePK/Lf//IInrOF/FvDoADYAGBMGb7FtErm5MXMlmPAJQVgWta7Zx2go+8xJ0UiCb8LHHdftWyLJE0QIAIsI+UbXu67dZMjmgDGCGl1H+vpF4NSDckSIkk7Vd+sxEhBQMRU8j/12UIRhzSaUdQ+rQU5kGeFxm+hb1oh6pWWmv3uvmReDl0UnvtapVaIzo1jZbf/pD6ElLqSX+rUmOQNpJFa/r+sa4e/pBlAABoAAAAA3CUgShLdGIxsY7AUABPRrgCABdDuQ5GC7DqPQCgbbJUAoRSUj+NIEig0YfyWUho1VBBBA//uQZB4ABZx5zfMakeAAAAmwAAAAF5F3P0w9GtAAACfAAAAAwLhMDmAYWMgVEG1U0FIGCBgXBXAtfMH10000EEEEEECUBYln03TTTdNBDZopopYvrTTdNa325mImNg3TTPV9q3pmY0xoO6bv3r00y+IDGid/9aaaZTGMuj9mpu9Mpio1dXrr5HERTZSmqU36A3CumzN/9Robv/Xx4v9ijkSRSNLQhAWumap82WRSBUqXStV/YcS+XVLnSS+WLDroqArFkMEsAS+eWmrUzrO0oEmE40RlMZ5+ODIkAyKAGUwZ3mVKmcamcJnMW26MRPgUw6j+LkhyHGVGYjSUUKNpuJUQoOIAyDvEyG8S5yfK6dhZc0Tx1KI/gviKL6qvvFs1+bWtaz58uUNnryq6kt5RzOCkPWlVqVX2a/EEBUdU1KrXLf40GoiiFXK///qpoiDXrOgqDR38JB0bw7SoL+ZB9o1RCkQjQ2CBYZKd/+VJxZRRZlqSkKiws0WFxUyCwsKiMy7hUVFhIaCrNQsKkTIsLivwKKigsj8XYlwt/WKi2N4d//uQRCSAAjURNIHpMZBGYiaQPSYyAAABLAAAAAAAACWAAAAApUF/Mg+0aohSIRobBAsMlO//Kk4soosy1JSFRYWaLC4qZBYWFRGZdwqKiwkNBVmoWFSJkWFxX4FFRQWR+LsS4W/rFRb/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU=';
 //var snd = new Audio("data:audio/wav;base64,"+beep1Str);  
 
-var snd = new Audio('http://www.soundjay.com/button/beep-24.wav');
-var snd2 = new Audio('http://www.soundjay.com/button/beep-07.wav');
+var snd = new Audio('https://www.soundjay.com/button/beep-24.wav');
+var snd2 = new Audio('https://www.soundjay.com/button/beep-07.wav');
 
 function beep() {
     try{
@@ -5741,10 +5781,47 @@ function doQuery(keywords) {
     checkArrowLeftButton();
     checkHelpButton();
     checkLibraryBreadCrumbs();
+    checkBreadCrumbs();
+    checkExitLibraryButton();
+    checkIndex();
 
     /* TODO: use qTip for tooltips, see http://qtip2.com/api
     $('[title!=""]').qtip();
     */
+}
+
+function checkIndex(){
+  if((getQueryText() && getQueryText().length > 0) || (getQuery().children('class') && getQuery().children('class').length > 0)) return;
+  if(getQueryGraph() && getQueryGraph().length > 0){ // check graph robot
+    var q = getQuery().clone();
+    var p = $.createElement('property');
+    var pid = createId();
+    p.attr('class', pid);
+    p.attr('iri', 'dsn:data.vios.network/o/p/index');
+    p.attr('label', 'index');
+    getFocus(q).append(p);
+    takeFocus(p, q);
+
+    q.find('view').attr('limit', '1');
+
+    var opt = new Object();
+    opt.tar = 'fetchIndex';
+    fct_query(q, VIEW_TYPE_LIST_COUNT, opt);
+  }
+  else { // check dataspace robot
+
+  }
+}
+
+function checkExitLibraryButton(){
+  var clearLibrary = $('span.clear-data').filter(function() {return $(this).text().indexOf('Library') >= 0;});
+
+  if(getQueryGraph() && getQueryGraph().length > 0) {
+    clearLibrary.parent().removeClass('hide');
+  }
+  else{
+    clearLibrary.parent().addClass('hide');
+  }
 }
 
 function checkLibraryBreadCrumbs(){
@@ -5756,8 +5833,17 @@ function checkLibraryBreadCrumbs(){
   }
 }
 
+function checkBreadCrumbs(){
+  if(nav_type == NAV_TYPE_2 || (nav_type == NAV_TYPE_3 && getMainFocus().attr('class') != ID_QUERY)){
+    $('#angular_breadcrumbs').removeClass('hide'); // TODO: the hide class is also removed in buildNavPath(), need to determine where this needs to happen
+  }
+  else {
+    $('#angular_breadcrumbs').addClass('hide');
+  }
+}
+
 function checkHelpButton(){
-  $('#helpButton').removeClass('hide');
+  $('#helpButton').addClass('hide');
   var sparql = 'select count(distinct *) where {graph <dsn:'+dataspace.replace('http://', '').replace('https://', '')+'/help> { ?s ?p ?o}}';
   var opt = new Object();
   opt.tar = 'countHelp';
@@ -5780,7 +5866,7 @@ function checkHelpButton(){
 }
 
 function checkGlossaryButton(){
-  $('#glossaryButton').removeClass('hide');
+  $('#glossaryButton').addClass('hide');
   var sparql = buildTypeCountQuery('http://dbpedia.org/class/yago/Glossary106420781');
 
   var opt = new Object();
@@ -5801,7 +5887,7 @@ function checkGlossaryButton(){
 }
 
 function checkLibraryButton(){
-  $('#libraryButton').removeClass('hide');
+  $('#libraryButton').addClass('hide');
   if(getMainFocus().attr('class') != ID_QUERY) return;
   var sparql = buildTypeCountQuery('http://www.w3.org/ns/sparql-service-description#NamedGraph');
   var opt = new Object();
@@ -5822,7 +5908,7 @@ function checkLibraryButton(){
 }
 
 function checkArrowRightButton(){
-  $('.la-arrow-right').removeClass('hide');
+  $('.la-arrow-right').addClass('hide');
   if(getMainFocus().attr('class') == ID_QUERY){
     $('.la-arrow-right').parent().addClass('hide');
   }
@@ -5939,6 +6025,7 @@ function doFindDataspaces(){
   else selectDataspace('http://data.vios.network', 'VIOS');
   takeMainFocus(ID_QUERY); 
   clearFacets(true); 
+  emptyQueryGraph();
   clearKeywords();
   var cid = createId(); 
   setQueryText($('#keywords').val()); 
@@ -6083,14 +6170,14 @@ function pageTableLeft(){
 
 var page = 0;
 
-var groupByResultsCt = 0;
+var contentsCt = 0;
 
 //query.append(view);
 //doQuery();
 
 function resetPaging(){
   page = 0;
-  //groupByResultsCt = 0;
+  //contentsCt = 0;
   getMainFocus().find('view').attr('offset', 0);
 }
 
@@ -6118,7 +6205,7 @@ function loadTextResults(xml){
 
       var rows = "";
       var result = $(xml).find("fct\\:result")[0];
-      groupByResultsCt = $("fct\\:row", result).length;
+      contentsCt = $("fct\\:row", result).length;
         if(page == 0){
           $("#leftButton").addClass('hide');
           $('#leftButton').removeAttr('title');
@@ -6130,7 +6217,7 @@ function loadTextResults(xml){
           setTitle('leftButton', 'page ' + (page), 'bottom');
 
         }
-      if(groupByResultsCt < SIZE_RESULT_SET) {
+      if(contentsCt < SIZE_RESULT_SET) {
         $("#rightButton").addClass('hide');
         $('#rightButton').removeAttr('title');
       }
@@ -6418,11 +6505,11 @@ if(!isGroupByCriteria){
 } // loadTextResults
 
 function getFavicon(value){
-return '<img class="rounded-circle" height="16" width="16" src="http://www.google.com/s2/favicons?domain='+getHostName(value)+'" />';
+return '<img class="rounded-circle" height="16" width="16" src="https://www.google.com/s2/favicons?domain='+getHostName(value)+'" />';
 }
 
 function getFaviconUrl(value){
-return 'http://www.google.com/s2/favicons?domain='+getHostName(value);
+return 'https://www.google.com/s2/favicons?domain='+getHostName(value);
 }
 
 
@@ -6508,7 +6595,7 @@ function getGroupById(){
 }
 
 
-function loadGroupByResults(xml, focusVarName){
+function loadContents(xml, focusVarName){
       $('#'+ID_GROUP_BY+'').empty();
       $('#angular_recordsList').empty();
 
@@ -6517,7 +6604,7 @@ function loadGroupByResults(xml, focusVarName){
 
       var rows = "";
       var result = $(xml).find("fct\\:result")[0];
-      groupByResultsCt = $("fct\\:row", result).length;
+      contentsCt = $("fct\\:row", result).length;
 /*      
         if(page == 0){
           $("#leftButton").attr('disabled', 'true');
@@ -6531,7 +6618,7 @@ function loadGroupByResults(xml, focusVarName){
           $('#leftButton').attr('title', 'page ' + (page));
 
         }
-      if(groupByResultsCt < SIZE_RESULT_SET) {
+      if(contentsCt < SIZE_RESULT_SET) {
         $("#rightButton").attr('disabled', 'true');
         $("#rightButton").addClass('disabled');
         $('#rightButton').removeAttr('title');
@@ -6555,7 +6642,7 @@ function loadGroupByResults(xml, focusVarName){
           setTitle('leftButton', 'page ' + (page), 'bottom');
 
         }
-      if(groupByResultsCt < SIZE_RESULT_SET) {
+      if(contentsCt < SIZE_RESULT_SET) {
         $("#rightButton").addClass('hide');
         $('#rightButton').removeAttr('title');
       }
@@ -6765,6 +6852,7 @@ rows += '</section>';
                 }
               });
               var checked = (facet) ? ' checked="checked"': '';
+              var hideCkbxClass = (facet) ? '': ' hide';
               var active = (facet) ? 'active': '';
 
               label = processLabel(label, value, datatype, lang);
@@ -6792,7 +6880,7 @@ var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'p
                 rows += '</div>';
                 rows += '</button>';
 */
-rows += '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item'+((recordActive)?' record-active':'')+'" data-target="#">';
+rows += '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item'+((recordActive)?' record-active':'')+'" data-target="#" onmouseover="$(\'#entbtn'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'#entbtn'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
 rows += '<div property="itemListElement" typeOf="Thing" class="hide">';
 rows += '<img property="logo" src="'+getFaviconUrl(value)+'" />';
 if(datatype == 'uri') rows += '<span property="url">'+value+'</span>';
@@ -6890,7 +6978,8 @@ if(true){
 //                  if(dataserverClass.attr('iri') == 'http://www.vios.network/o/DataServer'){
 
           checked=(ds.indexOfDataspace(value) >= 0) ? ' checked="checked"': '';
-          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-circle abc-checkbox-info">';
+          hideCkbxClass = (ds.indexOfDataspace(value) >= 0) ? '': ' hide';
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-circle abc-checkbox-info'+hideCkbxClass+'">';
           rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {doRemoveDataspace(\''+value+'\', true);}else{addDataspace(\''+value+'\', \''+label+'\', false, true);}" />&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
@@ -6911,7 +7000,7 @@ if(true){
                           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
                           rows += '</div>';*/
 
-                          rows += '<button class="btn btn-warning btn-xs mb-xs btn-enter-lib" type="button" onclick="javascript:takeMainFocus(ID_QUERY); clearFacets(true); stackGraphFacet(\''+value+'\', \''+label+'\');">Enter</button>';
+                          rows += '<button '+buildTitle('Enter '+label+' Library', 'right')+' id="entbtn'+id+'" class="hide btn btn-warning btn-xs mb-xs btn-enter-lib" type="button" onclick="javascript:takeMainFocus(ID_QUERY); clearFacets(true); stackGraphFacet(\''+value+'\', \''+label+'\');"><b class="fa fa-sign-in"></b></button>';
                         }
                   }
 
@@ -6943,8 +7032,7 @@ if(!isGroupByCriteria){
         //return total;
 
 
-
-} // loadGroupByResults
+} // loadContents
 
 /*
 function loadSubjectBadge(iri, propIRI, id, isReverse){
@@ -7475,7 +7563,21 @@ if(true){
             rows +=  '</div>';
           rows +=  '</a>';
 
-} // if false          
+
+
+
+if(showMeResultsCt == 1){
+  //addClassFacet(createId(), uri, label);
+}
+
+
+} // if false    
+
+
+
+
+
+
       });
       //console.log(rows);
 
@@ -7502,6 +7604,8 @@ if(getMainFocus().attr('class') != ID_QUERY && (!getMainFocus().children('value'
           else { 
           }  
 }
+
+
 
         //$('#groupby').append(rows);
         //return total;
@@ -8036,7 +8140,7 @@ rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-
                                     //rows +=  '<i class="status status-bottom bg-success"></i>';
 rows += '</span>';
 
-var ckcolor = 'primary';
+var ckcolor = 'warning';
 
 var rowId = opts.parentId;
 
@@ -10144,7 +10248,7 @@ function get_short_url(long_url, func)
     $('#permalink > i').removeClass('la-chain');
     $('#permalink > i').addClass('la-chain-broken');
     $.getJSON(
-        "http://vio.sn/c/create?uri="+ encodeURIComponent( long_url ), 
+        "https://data.vios.network/c/create?uri="+ encodeURIComponent( long_url ), 
         { 
         },
         function(response)
@@ -10159,107 +10263,20 @@ function get_short_url(long_url, func)
 }
 
 
-
-
-
-
-
-
-
-
-function autocomplete(inp, arr) {
-  /*the autocomplete function takes two arguments,
-  the text field element and an array of possible autocompleted values:*/
-  var currentFocus;
-  /*execute a function when someone writes in the text field:*/
-  inp.addEventListener("input", function(e) {
-      var a, b, i, val = this.value;
-      /*close any already open lists of autocompleted values*/
-      closeAllLists();
-      if (!val) { return false;}
-      currentFocus = -1;
-      /*create a DIV element that will contain the items (values):*/
-      a = document.createElement("DIV");
-      a.setAttribute("id", this.id + "autocomplete-list");
-      a.setAttribute("class", "autocomplete-items");
-      /*append the DIV element as a child of the autocomplete container:*/
-      this.parentNode.appendChild(a);
-      /*for each item in the array...*/
-      for (i = 0; i < arr.length; i++) {
-        /*check if the item starts with the same letters as the text field value:*/
-        if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
-          /*create a DIV element for each matching element:*/
-          b = document.createElement("DIV");
-          /*make the matching letters bold:*/
-          b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
-          b.innerHTML += arr[i].substr(val.length);
-          /*insert a input field that will hold the current array item's value:*/
-          b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
-          /*execute a function when someone clicks on the item value (DIV element):*/
-              b.addEventListener("click", function(e) {
-              /*insert the value for the autocomplete text field:*/
-              inp.value = this.getElementsByTagName("input")[0].value;
-              /*close the list of autocompleted values,
-              (or any other open lists of autocompleted values:*/
-              closeAllLists();
-          });
-          a.appendChild(b);
-        }
-      }
-  });
-  /*execute a function presses a key on the keyboard:*/
-  inp.addEventListener("keydown", function(e) {
-      var x = document.getElementById(this.id + "autocomplete-list");
-      if (x) x = x.getElementsByTagName("div");
-      if (e.keyCode == 40) {
-        /*If the arrow DOWN key is pressed,
-        increase the currentFocus variable:*/
-        currentFocus++;
-        /*and and make the current item more visible:*/
-        addActive(x);
-      } else if (e.keyCode == 38) { //up
-        /*If the arrow UP key is pressed,
-        decrease the currentFocus variable:*/
-        currentFocus--;
-        /*and and make the current item more visible:*/
-        addActive(x);
-      } else if (e.keyCode == 13) {
-        /*If the ENTER key is pressed, prevent the form from being submitted,*/
-        e.preventDefault();
-        if (currentFocus > -1) {
-          /*and simulate a click on the "active" item:*/
-          if (x) x[currentFocus].click();
-        }
-      }
-  });
-  function addActive(x) {
-    /*a function to classify an item as "active":*/
-    if (!x) return false;
-    /*start by removing the "active" class on all items:*/
-    removeActive(x);
-    if (currentFocus >= x.length) currentFocus = 0;
-    if (currentFocus < 0) currentFocus = (x.length - 1);
-    /*add class "autocomplete-active":*/
-    x[currentFocus].classList.add("autocomplete-active");
-  }
-  function removeActive(x) {
-    /*a function to remove the "active" class from all autocomplete items:*/
-    for (var i = 0; i < x.length; i++) {
-      x[i].classList.remove("autocomplete-active");
-    }
-  }
-  function closeAllLists(elmnt) {
-    /*close all autocomplete lists in the document,
-    except the one passed as an argument:*/
-    var x = document.getElementsByClassName("autocomplete-items");
-    for (var i = 0; i < x.length; i++) {
-      if (elmnt != x[i] && elmnt != inp) {
-      x[i].parentNode.removeChild(x[i]);
+function doRobot(json){
+  var obj = toJSONObject(json);
+  var actions = obj.actions;
+  var action;
+  for(i = 0; i < actions.length; i++){
+    action = actions[i];
+    switch(action.type){
+      case "addClassFacet": {
+        addClassFacet(createId(), action.uri, action.label, action.silent);
+      }; break;
     }
   }
 }
-/*execute a function when someone clicks in the document:*/
-document.addEventListener("click", function (e) {
-    closeAllLists(e.target);
-});
-}
+
+
+
+
