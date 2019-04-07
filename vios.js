@@ -447,6 +447,7 @@ function fct_removeVariableData(query){
   query.removeAttr('varname');
   query.removeAttr('class');
   query.removeAttr('timeout');
+  query.removeAttr('label');
   query.removeAttr('qid');
   query.removeAttr('graphAncestors');
   query.removeAttr('graphLabel');
@@ -2020,10 +2021,12 @@ function getSparqlCount(sparql, type){
     default: ctVar = getSparqlFocus(sparql); break;
   }
   if(VIEW_TYPE_TEXT != type && sparql.indexOf('group')>0) sparql = sparql.substring(0, sparql.indexOf('group'));
+  var prefix = sparql.substring(0, sparql.indexOf('select '));
   sparql = setSparqlProjection(sparql, 'count('+distinctStr+ctVar+') as ?c1');
   if(sparql.match(/{\s*select.*distinct.*?{/gi)){
     sparql = sparql.substring(sparql.indexOf('select')+6);
     sparql = sparql.substring(sparql.indexOf('select'), sparql.lastIndexOf('}'));
+    sparql = prefix + sparql;
   }
   //if(sparql.indexOf('distinct') < 0) sparql = sparql.replace('select ', 'select distinct ');
   if(type == VIEW_TYPE_TEXT) {
@@ -10278,5 +10281,48 @@ function doRobot(json){
 }
 
 
+function get_urib_nonce()
+{
+$.ajax({
+
+    url : getProxyEndpoint( 'https://linkeddata.uriburner.com/val/api/request_login_nonce' ),
+    type : 'GET',
+    data : {
+        'numberOfWords' : 10
+    },
+    dataType:'text/html',
+    success : function(data) {              
+        alert('Data: '+data);
+    },
+    error : function(request,error)
+    {
+        alert("Request: "+JSON.stringify(request));
+    }
+});
+}
 
 
+// DATAO
+
+
+var ns_datao_type = 'http://workspace/type#';
+var ns_datao_facet = 'http://facet/#';
+var ns_datao_j2 = 'http://workspace/udc#';
+
+
+
+var dataoRDF;
+
+function getDataoRDF(){
+  dataoRDF = $.createElement('rdf:RDF');
+  addNode(getQuery());
+}
+
+function addNode(ele){
+  $('property, property-of, class', ele).each(function(e){
+    var iri = $(this).attr('iri');
+    var label = $(this).attr('label');
+    var type = $(this).prop('nodeName');
+    addNode($(this).children());
+  });
+}
