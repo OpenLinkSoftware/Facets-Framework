@@ -10316,13 +10316,167 @@ var dataoRDF;
 function getDataoRDF(){
   dataoRDF = $.createElement('rdf:RDF');
   addNode(getQuery());
+  var str = dataoRDF.prop('outerHTML');
+  str = str.replaceAll('rdf:rdf', 'rdf:RDF');
+  str = str.replaceAll('hastitle', 'hasTitle');
+  str = str.replaceAll('hasdefault', 'hasDefault');
+  str = str.replaceAll('islabel', 'isLabel');
+  str = str.replaceAll('hasvertex', 'hasVertex');
+  str = str.replaceAll('hasedge', 'hasEdge');
+  str = str.replaceAll('directededge', 'directedEdge');
+  return str;
 }
 
 function addNode(ele){
-  $('property, property-of, class', ele).each(function(e){
+  if(!$('class', ele) || $('class', ele).length <= 0) return;
+
+  var dgm = $.createElement('type:diagram');
+  var cld = $.createElement('rdf:type');
+  cld.attr('rdf:resource', 'http://facet/#Facettable');
+  dgm.append(cld);
+
+  cld = $.createElement('j.2:hasTitle');
+  cld.text(ele.attr('label'));
+  dgm.append(cld);
+
+  var vid;
+
+  $('class', ele).each(function(i, e){
+    if(i > 0) return;
     var iri = $(this).attr('iri');
     var label = $(this).attr('label');
     var type = $(this).prop('nodeName');
-    addNode($(this).children());
+    vid = $(this).prop('class');
+
+    cld = $.createElement('hasVertex');
+    cld.attr('xmlns', 'http://workspace/diagram#');
+    cld.attr('rdf:resource', 'http://ClassVertex_' + vid);
+    dgm.append(cld);
+
+    var vtx = $.createElement('type:vertex');
+    vtx.attr('rdf:about', 'http://ClassVertex_' + vid);
+    vtx.append('<j.2:hasTitle>'+ label + '</j.2:hasTitle>');
+    vtx.append('<j.2:hasDefault>'+ iri + '</j.2:hasDefault>');
+
+    var isHidden = $.createElement('j.2:isLabel');
+    isHidden.attr('xmlns', 'http://workspace/edge#');
+    isHidden.attr('rdf:datatype', 'http://www.w3.org/2001/XMLSchema#boolean');
+    isHidden.text('false');
+    vtx.append(isHidden);
+
+    dataoRDF.append(vtx);
+
   });
+
+  $('property', ele).each(function(e){
+    var iri = $(this).attr('iri');
+    var label = $(this).attr('label');
+    var type = $(this).prop('nodeName');
+    var edgeId = $(this).prop('class');
+
+    cld = $.createElement('hasEdge');
+    cld.attr('xmlns', 'http://workspace/diagram#');
+    cld.attr('rdf:resource', 'http://PropertyEdge_' + edgeId);
+    dgm.append(cld);
+
+
+    var de = $.createElement('type:directedEdge');
+    de.attr('rdf:about', 'http://PropertyEdge_' + edgeId);
+
+    var src = $.createElement('source');
+    src.attr('xmlns', 'http://workspace/edge#');
+    src.attr('rdf:resource', 'http://ClassVertex_' + vid);
+    de.append(src);
+
+    de.append('<j.2:hasTitle>'+ label + '</j.2:hasTitle>');
+    de.append('<j.2:hasDefault>'+ iri + '</j.2:hasDefault>');
+
+    var isLabel = $.createElement('j.2:isLabel');
+    isLabel.attr('rdf:datatype', 'http://www.w3.org/2001/XMLSchema#boolean');
+    isLabel.text('true');
+    de.append(isLabel);
+
+
+    var childClass = $($(this).children('class')[0]);
+    var dest = $.createElement('dest');
+    dest.attr('xmlns', 'http://workspace/edge#');
+    dest.attr('rdf:resource', 'http://ClassVertex_' + childClass.attr('class'));
+    de.append(dest);
+
+    dataoRDF.append(de);
+
+    addNode($(this));
+
+
+  });
+
+  $('property-of', ele).each(function(e){
+    var iri = $(this).attr('iri');
+    var label = $(this).attr('label');
+    var type = $(this).prop('nodeName');
+    var edgeId = $(this).prop('class');
+
+    cld = $.createElement('hasEdge');
+    cld.attr('xmlns', 'http://workspace/diagram#');
+    cld.attr('rdf:resource', 'http://PropertyEdge_' + edgeId);
+    dgm.append(cld);
+
+
+    var de = $.createElement('type:directedEdge');
+    de.attr('rdf:about', 'http://PropertyEdge_' + edgeId);
+
+    var dest = $.createElement('dest');
+    dest.attr('xmlns', 'http://workspace/edge#');
+    dest.attr('rdf:resource', 'http://ClassVertex_' + vid);
+    de.append(dest);
+    
+    de.append('<j.2:hasTitle>'+ label + '</j.2:hasTitle>');
+    de.append('<j.2:hasDefault>'+ iri + '</j.2:hasDefault>');
+
+    var isLabel = $.createElement('j.2:isLabel');
+    isLabel.attr('rdf:datatype', 'http://www.w3.org/2001/XMLSchema#boolean');
+    isLabel.text('true');
+    de.append(isLabel);
+
+
+    var childClass = $($(this).children('class')[0]);
+    var src = $.createElement('source');
+    src.attr('xmlns', 'http://workspace/edge#');
+    src.attr('rdf:resource', 'http://ClassVertex_' + childClass.attr('class'));
+    de.append(dest);
+
+    dataoRDF.append(de);
+
+    addNode($(this));
+  });
+
+  dataoRDF.append(dgm);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
