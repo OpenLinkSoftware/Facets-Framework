@@ -514,6 +514,7 @@ function setMainSparql(s){
   getMainFocus().children('class').each(function(i){
       $('#copyQuery').append('<span property="object" class="hide searchActionObject">'+$(this).attr('iri')+'</span>');
   });
+  $('#queryLocation').text(getQueryGraph());
   $('title').text(queryArticulation);
 }
 
@@ -2587,7 +2588,7 @@ function toggleIDN(){
 
   }
   if(showIDN){
-    $('#idnButton').text('Record');
+    $('#idnButton').text('Back to Record');
     //detailResultsColumnWidths();
   }
   else {
@@ -2938,6 +2939,7 @@ function init(){
       copyButton += '<span id="queryTarget" class="hide" property="target"></span>';
       copyButton += '<span id="queryUrl" class="hide"></span>';
       copyButton += '<span id="queryKeywords" property="object" class="hide"></span>';
+      copyButton += '<span id="queryLocation" property="location" class="hide"></span>';
       copyButton += '<i id="copySPARQL" onmouseout="$(\'#copySPARQL\').tooltip(\'hide\');$(\'#copySPARQL\').attr(\'data-original-title\', \'Copy SPARQL to clipboard\');$(\'#copySPARQL\').tooltip();" '+buildTitle('Copy SPARQL to clipboard')+' onclick="javascript:$(\'#copySPARQL\').tooltip(\'hide\');copySPARQL(); $(\'#copySPARQL\').attr(\'data-original-title\', \'Copied\');$(\'#copySPARQL\').tooltip(\'show\');" style="cursor:pointer;" class="la la-copy fa-lg"></i>';
       copyButton += '</a></li>'; //la-heart-o
 
@@ -3043,7 +3045,8 @@ function init(){
   $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doFindDataspaces()">Find Dataspaces</a></li>');
   $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" href="http://data.vios.network/ods">Create Dataspace</a></li>');
   $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doRemoveDataspace()">Remove Dataspace</a></li>');
-
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li class="dropdown-divider"></li>');
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doImportLibrary()">Import Library</a></li>');
 
 
   $('#keywords').css('padding-left', '10px');
@@ -3279,7 +3282,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a class="nav-link disabled" data-target="#">Edit</a>';
       gbcol += '</li>';
     gbcol += '</ul>';
-      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">'+(showIDN ? 'Record' : 'IDN')+'</button>';
+      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">'+(showIDN ? 'Back to Record' : 'IDN')+'</button>';
 //    gbcol += '<form class="form-inline my-2 my-lg-0">';
       //gbcol += '<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">';
 //    gbcol += '</form>';
@@ -3599,7 +3602,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a class="nav-link disabled" data-target="#">Edit</a>';
       gbcol += '</li>';
     gbcol += '</ul>';
-      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">'+(showIDN ? 'Record' : 'IDN')+'</button>';
+      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">'+(showIDN ? 'Back to Record' : 'IDN')+'</button>';
 //    gbcol += '<form class="form-inline my-2 my-lg-0">';
       //gbcol += '<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">';
 //    gbcol += '</form>';
@@ -3783,7 +3786,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a class="nav-link disabled" data-target="#">Edit</a>';
       gbcol += '</li>';
     gbcol += '</ul>';
-      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">'+(showIDN ? 'Record' : 'IDN')+'</button>';
+      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">'+(showIDN ? 'Back to Record' : 'IDN')+'</button>';
 //    gbcol += '<form class="form-inline my-2 my-lg-0">';
       //gbcol += '<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">';
 //    gbcol += '</form>';
@@ -3890,8 +3893,21 @@ gbcol += '<div class="modal fade" id="helpModal" tabindex="-1" role="dialog" ari
       gbcol += '  </li><li>';
       gbcol += '  Hold down <i>1</i> (number one) key, then click Field checkbox to prepend Field to filter collector';
       gbcol += '  </li><li>';
+      gbcol += '  Press <i>Return</i> or <i>Enter</i> keys to clear the data canvas';
+      gbcol += '  </li><li>';
       gbcol += '  Press <i>H</i> key to view this menu';
       gbcol += '  </li></ul>';
+
+      gbcol += '  <p><i>Legend:</i></p>';
+      gbcol += '  <p _ngcontent-c13="">';
+//      gbcol += '  <span _ngcontent-c13="" class="badge badge-default">Default</span>';
+      gbcol += '  <span _ngcontent-c13="" class="badge badge-primary">Filter</span>';
+      gbcol += '  <span _ngcontent-c13="" class="badge badge-info">Navigation</span>';
+//      gbcol += '  <span _ngcontent-c13="" class="badge badge-success">Success</span>';
+      gbcol += '  <span _ngcontent-c13="" class="badge badge-warning">Guidance</span>';
+      gbcol += '  <span _ngcontent-c13="" class="badge badge-danger">Sensitive</span>';
+      gbcol += '  </p>';
+
       gbcol += '  <p>';
       gbcol += '  '+newLabel+'See <a href="https://medium.com/@sdmonroe/vios-network-99488f5bf29d">this article</a> for more tips';
       gbcol += '  </p>';
@@ -4155,9 +4171,9 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     }
 
     addDataspace('dbpedia.org','DBPedia',false,true); // try to add DBPedia
-    //addDataspace('lod.openlinksw.com','LOD',false,true); // try to add LOD Cloud Cache
+    addDataspace('lod.openlinksw.com','LOD',false,true); // try to add LOD Cloud Cache
     //addDataspace('demo.openlinksw.com','OpenLink Demo',false,true); // try to add OpenLink Demo
-    //addDataspace('linkeddata.uriburner.com','URIBurner',false,true); // try to add URI Burner
+    addDataspace('linkeddata.uriburner.com','URIBurner',false,true); // try to add URI Burner
     //addDataspace('data.vios.network','VIOS',false,true); // try to add VIOS
     //addDataspace('ggg.vios.network','GGG',false,true); // try to add GGG
     if(ds.length <= 0) selectDataspace('dbpedia.org', 'DBPedia', false, true);
@@ -5981,7 +5997,7 @@ function doRemoveDataspace(dsurl, silent){
     selectDataspace(ds[idx][0], ds[idx][1], silent);
   }
   else {
-    addDataspace('dbpedia.org','DBPedia',false,false); // try to add DBPedia
+    addDataspace('dbpedia.org','DBPedia',false,silent); // try to add DBPedia
   }
 
     try{
@@ -6071,7 +6087,7 @@ function addDataspace(url, label, secure, silent){
       });
   }
 
-  selectDataspace(protocol+url, label, silent);
+  if(!silent) selectDataspace(protocol+url, label);
 
     ds.push([protocol+url, label]);
     try{
@@ -6599,7 +6615,7 @@ function getGroupById(){
 
 
 function loadContents(xml, focusVarName){
-      $('#'+ID_GROUP_BY+'').empty();
+      //$('#'+ID_GROUP_BY+'').empty();
       $('#angular_recordsList').empty();
 
       // associate the focus with its corresponding SPARQL variable
@@ -6950,7 +6966,7 @@ if(true){
 
               label = deSanitizeLabel(label);
               var labelLink = (datatype=='uri') ? ' onclick="javascript:describe(\''+rowId+'\', \''+value+'\');"' : '';
-              rows +=  '<h6 class="row-result text-ellipsis m-0" >';
+              rows +=  '<h6 id="rw'+rowId+'" class="row-result text-ellipsis m-0" >';
               rows+='<span '+buildTitle(value)+' '+labelLink+'>'+label+'</span>';
               //rows +=  '<p class="help-block text-ellipsis m-0"></p>';
 
@@ -6980,18 +6996,23 @@ if(true){
                   if(isDataserver && getMainFocus().attr('iri')=='http://www.vios.network/o/DataServer/Index/dataserver'){
 //                  if(dataserverClass.attr('iri') == 'http://www.vios.network/o/DataServer'){
 
-          checked=(ds.indexOfDataspace(value) >= 0) ? ' checked="checked"': '';
-          hideCkbxClass = (ds.indexOfDataspace(value) >= 0) ? '': ' hide';
-          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-circle abc-checkbox-info'+hideCkbxClass+'">';
-          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {doRemoveDataspace(\''+value+'\', true);}else{addDataspace(\''+value+'\', \''+label+'\', false, true);}" />&nbsp;';
-          rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
-          rows += '</div>';
+                    checked=(ds.indexOfDataspace(value) >= 0) ? ' checked="checked"': '';
+                    hideCkbxClass = (ds.indexOfDataspace(value) >= 0) ? '': ' hide';
+                    rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-circle abc-checkbox-info'+hideCkbxClass+'">';
+                    rows += '<input '+buildTitle('Add ' +label+ ' to dataspace list', 'right')+' id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {doRemoveDataspace(\''+value+'\', true);}else{addDataspace(\''+value+'\', \''+label+'\', false, true);}" />&nbsp;';
+                    rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
+                    rows += '</div>';
+
+                    rows = rows.replace('id="'+opts.parentId+'" class="up', 'id="'+opts.parentId+'" class="up eventHandler');
+
+
+                    rows = rows.replace('id="'+opts.parentId+'"', 'id="'+opts.parentId+'" style="border-left: 3px solid #9964e3;"');
+
+                    //rows = rows.replace('<h6 id="rw'+rowId+'"', '<h6 id="rw'+rowId+'" style="color:#36393D;"');
+                    //rows = rows.replace('class="rounded-circle"', 'class="rounded-circle hide"');
 
                     //rows += '<i '+buildTitle('Add dataspace', 'right')+'  onclick="javascript:addDataspace(\''+value+'\', \''+label+'\');takeMainFocus(ID_QUERY); clearFacets();" class="fa fa-plus-circle fa-lg text-inverse"></i>';
                   }
-
-
-
                 }
                   else {
                       var libraryClass = getMainFocus().children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]');
@@ -7004,6 +7025,9 @@ if(true){
                           rows += '</div>';*/
 
                           rows += '<button '+buildTitle('Enter '+label+' Library', 'right')+' id="entbtn'+id+'" class="hide btn btn-warning btn-xs mb-xs btn-enter-lib" type="button" onclick="javascript:takeMainFocus(ID_QUERY); clearFacets(true); stackGraphFacet(\''+value+'\', \''+label+'\');"><b class="fa fa-sign-in"></b></button>';
+                    rows = rows.replace('id="'+opts.parentId+'"', 'id="'+opts.parentId+'" style="border-left: 3px solid #ffc247;"');
+                    //rows = rows.replace('<h6 id="rw'+rowId+'"', '<h6 id="rw'+rowId+'" style="color:#36393D;"');
+                    //rows = rows.replace('class="rounded-circle"', 'class="rounded-circle hide"');
                         }
                   }
 
@@ -10251,7 +10275,7 @@ function get_short_url(long_url, func)
     $('#permalink > i').removeClass('la-chain');
     $('#permalink > i').addClass('la-chain-broken');
     $.getJSON(
-        "https://data.vios.network/c/create?uri="+ encodeURIComponent( long_url ), 
+        "http://dev.vios.network/c/create?uri="+ encodeURIComponent( long_url ), 
         { 
         },
         function(response)
