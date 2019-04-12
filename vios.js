@@ -261,7 +261,7 @@ function stackQueryGraph(g, label){
     if(ancestors && ancestors.length > 0) ancestors += ', ';
     else ancestors = '';
 
-    var ancestorLabels = _root.children('query').attr('graphAncestors');
+    var ancestorLabels = _root.children('query').attr('graphAncestorLabels');
     if(ancestorLabels && ancestorLabels.length > 0) ancestorLabels += ', ';
     else ancestorLabels = '';
 
@@ -317,51 +317,6 @@ function setViewType(type, q){
   $(q).find('view').attr('type', type);
 }
 
-function setMutex(mtx, type, isCount){
-  if(isCount) {
-    if(type == 'showMeMenu'){
-      $('#showMeCount').attr('mutex', mtx);
-    }
-    else if(type == 'groupByMenu'){
-      $('#groupByCount').attr('mutex', mtx);
-    }
-    else if(type == 'table'){
-      $('#tableCount').attr('mutex', mtx);
-    }
-  }
-  else if(type == 'record'){
-    $('#angular_recordViewer').attr('mutex', mtx);
-  }
-  else if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN || type == VIEW_TYPE_GRAPHS || type == VIEW_TYPE_TEXT_PROPERTIES){
-    $('#showMeColumn').attr('mutex', mtx);
-  }
-  else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT || type == VIEW_TYPE_TEXT){
-    $('#recordsListWidgetContainer').attr('mutex', mtx);
-  }
-}
-
-function getMutex(type, isCount){
-  if(isCount) {
-    if(type == 'showMeMenu'){
-      return $('#showMeCount').attr('mutex');
-    }
-    else if(type == 'groupByMenu'){
-      return $('#groupByCount').attr('mutex');
-    }
-    else if(type == 'table'){
-      return $('#tableCount').attr('mutex');
-    }
-  }
-  else if(type == 'record'){
-    return $('#angular_recordViewer').attr('mutex');
-  }
-  else if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN || type == VIEW_TYPE_GRAPHS || type == VIEW_TYPE_TEXT_PROPERTIES){
-    return $('#showMeColumn').attr('mutex');
-  }
-  else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT || type == VIEW_TYPE_TEXT){
-    return $('#recordsListWidgetContainer').attr('mutex');
-  }
-}
 
 function setViewLimit(lim){
   _root.find('view').attr('limit', lim);
@@ -519,6 +474,56 @@ function setMainSparql(s){
 }
 
 var bid = createId();
+
+
+/** Associates a mutex with 'type' */
+function setMutex(mtx, type, isCount){
+  if(isCount) {
+    if(type == 'showMeMenu'){
+      $('#showMeCount').attr('mutex', mtx);
+    }
+    else if(type == 'groupByMenu'){
+      $('#groupByCount').attr('mutex', mtx);
+    }
+    else if(type == 'table'){
+      $('#tableCount').attr('mutex', mtx);
+    }
+  }
+  else if(type == 'record'){
+    $('#angular_recordViewer').attr('mutex', mtx);
+  }
+  else if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN || type == VIEW_TYPE_GRAPHS || type == VIEW_TYPE_TEXT_PROPERTIES){
+    $('#showMeColumn').attr('mutex', mtx);
+  }
+  else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT || type == VIEW_TYPE_TEXT){
+    $('#recordsListWidgetContainer').attr('mutex', mtx);
+  }
+}
+
+/** Returns the mutex associated with 'type' */
+function getMutex(type, isCount){
+  if(isCount) {
+    if(type == 'showMeMenu'){
+      return $('#showMeCount').attr('mutex');
+    }
+    else if(type == 'groupByMenu'){
+      return $('#groupByCount').attr('mutex');
+    }
+    else if(type == 'table'){
+      return $('#tableCount').attr('mutex');
+    }
+  }
+  else if(type == 'record'){
+    return $('#angular_recordViewer').attr('mutex');
+  }
+  else if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN || type == VIEW_TYPE_GRAPHS || type == VIEW_TYPE_TEXT_PROPERTIES){
+    return $('#showMeColumn').attr('mutex');
+  }
+  else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT || type == VIEW_TYPE_TEXT){
+    return $('#recordsListWidgetContainer').attr('mutex');
+  }
+}
+
 function fct_query(q, viewType, opt){
   var tstamp = new Date().getTime();
   if(!opt) opt = new Object();
@@ -601,7 +606,7 @@ function fct_query(q, viewType, opt){
   }
   var req = $.ajax({
       url: service_fct,
-      headers: {'X-VIOS-Type': 'fct', 'X-VIOS-QID': id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid, 'X-VIOS-BID': bid},
+      headers: {'X-VIOS-AGENT': ((opt.tar && opt.tar.length > 0) ? opt.tar : viewType), 'X-VIOS-Type': 'fct', 'X-VIOS-QID': id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid, 'X-VIOS-BID': bid},
       data: $(q).prop('outerHTML'), 
       type: 'POST',
       contentType: "text/xml",
@@ -853,9 +858,9 @@ function fct_sparql(sparql, opt){
   if(opt.tar == 'record') accept = 'application/rdf+xml';
   var isMainQueryCount = opt && (opt.tar == 'showMeMenu' || opt.tar == 'groupByMenu');
   var req = $.ajax({
-      url: sparqlSvr + '?query=' + encodeURIComponent(sparql) + '&timeout='+fct_queryTimeout,
+      url: sparqlSvr + '?query=' + encodeURIComponent(sparql),// + '&timeout='+fct_queryTimeout,
       type: 'GET',
-      headers: {'Accept': accept, 'X-VIOS-Type': 'sparql', 'X-VIOS-QID': (isMainQueryCount) ? getQuery().attr('qid') : id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid, 'X-VIOS-BID': bid},
+      headers: {'X-VIOS-AGENT': opt.tar,'Accept': accept, 'X-VIOS-Type': 'sparql', 'X-VIOS-QID': (isMainQueryCount) ? getQuery().attr('qid') : id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid, 'X-VIOS-BID': bid},
       dataType: "text", // POI: can't do dataType: xml, since the service sometimes returns malformed XML
       beforeSend: function(jqXHR, settings) {
           jqXHR.url = settings.url;
@@ -1538,7 +1543,7 @@ function fct_handleSparqlResults(xml, opt) {
                 //str += '<a data-target="#">';
 
 
-                if(j == 0 && isRollup()) str += '<i class="la la-bars expand float-right la-lg"></i>';
+                if(j == 0 && isRollup()) str += '<i class="la la-ellipsis-v text-secondary expand float-right la-lg"></i>';
                 //str += '<span class="thumb-sm float-left mr">';
                 var onclick = 'onclick="javascript:setValue(\'' + id + '\', \'' + value + '\', \'' + label + '\', \'' + datatype + '\', \'' + lang + '\')"';
                 if(isRollup() && j == 0) onclick = 'onclick="javascript: addClassFacet(\''+id+'\', \''+sanitizeLabel($(this).text())+'\', \''+sanitizeLabel(label)+'\')"';
@@ -2707,7 +2712,7 @@ function bookmark(){
         linkOut(short_url);
       });
       */
-      linkOut('http://data.vios.network/bookmark/1/bookmarks.vspx?URL='+short_url+'&TITLE='+document.title);
+      linkOut('https://data.vios.network/bookmark/1/bookmarks.vspx?URL='+short_url+'&TITLE='+document.title);
     });
 }
 
@@ -2933,7 +2938,7 @@ function init(){
   });
 */
 
-      var copyButton = '<li class="nav-item d-none d-md-block"><a id="copyQuery" vocab="http://schema.org/" typeOf="FindAction" class="nav-link pl-2 text-info" >';
+      var copyButton = '<li class="nav-item d-none d-md-block"><a id="copyQuery" vocab="http://schema.org/" typeOf="FindAction" class="nav-link pl-2 text-inverse" >';
       copyButton += '<span id="query" class="hide" property="query"></span>';
       copyButton += '<span id="queryDescription" class="hide" property="http://purl.org/dc/terms/description"></span>';
       copyButton += '<span id="queryTarget" class="hide" property="target"></span>';
@@ -2981,7 +2986,7 @@ function init(){
 
 */
 
-      var bookmarkButton = '<li class="nav-item d-none d-md-block"><a onclick="javascript:bookmark();" class="nav-link pl-2 text-info" id="favButton" ><i class="la la-bookmark la-lg text-info"></i></a></li>'; //la-heart-o
+      var bookmarkButton = '<li class="nav-item d-none d-md-block"><a onclick="javascript:bookmark();" class="nav-link pl-2 text-inverse" id="favButton" ><i class="la la-bookmark la-lg"></i></a></li>'; //la-heart-o
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(bookmarkButton);
 
@@ -2993,7 +2998,7 @@ function init(){
 
 
 
-      var demoButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" class="hide nav-link pl-2 text-info" id="helpButton" '+buildTitle('Click WWW on the next canvas to visit the demo smart folders')+' onclick="javascript:clearKeywords(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(true); clearQueryGraph(true); doSetLibrary(); checkLibraries();"><i class="la la-question la-lg text-info"></i></a></li>'; //la-heart-o la-map-signs
+      var demoButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" class="hide nav-link pl-2 text-warning" id="helpButton" '+buildTitle('Click WWW on the next canvas to visit the demo smart folders')+' onclick="javascript:clearKeywords(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(true); clearQueryGraph(true); doSetLibrary(); checkLibraries();"><i class="la la-question la-lg"></i></a></li>'; //la-heart-o la-map-signs
 //href="http://vio.sn/c/9LK72AN"
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(demoButton);
 
@@ -3028,7 +3033,8 @@ function init(){
     }
     else {
       var pid = createId();
-      addPropertyFacet(pid, getMainFocus().attr('iri'), getMainFocus().attr('label'), undefined, undefined, undefined, undefined, true);
+      if(getMainFocus().prop('nodeName').toLowerCase() == 'property-of') addPropertyOfFacet(pid, getMainFocus().attr('iri'), getMainFocus().attr('label'), undefined, undefined, undefined, undefined, true);
+      else addPropertyFacet(pid, getMainFocus().attr('iri'), getMainFocus().attr('label'), undefined, undefined, undefined, undefined, true);
       takeMainFocus(pid);
     }
   });
@@ -3869,8 +3875,8 @@ gbcol += '<div class="modal fade" id="helpModal" tabindex="-1" role="dialog" ari
         gbcol += '</button>';
       gbcol += '</div>';
       gbcol += '<div class="modal-body">';
-      gbcol += '  <p><i>Group-by</i>: Click the pinch icon <i class="la la-compress"></i> to group contents by <a href="http://bit.ly/2tRFCX8">Field</a> or <a href="http://bit.ly/2tQ29DZ">Role</a></p>';
-      gbcol += '  <p><i>Preview</i>: Click the expand icon <i class="la la-bars"></i> to preview the smart folder contents</p>';
+      gbcol += '  <p><i>Group-by</i>: Click the pinch icon <i class="la la-compress text-secondary"></i> to group contents by <a href="http://bit.ly/2tRFCX8">Field</a> or <a href="http://bit.ly/2tQ29DZ">Role</a></p>';
+      gbcol += '  <p><i>Preview</i>: Click the expand icon <i class="la la-ellipsis-v text-secondary"></i> to preview the smart folder contents</p>';
       gbcol += '  <p><i>UI Modes</i>: Press the <i>Ctrl</i> key to toggle Command and Edit Modes';
       gbcol += '  </p><p>';
       gbcol += '  In Commmand Mode:';
@@ -4174,6 +4180,8 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     addDataspace('lod.openlinksw.com','LOD',false,true); // try to add LOD Cloud Cache
     //addDataspace('demo.openlinksw.com','OpenLink Demo',false,true); // try to add OpenLink Demo
     addDataspace('linkeddata.uriburner.com','URIBurner',false,true); // try to add URI Burner
+    addDataspace('dbpedia-live.openlinksw.com','DBPedia Live',false,true); // try to add URI Burner
+
     //addDataspace('data.vios.network','VIOS',false,true); // try to add VIOS
     //addDataspace('ggg.vios.network','GGG',false,true); // try to add GGG
     if(ds.length <= 0) selectDataspace('dbpedia.org', 'DBPedia', false, true);
@@ -5055,7 +5063,7 @@ function checkKey(e) {
     }
 
 
-if(!$('input[type="text"], input[type="search"]').is(":focus")){
+if(!$('input[type="text"], input[type="password"], input[type="search"], input[type="number"]').is(":focus")){
     if (e.keyCode == '49') {
       oneKeyDown = true;
     }
@@ -5307,7 +5315,12 @@ $(document).ready(function() {
 function doCtrlMode(e){
   e = e || window.event;
   var target = e.target || e.srcElement;
-  if($('input[type="text"], input[type="search"]').is(":focus") || (target.tagName.toUpperCase() == 'INPUT' && target.getAttribute('type') == 'text') || (target.tagName.toUpperCase() == 'INPUT' && target.getAttribute('type') == 'search')){
+  if($('input[type="text"], input[type="password"], input[type="search"], input[type="number"]').is(":focus") || 
+    (target.tagName.toUpperCase() == 'INPUT' && target.getAttribute('type') == 'text') || 
+    (target.tagName.toUpperCase() == 'INPUT' && target.getAttribute('type') == 'search') || 
+    (target.tagName.toUpperCase() == 'INPUT' && target.getAttribute('type') == 'password') ||
+    (target.tagName.toUpperCase() == 'INPUT' && target.getAttribute('type') == 'number')
+  ){
       $('#keywords').removeAttr('disabled');
       $('#keywords').removeClass('disabled');
 
@@ -5927,7 +5940,7 @@ function checkLibraryButton(){
 }
 
 function checkArrowRightButton(){
-  $('.la-arrow-right').addClass('hide');
+  $('.la-arrow-right').parent().addClass('hide');
   if(getMainFocus().attr('class') == ID_QUERY){
     $('.la-arrow-right').parent().addClass('hide');
   }
@@ -6899,13 +6912,15 @@ var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'p
                 rows += '</div>';
                 rows += '</button>';
 */
-rows += '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item'+((recordActive)?' record-active':'')+'" data-target="#" onmouseover="$(\'#entbtn'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'#entbtn'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
+rows += '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item'+((recordActive)?' record-active':'')+'" data-target="#" onmouseover="$(\'.hidable'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'.hidable'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
 rows += '<div property="itemListElement" typeOf="Thing" class="hide">';
 rows += '<img property="logo" src="'+getFaviconUrl(value)+'" />';
 if(datatype == 'uri') rows += '<span property="url">'+value+'</span>';
 rows += '<span property="title">'+label+'</span>';
 rows += '</div>';
-                                rows +=  '<span class="thumb-sm float-left">';
+
+                                var float = (isGroupByCriteria) ? ' float-left' : ' pull-right';
+                                rows +=  '<span class="thumb-sm'+float+'">';
 
 /*
 
@@ -6946,7 +6961,9 @@ if(true){
                 var propOrPropOf = (isReverse) ? "property-of" : "property";
                 var nodeType = (isReverse) ? NODE_TYPE_PROPERTY_OF: NODE_TYPE_PROPERTY;
                 //rows += '<a class="count" onclick="javascript: remove(\''+getMainFocus().attr('class')+'\', true); '+propOrPropOf+'(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\'); selectMenuItem(\''+id+'\', \''+propIRI+'\');">'+ct+'</a>&nbsp;-&nbsp;';
-                rows +=  '<span style="cursor:pointer" _ngcontent-c9="" class="badge badge-pill badge-'+badgeColor+'" onclick="javascript: removeEmptyFacet(\''+propOrPropOf+'\',\''+propIRI+'\', true); '+addPropOrPropOf+'(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\', \''+lang+'\'); selectMenuItem(\''+id+'\', \''+propIRI+'\');">'+ct+'</span>';
+                rows +=  '<span '+buildTitle(ct, 'left')+' style="cursor:pointer" _ngcontent-c9="" class="badge badge-pill badge-'+badgeColor+'" onclick="javascript: removeEmptyFacet(\''+propOrPropOf+'\',\''+propIRI+'\', true); '+addPropOrPropOf+'(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\', \''+lang+'\'); selectMenuItem(\''+id+'\', \''+propIRI+'\');">';
+                rows+=getCountLabel(ct);
+                rows+='</span>';
               }
               else {
                 if(datatype=='uri') {
@@ -6983,7 +7000,7 @@ if(true){
           rows += '</div>';
 //                 rows += '<img title="click to drop-down" class="count" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
                  // rows += '<a title="click to drop-down" class="count" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"><img width="16" height="16"/>&nbsp;&nbsp;</a>&nbsp;';
-          rows += '<i '+buildTitle('acts as \''+propLabel+'\' of these things')+' class="expand la la-bars la-lg" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\')"></i>' + ((i==0 && page==0) ? '<script type="text/javascript">expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\');</script>' :'');
+          rows += '<i '+buildTitle('acts as \''+propLabel+'\' of these things')+' class="expand la la-ellipsis-v text-secondary la-lg" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\')"></i>' + ((i==0 && page==0) ? '<script type="text/javascript">expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\');</script>' :'');
               }
 
               else {
@@ -7024,10 +7041,11 @@ if(true){
                           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
                           rows += '</div>';*/
 
-                          rows += '<button '+buildTitle('Enter '+label+' Library', 'right')+' id="entbtn'+id+'" class="hide btn btn-warning btn-xs mb-xs btn-enter-lib" type="button" onclick="javascript:takeMainFocus(ID_QUERY); clearFacets(true); stackGraphFacet(\''+value+'\', \''+label+'\');"><b class="fa fa-sign-in"></b></button>';
+                          rows += '<button '+buildTitle('Enter '+label+' Library', 'top')+' id="filterbtn'+id+'" class="hide hidable'+id+' btn btn-warning btn-xs mb-xs btn-set-focus" type="button" onclick="javascript:takeMainFocus(ID_QUERY); clearFacets(true); stackGraphFacet(\''+value+'\', \''+label+'\');"><b class="fa fa-sign-in"></b></button>';
+                          rows += '<button '+buildTitle('Apply filter', 'right')+' id="entbtn'+id+'" class="hide hidable'+id+' btn btn-warning btn-xs mb-xs btn-enter-lib" type="button" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')"><b class="glyphicon glyphicon-filter"></b></button>';
                     rows = rows.replace('id="'+opts.parentId+'"', 'id="'+opts.parentId+'" style="border-left: 3px solid #ffc247;"');
-                    //rows = rows.replace('<h6 id="rw'+rowId+'"', '<h6 id="rw'+rowId+'" style="color:#36393D;"');
-                    //rows = rows.replace('class="rounded-circle"', 'class="rounded-circle hide"');
+                    //rows = rows.replace('<h6 id="rw'+rowId+'"', '<span _ngcontent-c9="" class="badge badge-pill badge-warning">8</span><h6 id="rw'+rowId+'""');
+                    rows = rows.replace('class="rounded-circle"', 'class="rounded-circle hide"');
                         }
                   }
 
@@ -7567,7 +7585,9 @@ if(true){
           var focusTargetClass = (getMainFocus().attr('class') == ID_QUERY+"") ? 'queryFocus' : 'queryFocusValue';
           //rows += '<tr  id="rw'+id+'" onmouseover="javascript:showControls(\''+id+'\')" onmouseout="javascript:hideControls(\''+id+'\')"><td class="up" id="'+opts.parentId+'">';
 
-          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onmouseover="javascript:$(\'#'+focusTarget+'\').addClass(\''+focusTargetClass+'\')" onmouseout="javascript:$(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\')" onclick="javascript: $(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\'); var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</span>';
+          rows +=  '<span '+buildTitle(ct, 'left')+' _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onmouseover="javascript:$(\'#'+focusTarget+'\').addClass(\''+focusTargetClass+'\')" onmouseout="javascript:$(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\')" onclick="javascript: $(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\'); var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\')">';
+          rows+= getCountLabel(ct);
+          rows += '</span>';
 //          rows += '<a class="count" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addClassFacet(\''+id+'\', \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</a>&nbsp;-&nbsp;';
           //rows += '<a title="'+uri+'" onclick="javascript:describe(\''+uri+'\');">'+ spaceCamelCase(label) +'</a>&nbsp;';
                                 rows +=  '</span>';
@@ -7584,7 +7604,7 @@ if(true){
           //rows += '<img title="view instances" class="count" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
 //          rows += '<a title="view instances" class="count" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>';
           //rows += '</td></tr>';
-          rows += '<i '+buildTitle('preview category members')+' class="expand la la-bars la-lg" onclick="javascript:expandShowMe(\''+uri+'\', \''+label+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('preview category members')+' class="expand la la-ellipsis-v la-lg text-secondary" onclick="javascript:expandShowMe(\''+uri+'\', \''+label+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
 
           rows +='</h6>';
             rows +=  '</div>';
@@ -7824,7 +7844,9 @@ var rowId = opts.parentId;
           //rows += '<tr id="'+id+'" onmouseover="javascript:showControls(\''+id+'\')" onmouseout="javascript:hideControls(\''+id+'\')"><td class="up" id="'+opts.parentId+'"><span id="'+id+'">';
           //var propIRI = $('#groupByMenu :selected').attr('value');
           //var propLabel = $('#groupByMenu :selected').text();
-          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(pid);">'+ct+'</span>';
+          rows +=  '<span '+buildTitle(ct, 'left')+' _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(pid);">';
+          rows+=getCountLabel(ct);
+          rows+='</span>';
                                 rows +=  '</span>';
             rows +=  '<div>';
 //          rows += '<a class="count" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addPropertyFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\');">'+ct+'</a>&nbsp;-&nbsp;';
@@ -7841,9 +7863,9 @@ var rowId = opts.parentId;
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
               //rows += '<img title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
-          rows += '<i '+buildTitle('preview field values')+' class="expand la la-bars la-lg" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+propLabel+'\' , \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('preview field values')+' class="expand la la-ellipsis-v la-lg text-secondary" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+propLabel+'\' , \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
 //              rows += '<a title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>&nbsp;';
-          if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the contents list by \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\')" ></i>';
+          if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the contents list by \''+propLabel+'\'')+' class="group la la-compress text-secondary" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\')" ></i>';
           }
           rows +='</h6>';
             rows +=  '</div>';
@@ -8000,7 +8022,9 @@ var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'i
 
 var ckcolor = 'primary';
  
-          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(pid)">'+ct+'</span>';
+          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(pid)">';
+          rows+=getCountLabel(ct);
+          rows+='</span>';
                                 rows +=  '</span>';
             rows +=  '<div>';
           rows +=  '<h6 class="row-result text-ellipsis m-0" >';
@@ -8014,9 +8038,9 @@ var ckcolor = 'primary';
           rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\');}"/>&nbsp;';//generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
-          rows += '<i '+buildTitle('preview rolees')+' class="expand la la-bars la-lg" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+propLabel+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('preview rolees')+' class="expand la la-ellipsis-v la-lg text-secondary" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+propLabel+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
               //rows += '<img title="shows up in the \''+propLabel+'\' field of these records" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
-          if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the contents list by role: \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\', true)" ></i>';
+          if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the contents list by role: \''+propLabel+'\'')+' class="group la la-compress text-secondary" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\', true)" ></i>';
           }
 
           rows +='</h6>';
@@ -8674,7 +8698,7 @@ content += '</section>';
         }
         uriLabel = uriLabel.trim();
 
-        $('#angular_recordViewer').append('<h3 onclick="javascript:linkOut(\'' + uri + '\');" ' + buildTitle('Visit ' + sanitizeLabel(uri)) + ' style="cursor:pointer;padding-top:1em; padding-left:.55rem; padding-right:.55rem;">' + uriLabel + '</h3>' + (tools ? tools : '') + '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \'' + sanitizeLabel(uri) + '\')" class="p-2 glyphicon glyphicon-filter text-' + ((filterRecordViewFields) ? 'info' : 'muted') + '"></i>'); //((body.children().length <= 0 && filterRecordViewFields)?'<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = false; describe(\''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-info"></i>':''));
+        $('#angular_recordViewer').append('<h3 onclick="javascript:linkOut(\'' + uri + '\');" ' + buildTitle('Visit ' + sanitizeLabel(uri)) + ' style="cursor:pointer;padding-top:1em; padding-left:.55rem; padding-right:.55rem;">' + uriLabel + '</h3>' + (tools ? tools : '') + '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \'' + sanitizeLabel(uri) + '\')" class="p-2 glyphicon glyphicon-filter text-' + ((filterRecordViewFields) ? 'primary' : 'muted') + '"></i>'); //((body.children().length <= 0 && filterRecordViewFields)?'<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = false; describe(\''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-info"></i>':''));
         if (desc) {
             $('#angular_recordViewer').append('<div style="padding-left:.55rem; padding-right:.55rem; ">' + (img ? img + desc : desc) + '</div>');
         } else if (img) {
@@ -8932,6 +8956,51 @@ function getBytesDenomination(sz){
   if(sz >= (1000*1000) && sz < (1000*1000*1000)) return sz/(1000*1000);
   else return sz/(1000*1000*1000);
 }
+
+function getCountDenominationUnit(sz){
+  sz = parseInt(sz);
+  if(sz < 1000) return '';
+  else if(sz >= 1000 && sz < (1000*1000)) return 'K';
+  else if(sz >= (1000*1000) && sz < (1000*1000*1000)) return 'M';
+  else return 'B';
+}
+
+function getCountDenomination(sz){
+  sz = parseInt(sz);
+  if(sz < 1000) sz;
+  else if(sz >= 1000 && sz < (1000*1000)) sz = sz/1000;
+  else if(sz >= (1000*1000) && sz < (1000*1000*1000)) sz = sz/(1000*1000);
+  else sz = sz/(1000*1000*1000);
+  return abbreviateNumber(sz);
+}
+
+// see https://stackoverflow.com/questions/10599933/convert-long-number-into-abbreviated-string-in-javascript-with-a-special-shortn
+function getCountLabel(value) {
+    value = parseInt(value);
+    var newValue = value;
+    if (value >= 1000) {
+        var suffixes = ["", "k", "m", "b","t"];
+        var suffixNum = Math.floor( (""+value).length/3 );
+        var shortValue = '';
+        for (var precision = 2; precision >= 1; precision--) {
+            shortValue = parseFloat( (suffixNum != 0 ? (value / Math.pow(1000,suffixNum) ) : value).toPrecision(precision));
+            var dotLessShortValue = (shortValue + '').replace(/[^a-zA-Z 0-9]+/g,'');
+            if (dotLessShortValue.length <= 2) { break; }
+        }
+        if(shortValue < 1) {
+          shortValue = shortValue * 1000;
+          suffixNum--;
+        }
+        if (shortValue % 1 != 0)  shortValue = shortValue.toFixed(1);
+        if(shortValue.toString().indexOf('.') < 0 && shortValue.toString().length == 1) shortValue = shortValue + '.0';
+        newValue = shortValue+suffixes[suffixNum];
+    }
+    return newValue;
+}
+
+//function getCountLabel(sz){
+//  return getCountDenomination(sz) + getCountDenominationUnit(sz);
+//}
 
 function lengthInUtf8Bytes(str) {
   // Matches only the 10.. bytes that are non-initial characters in a multi-byte sequence.
@@ -9497,6 +9566,7 @@ function isInterlinked(){
 }
 
 function describe(id, src, isGGGRecord){
+    if(!src || src.length <= 0) return;
     if(id && id != 'recordNavBar' && $('#'+id) && $('#'+id).length > 0){
       var rec = $('.record-active');
       if($('#'+id).prop('nodeName').toLowerCase() == 'td'){
@@ -9511,7 +9581,7 @@ function describe(id, src, isGGGRecord){
       }
     }
 
-    var linkOutURI = src;
+    var linkOutURI = src;    
     if(linkOutURI.startsWith('http://linkeddata.uriburner.com/') && false){
       linkOutURI = linkOutURI.substring(linkOutURI.indexOf('http://linkeddata.uriburner.com/')+'http://linkeddata.uriburner.com/'.length);
       linkOutURI = linkOutURI.substring(linkOutURI.indexOf('http'));
@@ -9897,9 +9967,11 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
             if(graphAncestors && graphAncestors.length > 0){
               var ga = graphAncestors.split(',');
               var gal = graphAncestorLabels.split(',');
+              var ancestors = '';
               for(i = 0; i < ga.length; i++){
-                libraries.prepend('<li><a href="#">'+gal[i]+'</a></li>');
+                ancestors += '<li><a href="#">'+gal[i]+'</a></li>';
               }
+              libraries.prepend(ancestors);
             }
           }
 
@@ -10275,7 +10347,7 @@ function get_short_url(long_url, func)
     $('#permalink > i').removeClass('la-chain');
     $('#permalink > i').addClass('la-chain-broken');
     $.getJSON(
-        "http://dev.vios.network/c/create?uri="+ encodeURIComponent( long_url ), 
+        "https://vio.sn/c/create?uri="+ encodeURIComponent( long_url ), 
         { 
         },
         function(response)

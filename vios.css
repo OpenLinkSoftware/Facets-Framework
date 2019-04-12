@@ -76,7 +76,7 @@
 }
 
 
-header.loading {
+header.loading, #wallet-tab.loading, wallets-modal.modal-header.loading {
   background-color: #547fff;
   animation-name: loading;
   animation-duration: 2s;
@@ -583,6 +583,15 @@ padding: 60px 40px 40px 15px;
   line-height: .7em;
 }
 
+td h6.row-result{
+  line-height: 1.2!important;
+  margin-top: 2px;
+}
+
+#showMeColumn td span.thumb-sm {
+    margin-right: 0px;
+}
+
 p.help-block b{
   font-weight: normal;
   color:#495057;
@@ -1017,6 +1026,15 @@ accordion .card-header {
 .btn-enter-lib{
     position: absolute;
     right: 10px;
+}
+
+.btn-set-focus{
+    position: absolute;
+    right: 38px;
+}
+
+#showMeColumn span.thumb-sm {
+    margin-right: 8px;
 }
 
 /*  * { box-sizing: border-box; }*/
