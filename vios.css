@@ -569,6 +569,12 @@ padding: 60px 40px 40px 15px;
     top: 14px!important;
   }
 
+div h6 .group {
+    right: 46px;
+    top: 13px;
+}
+
+
     .badge{
       font-weight: normal;
       font-size: 11px;
