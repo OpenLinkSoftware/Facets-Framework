@@ -6994,7 +6994,7 @@ if(true){
                   //rows += '<label _ngcontent-c6="" btncheckbox="" class="btn btn-default ng-untouched ng-valid '+active+' ng-dirty">';
                  // rows += 'Right way'
                   //rows += '</label>';
-          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-primary">';
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-primary'+hideCkbxClass+'">';
           rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {removeFacetValue(\''+propOrPropOf+'\',\''+propIRI+'\', \''+value+'\');}else{setPropertyValue(\''+createId()+'\', \''+nodeType+'\', \''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')} doGroup(\''+propIRI+'\', \''+propLabel+'\');" />&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
@@ -7026,7 +7026,7 @@ if(true){
                     rows = rows.replace('id="'+opts.parentId+'"', 'id="'+opts.parentId+'" style="border-left: 3px solid #9964e3;"');
 
                     //rows = rows.replace('<h6 id="rw'+rowId+'"', '<h6 id="rw'+rowId+'" style="color:#36393D;"');
-                    //rows = rows.replace('class="rounded-circle"', 'class="rounded-circle hide"');
+                    rows = rows.replace('class="rounded-circle"', 'class="rounded-circle hide"');
 
                     //rows += '<i '+buildTitle('Add dataspace', 'right')+'  onclick="javascript:addDataspace(\''+value+'\', \''+label+'\');takeMainFocus(ID_QUERY); clearFacets();" class="fa fa-plus-circle fa-lg text-inverse"></i>';
                   }
@@ -7554,7 +7554,7 @@ function loadCategoriesResults(xml){
           opts.contextId = id;
 
 
-rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
+rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
                                     //rows +=  '<img alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
 //                                    rows +=  '<span _ngcontent-c9="" class="badge badge-pill badge-info" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addClassFacet(\''+id+'\', \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</span>';
@@ -7581,6 +7581,7 @@ if(true){
           var facet = getMainFocus().children('class[iri=\''+uri+'\']');
           if((!facet || facet.length) <= 0 && getMainFocus().children('value') && getMainFocus().children('value').length > 0) facet = align;
           var checked = (facet && facet.length > 0) ? ' checked="checked"': '';
+          var hideCkbxClass = (facet && facet.length > 0) ? '': ' hide';
           var focusTarget = (getMainFocus().attr('class') == ID_QUERY+"") ? 'focusHeader' : 'focusValue';
           var focusTargetClass = (getMainFocus().attr('class') == ID_QUERY+"") ? 'queryFocus' : 'queryFocusValue';
           //rows += '<tr  id="rw'+id+'" onmouseover="javascript:showControls(\''+id+'\')" onmouseout="javascript:hideControls(\''+id+'\')"><td class="up" id="'+opts.parentId+'">';
@@ -7597,7 +7598,7 @@ if(true){
               //rows +=  '<p class="help-block text-ellipsis m-0"></p>';
 
           //rows += '</td><td id="ctrl'+id+'" class="hideCtrl" style="white-space:nowrap; vertical-align:top;">';
-          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+''+hideCkbxClass+'">';
           rows += '<input class="form-check-input" id="ckbx'+id+'" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\')}" />&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
@@ -7814,7 +7815,7 @@ if(isCategory && false) {
 }
 
 
-rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
+rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'.hidable'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'.hidable'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
                                     //rows +=  '<img alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
                                    // rows +=  '<span _ngcontent-c9="" class="badge badge-pill badge-info" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addPropertyFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\');">'+ct+'</span>';
@@ -7841,6 +7842,7 @@ var rowId = opts.parentId;
 
           var facet = _root.find('.' + getMainFocus().attr('class') + ' > property[iri=\''+opts.propIRI+'\']');
           var checked = (facet && facet.length > 0) ? ' checked="checked"': '';
+          var hideCkbxClass = (facet && facet.length > 0) ? '': ' hide';
           //rows += '<tr id="'+id+'" onmouseover="javascript:showControls(\''+id+'\')" onmouseout="javascript:hideControls(\''+id+'\')"><td class="up" id="'+opts.parentId+'"><span id="'+id+'">';
           //var propIRI = $('#groupByMenu :selected').attr('value');
           //var propLabel = $('#groupByMenu :selected').text();
@@ -7858,14 +7860,15 @@ var rowId = opts.parentId;
 //          }
           //rows += '</span></td><td id="ctrl'+id+'" style="white-space:nowrap; vertical-align:top;">';          
           if(propIRI != GROUP_BY_NONE_VALUE){
-          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+''+hideCkbxClass+'">';
           rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); }" />&nbsp;'; //generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
               //rows += '<img title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
           rows += '<i '+buildTitle('preview field values')+' class="expand la la-ellipsis-v la-lg text-secondary" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+propLabel+'\' , \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
 //              rows += '<a title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>&nbsp;';
-          if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the contents list by \''+propLabel+'\'')+' class="group la la-compress text-secondary" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\')" ></i>';
+          //if((facet && facet.length > 0) && !isTableShowing())
+            rows += '<i '+buildTitle('group the contents list by \''+propLabel+'\'')+' class="hide hidable'+id+' group la la-compress text-secondary" onclick="javascript:if(!$(\'#ckbx'+id+'\').is(\':checked\')){var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\');}doGroup(\''+propIRI+'\', \''+propLabel+'\');" ></i>';
           }
           rows +='</h6>';
             rows +=  '</div>';
@@ -8007,13 +8010,14 @@ function loadPropertiesInResults(xml){
           var rowId = opts.parentId;
 
 
-rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
+rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'.hidable'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'.hidable'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
 
 
           var facet = _root.find('.' + getMainFocus().attr('class') + ' > property-of[iri=\''+opts.propIRI+'\']');
           var checked = (facet && facet.length > 0) ? ' checked="checked"': '';
+          var hideCkbxClass = (facet && facet.length > 0) ? '': ' hide';
   //        rows += '<tr id="'+id+'" onmouseover="javascript:showControls(\''+id+'\')" onmouseout="javascript:hideControls(\''+id+'\')"><td class="up" id="'+opts.parentId+'"><span id="'+id+'">';
           //var propIRI = $('#groupByMenu :selected').attr('value');
           //var propLabel = $('#groupByMenu :selected').text();
@@ -8034,13 +8038,14 @@ var ckcolor = 'primary';
             rows += '<span '+buildTitle(propIRI)+' onclick="javascript:describe(\''+rowId+'\', \''+propIRI+'\');">' + propLabel + '</span>';
           //rows += '</span></td><td id="ctrl'+id+'" class="hideCtrl" style="white-space:nowrap; vertical-align:top;">';          
           if(propIRI != GROUP_BY_NONE_VALUE){
-          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+''+hideCkbxClass+'">';
           rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\');}"/>&nbsp;';//generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
           rows += '<i '+buildTitle('preview rolees')+' class="expand la la-ellipsis-v la-lg text-secondary" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+propLabel+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
               //rows += '<img title="shows up in the \''+propLabel+'\' field of these records" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
-          if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the contents list by role: \''+propLabel+'\'')+' class="group la la-compress text-secondary" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\', true)" ></i>';
+          //if((facet && facet.length > 0) && !isTableShowing())
+            rows += '<i '+buildTitle('group the contents list by role: \''+propLabel+'\'')+' class="hide hidable'+id+' group la la-compress text-secondary" onclick="javascript:if(!$(\'#ckbx'+id+'\').is(\':checked\')){var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\');}doGroup(\''+propIRI+'\', \''+propLabel+'\', true);" ></i>';
           }
 
           rows +='</h6>';
@@ -8159,7 +8164,7 @@ function loadGraphResults(xml){
           opts.propLabel = graphLabel;
 
 
-rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
+rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
                                // rows +=  '<span class="thumb-sm float-left mr">';
 
 
@@ -8168,6 +8173,7 @@ rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-
 
           var facet = _root.find('.' + ID_QUERY + '[graph=\''+graphIRI+'\']');
           var checked = (facet && facet.length > 0) ? ' checked="checked" ': '';
+          var hideCkbxClass = (facet && facet.length > 0) ? '': ' hide';
           //rows += '<tr><td class="up" id="'+opts.parentId+'"><span id="'+id+'">';
           //var propIRI = $('#groupByMenu :selected').attr('value');
           //var propLabel = $('#groupByMenu :selected').text();
@@ -8211,7 +8217,7 @@ var rowId = opts.parentId;
           //else 
           //rows += propLabel;
 //          rows += '</span></td><td id="ctrl'+id+'" class="hideCtrl" style="white-space:nowrap; vertical-align:top;">';          
-          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+''+hideCkbxClass+'">';
           rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' onclick="javascript: if(!$(this).is(\':checked\')) {removeGraphFacet();}else{setGraphFacet(\''+graphIRI+'\', \''+graphLabel+'\')}"/>&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
