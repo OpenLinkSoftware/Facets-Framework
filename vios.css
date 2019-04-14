@@ -693,9 +693,23 @@ h6 {
 /*.thumb-sm>.fa, .thumb-sm>.glyphicon {*/
 .icon-literal{
     line-height: 10px!important;
-  }
 }
 
+.record-action-highlight{
+    cursor: pointer;
+    right: 32px;
+    float: none;
+    position: absolute;
+    /* bottom: -2px; */
+}
+
+.record-action-nix{
+    cursor: pointer;
+    right: 55px;
+    float: none;
+    position: absolute;
+    /* bottom: -2px; */
+}
 
 
 .post-links {

@@ -1,46 +1,3 @@
-//var json = JSON.parse(fs.readFileSync('./content.json').toString());
-/*
-var fs = require('fs');
-var json = JSON.parse(fs.readFileSync('./content.json').toString());
-*/
-/*
-var json = (function() {
-        var json = null;
-        $.ajax({
-            'async': false,
-            'global': false,
-            'url': "/DAV/home/sdmonroe/lod.json",
-            'dataType': "json",
-            'success': function (data) {
-                json = data;
-            }
-        });
-        return json;
-    })();*/
-    
-//console.log(json);
-//console.log(count());
-
-/*
-function count(){
-var total = 0;
-var triples = 0;
-var rows = '';
-
-jQuery.each(json, function(i, val) {
-  triples = parseInt(val.triples) ;
-  if(triples) total+=triples;
-  rows += ('<tr><td>'+val._id+'</td><td>'+triples+'</td></tr>');
-});
-
-  $('table tbody').append(rows);
-  $('table tbody').append('<tr><td><b>Total</b></td><td>'+total+'</td></tr>');
-  return total;
-
-}
-*/
-
-
 function Rainbow(){"use strict";var e=null,r=0,F=100,t=["ff0000","ffff00","00ff00","0000ff"];function n(n){if(n.length<2)throw new Error("Rainbow must have two or more colours.");var a=(F-r)/(n.length-1),i=new ColourGradient;i.setGradient(n[0],n[1]),i.setNumberRange(r,r+a),e=[i];for(var o=1;o<n.length-1;o++){var l=new ColourGradient;l.setGradient(n[o],n[o+1]),l.setNumberRange(r+a*o,r+a*(o+1)),e[o]=l}t=n}n(t),this.setSpectrum=function(){return n(arguments),this},this.setSpectrumByArray=function(e){return n(e),this},this.colourAt=function(t){if(isNaN(t))throw new TypeError(t+" is not a number");if(1===e.length)return e[0].colourAt(t);var n=(F-r)/e.length,a=Math.min(Math.floor((Math.max(t,r)-r)/n),e.length-1);return e[a].colourAt(t)},this.colorAt=this.colourAt,this.setNumberRange=function(e,a){if(!(a>e))throw new RangeError("maxNumber ("+a+") is not greater than minNumber ("+e+")");return r=e,F=a,n(t),this}}function ColourGradient(){"use strict";var e="ff0000",r="0000ff",F=0,t=100;function n(e,r,n){var a=e;a<F&&(a=F),a>t&&(a=t);var i,o=t-F,l=parseInt(r,16),u=(parseInt(n,16)-l)/o,s=Math.round(u*(a-F)+l);return 1===(i=s.toString(16)).length?"0"+i:i}function a(e){if(/^#?[0-9a-fA-F]{6}$/i.test(e))return e.substring(e.length-6,e.length);var r=e.toLowerCase();if(i.hasOwnProperty(r))return i[r];throw new Error(e+" is not a valid colour.")}this.setGradient=function(F,t){e=a(F),r=a(t)},this.setNumberRange=function(e,r){if(!(r>e))throw new RangeError("maxNumber ("+r+") is not greater than minNumber ("+e+")");F=e,t=r},this.colourAt=function(F){return n(F,e.substring(0,2),r.substring(0,2))+n(F,e.substring(2,4),r.substring(2,4))+n(F,e.substring(4,6),r.substring(4,6))};var i={aliceblue:"F0F8FF",antiquewhite:"FAEBD7",aqua:"00FFFF",aquamarine:"7FFFD4",azure:"F0FFFF",beige:"F5F5DC",bisque:"FFE4C4",black:"000000",blanchedalmond:"FFEBCD",blue:"0000FF",blueviolet:"8A2BE2",brown:"A52A2A",burlywood:"DEB887",cadetblue:"5F9EA0",chartreuse:"7FFF00",chocolate:"D2691E",coral:"FF7F50",cornflowerblue:"6495ED",cornsilk:"FFF8DC",crimson:"DC143C",cyan:"00FFFF",darkblue:"00008B",darkcyan:"008B8B",darkgoldenrod:"B8860B",darkgray:"A9A9A9",darkgreen:"006400",darkgrey:"A9A9A9",darkkhaki:"BDB76B",darkmagenta:"8B008B",darkolivegreen:"556B2F",darkorange:"FF8C00",darkorchid:"9932CC",darkred:"8B0000",darksalmon:"E9967A",darkseagreen:"8FBC8F",darkslateblue:"483D8B",darkslategray:"2F4F4F",darkslategrey:"2F4F4F",darkturquoise:"00CED1",darkviolet:"9400D3",deeppink:"FF1493",deepskyblue:"00BFFF",dimgray:"696969",dimgrey:"696969",dodgerblue:"1E90FF",firebrick:"B22222",floralwhite:"FFFAF0",forestgreen:"228B22",fuchsia:"FF00FF",gainsboro:"DCDCDC",ghostwhite:"F8F8FF",gold:"FFD700",goldenrod:"DAA520",gray:"808080",green:"008000",greenyellow:"ADFF2F",grey:"808080",honeydew:"F0FFF0",hotpink:"FF69B4",indianred:"CD5C5C",indigo:"4B0082",ivory:"FFFFF0",khaki:"F0E68C",lavender:"E6E6FA",lavenderblush:"FFF0F5",lawngreen:"7CFC00",lemonchiffon:"FFFACD",lightblue:"ADD8E6",lightcoral:"F08080",lightcyan:"E0FFFF",lightgoldenrodyellow:"FAFAD2",lightgray:"D3D3D3",lightgreen:"90EE90",lightgrey:"D3D3D3",lightpink:"FFB6C1",lightsalmon:"FFA07A",lightseagreen:"20B2AA",lightskyblue:"87CEFA",lightslategray:"778899",lightslategrey:"778899",lightsteelblue:"B0C4DE",lightyellow:"FFFFE0",lime:"00FF00",limegreen:"32CD32",linen:"FAF0E6",magenta:"FF00FF",maroon:"800000",mediumaquamarine:"66CDAA",mediumblue:"0000CD",mediumorchid:"BA55D3",mediumpurple:"9370DB",mediumseagreen:"3CB371",mediumslateblue:"7B68EE",mediumspringgreen:"00FA9A",mediumturquoise:"48D1CC",mediumvioletred:"C71585",midnightblue:"191970",mintcream:"F5FFFA",mistyrose:"FFE4E1",moccasin:"FFE4B5",navajowhite:"FFDEAD",navy:"000080",oldlace:"FDF5E6",olive:"808000",olivedrab:"6B8E23",orange:"FFA500",orangered:"FF4500",orchid:"DA70D6",palegoldenrod:"EEE8AA",palegreen:"98FB98",paleturquoise:"AFEEEE",palevioletred:"DB7093",papayawhip:"FFEFD5",peachpuff:"FFDAB9",peru:"CD853F",pink:"FFC0CB",plum:"DDA0DD",powderblue:"B0E0E6",purple:"800080",red:"FF0000",rosybrown:"BC8F8F",royalblue:"4169E1",saddlebrown:"8B4513",salmon:"FA8072",sandybrown:"F4A460",seagreen:"2E8B57",seashell:"FFF5EE",sienna:"A0522D",silver:"C0C0C0",skyblue:"87CEEB",slateblue:"6A5ACD",slategray:"708090",slategrey:"708090",snow:"FFFAFA",springgreen:"00FF7F",steelblue:"4682B4",tan:"D2B48C",teal:"008080",thistle:"D8BFD8",tomato:"FF6347",turquoise:"40E0D0",violet:"EE82EE",wheat:"F5DEB3",white:"FFFFFF",whitesmoke:"F5F5F5",yellow:"FFFF00",yellowgreen:"9ACD32"}}"undefined"!=typeof module&&(module.exports=Rainbow);
 
 
@@ -110,6 +67,208 @@ var fct_getUrlParameter = function getUrlParameter(sParam) {
 var fct_isPermalink = false;
 var fct_queryTimeout = '5000';
 
+/*  This work is licensed under Creative Commons GNU LGPL License.
+
+  License: http://creativecommons.org/licenses/LGPL/2.1/
+  Version: 0.9
+  Author:  Stefan Goessner/2006
+  Web:     http://goessner.net/ 
+*/
+function json2xml(o, tab) {
+   var toXml = function(v, name, ind) {
+      var xml = "";
+      if (v instanceof Array) {
+         for (var i=0, n=v.length; i<n; i++)
+            xml += ind + toXml(v[i], name, ind+"\t") + "\n";
+      }
+      else if (typeof(v) == "object") {
+         var hasChild = false;
+         xml += ind + "<" + name;
+         for (var m in v) {
+            if (m.charAt(0) == "@")
+               xml += " " + m.substr(1) + "=\"" + v[m].toString() + "\"";
+            else
+               hasChild = true;
+         }
+         xml += hasChild ? ">" : "/>";
+         if (hasChild) {
+            for (var m in v) {
+               if (m == "#text")
+                  xml += v[m];
+               else if (m == "#cdata")
+                  xml += "<![CDATA[" + v[m] + "]]>";
+               else if (m.charAt(0) != "@")
+                  xml += toXml(v[m], m, ind+"\t");
+            }
+            xml += (xml.charAt(xml.length-1)=="\n"?ind:"") + "</" + name + ">";
+         }
+      }
+      else {
+         xml += ind + "<" + name + ">" + v.toString() +  "</" + name + ">";
+      }
+      return xml;
+   }, xml="";
+   for (var m in o)
+      xml += toXml(o[m], m, "");
+   return tab ? xml.replace(/\t/g, tab) : xml.replace(/\t|\n/g, "");
+}
+
+/*  This work is licensed under Creative Commons GNU LGPL License.
+
+  License: http://creativecommons.org/licenses/LGPL/2.1/
+   Version: 0.9
+  Author:  Stefan Goessner/2006
+  Web:     http://goessner.net/ 
+*/
+function xml2json(xml, tab) {
+   var X = {
+      toObj: function(xml) {
+         var o = {};
+         if (xml.nodeType==1) {   // element node ..
+            if (xml.attributes.length)   // element with attributes  ..
+               for (var i=0; i<xml.attributes.length; i++)
+                  o["@"+xml.attributes[i].nodeName] = (xml.attributes[i].nodeValue||"").toString();
+            if (xml.firstChild) { // element has child nodes ..
+               var textChild=0, cdataChild=0, hasElementChild=false;
+               for (var n=xml.firstChild; n; n=n.nextSibling) {
+                  if (n.nodeType==1) hasElementChild = true;
+                  else if (n.nodeType==3 && n.nodeValue.match(/[^ \f\n\r\t\v]/)) textChild++; // non-whitespace text
+                  else if (n.nodeType==4) cdataChild++; // cdata section node
+               }
+               if (hasElementChild) {
+                  if (textChild < 2 && cdataChild < 2) { // structured element with evtl. a single text or/and cdata node ..
+                     X.removeWhite(xml);
+                     for (var n=xml.firstChild; n; n=n.nextSibling) {
+                        if (n.nodeType == 3)  // text node
+                           o["#text"] = X.escape(n.nodeValue);
+                        else if (n.nodeType == 4)  // cdata node
+                           o["#cdata"] = X.escape(n.nodeValue);
+                        else if (o[n.nodeName]) {  // multiple occurence of element ..
+                           if (o[n.nodeName] instanceof Array)
+                              o[n.nodeName][o[n.nodeName].length] = X.toObj(n);
+                           else
+                              o[n.nodeName] = [o[n.nodeName], X.toObj(n)];
+                        }
+                        else  // first occurence of element..
+                           o[n.nodeName] = X.toObj(n);
+                     }
+                  }
+                  else { // mixed content
+                     if (!xml.attributes.length)
+                        o = X.escape(X.innerXml(xml));
+                     else
+                        o["#text"] = X.escape(X.innerXml(xml));
+                  }
+               }
+               else if (textChild) { // pure text
+                  if (!xml.attributes.length)
+                     o = X.escape(X.innerXml(xml));
+                  else
+                     o["#text"] = X.escape(X.innerXml(xml));
+               }
+               else if (cdataChild) { // cdata
+                  if (cdataChild > 1)
+                     o = X.escape(X.innerXml(xml));
+                  else
+                     for (var n=xml.firstChild; n; n=n.nextSibling)
+                        o["#cdata"] = X.escape(n.nodeValue);
+               }
+            }
+            if (!xml.attributes.length && !xml.firstChild) o = null;
+         }
+         else if (xml.nodeType==9) { // document.node
+            o = X.toObj(xml.documentElement);
+         }
+         else
+            alert("unhandled node type: " + xml.nodeType);
+         return o;
+      },
+      toJson: function(o, name, ind) {
+         var json = name ? ("\""+name+"\"") : "";
+         if (o instanceof Array) {
+            for (var i=0,n=o.length; i<n; i++)
+               o[i] = X.toJson(o[i], "", ind+"\t");
+            json += (name?":[":"[") + (o.length > 1 ? ("\n"+ind+"\t"+o.join(",\n"+ind+"\t")+"\n"+ind) : o.join("")) + "]";
+         }
+         else if (o == null)
+            json += (name&&":") + "null";
+         else if (typeof(o) == "object") {
+            var arr = [];
+            for (var m in o)
+               arr[arr.length] = X.toJson(o[m], m, ind+"\t");
+            json += (name?":{":"{") + (arr.length > 1 ? ("\n"+ind+"\t"+arr.join(",\n"+ind+"\t")+"\n"+ind) : arr.join("")) + "}";
+         }
+         else if (typeof(o) == "string")
+            json += (name&&":") + "\"" + o.toString() + "\"";
+         else
+            json += (name&&":") + o.toString();
+         return json;
+      },
+      innerXml: function(node) {
+         var s = ""
+         if ("innerHTML" in node)
+            s = node.innerHTML;
+         else {
+            var asXml = function(n) {
+               var s = "";
+               if (n.nodeType == 1) {
+                  s += "<" + n.nodeName;
+                  for (var i=0; i<n.attributes.length;i++)
+                     s += " " + n.attributes[i].nodeName + "=\"" + (n.attributes[i].nodeValue||"").toString() + "\"";
+                  if (n.firstChild) {
+                     s += ">";
+                     for (var c=n.firstChild; c; c=c.nextSibling)
+                        s += asXml(c);
+                     s += "</"+n.nodeName+">";
+                  }
+                  else
+                     s += "/>";
+               }
+               else if (n.nodeType == 3)
+                  s += n.nodeValue;
+               else if (n.nodeType == 4)
+                  s += "<![CDATA[" + n.nodeValue + "]]>";
+               return s;
+            };
+            for (var c=node.firstChild; c; c=c.nextSibling)
+               s += asXml(c);
+         }
+         return s;
+      },
+      escape: function(txt) {
+         return txt.replace(/[\\]/g, "\\\\")
+                   .replace(/[\"]/g, '\\"')
+                   .replace(/[\n]/g, '\\n')
+                   .replace(/[\r]/g, '\\r');
+      },
+      removeWhite: function(e) {
+         e.normalize();
+         for (var n = e.firstChild; n; ) {
+            if (n.nodeType == 3) {  // text node
+               if (!n.nodeValue.match(/[^ \f\n\r\t\v]/)) { // pure whitespace text node
+                  var nxt = n.nextSibling;
+                  e.removeChild(n);
+                  n = nxt;
+               }
+               else
+                  n = n.nextSibling;
+            }
+            else if (n.nodeType == 1) {  // element node
+               X.removeWhite(n);
+               n = n.nextSibling;
+            }
+            else                      // any other node
+               n = n.nextSibling;
+         }
+         return e;
+      }
+   };
+   if (xml.nodeType == 9) // document node
+      xml = xml.documentElement;
+   var json = X.toJson(X.toObj(X.removeWhite(xml)), xml.nodeName, "\t");
+   return "{\n" + tab + (tab ? json.replace(/\t/g, tab) : json.replace(/\t|\n/g, "")) + "\n}";
+}
+
 function fct_init(){
 
   // Simple helper function creates a new element from a name, so you don't have to add the brackets etc.
@@ -139,6 +298,11 @@ function fct_init(){
 
 
   var qxml = fct_getUrlParameter('qxml');
+  var qjson = fct_getUrlParameter('qjson');
+
+  if(qjson && qjson.length > 0){
+    qxml = json2xml(JSON.parse(qjson), '');
+  }
 
   if(qxml && qxml.length > 0){
     idct = fct_getUrlParameter('idCt');
@@ -2719,6 +2883,7 @@ function bookmark(){
 // USER PREFERENCES
 
 var isTableStriped = false;
+var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
 
 
 function init(){
@@ -3052,10 +3217,10 @@ function init(){
   $('dashboard').append('<div class="row" id="dataCanvas"></div>');
   $('#queryTimeout').val('30000');
 
-
-  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doFindDataspaces()">Find Dataspaces</a></li>');
-  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" href="http://data.vios.network/ods">Create Dataspace</a></li>');
-  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doRemoveDataspace()">Remove Dataspace</a></li>');
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').children().children().text('Add');
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doFindDataspaces()">Find</a></li>');
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" href="http://data.vios.network/ods">Create</a></li>');
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doRemoveDataspace()">Remove</a></li>');
   $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li class="dropdown-divider"></li>');
   $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doImportLibrary()">Import Library</a></li>');
 
@@ -4814,6 +4979,10 @@ function addTab(fctId, tabCounter) {
     $('[data-toggle="tooltip"]').tooltip();
 
     //$(document).on('click touch', doCtrlMode);
+  $('input').on('click', function(e){
+    doCtrlMode(e);
+  });
+
 }
 
 
@@ -5412,13 +5581,13 @@ return iri;
 function spaceCamelCase(label){
     // insert a space before all caps
     ///*
-    if(label.toUpperCase() != label){
+    if(isChrome && label.toUpperCase() != label){
     //label = label.replace(/([A-Z])([a-z])(.*)/g, ' $1$2$3')
 
-    // see here: https://stackoverflow.com/questions/5020906/python-convert-camel-case-to-space-delimited-using-regex-and-taking-acronyms-in
-    label = label.replace(/((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))/g, ' $1')
-    // uppercase the first character
-    .replace(/^./, function(str){ return str.toUpperCase(); });
+      // see here: https://stackoverflow.com/questions/5020906/python-convert-camel-case-to-space-delimited-using-regex-and-taking-acronyms-in
+      label = label.replace(new RegExp('((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))', 'g'), ' $1')
+      // uppercase the first character
+      .replace(/^./, function(str){ return str.toUpperCase(); });
     }
     //*/
     return label.trim();
@@ -5538,6 +5707,11 @@ function updatePermalink(){
     if(isTableShowing()) canvasViewType = 'table';
     else if(isFormShowing()) canvasViewType = 'form';
 
+
+    var xmlStr = _root.find('query').prop('outerHTML');
+    var parser = new DOMParser();
+    var xmlDoc = parser.parseFromString(xmlStr, "text/xml"); //important to use "text/xml"
+
     var long_url = this_endpoint + '?' + 
       'dataSpace=' + encodeURIComponent( dataspace ) + 
       '&dataSpaceLabel=' + encodeURIComponent( getDataspaceLabel() ) + 
@@ -5555,7 +5729,8 @@ function updatePermalink(){
       '&isChart=' + isChart() + 
       '&showIDN=' + showIDN + 
       '&filterRecordViewFields=' + filterRecordViewFields + 
-      '&qxml=' + encodeURIComponent(_root.find('query').prop('outerHTML'));
+      //'&qxml=' + encodeURIComponent(_root.find('query').prop('outerHTML'));
+      '&qjson=' + encodeURIComponent( xml2json( xmlDoc , '' ) );
   
     $('#permalink').attr('href', long_url); // use long url by default in case of rate limit
     $('#permalink').unbind('mouseover');
@@ -8289,6 +8464,7 @@ function loadDescribeResults(xml, opt) {
     table.append(header);
     var row = $.createElement('tr');
     var col = $.createElement('th');
+    col.css('padding-right', '3em');
     col.addClass('d-none');
     col.addClass('d-md-table-cell');
     col.css('cursor', 'pointer');
@@ -8297,6 +8473,7 @@ function loadDescribeResults(xml, opt) {
     row.append(col);
 
     col = $.createElement('th');
+    col.css('width', '100%');
     col.addClass('d-none');
     col.addClass('d-md-table-cell');
     col.text((showRecordRoles ? 'Of This' : 'Content'));
@@ -8358,6 +8535,8 @@ function loadDescribeResults(xml, opt) {
     var phone;
     var homepage;
     var url;
+
+    var comments = new Array();
 
     var rows = '';
     $('rdf\\:Description', xml).each(function(i) {
@@ -8429,7 +8608,7 @@ function loadDescribeResults(xml, opt) {
             }
             if (!desc && propLabel.endsWith(':comment')) desc = objectValue;
             if (!desc && propLabel.endsWith(':abstract')) desc = objectValue;
-            if (!desc && propLabel.endsWith(':description')) desc = objectValue;
+            if (propLabel.endsWith(':description')) desc = objectValue; // foaf:description always overrides comments and abstracts
             if (propLabel.endsWith(':long')) long = objectValue;
             if (propLabel.endsWith(':lat')) lat = objectValue;
             if (propLabel.endsWith(':name')) name = objectValue;
@@ -8441,12 +8620,15 @@ function loadDescribeResults(xml, opt) {
             }
 
 
-            if (propIRI == 'http://www.w3.org/ns/prov#wasDerivedFrom'.toLowerCase()) wikiPage = (!objectValue) ? objectIRI : objectValue;
-            if (propIRI == 'http://www.w3.org/ns/prov#hadPrimarySource'.toLowerCase()) wikiPage = (!objectValue) ? objectIRI : objectValue;
-            if (propIRI.toLowerCase() == 'http://schema.org/url'.toLowerCase()) url = (!objectValue) ? objectIRI : objectValue;
+            if (propIRI == 'http://www.w3.org/ns/prov#wasDerivedFrom') wikiPage = (!objectValue) ? objectIRI : objectValue;
+            if (propIRI == 'http://www.w3.org/ns/prov#hadPrimarySource') wikiPage = (!objectValue) ? objectIRI : objectValue;
+            if (propIRI == 'http://schema.org/url') url = (!objectValue) ? objectIRI : objectValue;
 
-            if (propIRI.toLowerCase() == 'http://xmlns.com/foaf/0.1/phone'.toLowerCase()) phone = objectValue;
-            if (propIRI.toLowerCase() == 'http://xmlns.com/foaf/0.1/homepage'.toLowerCase()) homepage = (!objectValue) ? objectIRI : objectValue;
+            if (propIRI == 'http://xmlns.com/foaf/0.1/phone') phone = objectValue;
+            if (propIRI == 'http://xmlns.com/foaf/0.1/homepage') homepage = (!objectValue) ? objectIRI : objectValue;
+
+            if (propIRI == 'http://www.w3.org/2000/01/rdf-schema#comment') comments.push(objectValue);
+
 
             //if(objectIRI == uri && !propLabel.trim().toLowerCase().endsWith('of')) propLabel += ' of';
             if (propLabel == 'RDF:TYPE') propLabel = 'category';
@@ -8487,32 +8669,34 @@ function loadDescribeResults(xml, opt) {
             row.append(col);
 
             col = $.createElement('td');
+            var hid = createId();
             var cid = 'copy_' + createId();
             var loid = 'linkout_' + createId();
             col.on('mouseover', function() {
-                $('#' + cid).removeClass('hide');
-                $('#' + loid).removeClass('hide');
+                $('.hidable' + hid).removeClass('hide');
+//                $('#' + loid).removeClass('hide');
             });
             col.on('mouseout', function() {
-                $('#' + cid).addClass('hide');
-                $('#' + loid).addClass('hide');
+                $('.hidable' + hid).addClass('hide');
+//                $('#' + cid).addClass('hide');
+//                $('#' + loid).addClass('hide');
             });
             //col.attr('width', '100%');
             //col.addClass('d-none');
             //col.addClass('d-md-table-cell');
             if (objectIRI == uri) {
                 if (subject) {
-                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + subject + '\', \'' + processLabel(subLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(subLabel) + '</a>&nbsp;<img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(subject) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
-                    col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide link-field fa fa-external-link fa-sm" onclick="linkOut(\''+subject+'\')"></i>');
+                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + subject + '\', \'' + processLabel(subLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(subLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right fa fa-thumbs-o-up fa-lg text-success"></span><span class="hide hidable'+hid+' record-action-nix pull-right fa fa-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(subject) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
+                    col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field fa fa-external-link fa-sm" onclick="linkOut(\''+subject+'\')"></i>');
                 } else col.text(objectValue);
             } else {
                 if (objectIRI) {
-                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(objLabel) + '</a>&nbsp;<img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(objectIRI) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
-                    col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide link-field fa fa-external-link fa-sm" onclick="linkOut(\''+objectIRI+'\')"></i>');
+                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(objLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right fa fa-thumbs-o-up fa-lg text-success"></span><span class="hide hidable'+hid+' record-action-nix pull-right fa fa-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(objectIRI) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
+                    col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field fa fa-external-link fa-sm" onclick="linkOut(\''+objectIRI+'\')"></i>');
                 } else {
                     col.text(objectValue); 
-                    col.prepend('<span style="cursor:pointer" class="pull-right icon-literal glyphicon glyphicon-tag" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + sanitizeLabel(objectValue) + '\', \'uri\', \'' + lang + '\');"></span>' );
-                    col.append('&nbsp;&nbsp;<i id="' + cid + '" onmouseout="$(\'#' + cid + '\').tooltip(\'hide\');$(\'#' + cid + '\').attr(\'data-original-title\', \'Copy to clipboard\');$(\'#' + cid + '\').tooltip();" ' + buildTitle('Copy to clipboard') + ' onclick="javascript:$(\'#' + cid + '\').tooltip(\'hide\');copy(\'' + sanitizeLabel(objectValue) + '\'); $(\'#' + cid + '\').attr(\'data-original-title\', \'Copied\');$(\'#' + cid + '\').tooltip(\'show\');" style="cursor:pointer;" class="hide fa fa-copy fa-sm"></i>');
+                    col.prepend('<span class="hide hidable'+hid+' record-action-nix pull-right fa fa-thumbs-o-down fa-lg text-danger"></span><span class="hide hidable'+hid+' record-action-highlight pull-right fa fa-thumbs-o-up fa-lg text-success"></span><span style="cursor:pointer" class="pull-right icon-literal glyphicon glyphicon-tag" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + sanitizeLabel(objectValue) + '\', \'uri\', \'' + lang + '\');"></span>' );
+                    col.append('&nbsp;&nbsp;<i id="' + cid + '" onmouseout="$(\'.hidable' + hid + '\').tooltip(\'hide\');$(\'.hidable' + hid + '\').attr(\'data-original-title\', \'Copy to clipboard\');$(\'.hidable' + hid + '\').tooltip();" ' + buildTitle('Copy to clipboard') + ' onclick="javascript:$(\'.hidable' + hid + '\').tooltip(\'hide\');copy(\'' + sanitizeLabel(objectValue) + '\'); $(\'.hidable' + hid + '\').attr(\'data-original-title\', \'Copied\');$(\'.hidable' + hid + '\').tooltip(\'show\');" style="cursor:pointer;" class="hide hidable'+hid+' fa fa-copy fa-sm"></i>');
                 }
             }
             row.append(col);
@@ -8770,6 +8954,9 @@ content += '</section>';
             tabs += '<li class="nav-item"><a aria-controls="menu" aria-expanded="false" class="nav-link" data-toggle="tab" href="#menu" id="menu-tab" role="tab">Menu</a></li>';
             tabs += '<li class="nav-item"><a aria-controls="review" aria-expanded="false" class="nav-link" data-toggle="tab" href="#review" id="review-tab" role="tab">Reviews</a></li>';
         }
+        if (comments.length > 0) {
+            tabs += '<li class="nav-item"><a aria-controls="comments" aria-expanded="false" class="nav-link" data-toggle="tab" href="#comments" id="menu-comments" role="tab">Comments</a></li>';
+        }
         //tabs += '<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"> Dropdown <b class="caret"></b></a><div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 45px, 0px); top: 0px; left: 0px; will-change: transform;"><a aria-controls="dropdown1" aria-expanded="true" class="dropdown-item show" data-toggle="tab" href="#dropdown1" id="dropdown1-tab" role="tab" aria-selected="true">@fat</a><a aria-controls="dropdown2" aria-expanded="true" class="dropdown-item active show" data-toggle="tab" href="#dropdown2" id="dropdown2-tab" role="tab" aria-selected="true">@mdo</a></div></li>
         tabs += '<li class="nav-item dropdown">';
         tabs += '<a aria-controls="info" aria-haspopup="true" aria-expanded="true" class="nav-link dropdown-toggle active" data-toggle="dropdown" href="#info" id="info-tab" role="button"> Info <b class="caret"></b></a>';
@@ -8953,6 +9140,87 @@ content += '</section>';
             //$('#angular_recordViewer').append('<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');
             //d4.append(table);
             d4.append('<div>');
+            d.append(d4);
+        }
+
+        if (comments.length > 0) {
+            var d4 = $.createElement('div');
+            //d4.attr('aria-expanded', 'true');
+            d4.attr('aria-labelledby', 'comments-tab');
+            d4.addClass('tab-pane');
+            //d4.addClass('active');
+            //d4.addClass('in');
+            //d4.addClass('clearfix');
+            d4.css('padding-top', '1em');
+            d4.css('padding-left', '0px');
+            d4.css('padding-right', '0px');
+            d4.attr('id', 'comments');
+            d4.attr('role', 'tabpanel');
+            //      var d2 = $('#angular_recordViewer').append('<div aria-expanded="true" aria-labelledby="info-tab" class="tab-pane active in clearfix" style="padding-top:0px" id="info" role="tabpanel">');
+            //$('#angular_recordViewer').append('<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');
+            //d4.append(table);
+            var commentDiv = '<section class="activities">';
+
+            for(j = 0; j < comments.length; j++){
+              commentDiv += '<section class="event">';            
+              commentDiv += '<span class="thumb-sm avatar pull-left mr-sm">';
+              commentDiv += '<img alt="..." class="rounded-circle" src="assets/img/people/a5.jpg">';
+              commentDiv += '</span>';
+              commentDiv += '<h5 class="event-heading">';
+              commentDiv += '<a href="#">Unknown author</a>';
+              commentDiv += '<small><a href="#">@nils</a></small>';
+              commentDiv += '</h5>';
+              commentDiv += '<p class="text-muted">February 22, 2019 at 01:59 PM</p>';
+              commentDiv += '<p class="fs-mini">'+comments[j]+'</p>';
+              commentDiv += '<footer>';
+              commentDiv += '<ul class="post-links">';
+              commentDiv += '<li><a href="#">1 hour</a></li>';
+              commentDiv += '<li><a href="#"><span class="text-danger"><i class="fa fa-heart"></i> Like</span></a></li>';
+              commentDiv += '<li><a href="#">Comment</a></li>';
+              commentDiv += '</ul>';
+              commentDiv += '</footer>';
+              commentDiv += '</section>';
+            }
+
+
+            commentDiv += '<section class="event">';
+            commentDiv += '<h5 class="event-heading">';
+            commentDiv += '<a href="#">Marvin</a><small>@vios</small>';
+            commentDiv += '</h5>';
+            commentDiv += '<p class="text-muted">February 22, 2019 at 01:59 PM</p>';
+            commentDiv += '<p class="fs-mini"> Add <span class="badge badge-secondary">rdfs:comment</span> to a record to begin a discussion. </p>';
+            commentDiv += '<footer>';
+            commentDiv += '<div class="clearfix">';
+            commentDiv += '<ul class="post-links mt-sm pull-left">';
+            commentDiv += '<li><a href="#">1 hour</a></li>';
+            commentDiv += '<li><a href="#"><span class="text-danger"><i class="fa fa-heart-o"></i> Like</span></a></li>';
+            commentDiv += '<li><a href="#">Comment</a></li>';
+            commentDiv += '</ul>';
+            commentDiv += '<span class="thumb thumb-sm pull-right"><a href="#"><img class="rounded-circle" src="assets/img/people/a1.jpg"></a></span>';
+            commentDiv += '<span class="thumb thumb-sm pull-right"><a href="#"><img class="rounded-circle" src="assets/img/people/a5.jpg"></a></span>';
+            commentDiv += '<span class="thumb thumb-sm pull-right"><a href="#"><img class="rounded-circle" src="assets/img/people/a3.jpg"></a></span>';
+            commentDiv += '</div>';
+            commentDiv += '<ul class="post-comments mt-sm">';
+            commentDiv += '<li><span class="thumb-xs avatar pull-left mr-sm"><img alt="..." class="rounded-circle" src="assets/img/people/a1.jpg"></span>';
+            commentDiv += '<div class="comment-body">';
+            commentDiv += '<h6 class="author fs-sm fw-semi-bold">Admin <small>6 mins ago</small></h6><p>Users can then post replies to their PODs and they\'ll show up here</p></div></li>';
+            commentDiv += '<li><span class="thumb-xs avatar pull-left mr-sm"><img alt="..." class="rounded-circle" src="assets/img/avatar.png"></span>';
+            commentDiv += '<div class="comment-body"><input class="form-control form-control-sm" placeholder="Reply to this comment..." type="text"></div></li>';
+            commentDiv += '</ul>';
+            commentDiv += '</footer>';
+            commentDiv += '</section>';
+            commentDiv += '<form action="#" class="mt ng-untouched ng-pristine ng-valid" novalidate="">';
+            commentDiv += '<div class="form-group mb-0"><label class="sr-only" for="new-event">New event</label>';
+            commentDiv += '<textarea class="form-control" id="new-event" placeholder="Post something..." rows="3"></textarea>';
+            commentDiv += '</div>';
+            commentDiv += '<div class="btn-toolbar">';
+            commentDiv += '<div class="btn-group"><a class="btn btn-sm btn-gray" href="#"><i class="fa fa-camera fa-lg"></i></a><a class="btn btn-sm btn-gray" href="#"><i class="fa fa-map-marker fa-lg"></i></a></div>';
+            commentDiv += '<button class="btn btn-danger btn-sm ml-auto" type="submit">Post</button>';
+            commentDiv += '</div>';
+            commentDiv += '</form>';
+            commentDiv += '</section>';
+
+            d4.append(commentDiv);
             d.append(d4);
         }
 
@@ -10407,14 +10675,42 @@ function get_short_url(long_url, func)
 
 
 function doRobot(json){
+  json = htmlDecode(json);
   var obj = toJSONObject(json);
   var actions = obj.actions;
-  var action;
+  var type = actions.type;
+  var action, id = createId();
   for(i = 0; i < actions.length; i++){
     action = actions[i];
-    switch(action.type){
+    switch(action.id){
+      case "takeMainFocus": {
+        takeMainFocus(id, action.silent);
+      }; break;
+      case "addPropertyFacet": {
+        id = createId();
+        var tar = action.tar;
+        addPropertyFacet(id, action.prop, action.propLabel, action.val, action.valLabel, action.datatype, action.lang, action.silent);
+      }; break;
+      case "addPropertyOfFacet": {
+        id = createId();
+        var tar = action.tar;
+        addPropertyOfFacet(id, action.prop, action.propLabel, action.val, action.valLabel, action.datatype, action.lang, action.silent);
+      }; break;
       case "addClassFacet": {
-        addClassFacet(createId(), action.uri, action.label, action.silent);
+        id = createId();
+        addClassFacet(id, action.uri, action.label, action.silent);
+      }; break;
+      case "setGraphFacet": {
+        setGraphFacet(action.graph, action.graphLabel, action.silent);
+      }; break;
+      case "stackGraphFacet": {
+        stackGraphFacet(action.graph, action.graphLabel, action.silent);
+      }; break;
+      case "removeGraphFacet": {
+        removeGraphFacet(action.silent);
+      }; break;
+      case "clearFacets": {
+        clearFacets(action.silent);
       }; break;
     }
   }
