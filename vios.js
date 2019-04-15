@@ -120,14 +120,15 @@ function json2xml(o, tab) {
   Author:  Stefan Goessner/2006
   Web:     http://goessner.net/ 
 */
-function xml2json(xml, tab) {
+function xml2json(xml, tab, excludeAts) {
+  var atSymbol = (excludeAts) ? '' :'@';
    var X = {
       toObj: function(xml) {
          var o = {};
          if (xml.nodeType==1) {   // element node ..
             if (xml.attributes.length)   // element with attributes  ..
                for (var i=0; i<xml.attributes.length; i++)
-                  o["@"+xml.attributes[i].nodeName] = (xml.attributes[i].nodeValue||"").toString();
+                  o[atSymbol+xml.attributes[i].nodeName] = (xml.attributes[i].nodeValue||"").toString();
             if (xml.firstChild) { // element has child nodes ..
                var textChild=0, cdataChild=0, hasElementChild=false;
                for (var n=xml.firstChild; n; n=n.nextSibling) {
@@ -443,11 +444,13 @@ function stackQueryGraph(g, label){
 }
 
 function checkLibraries(){
-  if(getMainFocus().attr('class') != ID_QUERY) return;
-  var sparql = buildTypeCountQuery('http://www.w3.org/ns/sparql-service-description#NamedGraph');
-  var opt = new Object();
-  opt.tar = 'countDefaultLoadLibraries';
-  fct_sparql(sparql, opt);
+  if(getQueryGraph() && getQueryGraph().length > 0){
+    if(getMainFocus().attr('class') != ID_QUERY) return;
+    var sparql = buildTypeCountQuery('http://www.w3.org/ns/sparql-service-description#NamedGraph');
+    var opt = new Object();
+    opt.tar = 'countDefaultLoadLibraries';
+    fct_sparql(sparql, opt);
+  }
 }
 
 function clearQueryGraph(){
@@ -526,8 +529,8 @@ function getDbActivity(xml){
 //var fct_sparql, fct_time, fct_complete, fct_timeout, fct_dbActivity;
 
 var dataspace = 'http://lod.openlinksw.com';
-var service_fct = getProxyEndpoint(dataspace) + "/fct/service";
-var service_sparql = getProxyEndpoint(dataspace) + "/sparql";
+var service_fct = getRudiEndpoint(dataspace) + "/fct/service";
+var service_sparql = getRudiEndpoint(dataspace) + "/sparql";
 var service_fct_label = "LOD";
 var dataspaceAdded = false;
 
@@ -592,7 +595,7 @@ function formatDate(date) {
   return date.getMonth()+1 + "/" + date.getDate() + "/" + date.getFullYear() + "  " + strTime;
 }
 
-function getProxyEndpoint(url){
+function getRudiEndpoint(url){
 //  if(url == 'http://lod.openlinksw.com') url = 'http://dbpedia.org';
   if(url == 'http://localhost' || url == 'http://localhost/') return url;
   if(url.startsWith('http://127.0.0.1')) return url;
@@ -600,6 +603,17 @@ function getProxyEndpoint(url){
   url = url.replace('https://', 'https/');
 //  return 'http://poc.vios.network/proxy/-start-'+url+'-end-';
   return this_endpoint + '/rudi/'+url;
+  //return url;
+}
+
+function getProxyEndpoint(url){
+//  if(url == 'http://lod.openlinksw.com') url = 'http://dbpedia.org';
+  if(url == 'http://localhost' || url == 'http://localhost/') return url;
+  if(url.startsWith('http://127.0.0.1')) return url;
+  ///url = url.replace('http://', 'http/');
+  //url = url.replace('https://', 'https/');
+//  return 'http://poc.vios.network/proxy/-start-'+url+'-end-';
+  return this_endpoint + '/proxy'+url;
   //return url;
 }
 
@@ -662,6 +676,9 @@ function setMutex(mtx, type, isCount){
   else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT || type == VIEW_TYPE_TEXT){
     $('#recordsListWidgetContainer').attr('mutex', mtx);
   }
+  else if(type == 'fetchLibraries'){
+    $('.libraryLink').attr('mutex', mtx);
+  }
 }
 
 /** Returns the mutex associated with 'type' */
@@ -685,6 +702,9 @@ function getMutex(type, isCount){
   }
   else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT || type == VIEW_TYPE_TEXT){
     return $('#recordsListWidgetContainer').attr('mutex');
+  }
+  else if(type == 'fetchLibraries'){
+    return $('.libraryLink').attr('mutex');
   }
 }
 
@@ -945,7 +965,7 @@ function fct_sparql(sparql, opt){
   var id = sparql ? (sparqlSvr + sparql).hashCode() : 0;
 
   // need to use a register pattern for these
-  setMutex(id, opt.tar, opt.tar!='record' && opt.tar != 'countLibraries' && opt.tar != 'countGlossaries' && opt.tar != 'countHelp' && opt.tar != 'countDefaultLoadLibraries' && opt.tar != 'countDefaultLoadOriginLibraries');
+  setMutex(id, opt.tar, opt.tar!='record' && opt.tar != 'countLibraries' && opt.tar != 'countGlossaries' && opt.tar != 'countHelp' && opt.tar != 'countDefaultLoadLibraries' && opt.tar != 'countDefaultLoadOriginLibraries' && opt.tar != 'fetchLibraries');
   //q.attr('timeout', fct_queryTimeout);
   var resp;
   if(fct_isCache){
@@ -1011,6 +1031,12 @@ function fct_sparql(sparql, opt){
               }
               else if(opt.tar == 'countDefaultLoadOriginLibraries'){
                 fct_handleSparqlDefaultLoadOriginLibrariesCount(resp, opt);
+              }
+              else if(opt.tar == 'fetchLibraries'){
+                if(getMutex(opt.tar) != id){
+                  return;
+                }
+                fct_handleSparqlFetchLibraries(resp, opt);
               }
             }
 
@@ -1082,6 +1108,12 @@ function fct_sparql(sparql, opt){
               }              
               else if(opt.tar == 'countDefaultLoadOriginLibraries'){
                 fct_handleSparqlDefaultLoadOriginLibrariesCount(xml, opt);
+              }
+              else if(opt.tar == 'fetchLibraries'){
+                if(getMutex(opt.tar) != id){
+                  return;
+                }
+                fct_handleSparqlFetchLibraries(xml, opt);
               }
             }
           //console.log('sparql results: ' + xml);
@@ -1214,6 +1246,55 @@ function fct_handleSparqlDefaultLoadOriginLibrariesCount(xml, opt){
       }
     }
   });
+}
+
+function fct_handleSparqlFetchLibraries(xml, opt){
+
+  var results = $(xml).find('results');
+  $('result', results).each(function(i){
+    var graph = $($(this).children('binding')[0]).text().trim();
+    var graphLabel = $($(this).children('binding')[1]).text().trim();
+    if(!graphLabel || graphLabel.length <= 0) graphLabel = graph;
+    graphLabel = processLabel(graphLabel);
+    $('.libraryLink').attr('iri', graph);
+    $('.libraryLink').attr('irilabel', graphLabel);
+    $('.libraryLink').text('Library - '+graph);
+    $('.libraryLink').on('click', function(e){
+      linkOut(graph);
+    });
+
+
+
+
+    //if(dataSpace.indexOf('linkeddata.uriburner.com') > 0){
+      if($('#libraryRowLink') && $('#libraryRowLink').length > 0){
+        $('#libraryRowLink').on('click', function(e){
+          setGraphFacet(graph, graphLabel);
+        });
+        $('#libraryRowLink').text(graph);
+      }
+    //}
+
+
+
+  });
+
+/*
+  var results = $(xml).find('results');
+  $('result', results).each(function(i){
+    var ct = $(this).text().trim();
+    if(ct > 0){
+      if(
+        !_root.children('query').children('class[iri="dsn:data.vios.network/o/Origin"]') || 
+        _root.children('query').children('class[iri="dsn:data.vios.network/o/Origin"]').length <= 0
+      ) {
+        addClassFacet(createId(), 'dsn:data.vios.network/o/Origin', 'Origin');
+      }
+    }
+  });
+*/
+
+
 }
 
 
@@ -2923,6 +3004,12 @@ function init(){
 
 //************************************//
 
+
+        link = document.createElement('script');
+        link.type = 'application/javascript';
+        link.src = getProxyEndpoint('https://www.myersdaily.org/joseph/javascript/md5.js');
+        document.head.appendChild(link);
+
     if(!document.getElementById('id2')) { 
         /*var link = document.createElement('link');
         link.id = 'id2';
@@ -3420,7 +3507,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a id="ggg" class="ggg-toolbar-item dropdown-item" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
         gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="www-toolbar-item dropdown-item" data-target="#" onclick="linkOut()">WWW</a>';
         gbcol += '<div class="dropdown-divider"></div>';
-        gbcol += '<a class="dropdown-item" data-target="#">Library</a>';
+        gbcol += '<a class="libraryLink dropdown-item" data-target="#">Library</a>';
         gbcol += '</div>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
@@ -3743,7 +3830,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a id="ggg" class="ggg-toolbar-item dropdown-item" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
         gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="www-toolbar-item dropdown-item" data-target="#" onclick="linkOut()">WWW</a>';
           gbcol += '<div class="dropdown-divider"></div>';
-          gbcol += '<a class="dropdown-item" data-target="#">Library</a>';
+          gbcol += '<a class="libraryLink dropdown-item" data-target="#">Library</a>';
         gbcol += '</div>';
       gbcol += '</li>';
       /*
@@ -3927,7 +4014,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a id="ggg" class="ggg-toolbar-item dropdown-item" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
         gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="www-toolbar-item dropdown-item" data-target="#" onclick="linkOut()">WWW</a>';
           gbcol += '<div class="dropdown-divider"></div>';
-          gbcol += '<a class="dropdown-item" data-target="#">Library</a>';
+          gbcol += '<a class="libraryLink dropdown-item" data-target="#">Library</a>';
         gbcol += '</div>';
       gbcol += '</li>';
       /*
@@ -5506,6 +5593,9 @@ if(target.id == 'keywords'){
 
   }
   else{
+      if(target.parentNode && target.parentNode.getAttribute('id') == 'permalink'){
+        linkOut(target.parentNode.getAttribute('href'));
+      }
       $('#keywords').blur();
       $('#keywords').attr('disabled', 'true');
       $('#keywords').addClass('disabled');
@@ -5729,8 +5819,8 @@ function updatePermalink(){
       '&isChart=' + isChart() + 
       '&showIDN=' + showIDN + 
       '&filterRecordViewFields=' + filterRecordViewFields + 
-      //'&qxml=' + encodeURIComponent(_root.find('query').prop('outerHTML'));
-      '&qjson=' + encodeURIComponent( xml2json( xmlDoc , '' ) );
+      '&qxml=' + encodeURIComponent(_root.find('query').prop('outerHTML'));
+      //'&qjson=' + encodeURIComponent( xml2json( xmlDoc , '' ) );
   
     $('#permalink').attr('href', long_url); // use long url by default in case of rate limit
     $('#permalink').unbind('mouseover');
@@ -6306,8 +6396,8 @@ function selectDataspace(url, label, silent){
   service_fct_label = label;
   //service_fct = $('#dataSpaceMenu :selected').attr('value') + '/fct/service';
   //service_sparql = $('#dataSpaceMenu :selected').attr('value') + '/sparql';
-  service_fct = getProxyEndpoint(url) + '/fct/service';
-  service_sparql = getProxyEndpoint(url) + '/sparql';
+  service_fct = getRudiEndpoint(url) + '/fct/service';
+  service_sparql = getRudiEndpoint(url) + '/sparql';
   LABEL_ROOT = '<i class="fa fa-cube" style="padding-bottom:4px;padding-right:2px;"></i>Root';// getDataspaceLabel();//.toUpperCase(); //<i class="fa fa-home" style="padding-bottom:4px;padding-right:2px;"></i>
 
   //if(url.indexOf('data.vios.network') >= 0) LABEL_ROOT = 'VIOS';
@@ -8432,7 +8522,27 @@ function updateInfoTab(b){
   updatePermalink();
 }
 
+function fetchLibraries(){
+
+  $('.libraryLink').unbind('click');
+
+  if($('#libraryRowLink') && $('#libraryRowLink').length > 0){
+    $('#libraryRowLink').unbind('click');
+  }
+
+  $('.libraryLink').removeAttr('iri');
+  $('.libraryLink').removeAttr('irilabel');
+  $('.libraryLink').text('Library - none');
+  var sparql = 'select distinct ?g ?l where {graph ?g {<'+$('#angular_recordViewer').attr('iri')+'> ?p ?o. OPTIONAL{?g <http://www.w3.org/2000/01/rdf-schema#label> ?l} }} limit 1';
+  var opt = new Object();
+  opt.tar = 'fetchLibraries';
+  //$('.libraryRowCell').addClass('loading');
+  fct_sparql(sparql, opt);  
+}
+
 function loadDescribeResults(xml, opt) {
+    fetchLibraries();
+
     recordRDF = xml;
     $('#angular_recordViewer').empty();
 
@@ -8603,12 +8713,13 @@ function loadDescribeResults(xml, opt) {
             if (propIRI == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' && objectIRI == 'http://www.w3.org/2002/07/owl#Class') hasClass = true;
             if (propIRI == 'http://xmlns.com/foaf/0.1/depiction'){// || (namespaces[qname]+fragId) == 'http://xmlns.com/foaf/0.1/logo' ){
                 //hasImage = true;
+                objectIRI = objectIRI.replace('http://', 'https://');
                 img = '<div class="pull-right"><img onclick="javascript:linkOut(\'' + objectIRI + '\');" style="cursor:pointer;width:200px; margin-left:.55em;" class="class="rounded img-thumbnail" src="' + objectIRI + '"/></div>';
                 imgIri = objectIRI;
             }
             if (!desc && propLabel.endsWith(':comment')) desc = objectValue;
-            if (!desc && propLabel.endsWith(':abstract')) desc = objectValue;
-            if (propLabel.endsWith(':description')) desc = objectValue; // foaf:description always overrides comments and abstracts
+            if (propLabel.endsWith(':abstract')) desc = objectValue;
+            if (propLabel.endsWith(':description')) desc = objectValue; // foaf:description always overrides comments 
             if (propLabel.endsWith(':long')) long = objectValue;
             if (propLabel.endsWith(':lat')) lat = objectValue;
             if (propLabel.endsWith(':name')) name = objectValue;
@@ -8658,12 +8769,16 @@ function loadDescribeResults(xml, opt) {
 
             row = $.createElement('tr');
             col = $.createElement('td');
+            col.css('white-space', 'nowrap');
+            col.css('padding-right', '3em');
             //col.css('font-weight', '400');
             //col.addClass('d-none');
             //col.addClass('d-md-table-cell');
             proplink.on('click', function (e){
-              if(showRecordRoles)addPropertyOfFacet(createId(), propIRI, propLabel);
-              else addPropertyFacet(createId(), propIRI, propLabel);
+              var pid = createId();
+              if(showRecordRoles)addPropertyOfFacet(pid, propIRI, propLabel, undefined, undefined, undefined, undefined, true);
+              else addPropertyFacet(pid, propIRI, propLabel, undefined, undefined, undefined, undefined, true);
+              takeMainFocus(pid);
             });
             col.append(proplink);
             row.append(col);
@@ -8686,16 +8801,16 @@ function loadDescribeResults(xml, opt) {
             //col.addClass('d-md-table-cell');
             if (objectIRI == uri) {
                 if (subject) {
-                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + subject + '\', \'' + processLabel(subLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(subLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right fa fa-thumbs-o-up fa-lg text-success"></span><span class="hide hidable'+hid+' record-action-nix pull-right fa fa-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(subject) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
+                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + subject + '\', \'' + processLabel(subLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(subLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right fa fa-thumbs-o-up fa-lg text-inverse"></span><span class="hide hidable'+hid+' record-action-nix pull-right fa fa-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(subject) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
                     col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field fa fa-external-link fa-sm" onclick="linkOut(\''+subject+'\')"></i>');
                 } else col.text(objectValue);
             } else {
                 if (objectIRI) {
-                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(objLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right fa fa-thumbs-o-up fa-lg text-success"></span><span class="hide hidable'+hid+' record-action-nix pull-right fa fa-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(objectIRI) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
+                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(objLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right fa fa-thumbs-o-up fa-lg text-inverse"></span><span class="hide hidable'+hid+' record-action-nix pull-right fa fa-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(objectIRI) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
                     col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field fa fa-external-link fa-sm" onclick="linkOut(\''+objectIRI+'\')"></i>');
                 } else {
                     col.text(objectValue); 
-                    col.prepend('<span class="hide hidable'+hid+' record-action-nix pull-right fa fa-thumbs-o-down fa-lg text-danger"></span><span class="hide hidable'+hid+' record-action-highlight pull-right fa fa-thumbs-o-up fa-lg text-success"></span><span style="cursor:pointer" class="pull-right icon-literal glyphicon glyphicon-tag" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + sanitizeLabel(objectValue) + '\', \'uri\', \'' + lang + '\');"></span>' );
+                    col.prepend('<span class="hide hidable'+hid+' record-action-nix pull-right fa fa-thumbs-o-down fa-lg text-danger"></span><span class="hide hidable'+hid+' record-action-highlight pull-right fa fa-thumbs-o-up fa-lg text-inverse"></span><span style="cursor:pointer" class="pull-right icon-literal glyphicon glyphicon-tag" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + sanitizeLabel(objectValue) + '\', \'uri\', \'' + lang + '\');"></span>' );
                     col.append('&nbsp;&nbsp;<i id="' + cid + '" onmouseout="$(\'.hidable' + hid + '\').tooltip(\'hide\');$(\'.hidable' + hid + '\').attr(\'data-original-title\', \'Copy to clipboard\');$(\'.hidable' + hid + '\').tooltip();" ' + buildTitle('Copy to clipboard') + ' onclick="javascript:$(\'.hidable' + hid + '\').tooltip(\'hide\');copy(\'' + sanitizeLabel(objectValue) + '\'); $(\'.hidable' + hid + '\').attr(\'data-original-title\', \'Copied\');$(\'.hidable' + hid + '\').tooltip(\'show\');" style="cursor:pointer;" class="hide hidable'+hid+' fa fa-copy fa-sm"></i>');
                 }
             }
@@ -8705,6 +8820,27 @@ function loadDescribeResults(xml, opt) {
         });
     });
 
+    var libraryIRI = $('.libraryLink').attr('iri');
+    var libraryLabel = $('.libraryLink').attr('irilabel');
+    var onclick = 'onclick="javascript:setGraphFacet(\''+libraryIRI+'\', \''+libraryLabel+'\');"';
+    if(!libraryIRI || libraryIRI == 'undefined') {
+      libraryIRI = 'unavailable';
+      libraryLabel = 'unavailable';
+      onclick = '';
+    }
+    body.prepend('<tr><td class="libraryRowCell">library</td><td class="libraryRowCell" style="width:100%"><a id="libraryRowLink" '+buildTitle( libraryIRI )+' '+onclick+' class="link-field">'+libraryIRI+'</a></td></tr>');
+
+/*
+    var graph = $('.libraryLink').attr('iri');
+    if(dataspace.indexOf('linkeddata.uriburner.com') > 0 && graph && graph.length > 0) uri = graph;
+    if(!uriLabel || uriLabel.length <= 0){
+      uriLabel = uri;
+      if (getLabel(uri)) uriLabel = getLabel(uri);
+      uriLabel = processLabel(uriLabel).replace(/\b\w/g, function(l) {
+          return l.toUpperCase()
+      });
+    }
+*/
     uriLabel = uriLabel.replace('\'S', '\'s');
     uriLabel = uriLabel.replace('\'T', '\'t');
 
@@ -8764,7 +8900,7 @@ content += '</section>';
         content += '<div class="row">';
         content += '<div class="col-md-5 col-12 text-center">';
         content += '<div class="post-user post-user-profile">';
-        content += '<span class="thumb-xl"><img alt="..." class="rounded-circle" src="assets/img/people/a5.jpg"></span>';
+        content += '<span class="thumb-xl"><img alt="..." class="rounded-circle" src="assets/img/avatar.png"></span>';
         content += '<h5 class="fw-normal">IDN: '+uriLabel+'</h5>';
         content += '<p>Owner: jnash</p>';
         content += '<p>Price: 0.03 ETH</p>';
@@ -8921,7 +9057,7 @@ content += '</section>';
         }
         uriLabel = uriLabel.trim();
 
-        $('#angular_recordViewer').append('<h3 onclick="javascript:linkOut(\'' + uri + '\');" ' + buildTitle('Visit ' + sanitizeLabel(uri)) + ' style="cursor:pointer;padding-top:1em; padding-left:.55rem; padding-right:.55rem;">' + uriLabel + '</h3>' + (tools ? tools : '') + '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \'' + sanitizeLabel(uri) + '\')" class="p-2 la la-ellipsis-v la-2x text-' + ((filterRecordViewFields) ? 'muted' : 'primary') + '"></i>');//glyphicon glyphicon-filter //((body.children().length <= 0 && filterRecordViewFields)?'<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = false; describe(\''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-info"></i>':''));
+        $('#angular_recordViewer').append('<h3 id="recordTitle" onclick="javascript:linkOut(\'' + uri + '\');" ' + buildTitle('Visit ' + sanitizeLabel(uri)) + ' style="cursor:pointer;padding-top:1em; padding-left:.55rem; padding-right:.55rem;">' + uriLabel + '</h3>' + (tools ? tools : '') + '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \'' + sanitizeLabel(uri) + '\')" class="p-2 la la-ellipsis-v la-2x text-' + ((filterRecordViewFields) ? 'primary' : 'danger') + '"></i>');//glyphicon glyphicon-filter //((body.children().length <= 0 && filterRecordViewFields)?'<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = false; describe(\''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-info"></i>':''));
         if (desc) {
             $('#angular_recordViewer').append('<div style="padding-left:.55rem; padding-right:.55rem; ">' + (img ? img + desc : desc) + '</div>');
         } else if (img) {
@@ -8950,13 +9086,6 @@ content += '</section>';
         $('#angular_recordViewer').append('<p/>');
         $('#angular_recordViewer').append('<p/>');
         var tabs = '<div class="clearfix"><ul class="nav nav-tabs float-left" id="infoTabButton" role="tablist"> ';
-        if (isFastFood) {
-            tabs += '<li class="nav-item"><a aria-controls="menu" aria-expanded="false" class="nav-link" data-toggle="tab" href="#menu" id="menu-tab" role="tab">Menu</a></li>';
-            tabs += '<li class="nav-item"><a aria-controls="review" aria-expanded="false" class="nav-link" data-toggle="tab" href="#review" id="review-tab" role="tab">Reviews</a></li>';
-        }
-        if (comments.length > 0) {
-            tabs += '<li class="nav-item"><a aria-controls="comments" aria-expanded="false" class="nav-link" data-toggle="tab" href="#comments" id="menu-comments" role="tab">Comments</a></li>';
-        }
         //tabs += '<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"> Dropdown <b class="caret"></b></a><div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 45px, 0px); top: 0px; left: 0px; will-change: transform;"><a aria-controls="dropdown1" aria-expanded="true" class="dropdown-item show" data-toggle="tab" href="#dropdown1" id="dropdown1-tab" role="tab" aria-selected="true">@fat</a><a aria-controls="dropdown2" aria-expanded="true" class="dropdown-item active show" data-toggle="tab" href="#dropdown2" id="dropdown2-tab" role="tab" aria-selected="true">@mdo</a></div></li>
         tabs += '<li class="nav-item dropdown">';
         tabs += '<a aria-controls="info" aria-haspopup="true" aria-expanded="true" class="nav-link dropdown-toggle active" data-toggle="dropdown" href="#info" id="info-tab" role="button"> Info <b class="caret"></b></a>';
@@ -8965,6 +9094,13 @@ content += '</section>';
         tabs += '<a onclick="javascript:updateInfoTab(true);" aria-controls="roles" aria-expanded="false" class="dropdown-item show'+((showRecordRoles) ? ' active' : '')+'" data-toggle="tab" href="#roles" id="roles-tab" role="tab" aria-selected="'+((showRecordRoles) ? 'true' : 'false')+'">Roles</a></div>';
         tabs += '</li>';
         tabs += '<li class="nav-item"><a aria-controls="tools" aria-expanded="false" class="nav-link" data-toggle="tab" href="#tools" id="tools-tab" role="tab"> Options </a></li>';
+        if (isFastFood) {
+            tabs += '<li class="nav-item"><a aria-controls="menu" aria-expanded="false" class="nav-link" data-toggle="tab" href="#menu" id="menu-tab" role="tab">Menu</a></li>';
+            tabs += '<li class="nav-item"><a aria-controls="review" aria-expanded="false" class="nav-link" data-toggle="tab" href="#review" id="review-tab" role="tab">Reviews</a></li>';
+        }
+        if (comments.length > 0) {
+            tabs += '<li class="nav-item"><a aria-controls="comments" aria-expanded="false" class="nav-link" data-toggle="tab" href="#comments" id="menu-comments" role="tab">Comments</a></li>';
+        }
         tabs += '</ul></div>';
         $('#angular_recordViewer').append(tabs);
         var d = $.createElement('div');
@@ -9164,7 +9300,7 @@ content += '</section>';
             for(j = 0; j < comments.length; j++){
               commentDiv += '<section class="event">';            
               commentDiv += '<span class="thumb-sm avatar pull-left mr-sm">';
-              commentDiv += '<img alt="..." class="rounded-circle" src="assets/img/people/a5.jpg">';
+              commentDiv += '<img alt="..." class="rounded-circle" src="assets/img/avatar.png">';
               commentDiv += '</span>';
               commentDiv += '<h5 class="event-heading">';
               commentDiv += '<a href="#">Unknown author</a>';
@@ -9201,7 +9337,7 @@ content += '</section>';
             commentDiv += '<span class="thumb thumb-sm pull-right"><a href="#"><img class="rounded-circle" src="assets/img/people/a3.jpg"></a></span>';
             commentDiv += '</div>';
             commentDiv += '<ul class="post-comments mt-sm">';
-            commentDiv += '<li><span class="thumb-xs avatar pull-left mr-sm"><img alt="..." class="rounded-circle" src="assets/img/people/a1.jpg"></span>';
+            commentDiv += '<li><span class="thumb-xs avatar pull-left mr-sm"><img alt="..." class="rounded-circle" src="assets/img/avatar.png"></span>';
             commentDiv += '<div class="comment-body">';
             commentDiv += '<h6 class="author fs-sm fw-semi-bold">Admin <small>6 mins ago</small></h6><p>Users can then post replies to their PODs and they\'ll show up here</p></div></li>';
             commentDiv += '<li><span class="thumb-xs avatar pull-left mr-sm"><img alt="..." class="rounded-circle" src="assets/img/avatar.png"></span>';
@@ -9921,7 +10057,7 @@ function describe(id, src, isGGGRecord){
 
     var opt = new Object();
     opt.tar = 'record';
-    if(isGGGRecord) opt.srv = getProxyEndpoint( 'http://linkeddata.uriburner.com/sparql' );
+    if(isGGGRecord) opt.srv = getRudiEndpoint( 'http://linkeddata.uriburner.com/sparql' );
     if(id) {
       opt.srcId = id;
       //if(id == 'recordNavBar') $('.'+id).addClass('loading');
@@ -10664,7 +10800,7 @@ function get_short_url(long_url, func)
         },
         function(response)
         {
-            if(response.c_uri) func(response.c_uri);
+            if(response.c_uri) func(response.c_uri.replace('http://','https://'));
             $('#permalink').removeClass('text-default');
             $('#permalink').addClass('text-info');
             $('#permalink > i').removeClass('la-chain-broken');
@@ -10717,24 +10853,55 @@ function doRobot(json){
 }
 
 
-function get_urib_nonce()
+var urib_nonce;
+var urib_password = '24ETjpx!g44!1GlBue';
+function doURIBurnerLogin()
 {
 $.ajax({
 
-    url : getProxyEndpoint( 'https://linkeddata.uriburner.com/val/api/request_login_nonce' ),
+    url : getProxyEndpoint( 'http://linkeddata.uriburner.com/val/api/request_login_nonce' ),
     type : 'GET',
     data : {
-        'numberOfWords' : 10
+        //'numberOfWords' : 10
     },
     dataType:'text/html',
     success : function(data) {              
-        alert('Data: '+data);
+        //alert('Data: '+data);
+        urib_nonce = data.responseText;
+        var pwdHash = md5(urib_password + urib_nonce);
+        get_urib_session('digest', pwdHash, urib_nonce, encodeURIComponent('http://www.openlinksw.com/ontology/acl#DefaultRealm'), 'rudi');
     },
     error : function(request,error)
     {
-        alert("Request: "+JSON.stringify(request));
+        //console.log("Error in request: "+request+error);
+        urib_nonce = request.responseText;
+        var pwdHash = md5(urib_password + urib_nonce);
+        get_urib_session('digest', pwdHash, urib_nonce, 'http%253A%252F%252Fwww.openlinksw.com%252Fontology%252Facl%2523DefaultRealm', 'rudi');
     }
 });
+}
+
+function get_urib_session(service, pwdHash, nonce, realm, usr){
+  $.ajax({
+
+    url : getProxyEndpoint( 'https://linkeddata.uriburner.com/sparql/login.vsp' ),
+    type : 'POST',
+    data : {
+        'service' : service,
+        'pwdHash' : pwdHash,
+        'nonce' : nonce,
+        'realm' : realm,
+        'usr' : usr
+    },
+    dataType:'text/html',
+    success : function(data) {
+      console.log('URIBurner login successful');
+    },
+    error : function(request,error)
+    {
+        console.log("Error in request: "+error);
+    }
+  });
 }
 
 

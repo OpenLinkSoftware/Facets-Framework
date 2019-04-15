@@ -76,7 +76,7 @@
 }
 
 
-header.loading, #wallet-tab.loading, wallets-modal.modal-header.loading {
+header.loading, #wallet-tab.loading, wallets-modal div.loading {
   background-color: #547fff;
   animation-name: loading;
   animation-duration: 2s;
