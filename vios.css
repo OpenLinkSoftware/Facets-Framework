@@ -614,10 +614,18 @@ p.text-match-subject{
     background-color: transparent!important;
     -webkit-text-decoration-skip: objects!important;
 }
-.link-category:hover, .link-category-odd:hover{
+.link-category:hover, .link-category-odd:hover, .link-field:hover, .link-prop-field:hover{
+    /*color: #7d39db!important;*/
     color: #165c82!important;
   text-decoration: none!important;
 }
+
+i.link-field:hover{
+    color: #165c82!important;
+  text-decoration: none!important;
+}
+
+
 .text-warning-hack {
     color: #ffc247 !important;
 }

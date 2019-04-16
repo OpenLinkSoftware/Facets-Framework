@@ -346,7 +346,7 @@ function fct_init(){
 }
 
 function getQuery(){
-  return $(_root.children('query')); //TODO: this code needs to be refactored to use getter/setters in place of the calls to _root, also, need to replace the string concats with more efficient routines
+  return $(_root.children('query')[0]); //TODO: this code needs to be refactored to use getter/setters in place of the calls to _root, also, need to replace the string concats with more efficient routines
 }
 
 function setQueryText(str){
@@ -597,7 +597,7 @@ function formatDate(date) {
 
 function getRudiEndpoint(url){
 //  if(url == 'http://lod.openlinksw.com') url = 'http://dbpedia.org';
-  if(url == 'http://localhost' || url == 'http://localhost/') return url;
+  if(url.startsWith( 'http://localhost') || url.startsWith('http://localhost/') || url .startsWith('http://127.0.0.1') || url.startsWith('http://127.0.0.1/')) return url;
   if(url.startsWith('http://127.0.0.1')) return url;
   url = url.replace('http://', 'http/');
   url = url.replace('https://', 'https/');
@@ -733,7 +733,7 @@ function fct_query(q, viewType, opt){
   var resp;
   if(fct_isCache){
     try{
-      resp = localStorage.getItem(id);
+      resp = sessionStorage.getItem(id);
       if(!resp || resp.length == 0) resp = fct_cache[id];
     }
     catch(err){ // TODO: what if localstorage *is* available, but something else went wrong on this try
@@ -788,9 +788,13 @@ function fct_query(q, viewType, opt){
     updatePermalink();
     return;
   }
+
+
+  var headers = {};
+  if(!service_fct.startsWith('http://127.0.0.1')) headers = {'X-VIOS-AGENT': ((opt.tar && opt.tar.length > 0) ? opt.tar : viewType), 'X-VIOS-Type': 'fct', 'X-VIOS-QID': id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid, 'X-VIOS-BID': bid};
   var req = $.ajax({
       url: service_fct,
-      headers: {'X-VIOS-AGENT': ((opt.tar && opt.tar.length > 0) ? opt.tar : viewType), 'X-VIOS-Type': 'fct', 'X-VIOS-QID': id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid, 'X-VIOS-BID': bid},
+      headers: headers,
       data: $(q).prop('outerHTML'), 
       type: 'POST',
       contentType: "text/xml",
@@ -854,7 +858,7 @@ function fct_query(q, viewType, opt){
 
           if(fct_isCache){
             try{
-              localStorage.setItem(id, xml);
+              sessionStorage.setItem(id, xml);
             }
             catch(err){
               fct_cache[id] = xml;
@@ -965,12 +969,12 @@ function fct_sparql(sparql, opt){
   var id = sparql ? (sparqlSvr + sparql).hashCode() : 0;
 
   // need to use a register pattern for these
-  setMutex(id, opt.tar, opt.tar!='record' && opt.tar != 'countLibraries' && opt.tar != 'countGlossaries' && opt.tar != 'countHelp' && opt.tar != 'countDefaultLoadLibraries' && opt.tar != 'countDefaultLoadOriginLibraries' && opt.tar != 'fetchLibraries');
+  setMutex(id, opt.tar, opt.tar!='record' && opt.tar != 'countLibraries' && opt.tar != 'countGlossaries' && opt.tar != 'countHelp' && opt.tar != 'countDefaultLoadLibraries' && opt.tar != 'countDefaultLoadOriginLibraries' && opt.tar != 'fetchLibraries' && opt.tar != 'fetchContentDesc');
   //q.attr('timeout', fct_queryTimeout);
   var resp;
   if(fct_isCache){
     try{
-      resp = localStorage.getItem(id);
+      resp = sessionStorage.getItem(id);
       if(!resp || resp.length == 0) resp = fct_cache[id];
     }
     catch(err){ // TODO: what if localstorage *is* available, but something else went wrong on this try
@@ -1038,6 +1042,9 @@ function fct_sparql(sparql, opt){
                 }
                 fct_handleSparqlFetchLibraries(resp, opt);
               }
+              else if(opt.tar == 'fetchContentDesc'){
+                fct_handleSparqlFetchContentDesc(resp, opt);
+              }
             }
 
     updatePermalink();
@@ -1046,11 +1053,13 @@ function fct_sparql(sparql, opt){
 
   var accept = 'application/sparql-results+xml';
   if(opt.tar == 'record') accept = 'application/rdf+xml';
+  var headers = {'Accept': accept};
+  if(!sparqlSvr.startsWith('http://127.0.0.1')) headers = {'Accept': accept, 'X-VIOS-AGENT': opt.tar,'X-VIOS-Type': 'sparql', 'X-VIOS-QID': (isMainQueryCount) ? getQuery().attr('qid') : id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid, 'X-VIOS-BID': bid};
   var isMainQueryCount = opt && (opt.tar == 'showMeMenu' || opt.tar == 'groupByMenu');
   var req = $.ajax({
       url: sparqlSvr + '?query=' + encodeURIComponent(sparql),// + '&timeout='+fct_queryTimeout,
       type: 'GET',
-      headers: {'X-VIOS-AGENT': opt.tar,'Accept': accept, 'X-VIOS-Type': 'sparql', 'X-VIOS-QID': (isMainQueryCount) ? getQuery().attr('qid') : id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid, 'X-VIOS-BID': bid},
+      headers: headers,
       dataType: "text", // POI: can't do dataType: xml, since the service sometimes returns malformed XML
       beforeSend: function(jqXHR, settings) {
           jqXHR.url = settings.url;
@@ -1115,11 +1124,14 @@ function fct_sparql(sparql, opt){
                 }
                 fct_handleSparqlFetchLibraries(xml, opt);
               }
+              else if(opt.tar == 'fetchContentDesc'){
+                fct_handleSparqlFetchContentDesc(xml, opt);
+              }
             }
           //console.log('sparql results: ' + xml);
           if(fct_isCache){
             try{
-              localStorage.setItem(id, xml);
+              sessionStorage.setItem(id, xml);
             }
             catch(err){
               fct_cache[id] = xml;
@@ -1248,12 +1260,30 @@ function fct_handleSparqlDefaultLoadOriginLibrariesCount(xml, opt){
   });
 }
 
+function fct_handleSparqlFetchContentDesc(xml, opt){
+    var results = $(xml).find('results');
+  $('result', results).each(function(i){
+    var content = $($(this).children('binding')[0]).text().trim();
+    var snip = content;
+    if(content.indexOf('.') > 0){
+      var snip = content.substring(0, content.indexOf('.')) + '.';
+      content = content.substring(content.indexOf('.')+1);
+      if(content.indexOf('.') > 0){
+        snip += ' ' + content.substring(0, content.indexOf('.')) + '.';
+      }
+    }
+    $('#'+opt.id).append('<span class="help-block">'+snip+'</span>');
+  });
+
+}
+
 function fct_handleSparqlFetchLibraries(xml, opt){
 
   var results = $(xml).find('results');
   $('result', results).each(function(i){
     var graph = $($(this).children('binding')[0]).text().trim();
-    var graphLabel = $($(this).children('binding')[1]).text().trim();
+    var graphLabel = $($(this).children('binding')[1]);
+    if(graphLabel && graphLabel.length > 0) graphLabel = graphLabel.text();
     if(!graphLabel || graphLabel.length <= 0) graphLabel = graph;
     graphLabel = processLabel(graphLabel);
     $('.libraryLink').attr('iri', graph);
@@ -1271,8 +1301,14 @@ function fct_handleSparqlFetchLibraries(xml, opt){
         $('#libraryRowLink').on('click', function(e){
           setGraphFacet(graph, graphLabel);
         });
+        $('.libraryRowLinkOut').on('click', function(e){
+          linkOut(graph);
+        });
         $('#libraryRowLink').text(graph);
       }
+
+      setTitleOnElement($('#libraryRowLink'), graphLabel);
+
     //}
 
 
@@ -2759,7 +2795,7 @@ var TAG_GRAPH = 'g';
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://poc.vios.network";
 var this_endpoint = 'https://dev.vios.network';
 
-var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qPage, qshowMePage, qTimeout, qNavType, qSubjectBadges, qVerticalChartHeaders, qViewType, qIsChart, qIsRollup, qShowIDN, qFilterRecordViewFields;
+var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qPage, qshowMePage, qTimeout, qNavType, qSubjectBadges, qVerticalChartHeaders, qViewType, qIsChart, qIsRollup, qShowIDN, qFilterRecordViewFields, qShowRecordRoles;
 
 var icon_folder_black = 'http://icon-park.com/imagefiles/folder_icon_black.png';
 var icon_file = 'http://myopenlink.net/DAV/home/sdmonroe/img/blank-file-xxl.png';
@@ -3937,7 +3973,7 @@ gbcol += '<header id="showMeHeader">';
 
         gbcol += '<div class="widget-controls">';
           //gbcol += '<a data-target="#"><i class="fa fa-refresh"></i></a>';
-          gbcol += '<a data-target="#" id="alignButton" class="disabled" ><i class="glyphicon glyphicon-filter text-secondary" '+buildTitle('Align this subject to its parent smart folders')+'></i></a>';
+          gbcol += '<a data-target="#" id="alignButton" class="disabled" ><i class="fa fa-filter text-secondary" '+buildTitle('Align this subject to its parent smart folders')+'></i></a>';
           gbcol += '<a data-target="#" id="showMeLeftButton" '+buildTitle('')+' class="hide" onclick="javascript:showMePageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
           gbcol += '<a data-target="#" id="showMeRightButton" '+buildTitle('')+' class="hide" onclick="javascript:showMePageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
 //          gbcol += '<a data-widgster="close" data-target="#"><i class="glyphicon glyphicon-remove"></i></a>';
@@ -4362,11 +4398,16 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     qShowIDN = fct_getUrlParameter('showIDN');
     qSubjectBadges = fct_getUrlParameter('subjectBadges');
     qFilterRecordViewFields = fct_getUrlParameter('filterRecordViewFields');
+    qShowRecordRoles = fct_getUrlParameter('showRecordRoles');
 
     qVerticalChartHeaders = fct_getUrlParameter('verticalChartHeaders');
 
     qIsRollup = fct_getUrlParameter('isRollup');
 
+    if(qShowRecordRoles && qShowRecordRoles.length > 0) {
+      showRecordRoles = qShowRecordRoles == 'true';
+      qShowRecordRoles = null;
+    }
     if(qShowMe && qShowMe.length > 0) {
       selectMenuItem('showMeMenu', qShowMe, true);
       qShowMe = null;
@@ -5818,6 +5859,7 @@ function updatePermalink(){
       '&isRollup=' + isRollup() + 
       '&isChart=' + isChart() + 
       '&showIDN=' + showIDN + 
+      '&showRecordRoles=' + showRecordRoles +
       '&filterRecordViewFields=' + filterRecordViewFields + 
       '&qxml=' + encodeURIComponent(_root.find('query').prop('outerHTML'));
       //'&qjson=' + encodeURIComponent( xml2json( xmlDoc , '' ) );
@@ -6216,6 +6258,7 @@ function checkArrowRightButton(){
     $('.la-arrow-right').parent().addClass('hide');
   }
   else {
+    if(!getMainFocus().prop('nodeName')) return;
     var q = getQuery().clone();
     var p = $.createElement(getMainFocus().prop('nodeName').toLowerCase());
     var pid = createId();
@@ -6294,6 +6337,14 @@ function doRemoveDataspace(dsurl, silent){
 
 function doSetLibrary(){
   setGraphFacet('dsn:'+dataspace.replace('http://', '').replace('https://', '')+'/help', 'Help Contents');
+}
+
+function buildGraphClause(where){
+  if(getQueryGraph() && getQueryGraph().length > 0){
+    where = '{graph <'+getQueryGraph()+'> {' + where + '}}';
+  }
+  else where = '{' + where + '}';
+  return where;
 }
 
 function buildTypeCountQuery(clazz){
@@ -7315,7 +7366,7 @@ if(true){
                           rows += '</div>';*/
 
                           rows += '<button '+buildTitle('Enter '+label+' Library', 'top')+' id="filterbtn'+id+'" class="hide hidable'+id+' btn btn-warning btn-xs mb-xs btn-set-focus" type="button" onclick="javascript:takeMainFocus(ID_QUERY); clearFacets(true); stackGraphFacet(\''+value+'\', \''+label+'\');"><b class="fa fa-sign-in"></b></button>';
-                          rows += '<button '+buildTitle('Apply filter', 'right')+' id="entbtn'+id+'" class="hide hidable'+id+' btn btn-warning btn-xs mb-xs btn-enter-lib" type="button" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')"><b class="glyphicon glyphicon-filter"></b></button>';
+                          rows += '<button '+buildTitle('Apply filter', 'right')+' id="entbtn'+id+'" class="hide hidable'+id+' btn btn-warning btn-xs mb-xs btn-enter-lib" type="button" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')"><b class="fa fa-filter"></b></button>';
                     rows = rows.replace('id="'+opts.parentId+'"', 'id="'+opts.parentId+'" style="border-left: 3px solid #ffc247;"');
                     //rows = rows.replace('<h6 id="rw'+rowId+'"', '<span _ngcontent-c9="" class="badge badge-pill badge-warning">8</span><h6 id="rw'+rowId+'""');
                     rows = rows.replace('class="rounded-circle"', 'class="rounded-circle hide"');
@@ -8522,8 +8573,7 @@ function updateInfoTab(b){
   updatePermalink();
 }
 
-function fetchLibraries(){
-
+function prepareFetchLibraries(){
   $('.libraryLink').unbind('click');
 
   if($('#libraryRowLink') && $('#libraryRowLink').length > 0){
@@ -8532,8 +8582,22 @@ function fetchLibraries(){
 
   $('.libraryLink').removeAttr('iri');
   $('.libraryLink').removeAttr('irilabel');
-  $('.libraryLink').text('Library - none');
-  var sparql = 'select distinct ?g ?l where {graph ?g {<'+$('#angular_recordViewer').attr('iri')+'> ?p ?o. OPTIONAL{?g <http://www.w3.org/2000/01/rdf-schema#label> ?l} }} limit 1';
+  $('.libraryLink').text('Library - unavailable');  
+}
+
+function fetchContentDesc(iri, id){
+  var graphClause = buildGraphClause('{<'+iri+'> <http://purl.org/dc/terms/description> ?o.} UNION {<'+iri+'> <http://www.w3.org/2000/01/rdf-schema#comment> ?o.}');
+  var sparql = 'select distinct ?o where{'+graphClause+'} limit 1';
+  var opt = new Object();
+  opt.tar = 'fetchContentDesc';
+  opt.id = id;
+  //$('.libraryRowCell').addClass('loading');
+  fct_sparql(sparql, opt);  
+}
+
+function fetchLibraries(s, p, oIRI, oValue){
+  var union = (oIRI) ? 'UNION {'+((oIRI && oIRI != 'undefined')? '<'+oIRI+'>' : '?o')+' <'+p+'> <'+s+'>.}' : '';
+  var sparql = 'select distinct ?g ?l where {graph ?g {{<'+s+'> <'+p+'> '+((oIRI && oIRI != 'undefined')? '<'+oIRI+'>' : '?o')+'.} '+union+' OPTIONAL{?g <http://www.w3.org/2000/01/rdf-schema#label> ?l} }}  limit 1';
   var opt = new Object();
   opt.tar = 'fetchLibraries';
   //$('.libraryRowCell').addClass('loading');
@@ -8541,7 +8605,9 @@ function fetchLibraries(){
 }
 
 function loadDescribeResults(xml, opt) {
-    fetchLibraries();
+    var fixmeTop = $('.record-table').offset()
+    if(fixmeTop) fixmeTop = fixmeTop.top;     
+    prepareFetchLibraries();
 
     recordRDF = xml;
     $('#angular_recordViewer').empty();
@@ -8565,6 +8631,7 @@ function loadDescribeResults(xml, opt) {
     //var description = $(xml).children('rdf\\:Description')[0];
     //var triples = description.children();
     var table = $.createElement('table');
+    table.addClass('record-table');
     table.addClass('table');
     table.addClass('table-hover');
     if(isTableStriped) table.addClass('table-striped');
@@ -8648,9 +8715,12 @@ function loadDescribeResults(xml, opt) {
 
     var comments = new Array();
 
+    var libraryFetched;
+
     var rows = '';
     $('rdf\\:Description', xml).each(function(i) {
         var subject = $(this).attr('rdf:about');
+        if(!subject) subject = 'nodeID://'+$(this).attr('rdf:nodeID');
         var subLabel = subject;
         if (getLabel(subject)) subLabel = getLabel(subject);
         $('*', this).each(function(j) {
@@ -8711,15 +8781,15 @@ function loadDescribeResults(xml, opt) {
                 return l.toUpperCase()
             });
             if (propIRI == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' && objectIRI == 'http://www.w3.org/2002/07/owl#Class') hasClass = true;
-            if (propIRI == 'http://xmlns.com/foaf/0.1/depiction'){// || (namespaces[qname]+fragId) == 'http://xmlns.com/foaf/0.1/logo' ){
+            if (propIRI == 'http://xmlns.com/foaf/0.1/depiction' && objectIRI && objectIRI.length > 0){// || (namespaces[qname]+fragId) == 'http://xmlns.com/foaf/0.1/logo' ){
                 //hasImage = true;
                 objectIRI = objectIRI.replace('http://', 'https://');
                 img = '<div class="pull-right"><img onclick="javascript:linkOut(\'' + objectIRI + '\');" style="cursor:pointer;width:200px; margin-left:.55em;" class="class="rounded img-thumbnail" src="' + objectIRI + '"/></div>';
                 imgIri = objectIRI;
             }
-            if (!desc && propLabel.endsWith(':comment')) desc = objectValue;
-            if (propLabel.endsWith(':abstract')) desc = objectValue;
-            if (propLabel.endsWith(':description')) desc = objectValue; // foaf:description always overrides comments 
+            if (!desc && propLabel.endsWith('comment')) desc = objectValue;
+            if (propLabel.endsWith('abstract')) desc = objectValue;
+            if (propLabel.endsWith('description')) desc = objectValue; // foaf:description always overrides comments 
             if (propLabel.endsWith(':long')) long = objectValue;
             if (propLabel.endsWith(':lat')) lat = objectValue;
             if (propLabel.endsWith(':name')) name = objectValue;
@@ -8745,9 +8815,14 @@ function loadDescribeResults(xml, opt) {
             if (propLabel == 'RDF:TYPE') propLabel = 'category';
             proplink.css('color', '#495057');
             proplink.css('text-decoration', 'none');
+            proplink.addClass('link-prop-field');
             //propLabel = propLabel.toLowerCase();
 
 
+            if(!libraryFetched){
+              fetchLibraries(subject, propIRI, objectIRI, objectValue);
+              libraryFetched = true;
+            }
 
             // skip the row if...
             if (isRole && !showRecordRoles) return;
@@ -8781,10 +8856,38 @@ function loadDescribeResults(xml, opt) {
               takeMainFocus(pid);
             });
             col.append(proplink);
+
+            var hid = createId();
+            var filterBtn = $.createElement('i');
+            filterBtn.addClass('la');
+            filterBtn.addClass('la-filter');
+            filterBtn.addClass('text-primary');
+            filterBtn.addClass('hide');
+            filterBtn.css('position', 'absolute');
+            filterBtn.css('cursor', 'pointer');
+            filterBtn.on('click', function (e){
+              filterRecordViewFields = true;
+              if(showRecordRoles) addPropertyOfFacet(createId(), propIRI, propLabel);
+              else addPropertyFacet(createId(), propIRI, propLabel);
+            });
+            filterBtn.addClass('hidable'+hid);
+            col.append('&nbsp;&nbsp;');
+            col.append(filterBtn);
+            col.on('mouseover', function() {
+                $('.hidable' + hid).removeClass('hide');
+            });
+            col.on('mouseout', function() {
+                $('.hidable' + hid).addClass('hide');
+            });
+
             row.append(col);
 
             col = $.createElement('td');
-            var hid = createId();
+            col.attr('id', createId());
+            var gloss = getMainFocus().children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]');
+            if(gloss && gloss.length > 0 && propIRI == 'http://dbpedia.org/property/content' && objectIRI && objectIRI.length > 0){
+              fetchContentDesc(objectIRI, col.attr('id'));
+            }
             var cid = 'copy_' + createId();
             var loid = 'linkout_' + createId();
             col.on('mouseover', function() {
@@ -8801,34 +8904,38 @@ function loadDescribeResults(xml, opt) {
             //col.addClass('d-md-table-cell');
             if (objectIRI == uri) {
                 if (subject) {
-                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + subject + '\', \'' + processLabel(subLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(subLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right fa fa-thumbs-o-up fa-lg text-inverse"></span><span class="hide hidable'+hid+' record-action-nix pull-right fa fa-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(subject) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
+                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + subject + '\', \'' + processLabel(subLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(subLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right la la-thumbs-o-up fa-lg text-inverse"></span><span class="hide hidable'+hid+' record-action-nix pull-right la la-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(subject) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
                     col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field fa fa-external-link fa-sm" onclick="linkOut(\''+subject+'\')"></i>');
                 } else col.text(objectValue);
             } else {
                 if (objectIRI) {
-                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(objLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right fa fa-thumbs-o-up fa-lg text-inverse"></span><span class="hide hidable'+hid+' record-action-nix pull-right fa fa-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(objectIRI) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
+                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(objLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right la la-thumbs-o-up fa-lg text-inverse"></span><span class="hide hidable'+hid+' record-action-nix pull-right la la-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(objectIRI) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
                     col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field fa fa-external-link fa-sm" onclick="linkOut(\''+objectIRI+'\')"></i>');
                 } else {
                     col.text(objectValue); 
-                    col.prepend('<span class="hide hidable'+hid+' record-action-nix pull-right fa fa-thumbs-o-down fa-lg text-danger"></span><span class="hide hidable'+hid+' record-action-highlight pull-right fa fa-thumbs-o-up fa-lg text-inverse"></span><span style="cursor:pointer" class="pull-right icon-literal glyphicon glyphicon-tag" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + sanitizeLabel(objectValue) + '\', \'uri\', \'' + lang + '\');"></span>' );
-                    col.append('&nbsp;&nbsp;<i id="' + cid + '" onmouseout="$(\'.hidable' + hid + '\').tooltip(\'hide\');$(\'.hidable' + hid + '\').attr(\'data-original-title\', \'Copy to clipboard\');$(\'.hidable' + hid + '\').tooltip();" ' + buildTitle('Copy to clipboard') + ' onclick="javascript:$(\'.hidable' + hid + '\').tooltip(\'hide\');copy(\'' + sanitizeLabel(objectValue) + '\'); $(\'.hidable' + hid + '\').attr(\'data-original-title\', \'Copied\');$(\'.hidable' + hid + '\').tooltip(\'show\');" style="cursor:pointer;" class="hide hidable'+hid+' fa fa-copy fa-sm"></i>');
+                    col.prepend('<span class="hide hidable'+hid+' record-action-nix pull-right la la-thumbs-o-down fa-lg text-danger"></span><span class="hide hidable'+hid+' record-action-highlight pull-right la la-thumbs-o-up fa-lg text-inverse"></span><span style="cursor:pointer" class="pull-right icon-literal glyphicon glyphicon-tag" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + sanitizeLabel(objectValue) + '\', \'uri\', \'' + lang + '\');"></span>' );
+                    col.append('&nbsp;&nbsp;<i id="' + cid + '" onmouseout="$(\'#' + cid + '\').tooltip(\'hide\');$(\'#' + cid + '\').attr(\'data-original-title\', \'Copy to clipboard\');$(\'#' + cid + '\').tooltip();" ' + buildTitle('Copy to clipboard') + ' onclick="javascript:$(\'#' + cid + '\').tooltip(\'hide\');copy(\'' + sanitizeLabel(objectValue) + '\'); $(\'#' + hid + '\').attr(\'data-original-title\', \'Copied\');$(\'#' + cid + '\').tooltip(\'show\');" style="cursor:pointer;" class="hide hidable'+hid+' fa fa-copy fa-sm"></i>');
                 }
             }
             row.append(col);
 
             body.append(row);
+
         });
     });
 
     var libraryIRI = $('.libraryLink').attr('iri');
     var libraryLabel = $('.libraryLink').attr('irilabel');
     var onclick = 'onclick="javascript:setGraphFacet(\''+libraryIRI+'\', \''+libraryLabel+'\');"';
+    var onclickLinkOut = 'onclick="javascript:linkOut(\''+libraryIRI+'\');"';
     if(!libraryIRI || libraryIRI == 'undefined') {
       libraryIRI = 'unavailable';
       libraryLabel = 'unavailable';
       onclick = '';
+      onclickLinkOut = '';
     }
-    body.prepend('<tr><td class="libraryRowCell">library</td><td class="libraryRowCell" style="width:100%"><a id="libraryRowLink" '+buildTitle( libraryIRI )+' '+onclick+' class="link-field">'+libraryIRI+'</a></td></tr>');
+    var lbid = createId();
+    body.prepend('<tr><td class="libraryRowCell">library</td><td onmouseover="$(\'.hidable' + lbid +'\').removeClass(\'hide\');" onmouseout="$(\'.hidable' + lbid + '\').addClass(\'hide\');" class="libraryRowCell" style="width:100%"><a id="libraryRowLink" '+buildTitle( libraryIRI )+' '+onclick+' class="link-field">'+libraryIRI+'</a>&nbsp;&nbsp;<i id="'+lbid+'" style="cursor:pointer;" class="libraryRowLinkOut hide hidable'+lbid+' link-field fa fa-external-link fa-sm" '+onclickLinkOut+'></i></td></tr>');
 
 /*
     var graph = $('.libraryLink').attr('iri');
@@ -9088,10 +9195,10 @@ content += '</section>';
         var tabs = '<div class="clearfix"><ul class="nav nav-tabs float-left" id="infoTabButton" role="tablist"> ';
         //tabs += '<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"> Dropdown <b class="caret"></b></a><div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 45px, 0px); top: 0px; left: 0px; will-change: transform;"><a aria-controls="dropdown1" aria-expanded="true" class="dropdown-item show" data-toggle="tab" href="#dropdown1" id="dropdown1-tab" role="tab" aria-selected="true">@fat</a><a aria-controls="dropdown2" aria-expanded="true" class="dropdown-item active show" data-toggle="tab" href="#dropdown2" id="dropdown2-tab" role="tab" aria-selected="true">@mdo</a></div></li>
         tabs += '<li class="nav-item dropdown">';
-        tabs += '<a aria-controls="info" aria-haspopup="true" aria-expanded="true" class="nav-link dropdown-toggle active" data-toggle="dropdown" href="#info" id="info-tab" role="button"> Info <b class="caret"></b></a>';
+        tabs += '<a aria-controls="info" aria-haspopup="true" aria-expanded="true" class="nav-link dropdown-toggle active" data-toggle="dropdown" href="#info" id="info-tab" role="button"> '+(showRecordRoles?'Roles':'Fields')+' <b class="caret"></b></a>';
         tabs += '<div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 45px, 0px); top: 0px; left: 0px; will-change: transform;">';
-        tabs += '<a onclick="javascript:updateInfoTab(false);" aria-controls="fields" aria-expanded="false" class="dropdown-item show'+((showRecordRoles) ? '' : ' active')+'" data-toggle="tab" href="#fields" id="fields-tab" role="tab" aria-selected="'+((showRecordRoles) ? 'false' : 'true')+'">Fields</a>';
-        tabs += '<a onclick="javascript:updateInfoTab(true);" aria-controls="roles" aria-expanded="false" class="dropdown-item show'+((showRecordRoles) ? ' active' : '')+'" data-toggle="tab" href="#roles" id="roles-tab" role="tab" aria-selected="'+((showRecordRoles) ? 'true' : 'false')+'">Roles</a></div>';
+        tabs += '<a onclick="javascript:updateInfoTab(false);" onclick="$(\'#info-tab\').text(\' Info: Fields \'); showRecordRoles = false; updatePermalink();" aria-controls="fields" aria-expanded="false" class="dropdown-item show'+((showRecordRoles) ? '' : ' active')+'" data-toggle="tab" href="#fields" id="fields-tab" role="tab" aria-selected="'+((showRecordRoles) ? 'false' : 'true')+'">Fields</a>';
+        tabs += '<a onclick="javascript:updateInfoTab(true);" onclick="$(\'#info-tab\').text(\' Info: Roles \'); showRecordRoles = true; updatePermalink();" aria-controls="roles" aria-expanded="false" class="dropdown-item show'+((showRecordRoles) ? ' active' : '')+'" data-toggle="tab" href="#roles" id="roles-tab" role="tab" aria-selected="'+((showRecordRoles) ? 'true' : 'false')+'">Roles</a></div>';
         tabs += '</li>';
         tabs += '<li class="nav-item"><a aria-controls="tools" aria-expanded="false" class="nav-link" data-toggle="tab" href="#tools" id="tools-tab" role="tab"> Options </a></li>';
         if (isFastFood) {
@@ -9383,7 +9490,24 @@ content += '</section>';
     }
 
 
+    // see here https://stackoverflow.com/questions/15850271/how-to-make-div-fixed-after-you-scroll-to-that-div
+    $(window).scroll(function() {                  // assign scroll event listener
 
+      var currentScroll = $(window).scrollTop(); // get current position
+
+      if (currentScroll >= fixmeTop) {           // apply position: fixed if you
+          $('.fixme').css({                      // scroll to that element or below it
+              position: 'fixed',
+              top: '0',
+              left: '0'
+          });
+      } else {                                   // apply position: static
+          $('.fixme').css({                      // if you scroll above it
+              position: 'static'
+          });
+      }
+
+    });
 } //recordViewerColumn
 
 function getBytesDenominationUnit(sz){
@@ -9457,7 +9581,7 @@ function downloadRecordRDF(){
 
 function matchFocusProperties(propIRI, isReverse){
   return getMainFocus().children('property' + (isReverse ? '-of' : '') ).filter(function() {
-            return $(this).attr('iri').toLowerCase() == propIRI.toLowerCase();
+            return $(this).attr('iri') == propIRI;
           });
 }
 
@@ -10854,12 +10978,12 @@ function doRobot(json){
 
 
 var urib_nonce;
-var urib_password = '24ETjpx!g44!1GlBue';
-function doURIBurnerLogin()
+var urib_password = localStorage.getItem('dataspace.password');
+function doLogin()
 {
 $.ajax({
 
-    url : getProxyEndpoint( 'http://linkeddata.uriburner.com/val/api/request_login_nonce' ),
+    url : getProxyEndpoint( 'http://'+dataspace+'/val/api/request_login_nonce' ),
     type : 'GET',
     data : {
         //'numberOfWords' : 10
@@ -10884,7 +11008,7 @@ $.ajax({
 function get_urib_session(service, pwdHash, nonce, realm, usr){
   $.ajax({
 
-    url : getProxyEndpoint( 'https://linkeddata.uriburner.com/sparql/login.vsp' ),
+    url : getProxyEndpoint( 'https://'+dataspace+'/sparql/login.vsp' ),
     type : 'POST',
     data : {
         'service' : service,
