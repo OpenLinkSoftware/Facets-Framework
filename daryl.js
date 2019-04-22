@@ -613,7 +613,7 @@ function getProxyEndpoint(url){
   ///url = url.replace('http://', 'http/');
   //url = url.replace('https://', 'https/');
 //  return 'http://poc.vios.network/proxy/-start-'+url+'-end-';
-  return this_endpoint + '/proxy'+url;
+  return this_endpoint + '/proxy/'+url;
   //return url;
 }
 
@@ -1100,8 +1100,9 @@ function fct_sparql(sparql, opt){
               else if(opt.tar == 'record'){
                 if(getMutex(opt.tar, false) != id){
                   $('#'+opt.srcId).removeClass('loading');
+                  return;
                 }
-                else fct_handleSparqlDescribe(xml, opt); // POI: be sure to cache the work
+                fct_handleSparqlDescribe(xml, opt); // POI: be sure to cache the work
               }
               else if(opt.tar == 'countLibraries'){
                 fct_handleSparqlLibraryCount(xml, opt);
@@ -1846,7 +1847,7 @@ function fct_handleSparqlResults(xml, opt) {
                         //str += '<img class="pull-right" style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' alt="..." class="rounded-circle" src="' + getFaviconUrl($(this).text()) + '"/>&nbsp;';
                         //str += '<i class="status status-bottom bg-success"></i>';
                     } else {
-                        str += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' class="pull-right icon-literal glyphicon glyphicon-tag"></span>';
+                        str += '<i onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' class="pull-right icon-literal glyphicon glyphicon-tag"></i>';
                     }
 
                 } // if j == 0
@@ -1860,13 +1861,16 @@ function fct_handleSparqlResults(xml, opt) {
                 label = deSanitizeLabel(label);
                 //if(datatype == 'uri') label = '<a href="#">' + label + '</a>';
                 var labelLink = (datatype == 'uri') ? '' + buildTitle($(this).text()) : '';
+                var nodeClass = (datatype == 'uri') ? 'link-table' : 'literal-table';
                 //str += '<h6 >';
-                str += '<span ' + onclick + ' ' + labelLink + '>' + label + '</span>';
+                str += '<span class="' + nodeClass + '"" ' + onclick + ' ' + labelLink + '>' + label + '</span>';
 
                 //str += '</h6>';
                 //str += '</a>';
 
-                if(j == 0) col.attr('nowrap', 'true');
+                if(j == 0) {
+                  col.attr('nowrap', 'true');
+                }
                 col.append(str);
                 if(isRollup() && j > 0) col.css('text-align', 'right');
 
@@ -2578,7 +2582,7 @@ function removeFacet(id){
   doQuery(getQueryText());
 }
 
-function setValue(id, val, valLabel, datatype, lang){
+function setValue(id, val, valLabel, datatype, lang, exclude){
     exitGroupBy(id);
 
   val = deSanitizeLabel(val);
@@ -2613,7 +2617,7 @@ function setValue(id, val, valLabel, datatype, lang){
   //getFocus(query).append(p);
 }
 
-function setPropertyValue(id, nodeName, contextId, propIRI, propLabel, val, valLabel, datatype, lang, silent){
+function setPropertyValue(id, nodeName, contextId, propIRI, propLabel, val, valLabel, datatype, lang, silent, exclude){
     exitGroupBy(id);
 
   if(propIRI) propIRI = deSanitizeLabel(propIRI);
@@ -2649,7 +2653,7 @@ function setPropertyValue(id, nodeName, contextId, propIRI, propLabel, val, valL
   //getFocus(query).append(p);
 }
 
-function addPropertyFacet(id, prop, propLabel, val, valLabel, datatype, lang, silent){
+function addPropertyFacet(id, prop, propLabel, val, valLabel, datatype, lang, silent, exclude){
   exitGroupBy(id);
   if(prop) prop = deSanitizeLabel(prop);
   if(val) val = deSanitizeLabel(val);
@@ -2657,6 +2661,7 @@ function addPropertyFacet(id, prop, propLabel, val, valLabel, datatype, lang, si
   p.attr('class', id);
   p.attr('iri', prop);
   p.attr('label', propLabel);
+  if(exclude) p.attr('exclude', 'yes');
   if(val){
       var v = $.createElement('value');
       v.attr('label', valLabel);
@@ -2680,7 +2685,7 @@ function addPropertyFacet(id, prop, propLabel, val, valLabel, datatype, lang, si
   if(!silent) doQuery(getQueryText());
 }
 
-function addPropertyOfFacet(id, prop, propLabel, val, valLabel, datatype, lang, silent){
+function addPropertyOfFacet(id, prop, propLabel, val, valLabel, datatype, lang, silent, exclude){
     exitGroupBy(id);
 
   if(prop) prop = deSanitizeLabel(prop);
@@ -2689,6 +2694,7 @@ function addPropertyOfFacet(id, prop, propLabel, val, valLabel, datatype, lang, 
   p.attr('class', id);
   p.attr('iri', prop);
   p.attr('label', propLabel);
+  if(exclude) p.attr('exclude', 'yes');
   if(val){
       var v = $.createElement('value');
       v.attr('label', valLabel);
@@ -2712,7 +2718,7 @@ function addPropertyOfFacet(id, prop, propLabel, val, valLabel, datatype, lang, 
   if(!silent) doQuery(getQueryText());
 }
 
-function addClassFacet(id, clazz, label, silent){
+function addClassFacet(id, clazz, label, silent, exclude){
     exitGroupBy(id);
 
   //clazz = deSanitizeLabel(clazz);
@@ -2721,6 +2727,7 @@ function addClassFacet(id, clazz, label, silent){
   c.attr('class', id);
   c.attr('iri', clazz);
   c.attr('label', label);
+  if(exclude) c.attr('exclude', 'yes');
   //prop.attr('exclude', 'yes');
   //console.log('focus: ' + getFocus().attr('label'));
 
@@ -2843,6 +2850,7 @@ var SIZE_MIN_DIGITS = 7;
 var SIZE_MAX_DIGITS = 20;
 
 var isExpandSearch = $('#isSearchAllFields').parent().hasClass('active');
+var isContractSearch = $('#isExactLabelMatch').parent().hasClass('active');
 
 var labels = {};
 
@@ -2862,7 +2870,10 @@ var labels = {};
 
 function setShowIDN(b){
   showIDN = b;  
-  if(showIDN) $('#idnButton').text('Record');
+  if(showIDN) {
+    $('#idnButton').children('i').addClass('fa-share-alt');
+    $('#idnButton').children('i').removeClass('fa-font');
+  }
 }
 
 function toggleIDN(){
@@ -2874,11 +2885,13 @@ function toggleIDN(){
 
   }
   if(showIDN){
-    $('#idnButton').text('Back to Record');
+    $('#idnButton').children('i').addClass('fa-share-alt');
+    $('#idnButton').children('i').removeClass('fa-font');
     //detailResultsColumnWidths();
   }
   else {
-    $('#idnButton').text('IDN');
+    $('#idnButton').children('i').removeClass('fa-share-alt');
+    $('#idnButton').children('i').addClass('fa-font');
     //resetColumnWidths();
   }
   describe(undefined, $('#angular_recordViewer').attr('iri') );
@@ -2999,8 +3012,11 @@ function bookmark(){
 
 // USER PREFERENCES
 
-var isTableStriped = false;
+var isTableStriped = localStorage.getItem('table.isStripped') == 'true';
 var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+var isSubjectElf = localStorage.getItem('contents.isSubjectElf') == 'true';
+
+
 
 
 function init(){
@@ -3044,7 +3060,7 @@ function init(){
         link = document.createElement('script');
         link.type = 'application/javascript';
         link.src = getProxyEndpoint('https://www.myersdaily.org/joseph/javascript/md5.js');
-        document.head.appendChild(link);
+        //document.head.appendChild(link);
 
     if(!document.getElementById('id2')) { 
         /*var link = document.createElement('link');
@@ -3110,6 +3126,15 @@ function init(){
         link.src = 'https://demo.flatlogic.com/sing-app/angular/profile-profile-module.js';
         document.head.appendChild(link);
 
+        link = document.createElement('script');
+        link.type = 'text/javascript';
+        link.src = 'https://demo.flatlogic.com/sing-app/angular/charts-charts-module.js';
+        document.head.appendChild(link);
+
+        link = document.createElement('script');
+        link.type = 'text/javascript';
+        link.src = 'https://demo.flatlogic.com/sing-app/angular/default~charts-charts-module~core-core-elements-module~dashboard-dashboard-module~forms-forms-module~65277faf.js';
+        document.head.appendChild(link);
 /*
         link = document.createElement('script');
         link.type = 'application/javascript';
@@ -3174,11 +3199,55 @@ function init(){
   // ***** END TODO
 
 //$('#isSearchAllFields').parent().append('to <span class="badge badge-info">34523</span>');
+var exactMatchButton = $.createElement('label');
+exactMatchButton.addClass('btn');
+exactMatchButton.addClass('btn-primary');
+exactMatchButton.append('<input id="isExactLabelMatch" type="checkbox" ></input><i class="fa fa-search-minus fa-lg"></i>');
+
+exactMatchButton.on('click', function(e){
+  isContractSearch = !exactMatchButton.hasClass('active'); 
+  doQuery(getQueryText());
+});
+$("#isSearchAllFields").parent().contents().filter(function(){
+    return (this.nodeType == 3);
+}).remove();
+
+$('#isSearchAllFields').parent().after(exactMatchButton);
+setTitleOnElement($('#isSearchAllFields').parent().next(), 'Narrow Search', 'bottom');
+
+$('#isSearchAllFields').parent().children('span').remove();
+$('#isSearchAllFields').parent().append('<i class="fa fa-search-plus fa-lg"></i>');
+setTitleOnElement($('#isSearchAllFields').parent(), 'Expand Search', 'bottom');
+
+
   isExpandSearch = $('#isSearchAllFields').parent().hasClass('active');
   $('#isSearchAllFields').parent().click(function(e){
     isExpandSearch = !$('#isSearchAllFields').parent().hasClass('active');
     doQuery(getQueryText());
   });
+
+
+
+
+$("#isDebug").parent().contents().filter(function(){
+    return (this.nodeType == 3);
+}).remove();
+
+$('#isDebug').parent().children('span').remove();
+$('#isDebug').parent().append('<i class="fa fa-bug fa-lg"></i>');
+setTitleOnElement($('#isDebug').parent(), 'Enable Debug', 'bottom');
+
+
+$("#isCache").parent().contents().filter(function(){
+    return (this.nodeType == 3);
+}).remove();
+
+$('#isCache').parent().children('span').remove();
+$('#isCache').parent().append('<i class="fa fa-hdd-o fa-lg"></i>');
+setTitleOnElement($('#isCache').parent(), 'Enable Cache', 'bottom');
+
+
+$('#keywords').attr('placeholder', 'Explore dashbooks');
 
       /*
       $('#favButton').click(function(e) {
@@ -3243,7 +3312,7 @@ function init(){
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(copyButton);
 
-      var libraryButton = '<li class="nav-item d-none d-md-block"><a '+buildTitle('List Libraries')+' onclick="javascript:doLoadLibraries()" class="hide nav-link pl-2 text-warning" id="libraryButton" ><i class="la la-compress la-lg"></i></a></li>'; //la-heart-o
+      var libraryButton = '<li class="nav-item d-none d-md-block"><a '+buildTitle('Enter Library')+' onclick="javascript:doLoadLibraries()" class="hide nav-link pl-2 text-warning" id="libraryButton" ><i class="la la-sign-in la-lg"></i></a></li>'; //la-heart-o
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().prev().before(libraryButton);
 
@@ -3284,7 +3353,7 @@ function init(){
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(bookmarkButton);
 
 
-      var glossaryButton = '<li class="nav-item d-none d-md-block"><a  id="glossaryButton" '+buildTitle('Find a Glossary')+' class="hide nav-link pl-2 text-info" onclick="javascript: isExpandSearch = true; takeMainFocus(ID_QUERY); clearFacets(true); var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/Glossary106420781\', \'Glossary\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\'); takeMainFocus(pid);" style="cursor:pointer;"><i class="la la-book la-lg text-info"></i></a></li>'; //la-heart-o
+      var glossaryButton = '<li class="nav-item d-none d-md-block"><a  id="glossaryButton" '+buildTitle('Find a Glossary')+' class="hide nav-link pl-2 text-info" onclick="javascript: isExpandSearch = true; filterRecordViewFields = true; takeMainFocus(ID_QUERY); clearFacets(true); var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/Glossary106420781\', \'Glossary\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\');" style="cursor:pointer;"><i class="la la-book la-lg text-info"></i></a></li>'; //la-heart-o
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(glossaryButton);
 
@@ -3350,6 +3419,18 @@ function init(){
 
   $('#keywords').css('padding-left', '10px');
 
+
+$('#isSearchAllFields').parent().removeClass('btn-gray');
+$('#isCache').parent().removeClass('btn-gray');
+$('#isDebug').parent().removeClass('btn-gray');
+
+$('#isSearchAllFields').parent().addClass('btn-primary');
+$('#isCache').parent().addClass('btn-inverse');
+$('#isDebug').parent().addClass('btn-inverse');
+
+
+//$('input#keywords').parent().css('width', '80%');
+
     var clearKeywords = $('span.clear-data').filter(function() {return $(this).text().indexOf('Keywords') >= 0;});
     var clearLibrary = $('span.clear-data').filter(function() {return $(this).text().indexOf('Library') >= 0;});
 
@@ -3377,11 +3458,16 @@ function init(){
     //ict.addClass('fa-times-circle');
     //icl.addClass('fa-times-circle');
 
+    $('#keywords').parent().css('width', '100%');
+    $('#keywords').next().css('margin-right', '1em');
+
     clearKeywords.text('Clear Keywords');
+    clearKeywords.css('white-space', 'nowrap');
     clearKeywords.parent().removeClass('btn-default');
     clearKeywords.parent().addClass('btn-danger');
 
     clearLibrary.text('Exit Library');
+    clearLibrary.css('white-space', 'nowrap');
     clearLibrary.parent().removeClass('btn-default');
     clearLibrary.parent().addClass('btn-danger');
 
@@ -3500,11 +3586,11 @@ gbcol += '</app-navbar>';
 
 
 
-gbcol = '<div class="col-lg-12 col-xl-12 col-12"><ul class="libraries" id="angular_libraryBar">';
+gbcol = '<div id="angular_libraryBarContainer" class="col-lg-12 col-xl-12 col-12"><ul class="m-0 libraries" id="angular_libraryBar">';
 gbcol += '</ul></div>';
 $('#angular_libraries').append(gbcol);
 
-gbcol = '<div class="col-lg-12 col-xl-12 col-12"><ul class="steps" id="angular_breadcrumbBar">';
+gbcol = '<div id="angular_breadcrumbBarContainer" class="col-lg-12 col-xl-12 col-12"><ul class="m-0 steps" id="angular_breadcrumbBar">';
 gbcol += '</ul></div>';
 $('#angular_breadcrumbs').append(gbcol);
 
@@ -3529,8 +3615,13 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
       gbcol += '<li class="nav-item active">';
         gbcol += '<a id="edit" class="nav-link" data-target="#">Edit</a>';
       gbcol += '</li>';
-      gbcol += '<li class="nav-item active">';
-        gbcol += '<a id="view" class="nav-link" data-target="#">View</a>';
+      gbcol += '<li class="nav-item dropdown active">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="viewDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'View';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="viewDropdown">';
+          gbcol += '<a class="dropdown-item" data-target="#">Owner Profile</a>';
+        gbcol += '</div>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
@@ -3581,7 +3672,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a class="nav-link disabled" data-target="#">Edit</a>';
       gbcol += '</li>';
     gbcol += '</ul>';
-      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">'+(showIDN ? 'Back to Record' : 'IDN')+'</button>';
+      gbcol += '<button id="idnButton" style="margin-right:4px" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();"><i class="fa fa-lg '+(showIDN ? 'fa-share-alt' : 'fa-font')+'"></i></button>';
 //    gbcol += '<form class="form-inline my-2 my-lg-0">';
       //gbcol += '<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">';
 //    gbcol += '</form>';
@@ -3589,7 +3680,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
 gbcol += '</nav>';
 
 
-            gbcol += '<div id="angular_recordViewer" class="embed-responsive">'; //embed-responsive-1by1
+            gbcol += '<div id="angular_recordViewer" class="embed-responsive table-responsive">'; //embed-responsive-1by1
 
 
 //gbcol += '<iframe id="describe" class="iframe embed-responsive-item" src="" height="100%"></iframe>';
@@ -3700,7 +3791,7 @@ gbcol += '<header id="groupByHeader" style="cursor:pointer;" >';
 
 gbcol += '<div id="tabularResults" class="short-div hide"><section class="widget p-0" widget>';
 
-gbcol += '<header class="m-1" id="groupByTableHeader">';
+gbcol += '<header class="mr-1 mt-0 ml-0" id="groupByTableHeader">'; //mt-0 ml-0
         gbcol += '<h5>';
           gbcol += '<h4><span id="tableCount" class="badge badge-info">0/0</span> <span id="tableType"  class="fw-semi-bold">'+DISCOVER_LABEL+'</span> <span id="tableSubType">'+((isChart()) ? TABLE_HEADER_LABEL_CHART : TABLE_HEADER_LABEL_DETAILS)+'</span></h4>';
         gbcol += '</h5>';
@@ -3852,8 +3943,13 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
       gbcol += '<li class="nav-item active">';
         gbcol += '<a id="edit" class="nav-link" data-target="#">Edit</a>';
       gbcol += '</li>';
-      gbcol += '<li class="nav-item active">';
-        gbcol += '<a id="view" class="nav-link" data-target="#">View</a>';
+      gbcol += '<li class="nav-item dropdown active">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="viewDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'View';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="viewDropdown">';
+          gbcol += '<a class="dropdown-item" data-target="#">Owner Profile</a>';
+        gbcol += '</div>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
@@ -3902,7 +3998,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a class="nav-link disabled" data-target="#">Edit</a>';
       gbcol += '</li>';
     gbcol += '</ul>';
-      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">'+(showIDN ? 'Back to Record' : 'IDN')+'</button>';
+      gbcol += '<button id="idnButton" style="margin-right:4px" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();"><i class="fa fa-lg '+(showIDN ? 'fa-share-alt' : 'fa-font')+'"></i></button>';
 //    gbcol += '<form class="form-inline my-2 my-lg-0">';
       //gbcol += '<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">';
 //    gbcol += '</form>';
@@ -3910,7 +4006,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
 gbcol += '</nav>';
 
 
-            gbcol += '<div id="angular_recordViewer" class="embed-responsive">'; //embed-responsive-1by1
+            gbcol += '<div id="angular_recordViewer" class="embed-responsive table-responsive">'; //embed-responsive-1by1
 
 
 //gbcol += '<iframe id="describe" class="iframe embed-responsive-item" src="" height="100%"></iframe>';
@@ -4036,8 +4132,13 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
       gbcol += '<li class="nav-item active">';
         gbcol += '<a id="edit" class="nav-link" data-target="#">Edit</a>';
       gbcol += '</li>';
-      gbcol += '<li class="nav-item active">';
-        gbcol += '<a id="view" class="nav-link" data-target="#">View</a>';
+      gbcol += '<li class="nav-item dropdown active">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="viewDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'View';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="viewDropdown">';
+          gbcol += '<a class="dropdown-item" data-target="#">Owner Profile</a>';
+        gbcol += '</div>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
@@ -4086,7 +4187,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a class="nav-link disabled" data-target="#">Edit</a>';
       gbcol += '</li>';
     gbcol += '</ul>';
-      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">'+(showIDN ? 'Back to Record' : 'IDN')+'</button>';
+      gbcol += '<button id="idnButton" style="margin-right:4px" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();"><i class="fa fa-lg '+(showIDN ? 'fa-share-alt' : 'fa-font')+'"></i></button>';
 //    gbcol += '<form class="form-inline my-2 my-lg-0">';
       //gbcol += '<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">';
 //    gbcol += '</form>';
@@ -4094,7 +4195,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
 gbcol += '</nav>';
 
 
-            gbcol += '<div id="angular_recordViewer" class="embed-responsive">'; //embed-responsive-1by1
+            gbcol += '<div id="angular_recordViewer" class="embed-responsive table-responsive">'; //embed-responsive-1by1
 
 
 //gbcol += '<iframe id="describe" class="iframe embed-responsive-item" src="" height="100%"></iframe>';
@@ -4193,6 +4294,8 @@ gbcol += '<div class="modal fade" id="helpModal" tabindex="-1" role="dialog" ari
       gbcol += '  </li><li>';
       gbcol += '  Hold down <i>1</i> (number one) key, then click Field checkbox to prepend Field to filter collector';
       gbcol += '  </li><li>';
+      gbcol += '  Hold down <i>X</i> key, then add CTRL filter to exclude the choosen item';
+      gbcol += '  </li><li>';
       gbcol += '  Press <i>Return</i> or <i>Enter</i> keys to clear the data canvas';
       gbcol += '  </li><li>';
       gbcol += '  Press <i>H</i> key to view this menu';
@@ -4229,6 +4332,132 @@ if(!hideHelpOnEnter){
   $('#helpModal').modal({});
 }
 
+
+gbcol = '<div id="idn_content" class="hide" extra-search-results="">';
+/*   gbcol += '<ol class="breadcrumb">';
+      gbcol += '<li class="breadcrumb-item">YOU ARE HERE</li>';
+      gbcol += '<li class="breadcrumb-item active">Search Results</li>';
+   gbcol += '</ol>';
+   gbcol += '<h1 class="page-title">Matching - <span class="fw-semi-bold">Results</span></h1>';*/
+   gbcol += '<div class="clearfix">';
+      gbcol += '<div class="btn-toolbar">';
+         gbcol += '<div class="btn-group">';
+            gbcol += '<a class="btn dropdown-toggle btn-default" data-toggle="dropdown" aria-expanded="false"> Popular <span class="caret"></span></a>';
+            gbcol += '<ul class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 33px, 0px); top: 0px; left: 0px; will-change: transform;">';
+               gbcol += '<li><a class="dropdown-item" href="#">All</a></li>';
+               gbcol += '<li><a class="dropdown-item" href="#">Popular</a></li>';
+               gbcol += '<li><a class="dropdown-item" href="#">Interesting</a></li>';
+               gbcol += '<li><a class="dropdown-item" href="#">Latest</a></li>';
+            gbcol += '</ul>';
+         gbcol += '</div>';
+         gbcol += '<div class="btn-group ml-xs">';
+            gbcol += '<a class="btn dropdown-toggle btn-default" data-toggle="dropdown" aria-expanded="false"> All Time <span class="caret"></span></a>';
+            gbcol += '<ul class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 33px, 0px); top: 0px; left: 0px; will-change: transform;">';
+               gbcol += '<li><a class="dropdown-item" href="#">Last 24h</a></li>';
+               gbcol += '<li><a class="dropdown-item" href="#">Last Month</a></li>';
+               gbcol += '<li><a class="dropdown-item" href="#">Last Year</a></li>';
+            gbcol += '</ul>';
+         gbcol += '</div>';
+         gbcol += '<div class="btn-group ml-auto"><button class="btn btn-gray active" type="button"><i class="fa fa-th-list"></i></button><button class="btn btn-gray" type="button"><i class="fa fa-th-large"></i></button></div>';
+      gbcol += '</div>';
+   gbcol += '</div>';
+   gbcol += '<div class="row">';
+      gbcol += '<div class="col-lg-3 order-lg-2">';
+/*         gbcol += '<h5>Results <span class="fw-semi-bold">Filtering</span></h5>';
+         gbcol += '<p class="text-muted fs-mini">Listed content is categorized by the following groups:</p>';*/
+         gbcol += '<ul class="nav nav-pills nav-stacked flex-column search-result-categories mt">';
+            gbcol += '<li class="nav-item"><a class="nav-link" href="#"> Hot Ideas <span class="badge badge-pill badge-secondary float-right">34</span></a></li>';
+            gbcol += '<li class="nav-item"><a class="nav-link" href="#"> Latest Pictures <span class="badge badge-pill badge-secondary float-right">9</span></a></li>';
+            gbcol += '<li class="nav-item"><a class="nav-link" href="#">tags of Day</a></li>';
+            gbcol += '<li class="nav-item"><a class="nav-link" href="#"> Recent Movies </a></li>';
+            gbcol += '<li class="nav-item"><a class="nav-link" href="#">Globals <span class="badge badge-pill badge-secondary float-right">18</span></a></li>';
+         gbcol += '</ul>';
+      gbcol += '</div>';
+      gbcol += '<div class="col-lg-9 order-lg-1">';
+         gbcol += '<p class="search-results-count">About 94 700 000 (0.39 sec.) results</p>';
+         gbcol += '<section class="search-result-item">';
+            gbcol += '<a class="image-link" href="#"><img class="image" src="assets/img/pictures/1.jpg"></a>';
+            gbcol += '<div class="search-result-item-body">';
+               gbcol += '<div class="row">';
+                  gbcol += '<div class="col-md-9 col-12">';
+                     gbcol += '<h5 class="search-result-item-heading"><a href="#">Next generation admin template</a></h5>';
+                     gbcol += '<p class="info"> New York, NY 20188 </p>';
+                     gbcol += '<p class="description"> Not just usual Metro. But something bigger. Not just usual widgets, but real widgets. Not just yet another admin template, but next generation admin template. </p>';
+                  gbcol += '</div>';
+                  gbcol += '<div class="col-md-3 col-12 text-center">';
+                     gbcol += '<p class="value3 mt-sm"> $9, 700 </p>';
+                     gbcol += '<p class="fs-mini text-muted"> PER WEEK </p>';
+                     gbcol += '<a class="btn btn-primary btn-info btn-sm" href="#">Learn More</a>';
+                  gbcol += '</div>';
+               gbcol += '</div>';
+            gbcol += '</div>';
+         gbcol += '</section>';
+         gbcol += '<section class="search-result-item">';
+            gbcol += '<a class="image-link" href="#"><img class="image" src="assets/img/pictures/5.jpg"></a>';
+            gbcol += '<div class="search-result-item-body">';
+               gbcol += '<div class="row">';
+                  gbcol += '<div class="col-md-9 col-12">';
+                     gbcol += '<h5 class="search-result-item-heading"><a href="#">Try. Posted by Okendoken</a><span class="badge badge-pill badge-danger fw-normal float-right">Best Deal!</span></h5>';
+                     gbcol += '<p class="info"> Los Angeles, NY 20188 </p>';
+                     gbcol += '<p class="description"> You will never know exactly how something will go until you try it. You can think three hundred times and still have no precise result. </p>';
+                  gbcol += '</div>';
+                  gbcol += '<div class="col-md-3 col-12 text-center">';
+                     gbcol += '<p class="value3 mt-sm"> $10, 300 </p>';
+                     gbcol += '<p class="fs-mini text-muted"> PER WEEK </p>';
+                     gbcol += '<a class="btn btn-primary btn-info btn-sm" href="#">Learn More</a>';
+                  gbcol += '</div>';
+               gbcol += '</div>';
+            gbcol += '</div>';
+         gbcol += '</section>';
+         gbcol += '<section class="search-result-item">';
+            gbcol += '<a class="image-link" href="#"><img class="image" src="assets/img/pictures/13.jpg"></a>';
+            gbcol += '<div class="search-result-item-body">';
+               gbcol += '<div class="row">';
+                  gbcol += '<div class="col-md-9 col-12">';
+                     gbcol += '<h5 class="search-result-item-heading"><a href="#">Vitaut the Great</a></h5>';
+                     gbcol += '<p class="info"> New York, NY 20188 </p>';
+                     gbcol += '<p class="description"> The Great Prince of the Grand Duchy of Lithuania he had stopped the invasion to Europe of Timur (Tamerlan) from Asia heading a big Army of Belarusians, Lithuanians. </p>';
+                  gbcol += '</div>';
+                  gbcol += '<div class="col-md-3 col-12 text-center">';
+                     gbcol += '<p class="value3 mt-sm"> $3, 200 </p>';
+                     gbcol += '<p class="fs-mini text-muted"> PER WEEK </p>';
+                     gbcol += '<a class="btn btn-info btn-sm" href="#">Learn More</a>';
+                  gbcol += '</div>';
+               gbcol += '</div>';
+            gbcol += '</div>';
+         gbcol += '</section>';
+         gbcol += '<section class="search-result-item">';
+            gbcol += '<a class="image-link" href="#"><img class="image" src="assets/img/pictures/3.jpg"></a>';
+            gbcol += '<div class="search-result-item-body">';
+               gbcol += '<div class="row">';
+                  gbcol += '<div class="col-md-9 col-12">';
+                     gbcol += '<h5 class="search-result-item-heading"><a href="#">Can I use CSS3 Radial-Gradient?</a></h5>';
+                     gbcol += '<p class="info"> Minsk, NY 20188 </p>';
+                     gbcol += '<p class="description"> Yes you can! Further more, you should! It let\'s you create really beautiful images either for elements or for the entire background. </p>';
+                  gbcol += '</div>';
+                  gbcol += '<div class="col-md-3 col-12 text-center">';
+                     gbcol += '<p class="value3 mt-sm"> $2, 400 </p>';
+                     gbcol += '<p class="fs-mini text-muted"> PER MONTH </p>';
+                     gbcol += '<a class="btn btn-info btn-sm" href="#">Learn More</a>';
+                  gbcol += '</div>';
+               gbcol += '</div>';
+            gbcol += '</div>';
+         gbcol += '</section>';
+         gbcol += '<div class="d-flex justify-content-center mt-3">';
+            gbcol += '<ul class="pagination">';
+               gbcol += '<li class="disabled page-item"><a class="page-link" href="#">Prev</a></li>';
+               gbcol += '<li class="active page-item"><a class="page-link" href="#">1</a></li>';
+               gbcol += '<li class="page-item"><a class="page-link" href="#">2</a></li>';
+               gbcol += '<li class="page-item"><a class="page-link" href="#">3</a></li>';
+               gbcol += '<li class="page-item"><a class="page-link" href="#">4</a></li>';
+               gbcol += '<li class="page-item"><a class="page-link" href="#">5</a></li>';
+               gbcol += '<li class="page-item"><a class="page-link" href="#">Next</a></li>';
+            gbcol += '</ul>';
+         gbcol += '</div>';
+      gbcol += '</div>';
+   gbcol += '</div>';
+gbcol += '</div>';
+$('#dataCanvas').before(gbcol);
 
 
 gbcol = '<app-notifications class="dropdown-menu dropdown-menu-right animated animated-last ladeInUp" _nghost-c1="" style="left: auto; right: 0px;">';
@@ -5339,11 +5568,15 @@ document.onkeyup = checkKeyRelease;
 
 var ctrlDown = false;
 var oneKeyDown = false;
+var xKeyDown = false;
 function isCTRLKeyDown(){
   return ctrlDown;
 }
 function isOneKeyDown(){
   return oneKeyDown;
+}
+function isXKeyDown(){
+  return xKeyDown;
 }
 
 function checkKeyRelease(e) {
@@ -5353,6 +5586,9 @@ function checkKeyRelease(e) {
     }
     else if (e.keyCode == '49') { // 1 KEY
         oneKeyDown = false;
+    }
+    else if (e.keyCode == '88') { // X KEY
+        xKeyDown = false;
     }
 }
 
@@ -5369,6 +5605,9 @@ function checkKey(e) {
 if(!$('input[type="text"], input[type="password"], input[type="search"], input[type="number"]').is(":focus")){
     if (e.keyCode == '49') {
       oneKeyDown = true;
+    }
+    else if (e.keyCode == '88') {
+      xKeyDown = true;
     }
     else if (e.keyCode == '188') { // period key
         if(page > 0 && !$('#leftButton').hasClass('hide')) pageLeft();
@@ -5762,12 +6001,22 @@ function processLabel(label, value, datatype, lang, labelSize, includeHostName){
 
 
     // *** business Category processing - TODO: this need to be removed
+
+if(dataspace.startsWith('http://dbpedia.org') || dataspace.startsWith('http://lod.openlinksw.com')){
+      label = label.replace(/wikiPage/g, '');
       label = label.replace('WikiCat', '');
       label = label.replace('Wikicat', '');
       label = label.replace('YagoLegal', '');
       label = label.replace('Wiki Cat', '');
       label = label.replace('Wiki cat', '');
       label = label.replace('Yago Legal', '');
+
+      label = label.replace('Category:', '');
+      label = label.replace('Link from a Wikipage to another Wikipage', 'internal link');
+      label = label.replace('Link from a Wikipage to an external page', 'external link');  
+}
+
+
 
 
     if(label.length > 1) {
@@ -5810,8 +6059,8 @@ function processLabel(label, value, datatype, lang, labelSize, includeHostName){
 //var beep1Str = '//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vmz+Zt//+mm3Wm3Q576v////+32///5/EOgAAADVghQAAAAA//uQZAUAB1WI0PZugAAAAAoQwAAAEk3nRd2qAAAAACiDgAAAAAAABCqEEQRLCgwpBGMlJkIz8jKhGvj4k6jzRnqasNKIeoh5gI7BJaC1A1AoNBjJgbyApVS4IDlZgDU5WUAxEKDNmmALHzZp0Fkz1FMTmGFl1FMEyodIavcCAUHDWrKAIA4aa2oCgILEBupZgHvAhEBcZ6joQBxS76AgccrFlczBvKLC0QI2cBoCFvfTDAo7eoOQInqDPBtvrDEZBNYN5xwNwxQRfw8ZQ5wQVLvO8OYU+mHvFLlDh05Mdg7BT6YrRPpCBznMB2r//xKJjyyOh+cImr2/4doscwD6neZjuZR4AgAABYAAAABy1xcdQtxYBYYZdifkUDgzzXaXn98Z0oi9ILU5mBjFANmRwlVJ3/6jYDAmxaiDG3/6xjQQCCKkRb/6kg/wW+kSJ5//rLobkLSiKmqP/0ikJuDaSaSf/6JiLYLEYnW/+kXg1WRVJL/9EmQ1YZIsv/6Qzwy5qk7/+tEU0nkls3/zIUMPKNX/6yZLf+kFgAfgGyLFAUwY//uQZAUABcd5UiNPVXAAAApAAAAAE0VZQKw9ISAAACgAAAAAVQIygIElVrFkBS+Jhi+EAuu+lKAkYUEIsmEAEoMeDmCETMvfSHTGkF5RWH7kz/ESHWPAq/kcCRhqBtMdokPdM7vil7RG98A2sc7zO6ZvTdM7pmOUAZTnJW+NXxqmd41dqJ6mLTXxrPpnV8avaIf5SvL7pndPvPpndJR9Kuu8fePvuiuhorgWjp7Mf/PRjxcFCPDkW31srioCExivv9lcwKEaHsf/7ow2Fl1T/9RkXgEhYElAoCLFtMArxwivDJJ+bR1HTKJdlEoTELCIqgEwVGSQ+hIm0NbK8WXcTEI0UPoa2NbG4y2K00JEWbZavJXkYaqo9CRHS55FcZTjKEk3NKoCYUnSQ0rWxrZbFKbKIhOKPZe1cJKzZSaQrIyULHDZmV5K4xySsDRKWOruanGtjLJXFEmwaIbDLX0hIPBUQPVFVkQkDoUNfSoDgQGKPekoxeGzA4DUvnn4bxzcZrtJyipKfPNy5w+9lnXwgqsiyHNeSVpemw4bWb9psYeq//uQZBoABQt4yMVxYAIAAAkQoAAAHvYpL5m6AAgAACXDAAAAD59jblTirQe9upFsmZbpMudy7Lz1X1DYsxOOSWpfPqNX2WqktK0DMvuGwlbNj44TleLPQ+Gsfb+GOWOKJoIrWb3cIMeeON6lz2umTqMXV8Mj30yWPpjoSa9ujK8SyeJP5y5mOW1D6hvLepeveEAEDo0mgCRClOEgANv3B9a6fikgUSu/DmAMATrGx7nng5p5iimPNZsfQLYB2sDLIkzRKZOHGAaUyDcpFBSLG9MCQALgAIgQs2YunOszLSAyQYPVC2YdGGeHD2dTdJk1pAHGAWDjnkcLKFymS3RQZTInzySoBwMG0QueC3gMsCEYxUqlrcxK6k1LQQcsmyYeQPdC2YfuGPASCBkcVMQQqpVJshui1tkXQJQV0OXGAZMXSOEEBRirXbVRQW7ugq7IM7rPWSZyDlM3IuNEkxzCOJ0ny2ThNkyRai1b6ev//3dzNGzNb//4uAvHT5sURcZCFcuKLhOFs8mLAAEAt4UWAAIABAAAAAB4qbHo0tIjVkUU//uQZAwABfSFz3ZqQAAAAAngwAAAE1HjMp2qAAAAACZDgAAAD5UkTE1UgZEUExqYynN1qZvqIOREEFmBcJQkwdxiFtw0qEOkGYfRDifBui9MQg4QAHAqWtAWHoCxu1Yf4VfWLPIM2mHDFsbQEVGwyqQoQcwnfHeIkNt9YnkiaS1oizycqJrx4KOQjahZxWbcZgztj2c49nKmkId44S71j0c8eV9yDK6uPRzx5X18eDvjvQ6yKo9ZSS6l//8elePK/Lf//IInrOF/FvDoADYAGBMGb7FtErm5MXMlmPAJQVgWta7Zx2go+8xJ0UiCb8LHHdftWyLJE0QIAIsI+UbXu67dZMjmgDGCGl1H+vpF4NSDckSIkk7Vd+sxEhBQMRU8j/12UIRhzSaUdQ+rQU5kGeFxm+hb1oh6pWWmv3uvmReDl0UnvtapVaIzo1jZbf/pD6ElLqSX+rUmOQNpJFa/r+sa4e/pBlAABoAAAAA3CUgShLdGIxsY7AUABPRrgCABdDuQ5GC7DqPQCgbbJUAoRSUj+NIEig0YfyWUho1VBBBA//uQZB4ABZx5zfMakeAAAAmwAAAAF5F3P0w9GtAAACfAAAAAwLhMDmAYWMgVEG1U0FIGCBgXBXAtfMH10000EEEEEECUBYln03TTTdNBDZopopYvrTTdNa325mImNg3TTPV9q3pmY0xoO6bv3r00y+IDGid/9aaaZTGMuj9mpu9Mpio1dXrr5HERTZSmqU36A3CumzN/9Robv/Xx4v9ijkSRSNLQhAWumap82WRSBUqXStV/YcS+XVLnSS+WLDroqArFkMEsAS+eWmrUzrO0oEmE40RlMZ5+ODIkAyKAGUwZ3mVKmcamcJnMW26MRPgUw6j+LkhyHGVGYjSUUKNpuJUQoOIAyDvEyG8S5yfK6dhZc0Tx1KI/gviKL6qvvFs1+bWtaz58uUNnryq6kt5RzOCkPWlVqVX2a/EEBUdU1KrXLf40GoiiFXK///qpoiDXrOgqDR38JB0bw7SoL+ZB9o1RCkQjQ2CBYZKd/+VJxZRRZlqSkKiws0WFxUyCwsKiMy7hUVFhIaCrNQsKkTIsLivwKKigsj8XYlwt/WKi2N4d//uQRCSAAjURNIHpMZBGYiaQPSYyAAABLAAAAAAAACWAAAAApUF/Mg+0aohSIRobBAsMlO//Kk4soosy1JSFRYWaLC4qZBYWFRGZdwqKiwkNBVmoWFSJkWFxX4FFRQWR+LsS4W/rFRb/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU=';
 //var snd = new Audio("data:audio/wav;base64,"+beep1Str);  
 
-var snd = new Audio('https://www.soundjay.com/button/beep-24.wav');
-var snd2 = new Audio('https://www.soundjay.com/button/beep-07.wav');
+var snd = new Audio(getProxyEndpoint('https://www.soundjay.com/button/beep-24.wav'));
+var snd2 = new Audio(getProxyEndpoint('https://www.soundjay.com/button/beep-07.wav'));
 
 function beep() {
     try{
@@ -6130,9 +6379,34 @@ function doQuery(keywords) {
     checkExitLibraryButton();
     checkIndex();
 
+    checkExpandSearchButton();
+    checkNarrowSearchButton();
+
     /* TODO: use qTip for tooltips, see http://qtip2.com/api
     $('[title!=""]').qtip();
     */
+}
+
+function checkNarrowSearchButton(){
+  if(isContractSearch){
+    $('#isSearchAllFields').parent().addClass('hide');
+    $('#isExactLabelMatch').parent().css('border-top-left-radius', '0.25rem');
+    $('#isExactLabelMatch').parent().css('border-bottom-left-radius', '0.25rem');
+  }
+  else {
+    $('#isSearchAllFields').parent().removeClass('hide');
+    $('#isExactLabelMatch').parent().css('border-top-left-radius', '0rem');
+    $('#isExactLabelMatch').parent().css('border-bottom-left-radius', '0rem');
+  }
+}
+
+function checkExpandSearchButton(){
+  if(isExpandSearch){
+    $('#isExactLabelMatch').parent().addClass('hide');
+  }
+  else {
+    $('#isExactLabelMatch').parent().removeClass('hide');
+  }
 }
 
 function checkIndex(){
@@ -6449,7 +6723,7 @@ function selectDataspace(url, label, silent){
   //service_sparql = $('#dataSpaceMenu :selected').attr('value') + '/sparql';
   service_fct = getRudiEndpoint(url) + '/fct/service';
   service_sparql = getRudiEndpoint(url) + '/sparql';
-  LABEL_ROOT = '<i class="fa fa-cube" style="padding-bottom:4px;padding-right:2px;"></i>Root';// getDataspaceLabel();//.toUpperCase(); //<i class="fa fa-home" style="padding-bottom:4px;padding-right:2px;"></i>
+  LABEL_ROOT = '<i class="fa fa-book" style="padding-bottom:4px;padding-right:2px;"></i>Welcome to ' + getDataspaceLabel() + '!';// getDataspaceLabel();//.toUpperCase(); //<i class="fa fa-home" style="padding-bottom:4px;padding-right:2px;"></i>
 
   //if(url.indexOf('data.vios.network') >= 0) LABEL_ROOT = 'VIOS';
 
@@ -6584,6 +6858,7 @@ function loadTextResults(xml){
 
 
       var loadedUri = false;
+              var isGroupByCriteria = isGrouped(); // POI: For now, "Used As" fields are not treated as "group by", since they are not "added" from the Group by menu, but are instead added from the Used As menu
 
 
       $("fct\\:row", result).each(function(i) {
@@ -6659,7 +6934,6 @@ function loadTextResults(xml){
               var facet = false;
 
               //var groupByCriteria = getMainFocus();
-              var isGroupByCriteria = isGrouped(); // POI: For now, "Used As" fields are not treated as "group by", since they are not "added" from the Group by menu, but are instead added from the Used As menu
               //if(isGroupByCriteria){
                 //propIRI = groupByCriteria.attr('iri');
                 //propLabel = groupByCriteria.attr('label');
@@ -7009,6 +7283,7 @@ function loadContents(xml, focusVarName){
 
 
       var loadedUri = false;
+              var isGroupByCriteria = isGrouped(); // POI: For now, "Used As" fields are not treated as "group by", since they are not "added" from the Group by menu, but are instead added from the Used As menu
 
 
       $("fct\\:row", result).each(function(i) {
@@ -7076,7 +7351,7 @@ rows += '<p class="description"> A digital camera is a device that records image
 rows += '</div>';
 rows += '<div class="col-md-3 col-12 text-center">';
 rows += '<p class="value3 mt-sm">9, 700 AVI</p>';
-rows += '<p class="fs-mini text-muted"> PER WEEK </p><a class="btn btn-primary btn-info btn-sm" href="#">Buy Now</a>';
+rows += '<p class="fs-mini text-muted"> PER WEEK </p><a class="btn btn-primary btn-info btn-sm" href="#">Rent Now</a>';
 rows += '</div>';
 rows += '</div>';
 rows += '</div>';
@@ -7094,7 +7369,7 @@ rows += '<p class="description"> St. Martin\'s history shares many commonalities
 rows += '</div>';
 rows += '<div class="col-md-3 col-12 text-center">';
 rows += '<p class="value3 mt-sm"> 1, 700 AVI </p>';
-rows += '<p class="fs-mini text-muted"> PER WEEK </p><a class="btn btn-primary btn-info btn-sm" href="#">Buy Now</a>';
+rows += '<p class="fs-mini text-muted"> PER WEEK </p><a class="btn btn-primary btn-info btn-sm" href="#">Rent Now</a>';
 rows += '</div>';
 rows += '</div>';
 rows += '</div>';
@@ -7189,7 +7464,6 @@ rows += '</section>';
               var facet = false;
 
               //var groupByCriteria = getMainFocus();
-              var isGroupByCriteria = isGrouped(); // POI: For now, "Used As" fields are not treated as "group by", since they are not "added" from the Group by menu, but are instead added from the Used As menu
               //if(isGroupByCriteria){
                 //propIRI = groupByCriteria.attr('iri');
                 //propLabel = groupByCriteria.attr('label');
@@ -7242,7 +7516,7 @@ rows += '<span property="title">'+label+'</span>';
 rows += '</div>';
 
                                 var float = (isGroupByCriteria) ? ' float-left' : ' pull-right';
-                                rows +=  '<span class="thumb-sm'+float+'">';
+                                rows +=  '<span class="thumb-sm'+float+' mr-1">';
 
 /*
 
@@ -7283,8 +7557,11 @@ if(true){
                 var propOrPropOf = (isReverse) ? "property-of" : "property";
                 var nodeType = (isReverse) ? NODE_TYPE_PROPERTY_OF: NODE_TYPE_PROPERTY;
                 //rows += '<a class="count" onclick="javascript: remove(\''+getMainFocus().attr('class')+'\', true); '+propOrPropOf+'(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\'); selectMenuItem(\''+id+'\', \''+propIRI+'\');">'+ct+'</a>&nbsp;-&nbsp;';
-                rows +=  '<span '+buildTitle(ct, 'left')+' style="cursor:pointer" _ngcontent-c9="" class="badge badge-pill badge-'+badgeColor+'" onclick="javascript: removeEmptyFacet(\''+propOrPropOf+'\',\''+propIRI+'\', true); '+addPropOrPropOf+'(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\', \''+lang+'\'); selectMenuItem(\''+id+'\', \''+propIRI+'\');">';
-                rows+=getCountLabel(ct);
+                var ctAbbr = getCountLabel(ct);
+                var ctTitle = '';
+                if(ctAbbr != ct) ctTitle = buildTitle(ct, 'left');
+                rows +=  '<span '+ctTitle+' style="cursor:pointer" _ngcontent-c9="" class="badge badge-'+badgeColor+'" onclick="javascript: removeEmptyFacet(\''+propOrPropOf+'\',\''+propIRI+'\', true); '+addPropOrPropOf+'(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\', \''+lang+'\');">';
+                rows+=ctAbbr;
                 rows+='</span>';
               }
               else {
@@ -7365,8 +7642,8 @@ if(true){
                           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
                           rows += '</div>';*/
 
-                          rows += '<button '+buildTitle('Enter '+label+' Library', 'top')+' id="filterbtn'+id+'" class="hide hidable'+id+' btn btn-warning btn-xs mb-xs btn-set-focus" type="button" onclick="javascript:takeMainFocus(ID_QUERY); clearFacets(true); stackGraphFacet(\''+value+'\', \''+label+'\');"><b class="fa fa-sign-in"></b></button>';
-                          rows += '<button '+buildTitle('Apply filter', 'right')+' id="entbtn'+id+'" class="hide hidable'+id+' btn btn-warning btn-xs mb-xs btn-enter-lib" type="button" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')"><b class="fa fa-filter"></b></button>';
+                          rows += '<button '+buildTitle('Enter '+label+' Library', 'top')+' id="filterbtn'+id+'" class="hide hidable'+id+' btn btn-warning btn-xs mb-xs btn-set-focus" type="button" onclick="javascript:takeMainFocus(ID_QUERY); clearFacets(true); stackGraphFacet(\''+value+'\', \''+label+'\');"><b class="la la-sign-in la-lg"></b></button>';
+                          rows += '<button '+buildTitle('Apply filter', 'right')+' id="entbtn'+id+'" class="hide hidable'+id+' btn btn-warning btn-xs mb-xs btn-enter-lib" type="button" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')"><b class="la la-filter la-lg"></b></button>';
                     rows = rows.replace('id="'+opts.parentId+'"', 'id="'+opts.parentId+'" style="border-left: 3px solid #ffc247;"');
                     //rows = rows.replace('<h6 id="rw'+rowId+'"', '<span _ngcontent-c9="" class="badge badge-pill badge-warning">8</span><h6 id="rw'+rowId+'""');
                     rows = rows.replace('class="rounded-circle"', 'class="rounded-circle hide"');
@@ -7911,8 +8188,11 @@ if(true){
           var focusTargetClass = (getMainFocus().attr('class') == ID_QUERY+"") ? 'queryFocus' : 'queryFocusValue';
           //rows += '<tr  id="rw'+id+'" onmouseover="javascript:showControls(\''+id+'\')" onmouseout="javascript:hideControls(\''+id+'\')"><td class="up" id="'+opts.parentId+'">';
 
-          rows +=  '<span '+buildTitle(ct, 'left')+' _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onmouseover="javascript:$(\'#'+focusTarget+'\').addClass(\''+focusTargetClass+'\')" onmouseout="javascript:$(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\')" onclick="javascript: $(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\'); var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\')">';
-          rows+= getCountLabel(ct);
+          var ctAbbr = getCountLabel(ct);
+          var ctTitle = '';
+          if(ctAbbr != ct) ctTitle = buildTitle(ct, 'left');
+          rows +=  '<span '+ctTitle+' _ngcontent-c9="" class="total badge badge-'+badgeColor+'" onmouseover="javascript:$(\'#'+focusTarget+'\').addClass(\''+focusTargetClass+'\')" onmouseout="javascript:$(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\')" onclick="javascript: $(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\'); var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\', false, isXKeyDown())">';
+          rows+= ctAbbr;
           rows += '</span>';
 //          rows += '<a class="count" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addClassFacet(\''+id+'\', \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</a>&nbsp;-&nbsp;';
           //rows += '<a title="'+uri+'" onclick="javascript:describe(\''+uri+'\');">'+ spaceCamelCase(label) +'</a>&nbsp;';
@@ -7924,7 +8204,7 @@ if(true){
 
           //rows += '</td><td id="ctrl'+id+'" class="hideCtrl" style="white-space:nowrap; vertical-align:top;">';
           rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+''+hideCkbxClass+'">';
-          rows += '<input class="form-check-input" id="ckbx'+id+'" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\')}" />&nbsp;';
+          rows += '<input class="form-check-input" id="ckbx'+id+'" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\', false, '+isXKeyDown+')}" />&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
           //rows += '<img title="view instances" class="count" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
@@ -8171,8 +8451,11 @@ var rowId = opts.parentId;
           //rows += '<tr id="'+id+'" onmouseover="javascript:showControls(\''+id+'\')" onmouseout="javascript:hideControls(\''+id+'\')"><td class="up" id="'+opts.parentId+'"><span id="'+id+'">';
           //var propIRI = $('#groupByMenu :selected').attr('value');
           //var propLabel = $('#groupByMenu :selected').text();
-          rows +=  '<span '+buildTitle(ct, 'left')+' _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(pid);">';
-          rows+=getCountLabel(ct);
+          var ctAbbr = getCountLabel(ct);
+          var ctTitle = '';
+          if(ctAbbr != ct) ctTitle = buildTitle(ct, 'left');
+          rows +=  '<span '+ctTitle+' _ngcontent-c9="" class="total badge badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\', undefined, undefined, undefined, undefined, true, isXKeyDown()); takeMainFocus(pid);">';
+          rows+=ctAbbr;
           rows+='</span>';
                                 rows +=  '</span>';
             rows +=  '<div>';
@@ -8351,8 +8634,12 @@ var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'i
 
 var ckcolor = 'primary';
  
-          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(pid)">';
-          rows+=getCountLabel(ct);
+
+          var ctAbbr = getCountLabel(ct);
+          var ctTitle = '';
+          if(ctAbbr != ct) ctTitle = buildTitle(ct, 'left');
+          rows +=  '<span _ngcontent-c9="" '+ctTitle+' class="total badge badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\', undefined, undefined, undefined, undefined, true, isXKeyDown()); takeMainFocus(pid)">';
+          rows+=ctAbbr;
           rows+='</span>';
                                 rows +=  '</span>';
             rows +=  '<div>';
@@ -8717,6 +9004,8 @@ function loadDescribeResults(xml, opt) {
 
     var libraryFetched;
 
+
+
     var rows = '';
     $('rdf\\:Description', xml).each(function(i) {
         var subject = $(this).attr('rdf:about');
@@ -8835,7 +9124,7 @@ function loadDescribeResults(xml, opt) {
             if (propLabel == 'category') return;
 
             if (getLabel(propIRI)) propLabel = getLabel(propIRI);
-            proplink.append(propLabel);
+            proplink.append(processLabel(propLabel));
 
             if (!headerAdded) {
                 header.append(row);
@@ -8882,11 +9171,12 @@ function loadDescribeResults(xml, opt) {
 
             row.append(col);
 
+            var colId = createId();
             col = $.createElement('td');
-            col.attr('id', createId());
+            col.attr('id', colId);
             var gloss = getMainFocus().children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]');
             if(gloss && gloss.length > 0 && propIRI == 'http://dbpedia.org/property/content' && objectIRI && objectIRI.length > 0){
-              fetchContentDesc(objectIRI, col.attr('id'));
+              fetchContentDesc(objectIRI, colId);
             }
             var cid = 'copy_' + createId();
             var loid = 'linkout_' + createId();
@@ -8924,6 +9214,9 @@ function loadDescribeResults(xml, opt) {
         });
     });
 
+
+
+
     var libraryIRI = $('.libraryLink').attr('iri');
     var libraryLabel = $('.libraryLink').attr('irilabel');
     var onclick = 'onclick="javascript:setGraphFacet(\''+libraryIRI+'\', \''+libraryLabel+'\');"';
@@ -8958,6 +9251,7 @@ function loadDescribeResults(xml, opt) {
 
 
     if (showIDN) {
+        //$('#idn_content').removeClass('hide');
 
         uriLabel = '';
         for (i = 0; i < uriLabalArray.length; i++) {
@@ -8993,29 +9287,210 @@ content += '</section>';
 
 
 
+        var imgClass = createId();
+        var fetchUnsplashPhoto = !imgIri;
+        var photoAuthId = '';
+        var photoAuthURL = '';
         content += '<div class="widget-top-overflow text-white">';
-        content += '<div class="height-250 overflow-hidden">';
-        content += '<img class="img-fluid" src="'+imgIri+'">';//https://demo.flatlogic.com/sing-app/angular/assets/img/pictures/3.jpg //assets/img/pictures/19.jpg
+        content += '<div class="height-250 overflow-hidden text-center" style="background-color: #36393D">';
+        content += '<img class="'+imgClass+' img-fluid" src="'+imgIri+'">';//https://demo.flatlogic.com/sing-app/angular/assets/img/pictures/3.jpg //assets/img/pictures/19.jpg
+        if(fetchUnsplashPhoto) {
+          var photoSearch = buttonLabel;
+          photoSearch = photoSearch.replaceAll('(', ' ');
+          photoSearch = photoSearch.replaceAll(')', ' ');
+          photoSearch = photoSearch.trim();
+          getPhoto(photoSearch, function(photoURL, authId, authURL){
+            $('.'+imgClass).attr('src', photoURL);
+            photoAuthId = authId;
+            photoAuthURL = authURL;
+            $('#photoAuthorAttribution').attr('href', authURL);
+            $('#photoAuthorAttribution').text(authId);
+          });
+        }
         content += '</div>';
+
         content += '<div class="btn-toolbar">';
         content += '<a class="btn btn-outline btn-sm pull-right mr-1" href="#">';
-        content += '<i class="glyphicon glyphicon-shopping-cart mr-xs"></i> Buy Now ';
+        content += ' Edit <i class="fa fa-ticket"></i>';
         content += '</a>';
         content += '</div>';
         content += '</div>';
 
         content += '<div class="row">';
         content += '<div class="col-md-5 col-12 text-center">';
+
+/*
         content += '<div class="post-user post-user-profile">';
         content += '<span class="thumb-xl"><img alt="..." class="rounded-circle" src="assets/img/avatar.png"></span>';
-        content += '<h5 class="fw-normal">IDN: '+uriLabel+'</h5>';
+        content += '<h5 class="fw-normal"><legend>Idenity Node</legend> '+uriLabel+'</h5>';
         content += '<p>Owner: jnash</p>';
         content += '<p>Price: 0.03 ETH</p>';
         content += '<p>Price Valid Through: 10/03/2020</p>';
+        if(fetchUnsplashPhoto) content += '<a class="btn btn-inverse btn-sm mt-sm" href="#"> &nbsp;Buy Now <i class="fa fa-ticket ml-xs text-info"></i>&nbsp; </a><br/>';
+        content += '<a class="btn btn-inverse btn-sm mt-sm" href="#"> &nbsp;Tip Owner <i class="fa fa-ticket text-info ml-xs"></i>&nbsp; </a><br/>';
         content += '<a class="btn btn-danger btn-sm mt-sm" href="#"> &nbsp;Private Message <i class="fa fa-envelope ml-xs"></i>&nbsp; </a>';
         content += '<ul class="contacts">';
-        /*    content += '<li><i class="fa fa-lg fa-phone fa-fw mr-xs"></i><a href="#"> +375 29 555-55-55</a></li>';
-            content += '<li><i class="fa fa-lg fa-envelope fa-fw mr-xs"></i><a href="#"> psmith@example.com</a></li>';*/
+
+        content += '<li><i class="fa fa-lg fa-map-marker fa-fw mr-xs"></i><a href="#"> Minsk, Belarus</a></li>';
+        content += '</ul>';
+        content += '</div>';
+        */
+
+
+        content += '<div class="list-group">';
+          content += '<a href="#" class="list-group-item active">Info Feed</a>';
+          content += '<a href="#" class="list-group-item">Videos and media</a>';
+          content += '<a href="#" class="list-group-item">Articles and stories</a>';
+          content += '<a href="#" class="list-group-item">See also</a>';
+          content += '<a href="#" class="list-group-item">References</a>';
+          content += '<a href="#" class="list-group-item">External links</a>';
+        content += '</div>';
+
+
+
+        content += '</div>';
+        content += '<div class="col-md-7 col-12">';
+
+        content += '<h5 class="fw-normal text-center">'+uriLabel+'</h5>';
+
+
+        content += '<div class="stats-row stats-row-profile mt text-center">';
+        
+        content += '<div class="stat-item">';
+        content += '<p class="value text-left">9, 700</p>';
+        content += '<h6 class="name">AVI</h6>';
+        content += '</div>';
+        content += '<div class="stat-item">';
+        content += '<p class="value text-left">9.38%</p>';
+        content += '<h6 class="name">Prevelance</h6>';
+        content += '</div>';
+        content += '<div class="stat-item">';
+        content += '<p class="value text-left">842</p>';
+        content += '<h6 class="name">Performance</h6>';
+        content += '</div>';
+        
+
+
+
+        content += '</div>';
+
+
+
+/*
+        content += '<p class="text-left mt-lg">';
+        content += '<a class="badge badge-warning rounded-0" href="#"><i class="fa fa-ticket"></i> Identity </a>';
+        content += '<a class="badge badge-danger rounded-0 ml-xs" href="#"><i class="fi flaticon-diamond"></i> Genesis </a>';
+        content += '<a class="badge badge-success rounded-0 ml-xs" href="#"> Claimed </a>';
+        content += '</p>';
+*/
+
+        if(desc) {
+          var descAbbrv = desc;
+          if(descAbbrv.length > 50) descAbbrv = descAbbrv.substring(0, 500) + '...';
+          content += '<p> '+descAbbrv+' </p>';
+        }
+        content += '<legend> Fast Facts </legend>';
+        content += '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus non arcu aliquet, gravida nisl eget, gravida mi. Proin vitae augue sit amet massa cursus imperdiet dapibus dapibus leo. Praesent nisl tortor, blandit sed feugiat sit amet, egestas sit amet nisi. Aenean imperdiet elementum purus, a euismod odio interdum sit amet. </p>';
+        if(fetchUnsplashPhoto) content += '<legend>Photo Details</legend> Author: <a id="photoAuthorAttribution" href="'+photoAuthURL+'">'+photoAuthId+'</a>, Dataspace: <a href="https://www.unsplash.com">Unsplash</a></p>';
+        content += '</div>';
+
+        content += '</div>';
+        content += '<div id="ownerDIV" style="padding:1em;">';
+
+        /*
+        if(uri == 'http://dbpedia.org/resource/Kingsley_Idehen'){
+          content += '<span></span>';
+        }
+        else {
+          content += '<i class="fa fa-asterisk"></i>&nbsp;<span>The owner has not yet posted content here.</span>';
+        }
+        */
+
+        content += '<legend>Background</legend>';
+        content += '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus non arcu aliquet, gravida nisl eget, gravida mi. Proin vitae augue sit amet massa cursus imperdiet dapibus dapibus leo. Praesent nisl tortor, blandit sed feugiat sit amet, egestas sit amet nisi. Aenean imperdiet elementum purus, a euismod odio interdum sit amet.</p>';
+
+        content += '<legend>Innovations and design</legend>';
+        content += '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus non arcu aliquet, gravida nisl eget, gravida mi. Proin vitae augue sit amet massa cursus imperdiet dapibus dapibus leo. Praesent nisl tortor, blandit sed feugiat sit amet, egestas sit amet nisi. Aenean imperdiet elementum purus, a euismod odio interdum sit amet. </p>';
+content += '<section class="widget" widget="">';
+   content += '<div class="widget-body">';
+      content += '<div class="mt mb" flot-chart-animator="" id="flot-main" style="width: 100%; height: 260px; padding: 0px; position: relative;" ng-reflect-data="[object Object],[object Object">';
+         content += '<canvas class="flot-base" width="713" style="direction: ltr; position: absolute; left: 0px; top: 0px; width: 713.328px; height: 260px;" height="260"></canvas>';
+         content += '<div class="flot-text" style="position: absolute; top: 0px; left: 0px; bottom: 0px; right: 0px; font-size: smaller; color: rgb(84, 84, 84);">';
+            content += '<div class="flot-x-axis flot-x1-axis xAxis x1Axis" style="position: absolute; top: 0px; left: 0px; bottom: 0px; right: 0px;">';
+               content += '<div style="position: absolute; max-width: 118px; top: 246px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 32px; text-align: center;">2</div>';
+               content += '<div style="position: absolute; max-width: 118px; top: 246px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 167px; text-align: center;">3</div>';
+               content += '<div style="position: absolute; max-width: 118px; top: 246px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 301px; text-align: center;">4</div>';
+               content += '<div style="position: absolute; max-width: 118px; top: 246px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 436px; text-align: center;">5</div>';
+               content += '<div style="position: absolute; max-width: 118px; top: 246px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 571px; text-align: center;">6</div>';
+               content += '<div style="position: absolute; max-width: 118px; top: 246px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 706px; text-align: center;">7</div>';
+            content += '</div>';
+            content += '<div class="flot-y-axis flot-y1-axis yAxis y1Axis" style="position: absolute; top: 0px; left: 0px; bottom: 0px; right: 0px;">';
+               content += '<div style="position: absolute; top: 220px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 8px; text-align: right;">0</div>';
+               content += '<div style="position: absolute; top: 188px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 8px; text-align: right;">5</div>';
+               content += '<div style="position: absolute; top: 157px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 3px; text-align: right;">10</div>';
+               content += '<div style="position: absolute; top: 126px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 4px; text-align: right;">15</div>';
+               content += '<div style="position: absolute; top: 94px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 1px; text-align: right;">20</div>';
+               content += '<div style="position: absolute; top: 63px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 2px; text-align: right;">25</div>';
+               content += '<div style="position: absolute; top: 32px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 1px; text-align: right;">30</div>';
+               content += '<div style="position: absolute; top: 1px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 2px; text-align: right;">35</div>';
+            content += '</div>';
+         content += '</div>';
+         content += '<canvas class="flot-overlay" width="713" style="direction: ltr; position: absolute; left: 0px; top: 0px; width: 713.328px; height: 260px;" height="260"></canvas>';
+      content += '</div>';
+      content += '<div class="chart-tooltip" id="flot-main-tooltip" style="opacity: 0"></div>';
+      content += '<p class="fs-mini text-muted"> Flot is a <span class="fw-semi-bold">pure</span> JavaScript plotting library for jQuery, with a focus on simple usage, attractive looks and interactive features. </p>';
+      content += '<h5 class="mt">Growth by <span class="fw-semi-bold">Year</span></h5>';
+      content += '<div class="row mt">';
+         content += '<div class="col-md-6 col-12">';
+            content += '<div class="stats-row">';
+               content += '<div class="stat-item">';
+                  content += '<p class="value5 fw-thin">34 567</p>';
+                  content += '<h6 class="name text-muted m-0 fs-mini">Overall Values</h6>';
+               content += '</div>';
+               content += '<div class="stat-item stat-item-mini-chart">';
+                  content += '<div class="sparkline" jq-sparkline="" ng-reflect-data="9,12,14,15,10,14,20" ng-reflect-options="[object Object]">';
+                     content += '<canvas width="54" height="30" style="display: inline-block; width: 54px; height: 30px; vertical-align: top;"></canvas>';
+                  content += '</div>';
+               content += '</div>';
+            content += '</div>';
+         content += '</div>';
+         content += '<div class="col-md-6 col-12">';
+            content += '<div class="stats-row">';
+               content += '<div class="stat-item">';
+                  content += '<p class="value5 fw-thin">34 567</p>';
+                  content += '<h6 class="name text-muted m-0 fs-mini">Overall Values</h6>';
+               content += '</div>';
+               content += '<div class="stat-item stat-item-mini-chart">';
+                  content += '<div class="sparkline" jq-sparkline="" ng-reflect-data="9,12,14,15,10,14,20" ng-reflect-options="[object Object]">';
+                     content += '<canvas width="54" height="30" style="display: inline-block; width: 54px; height: 30px; vertical-align: top;"></canvas>';
+                  content += '</div>';
+               content += '</div>';
+            content += '</div>';
+         content += '</div>';
+      content += '</div>';
+//      content += '<p class="fs-mini text-muted"> This jQuery plugin generates sparklines (small inline charts) directly in the browser using data supplied either inline in the HTML, or via javascript. </p>';
+   content += '</div>';
+content += '</section>';
+
+        content += '<legend>Honors and awards</legend>';
+        content += '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus non arcu aliquet, gravida nisl eget, gravida mi. Proin vitae augue sit amet massa cursus imperdiet dapibus dapibus leo. Praesent nisl tortor, blandit sed feugiat sit amet, egestas sit amet nisi. Aenean imperdiet elementum purus, a euismod odio interdum sit amet.</p>';
+
+        content += '<legend>See also</legend>';
+        content += '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus non arcu aliquet, gravida nisl eget, gravida mi. Proin vitae augue sit amet massa cursus imperdiet dapibus dapibus leo. Praesent nisl tortor, blandit sed feugiat sit amet, egestas sit amet nisi. Aenean imperdiet elementum purus, a euismod odio interdum sit amet.</p>';
+
+        content += '<legend>References</legend>';
+        content += '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus non arcu aliquet, gravida nisl eget, gravida mi. Proin vitae augue sit amet massa cursus imperdiet dapibus dapibus leo. Praesent nisl tortor, blandit sed feugiat sit amet, egestas sit amet nisi. Aenean imperdiet elementum purus, a euismod odio interdum sit amet.</p>';
+
+        content += '<legend>External links</legend>';
+        content += '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus non arcu aliquet, gravida nisl eget, gravida mi. Proin vitae augue sit amet massa cursus imperdiet dapibus dapibus leo. Praesent nisl tortor, blandit sed feugiat sit amet, egestas sit amet nisi. Aenean imperdiet elementum purus, a euismod odio interdum sit amet.</p>';
+
+        content += '</div>';
+
+
+
+
+/* OLD IDN - SAVE 
+
 
         content += '<li><i class="fa fa-lg fa-map-marker fa-fw mr-xs"></i><a href="#"> Minsk, Belarus</a></li>';
         content += '</ul>';
@@ -9037,16 +9512,30 @@ content += '</section>';
         content += '</div>';
         content += '</div>';
         content += '<p class="text-left mt-lg">';
-        content += '<a class="badge badge-warning rounded-0" href="#"> Identity </a>';
-        content += '<a class="badge badge-danger rounded-0 ml-xs" href="#"> Genesis </a>';
+        content += '<a class="badge badge-warning rounded-0" href="#"><i class="fa fa-ticket"></i> Identity </a>';
+        content += '<a class="badge badge-danger rounded-0 ml-xs" href="#"><i class="fi flaticon-diamond"></i> Genesis </a>';
         content += '<a class="badge badge-success rounded-0 ml-xs" href="#"> Claimed </a>';
         content += '</p>';
-        if(desc) content += '<p class="lead mt-lg"> '+desc+' </p>';
+        if(desc) {
+          var descAbbrv = desc;
+          if(descAbbrv.length > 50) descAbbrv = descAbbrv.substring(0, 500) + '...';
+          content += '<p class="lead mt-lg"> '+descAbbrv+' </p>';
+        }
         content += '<legend> About </legend>';
         content += '<p>An identity node (IDN) is a non-fungible token that represents a data asset (e.g. the URI of a physical location). VIOS Network data assets are assigned unique identifiers which are linked to a non-fungible token called an Identity Node (aka IDN). The IDN is a VIP 181 token. </p>';
+        if(fetchUnsplashPhoto) content += '<legend>Photo Details</legend> Author: <a id="photoAuthorAttribution" href="'+photoAuthURL+'">'+photoAuthId+'</a>, Dataspace: <a href="https://www.unsplash.com">Unsplash</a></p>';
         content += '</div>';
+        content += '</div>';
+        content += '<div id="ownerDIV" style="padding:1em;">';
+        if(uri == 'http://dbpedia.org/resource/Kingsley_Idehen'){
+          content += '<>';
+        }
+        else {
+          content += '<i class="fa fa-asterisk"></i>&nbsp;<span>The owner has not yet posted content here.</span>';
+        }
         content += '</div>';
 
+*/ // end OLD IDN
 
 
         /*
@@ -9112,6 +9601,7 @@ content += '</section>';
 
     } //
     else {
+        $('#idn_content').addClass('hide');
 
         if (isMovie) {
             if (!actions) actions = '';
@@ -9271,7 +9761,7 @@ content += '</section>';
         var sz = lengthInUtf8Bytes(recordRDF);
         recordToolBar += '<button _ngcontent-c9="" class="btn btn-block btn-inverse mb-xs" role="button" onclick="javascript:downloadRecordRDF();">';
         recordToolBar += 'Download Record - ' + getBytesDenomination(sz) + ' ' + getBytesDenominationUnit(sz) + '';
-        recordToolBar += '&nbsp;&nbsp;<i class="fa fa-file-code-o"></i>';
+        recordToolBar += '&nbsp;&nbsp;<i class="fa fa-share-alt"></i>';
         recordToolBar += '</button>';
         if (isFastFood) {
             if (phone) {
@@ -9675,8 +10165,9 @@ exitGroupBy();
     if(showMeType == VIEW_TYPE_TEXT_PROPERTIES){
       if(!_root.find('query text') || _root.find('query text').length <= 0){
         //('Please enter keywords to view corresponding text fields');
-       $('#'+ID_SHOW_ME+'').empty();
-       return;
+       $('#angular_showMeList').empty();
+       beep2();
+      return;
       }
     }
     $('#showMeHeader').addClass('loading');
@@ -9827,11 +10318,11 @@ rows += '<tr><td '+iriAttr+' id="'+rowId+'"'+((recordActive)?' class="record-act
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left ">';
 if(datatype == 'uri'){
-                  rows += '<img style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\'); takeMainFocus(\''+opts.contextId+'\')" src="'+getFaviconUrl(value)+'">';
+                  rows += '<img style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\', true, isXKeyDown()); takeMainFocus(\''+opts.contextId+'\')" src="'+getFaviconUrl(value)+'">';
                                     //rows +=  '<i class="status status-bottom bg-success"></i>';
 }
                 else {
-                  rows += '<span style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="icon-literal glyphicon glyphicon-tag"></span>';
+                  rows += '<span style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\', false, isXKeyDown())" class="icon-literal glyphicon glyphicon-tag"></span>';
                 }
 rows += '</span>';
 //rows += '</a>';
@@ -9973,7 +10464,7 @@ return;
 
 
           rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-primary">';
-          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' onclick="javascript:if(!$(this).is(\':checked\')) {removeFacetValue(\''+propOrPropOf+'\',\''+opts.propIRI+'\', \''+value+'\');}else{setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY_OF+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\')}"/>&nbsp;';
+          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' onclick="javascript:if(!$(this).is(\':checked\')) {removeFacetValue(\''+propOrPropOf+'\',\''+opts.propIRI+'\', \''+value+'\');}else{setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY_OF+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', true, isXKeyDown())}"/>&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
 rows +='</h6>';
@@ -10565,6 +11056,8 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
         //val = val.trim();
 
         var isPropOf = ($(ele).prop('nodeName')) ? $(ele).prop('nodeName').toLowerCase() === 'property-of' : false;
+        var exclude = $(ele).attr('exclude') == 'yes';
+        if(id == ID_QUERY && c.length > 0) exclude = c.attr('exclude') == 'yes';
         //console.log('nodeName: ' + $(ele).prop('nodeName'));
         //if(isPropOf) console.log('is property-of: ' + label);
 
@@ -10765,12 +11258,19 @@ if(false){
         }
 
 }
+        if(exclude){
+          desc = '<i style="cursor:pointer" class="fa fa-ban" onclick="$(\''+id+'\').removeAttr(\'exclude\')"></i>&nbsp;' + desc;
+
+        }
+
 
         var isEmptyValue = val === VALUE_ANON_NODE;
         var outline = (isEmptyValue) ? 'outline-default': 'default';
         var bcOutline = (isEmptyValue) ? 'outline-default': 'primary';
         var bcOutlineRemove = (isEmptyValue) ? 'outline-': '';
         var of = (isPropOf && !desc.toLowerCase().endsWith('of')) ? ' of' : '';
+
+        var excludeIcon = '';// exclude ? '<i class="fa fa-ban"></i>&nbsp;' : '';
 
         if(nav_type == NAV_TYPE_1){
 
@@ -10785,21 +11285,21 @@ if(false){
           }
 
           var roleBadge = '';// '&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>';
-          ret = '<li '+buildTitle(tooltip)+' class="'+focusClass+'" id="nav'+id+'"><a ><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?roleBadge:'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
+          ret = '<li '+buildTitle(tooltip)+' class="'+focusClass+'" id="nav'+id+'">'+excludeIcon+'<a ><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?roleBadge:'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
 
 
         }
         else if(nav_type == NAV_TYPE_3){
           var roleBadge = '';// '&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>';
           if(bcFacetType == BC_FACET_TYPE_FACET) {
-            ret = '<div style="padding: 0px; background-color:transparent;" class="row" '+buildTitle(tooltip)+' id="nav'+id+'" '+focus+'><div style="display:inline; padding:0px;" class="text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6 style="vertical-align:bottom;margin-bottom:0px">&nbsp;<span onclick="javascript:'+action+'(\''+id+'\')" class="via" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')">' + ''+desc+of+((isPropOf)?roleBadge:'')+((len > 0) ? '</span>&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">'+len+'</span>' : '')+'</h6></div><button class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
+            ret = '<div style="padding: 0px; background-color:transparent;" class="row" '+buildTitle(tooltip)+' id="nav'+id+'" '+focus+'><div style="display:inline; padding:0px;" class="text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6 style="vertical-align:bottom;margin-bottom:0px">'+excludeIcon+'&nbsp;<span onclick="javascript:'+action+'(\''+id+'\')" class="via" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')">' + ''+desc+of+((isPropOf)?roleBadge:'')+((len > 0) ? '</span>&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">'+len+'</span>' : '')+'</h6></div><button class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
           }
           else if(bcFacetType == BC_FACET_TYPE_FOCUS) {
-            ret = '<div style="padding: 0px; background-color:transparent;" class="row" '+buildTitle(tooltip)+' id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')"><h3 class="fw-semi-bold" style="padding-bottom:4px" >'+desc+of+((isPropOf)?roleBadge:'')+'</h3></div><button id="focusValue" class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
+            ret = '<div style="padding: 0px; background-color:transparent;" class="row" '+buildTitle(tooltip)+' id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')"><h3 class="fw-semi-bold" style="padding-bottom:4px" >'+excludeIcon+''+desc+of+((isPropOf)?roleBadge:'')+'</h3></div><button id="focusValue" class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
           }
           else { // isBreadCrumb
             //ret = '<li class="breadcrumb-item"><div class="row" style="background-color:transparent;" title="'+tooltip+'" id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6>' + ''+desc+'</h6></div><button class="btn-rounded-f  btn btn-'+outline+'default btn-block btn-xs text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div></li>';
-    ret = '<li '+buildTitle(tooltip)+' class="" id="nav'+id+'"><a><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?roleBadge:'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
+    ret = '<li '+buildTitle(tooltip)+' class="" id="nav'+id+'">'+excludeIcon+'<a><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?roleBadge:'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
   //  gbcol += '<li class="breadcrumb-item"><a  title=""><em>distributor</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-outline-default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\'0\')">'+VALUE_ANON_NODE+'</button></li>';
           }
 
@@ -10995,7 +11495,7 @@ $.ajax({
         var pwdHash = md5(urib_password + urib_nonce);
         get_urib_session('digest', pwdHash, urib_nonce, encodeURIComponent('http://www.openlinksw.com/ontology/acl#DefaultRealm'), 'rudi');
     },
-    error : function(request,error)
+    error : function(response,error)
     {
         //console.log("Error in request: "+request+error);
         urib_nonce = request.responseText;
@@ -11021,9 +11521,39 @@ function get_urib_session(service, pwdHash, nonce, realm, usr){
     success : function(data) {
       console.log('URIBurner login successful');
     },
-    error : function(request,error)
+    error : function(response,error)
     {
         console.log("Error in request: "+error);
+    }
+  });
+}
+
+
+function getPhoto(keywords, func){
+  console.log('photo search: ' + keywords);
+  $.ajax({
+
+    url : getProxyEndpoint( 'https://api.unsplash.com/search/photos/?query=' + keywords + '&orientation=landscape&client_id=' + localStorage.getItem('unsplash.key') ),
+    type : 'GET',
+    data : {
+    },
+    dataType:'json',
+    success : function(data) {
+      //console.log('Unsplash photos: ' + data.results[1].urls.raw);
+      if(data.results.length <= 1){
+        func('', '', '');
+        return;
+      }
+      var photoURL = data.results[1].urls.regular;
+      var photoAuthorURL = data.results[1].user.portfolio_url;
+      var photoAuthorId = data.results[1].user.username;
+      console.log('attribution: ' + photoAuthorId + ', ' + photoAuthorURL);
+      if(data.results.length > 0) func(photoURL, photoAuthorId, photoAuthorURL);
+      else return 'https://images.unsplash.com/photo-1481819613568-3701cbc70156?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2016&q=80';
+    },
+    error : function(response,error)
+    {
+        console.log("Error in request: "+error + ' request: ' + request.responseText);
     }
   });
 }

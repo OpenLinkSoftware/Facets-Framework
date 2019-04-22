@@ -83,6 +83,15 @@ header.loading, #wallet-tab.loading, wallets-modal div.loading {
   animation-iteration-count: infinite;
 }
 
+#wallet-tab.loading, wallets-modal div.loading {
+  background-color: #547fff;
+  animation-name: loadingWallet;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+}
+
+
+
 #focusHeader.loading {
   background-color: #ffffff;
   animation-name: loadingFocus;
@@ -110,6 +119,28 @@ header.loading, #wallet-tab.loading, wallets-modal div.loading {
     color: #7f3ddb;
   }
 }
+
+@keyframes loadingWallet {
+  0% {
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    background-color: #ffffff;
+    color: #f0af03;
+  }
+  50% {
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    background-color: #ffc247; /*#547fff; #4285f4;*/
+    color: #fff;
+  }
+  100% {
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    background-color: #ffffff;
+    color: #f0af03;
+  }
+}
+
 
 a.loading, td.loading {
   background-color: #547fff;
@@ -259,6 +290,26 @@ color:white;
 }
 #isDebug.focus{
   background: transparent!important;
+}
+
+.nav-link.active{
+    border-top: 1px solid #4e85bd!important;
+}
+
+#walletTabButton .nav-link.active{
+    border-top: 1px solid #f0af03!important;
+}
+
+#recordViewerColumn, #showMeColumn, #groupByColumn, #recordFormColumn{
+  padding:4px;
+}
+
+#angular_breadcrumbBarContainer, #angular_libraryBarContainer{
+  padding:4px;
+}
+
+app-navbar{
+  margin-bottom: 0px;
 }
 
 .header
@@ -625,6 +676,10 @@ i.link-field:hover{
   text-decoration: none!important;
 }
 
+.badge{
+  min-width: 25px !important;
+}
+
 
 .text-warning-hack {
     color: #ffc247 !important;
@@ -717,6 +772,30 @@ h6 {
     float: none;
     position: absolute;
     /* bottom: -2px; */
+}
+
+#groupByTableHeader{
+  padding-left:4px!important;
+  margin-top: 0;
+}
+
+.literal-table{
+/*  quotes: "“" "”" "‘" "’";*/
+  font-family: "Andale Mono", AndaleMono, monospace; 
+  font-size: .82rem;
+}
+q:before {
+/*    content: open-quote;*/
+}
+q:after {
+/*    content: close-quote;*/
+}
+.link-table:hover{
+    color: #165c82!important;
+  text-decoration: none!important;
+}
+.link-table{
+
 }
 
 
@@ -1019,6 +1098,10 @@ accordion .card-header {
   border-bottom-left-radius: 0.25rem;
 }
 
+form.navbar-form{
+  width: 100%;
+}
+
 
 /*
 .libraries li:nth-child(2) a       { background:        hsla(34,85%,45%,1); }
@@ -1058,7 +1141,7 @@ accordion .card-header {
 
 .btn-set-focus{
     position: absolute;
-    right: 38px;
+    right: 42px;
 }
 
 #showMeColumn span.thumb-sm {
@@ -1168,3 +1251,24 @@ a.eventHandler {
 .breadcrumb-item+.breadcrumb-item {
     /* padding-left: .5rem; */
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
