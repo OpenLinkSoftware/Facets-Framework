@@ -11058,6 +11058,9 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
         var isPropOf = ($(ele).prop('nodeName')) ? $(ele).prop('nodeName').toLowerCase() === 'property-of' : false;
         var exclude = $(ele).attr('exclude') == 'yes';
         if(id == ID_QUERY && c.length > 0) exclude = c.attr('exclude') == 'yes';
+
+        var not = exclude ? ' not ' : '';
+        var doesNot = exclude ? ' does not ' : '';
         //console.log('nodeName: ' + $(ele).prop('nodeName'));
         //if(isPropOf) console.log('is property-of: ' + label);
 
@@ -11098,23 +11101,23 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
                 if(ttd.indexOf('[') > 0) ttd = ttd.substring(0, ttd.lastIndexOf('[')); 
                 ttd = ttd.trim();
             }
-            var tooltip = 'and for what does it act as ' + ttd;        
+            var tooltip = 'and for what does it '+not+' act as ' + ttd;        
             if(ttd.endsWith(' to') || ttd.endsWith('To')){
                 tooltip = 'and what ' + ttd + ' it';
             }
             else if(ttd.endsWith(' of') || ttd.endsWith('Of')){
-                var isa = 'is a ';
+                var isa = 'is '+not+' a ';
                 if( (ttd.startsWith('is') || ttd.startsWith('Is')) && ttd.length > 2 && (ttd.charAt(2).toUpperCase() == ttd.charAt(2) || ttd.charAt(2) == ' ') ) isa = '';
                 tooltip = 'and what ' + isa + ttd + ' it';
             }
             else if(ttd.startsWith('has')){
-                tooltip = 'and what ' + ttd + ' represented by it';
+                tooltip = 'and what ' + doesNot + ttd + ' represented by it';
             }
             else if(ttd.endsWith('by') || ttd.endsWith('By')){
-                tooltip = 'and what is ' + ttd + ' it';
+                tooltip = 'and what is '+ not + ttd + ' it';
             }
             else if(ttd.endsWith('ing')){
-                tooltip = 'and what is ' + ttd + ' it';
+                tooltip = 'and what is '+ not + ttd + ' it';
             }
             //desc = desc + '';
         }
@@ -11124,23 +11127,23 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
                 if(ttd.indexOf('[') > 0) ttd = ttd.substring(0, ttd.lastIndexOf('[')); 
                 ttd = ttd.trim();
             }
-            var tooltip = 'and what is its ' + ttd;        
+            var tooltip = 'and what is ' + not + ' its ' + ttd;        
             if(ttd.endsWith(' to') || ttd.endsWith('To')){
-                tooltip = 'and what it ' + ttd;
+                tooltip = 'and what it ' + doesNot + ttd;
             }
             else if(ttd.endsWith(' of') || ttd.endsWith('Of')){
-                var isa = 'is a ';
+                var isa = 'is '+not+' a ';
                 if( (ttd.startsWith('is') || ttd.startsWith('Is')) && ttd.length > 2 && (ttd.charAt(2).toUpperCase() == ttd.charAt(2) || ttd.charAt(2) == ' ') ) isa = '';
                 tooltip = 'and it ' + isa + ttd + ' what';
             }
             else if(ttd.startsWith('has') || ttd.startsWith('Has')){
-                tooltip = 'and it ' + ttd + ' among these';
+                tooltip = 'and it ' + doesNot + ttd + ' among these';
             }
             else if(ttd.endsWith('by') || ttd.endsWith('By')){
-                tooltip = 'and what is it ' + ttd;
+                tooltip = 'and what is it ' + not + ttd;
             }
             else if(ttd.endsWith('ing')){
-                tooltip = 'and what is it ' + ttd;
+                tooltip = 'and what is it ' + not + ttd;
             }
         }
         if(val != VALUE_ANON_NODE && !categoryAsValue) {
@@ -11207,7 +11210,7 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
 
             if(cval){
 
-                tooltip += ', and each of them is';
+                tooltip += ', and each of them is' + not;
 
                 var cvals = _root.find('.'+id + ' > class');
                 for(i = 0; i < cvals.length; i++){
@@ -11219,11 +11222,14 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
                     tooltip += ',';
                   }
                   if(i+2 == cvals.length) {
-                    tooltip += ' and';
+                    tooltip += ' and' + not;
                   }
                 }
             }
         }
+
+        desc = desc.replaceAll('  ', ' ');
+
         if( (v.attr('datatype') != 'uri' && (!v.attr('iri') || v.attr('iri').length <= 0)) && ( !cval || id == ID_QUERY)){
               if(val.length > 0 && val != VALUE_ANON_NODE) val = '\'' + val + '\'';
         }
