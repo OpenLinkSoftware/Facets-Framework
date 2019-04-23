@@ -620,6 +620,35 @@ padding: 60px 40px 40px 15px;
     top: 14px!important;
   }
 
+div h6 .ctrl-reverse-1 {
+    top: 14px!important;
+    right: 46px;
+}
+
+div h6 .ctrl-reverse-2 {
+    top: 14px!important;
+    right: 64px;
+}
+
+div h6 .ctrl-reverse-3 {
+    top: 13px!important;
+    right: 46px;
+}
+
+div h6 .ctrl-reverse-4 {
+    top: 14px!important;
+    right: 64px;
+}
+
+div h6 .ctrl-reverse-4:hover,
+div h6 .ctrl-reverse-3:hover,
+div h6 .ctrl-reverse-2:hover,
+div h6 .ctrl-reverse-1:hover
+{
+color:#000;
+}
+
+
     .badge{
       font-weight: normal;
       font-size: 11px;
@@ -728,6 +757,15 @@ td .thumb-sm .status{
   top:-10px!important;
 }
 
+.ctrl-select{
+  cursor: pointer;
+  font-size: 10pt;
+}
+
+.ctrl-select:hover{
+    color: #29323a!important;
+  text-decoration: none!important;
+}
 
 div h6 i {
   top: 13px;
@@ -736,7 +774,8 @@ div h6 i {
 
 .linkout{
   position: absolute;
-  bottom: -8px;
+  /*bottom: -8px;*/
+  bottom: 3px;
   right:28px;
 }
 

@@ -446,9 +446,9 @@ function stackQueryGraph(g, label){
 function checkLibraries(){
   if(getQueryGraph() && getQueryGraph().length > 0){
     if(getMainFocus().attr('class') != ID_QUERY) return;
-    var sparql = buildTypeCountQuery('http://www.w3.org/ns/sparql-service-description#NamedGraph');
+    var sparql = buildTypeAskQuery('http://www.w3.org/ns/sparql-service-description#NamedGraph');
     var opt = new Object();
-    opt.tar = 'countDefaultLoadLibraries';
+    opt.tar = 'askDefaultLoadLibraries';
     fct_sparql(sparql, opt);
   }
 }
@@ -969,7 +969,7 @@ function fct_sparql(sparql, opt){
   var id = sparql ? (sparqlSvr + sparql).hashCode() : 0;
 
   // need to use a register pattern for these
-  setMutex(id, opt.tar, opt.tar!='record' && opt.tar != 'countLibraries' && opt.tar != 'countGlossaries' && opt.tar != 'countHelp' && opt.tar != 'countDefaultLoadLibraries' && opt.tar != 'countDefaultLoadOriginLibraries' && opt.tar != 'fetchLibraries' && opt.tar != 'fetchContentDesc');
+  setMutex(id, opt.tar, opt.tar!='record' && opt.tar != 'askLibraries' && opt.tar != 'askGlossaries' && opt.tar != 'askHelp' && opt.tar != 'askDefaultLoadLibraries' && opt.tar != 'askDefaultLoadOriginLibraries' && opt.tar != 'fetchLibraries' && opt.tar != 'fetchContentDesc');
   //q.attr('timeout', fct_queryTimeout);
   var resp;
   if(fct_isCache){
@@ -1021,20 +1021,20 @@ function fct_sparql(sparql, opt){
                 }
                 fct_handleSparqlDescribe(resp, opt);
               }
-              else if(opt.tar == 'countLibraries'){
-                fct_handleSparqlLibraryCount(resp, opt);
+              else if(opt.tar == 'askLibraries'){
+                fct_handleSparqlLibraryAsk(resp, opt);
               }
-              else if(opt.tar == 'countGlossaries'){
-                fct_handleSparqlGlossaryCount(resp, opt);
+              else if(opt.tar == 'askGlossaries'){
+                fct_handleSparqlGlossaryAsk(resp, opt);
               }
-              else if(opt.tar == 'countHelp'){
-                fct_handleSparqlHelpCount(resp, opt);
+              else if(opt.tar == 'askHelp'){
+                fct_handleSparqlHelpAsk(resp, opt);
               }
-              else if(opt.tar == 'countDefaultLoadLibraries'){
-                fct_handleSparqlDefaultLoadLibrariesCount(resp, opt);
+              else if(opt.tar == 'askDefaultLoadLibraries'){
+                fct_handleSparqlDefaultLoadLibrariesAsk(resp, opt);
               }
-              else if(opt.tar == 'countDefaultLoadOriginLibraries'){
-                fct_handleSparqlDefaultLoadOriginLibrariesCount(resp, opt);
+              else if(opt.tar == 'askDefaultLoadOriginLibraries'){
+                fct_handleSparqlDefaultLoadOriginLibrariesAsk(resp, opt);
               }
               else if(opt.tar == 'fetchLibraries'){
                 if(getMutex(opt.tar) != id){
@@ -1104,20 +1104,20 @@ function fct_sparql(sparql, opt){
                 }
                 fct_handleSparqlDescribe(xml, opt); // POI: be sure to cache the work
               }
-              else if(opt.tar == 'countLibraries'){
-                fct_handleSparqlLibraryCount(xml, opt);
+              else if(opt.tar == 'askLibraries'){
+                fct_handleSparqlLibraryAsk(xml, opt);
               }
-              else if(opt.tar == 'countGlossaries'){
-                fct_handleSparqlGlossaryCount(xml, opt);
+              else if(opt.tar == 'askGlossaries'){
+                fct_handleSparqlGlossaryAsk(xml, opt);
               }
-              else if(opt.tar == 'countHelp'){
-                fct_handleSparqlHelpCount(xml, opt);
+              else if(opt.tar == 'askHelp'){
+                fct_handleSparqlHelpAsk(xml, opt);
               }
-              else if(opt.tar == 'countDefaultLoadLibraries'){
-                fct_handleSparqlDefaultLoadLibrariesCount(xml, opt);
+              else if(opt.tar == 'askDefaultLoadLibraries'){
+                fct_handleSparqlDefaultLoadLibrariesAsk(xml, opt);
               }              
-              else if(opt.tar == 'countDefaultLoadOriginLibraries'){
-                fct_handleSparqlDefaultLoadOriginLibrariesCount(xml, opt);
+              else if(opt.tar == 'askDefaultLoadOriginLibraries'){
+                fct_handleSparqlDefaultLoadOriginLibrariesAsk(xml, opt);
               }
               else if(opt.tar == 'fetchLibraries'){
                 if(getMutex(opt.tar) != id){
@@ -1199,66 +1199,57 @@ function fct_handleSparqlTableCount(xml, opt){
 }
 
 
-function fct_handleSparqlLibraryCount(xml, opt){
-  var results = $(xml).find('results');
-  $('result', results).each(function(i){
-    var ct = $(this).text().trim();
-    if(ct <= 0){
+function fct_handleSparqlLibraryAsk(xml, opt){
+  var exists = $($(xml).find('boolean')[0]).text().trim() == 'true';
+  if(!exists){
+    $('#libraryButton').addClass('hide');
+  }
+  else {
+    if( 
+      !_root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]') || 
+      _root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]').length <= 0
+      
+      ){
+      $('#libraryButton').removeClass('hide');
+    }
+    else if( !$('#libraryButton').hasClass('hide') ){
       $('#libraryButton').addClass('hide');
+
+      var sparql = buildTypeAskQuery('dsn:data.vios.network/o/Origin');
+      var opt = new Object();
+      opt.tar = 'askDefaultLoadOriginLibraries';
+      fct_sparql(sparql, opt);
     }
-    else {
-      if( 
-        !_root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]') || 
-        _root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]').length <= 0
-        
-        ){
-        $('#libraryButton').removeClass('hide');
-      }
-      else if( !$('#libraryButton').hasClass('hide') ){
+  }
+}
+
+
+function fct_handleSparqlDefaultLoadLibrariesAsk(xml, opt){
+  var exists = $($(xml).find('boolean')[0]).text().trim() == 'true';
+  if(exists){
+    if(
+      !_root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]') || 
+      _root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]').length <= 0
+    ) {
+      clearFacets(true);
+      addClassFacet(createId(), 'http://www.w3.org/ns/sparql-service-description#NamedGraph', 'Library');
+      if( !$('#libraryButton').hasClass('hide') ){
         $('#libraryButton').addClass('hide');
-
-        var sparql = buildTypeCountQuery('dsn:data.vios.network/o/Origin');
-        var opt = new Object();
-        opt.tar = 'countDefaultLoadOriginLibraries';
-        fct_sparql(sparql, opt);
       }
     }
-  });
+  }
 }
 
-
-function fct_handleSparqlDefaultLoadLibrariesCount(xml, opt){
-  var results = $(xml).find('results');
-  $('result', results).each(function(i){
-    var ct = $(this).text().trim();
-    if(ct > 0){
-      if(
-        !_root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]') || 
-        _root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]').length <= 0
-      ) {
-        clearFacets(true);
-        addClassFacet(createId(), 'http://www.w3.org/ns/sparql-service-description#NamedGraph', 'Library');
-        if( !$('#libraryButton').hasClass('hide') ){
-          $('#libraryButton').addClass('hide');
-        }
-      }
+function fct_handleSparqlDefaultLoadOriginLibrariesAsk(xml, opt){
+  var exists = $($(xml).find('boolean')[0]).text().trim() == 'true';
+  if(exists){
+    if(
+      !_root.children('query').children('class[iri="dsn:data.vios.network/o/Origin"]') || 
+      _root.children('query').children('class[iri="dsn:data.vios.network/o/Origin"]').length <= 0
+    ) {
+      addClassFacet(createId(), 'dsn:data.vios.network/o/Origin', 'Origin');
     }
-  });
-}
-
-function fct_handleSparqlDefaultLoadOriginLibrariesCount(xml, opt){
-  var results = $(xml).find('results');
-  $('result', results).each(function(i){
-    var ct = $(this).text().trim();
-    if(ct > 0){
-      if(
-        !_root.children('query').children('class[iri="dsn:data.vios.network/o/Origin"]') || 
-        _root.children('query').children('class[iri="dsn:data.vios.network/o/Origin"]').length <= 0
-      ) {
-        addClassFacet(createId(), 'dsn:data.vios.network/o/Origin', 'Origin');
-      }
-    }
-  });
+  }
 }
 
 function fct_handleSparqlFetchContentDesc(xml, opt){
@@ -1335,40 +1326,34 @@ function fct_handleSparqlFetchLibraries(xml, opt){
 }
 
 
-function fct_handleSparqlGlossaryCount(xml, opt){
-  var results = $(xml).find('results');
-  $('result', results).each(function(i){
-    var ct = $(this).text().trim();
-    if(ct <= 0){
+function fct_handleSparqlGlossaryAsk(xml, opt){
+  var exists = $($(xml).find('boolean')[0]).text().trim() == 'true';
+  if(!exists){
+    $('#glossaryButton').addClass('hide');
+  }
+  else {
+    if( 
+      !_root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]') || 
+      _root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]').length <= 0
+      
+      ){
+      $('#glossaryButton').removeClass('hide');
+    }
+    else if( !$('#glossaryButton').hasClass('hide') ){
       $('#glossaryButton').addClass('hide');
     }
-    else {
-      if( 
-        !_root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]') || 
-        _root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]').length <= 0
-        
-        ){
-        $('#glossaryButton').removeClass('hide');
-      }
-      else if( !$('#glossaryButton').hasClass('hide') ){
-        $('#glossaryButton').addClass('hide');
-      }
-    }
-  });
+  }
 }
 
 
-function fct_handleSparqlHelpCount(xml, opt){
-  var results = $(xml).find('results');
-  $('result', results).each(function(i){
-    var ct = $(this).text().trim();
-    if(ct <= 0 || getQueryGraph() == 'dsn:'+dataspace.replace('http://', '').replace('https://', '')+'/help'){
-      $('#helpButton').addClass('hide');
-    }
-    else {
-      $('#helpButton').removeClass('hide');
-    }
-  });
+function fct_handleSparqlHelpAsk(xml, opt){
+  var exists = $($(xml).find('boolean')[0]).text().trim() == 'true';
+  if(!exists || getQueryGraph() == 'dsn:'+dataspace.replace('http://', '').replace('https://', '')+'/help'){
+    $('#helpButton').addClass('hide');
+  }
+  else {
+    $('#helpButton').removeClass('hide');
+  }
 }
 
 /*
@@ -1491,19 +1476,18 @@ function fct_handleIndexResults(xml, opt){
 }
 
 function fct_handleIncrementPropertyResults(xml, opt){
-    var result = $(xml).find("fct\\:result")[0];
-    var ct = $("fct\\:row", result).length;
-    if(ct <= 0){
-      $('.la-arrow-right').parent().addClass('hide');
-    }
-    else {
-      $('.la-arrow-right').parent().removeClass('hide');
-    }
+  var exists = $($(xml).find('boolean')[0]).text().trim() == 'true';
+  if(!exists){
+    $('.la-arrow-right').parent().addClass('hide');
+  }
+  else {
+    $('.la-arrow-right').parent().removeClass('hide');
+  }
 }
 
 function fct_handleGeoListResults(xml, opt){
-    loadGeoListResults(xml);
-    $('#showMeMenu').removeClass('loading');
+  loadGeoListResults(xml);
+  $('#showMeMenu').removeClass('loading');
 }
 
 function toggleChartHeaders(){
@@ -2741,6 +2725,17 @@ function addClassFacet(id, clazz, label, silent, exclude){
   if(!silent) doQuery(getQueryText());
 }
 
+function addExcludeFacet(id, silent){
+  getMainFocus().find('.'+id).attr('exclude', 'yes');
+  if(!silent) doQuery(getQueryText());
+}
+
+function removeExcludeFacet(id, silent){
+  getMainFocus().find('.'+id).removeAttr('exclude');
+  if(!silent) doQuery(getQueryText());
+}
+
+
 function setGraphFacet(graph, graphLabel, silent){
   setQueryGraph(graph, graphLabel);
   if(!silent) doQuery(getQueryText());
@@ -3015,7 +3010,7 @@ function bookmark(){
 var isTableStriped = localStorage.getItem('table.isStripped') == 'true';
 var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
 var isSubjectElf = localStorage.getItem('contents.isSubjectElf') == 'true';
-
+var isUseShortcuts = localStorage.getItem('ui.useShortcuts') == 'true';
 
 
 
@@ -3199,6 +3194,28 @@ function init(){
   // ***** END TODO
 
 //$('#isSearchAllFields').parent().append('to <span class="badge badge-info">34523</span>');
+
+
+var nearByButton = $.createElement('label');
+nearByButton.addClass('btn');
+nearByButton.addClass('hide');
+nearByButton.addClass('btn-primary');
+nearByButton.append('<input id="nearByButton" type="checkbox" ></input><i class="fa fa-map-marker fa-lg"></i>');
+
+$('#isSearchAllFields').parent().after(nearByButton);
+setTitleOnElement(nearByButton, 'Nearby Contents Only', 'bottom');
+
+
+var timePickerButton = $.createElement('label');
+timePickerButton.addClass('btn');
+timePickerButton.addClass('hide');
+timePickerButton.addClass('btn-primary');
+timePickerButton.append('<input id="timePickerButton" type="checkbox" ></input><i class="fa fa-calendar fa-lg"></i>');
+
+$('#isSearchAllFields').parent().after(timePickerButton);
+setTitleOnElement(timePickerButton, 'Time-box Contents', 'bottom');
+
+
 var exactMatchButton = $.createElement('label');
 exactMatchButton.addClass('btn');
 exactMatchButton.addClass('btn-primary');
@@ -3208,12 +3225,14 @@ exactMatchButton.on('click', function(e){
   isContractSearch = !exactMatchButton.hasClass('active'); 
   doQuery(getQueryText());
 });
+
 $("#isSearchAllFields").parent().contents().filter(function(){
     return (this.nodeType == 3);
 }).remove();
 
 $('#isSearchAllFields').parent().after(exactMatchButton);
 setTitleOnElement($('#isSearchAllFields').parent().next(), 'Narrow Search', 'bottom');
+
 
 $('#isSearchAllFields').parent().children('span').remove();
 $('#isSearchAllFields').parent().append('<i class="fa fa-search-plus fa-lg"></i>');
@@ -3247,7 +3266,7 @@ $('#isCache').parent().append('<i class="fa fa-hdd-o fa-lg"></i>');
 setTitleOnElement($('#isCache').parent(), 'Enable Cache', 'bottom');
 
 
-$('#keywords').attr('placeholder', 'Explore dashbooks');
+$('#keywords').attr('placeholder', 'Explore dataspace');
 
       /*
       $('#favButton').click(function(e) {
@@ -3734,7 +3753,7 @@ $('#dataCanvas').append(gbcol);
 
 
 gbcol = '<div id="groupByColumn" class="hide col-xl-'+SIZE_GROUP_BY+' col-lg-3 col-12">';
-gbcol += '<div id="facetCollectorWidgetContainer" class="short-div"><section class="widget bg-info text-white focusHeaderSec" widget>';
+gbcol += '<div id="facetCollectorWidgetContainer" class="short-div"><section class="mb-0 widget bg-info text-white focusHeaderSec" widget>';
 gbcol += '<header id="focusHeader">';
         gbcol += '<h3 id="angular_focusCollector" class="fw-semi-bold">'+LABEL_ROOT+'</h3>';
 
@@ -4063,7 +4082,14 @@ $('#dataCanvas').append(gbcol);
 
 gbcol = '<div id="showMeColumn" class="hide col-xl-'+SIZE_SHOW_ME+' col-lg-3 col-12"><section class="widget" widget>';
 gbcol += '<header id="showMeHeader">';
-        gbcol += '<h4><span id="showMeCount" class="badge badge-info">0/0</span>&nbsp;<span id="showMeMenuSelectLabel">Categories</span></h4>';
+        gbcol += '<h4 onmouseout="hideCTRLChoices()" onmouseover="showCTRLChoices();"><span id="showMeCount" class="badge badge-info">0/0</span>&nbsp;<span id="showMeMenuSelectLabel">Categories</span>';
+
+        gbcol += '&nbsp;<a class="hide ctrl-select ctrl-select-c d-inline text-muted" onclick="selectMenuItem(\'showMeMenu\', VIEW_TYPE_CLASSES);">C&nbsp;&nbsp;</a>';
+        gbcol += '<a class="hide ctrl-select ctrl-select-f d-inline text-muted" onclick="selectMenuItem(\'showMeMenu\', VIEW_TYPE_PROPERTIES);">F&nbsp;&nbsp;</a>';
+        gbcol += '<a class="hide ctrl-select ctrl-select-t d-inline text-muted" onclick="selectMenuItem(\'showMeMenu\', VIEW_TYPE_TEXT_PROPERTIES);">T&nbsp;&nbsp;</a>';
+        gbcol += '<a class="hide ctrl-select ctrl-select-r d-inline text-muted" onclick="selectMenuItem(\'showMeMenu\', VIEW_TYPE_PROPERTIES_IN);">R&nbsp;&nbsp;</a>';
+        gbcol += '<a class="hide ctrl-select ctrl-select-l d-inline text-muted" onclick="selectMenuItem(\'showMeMenu\', VIEW_TYPE_GRAPHS);">L&nbsp;&nbsp;</a>';
+        gbcol += '</h4>';
 
 
 
@@ -4811,6 +4837,22 @@ checkLibraryButton();
 
 //var countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Anguilla","Antigua &amp; Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia &amp; Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Cayman Islands","Central Arfrican Republic","Chad","Chile","China","Colombia","Congo","Cook Islands","Costa Rica","Cote D Ivoire","Croatia","Cuba","Curacao","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Ethiopia","Falkland Islands","Faroe Islands","Fiji","Finland","France","French Polynesia","French West Indies","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guam","Guatemala","Guernsey","Guinea","Guinea Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Isle of Man","Israel","Italy","Jamaica","Japan","Jersey","Jordan","Kazakhstan","Kenya","Kiribati","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Macau","Macedonia","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Montserrat","Morocco","Mozambique","Myanmar","Namibia","Nauro","Nepal","Netherlands","Netherlands Antilles","New Caledonia","New Zealand","Nicaragua","Niger","Nigeria","North Korea","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Puerto Rico","Qatar","Reunion","Romania","Russia","Rwanda","Saint Pierre &amp; Miquelon","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","St Kitts &amp; Nevis","St Lucia","St Vincent","Sudan","Suriname","Swaziland","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor L'Este","Togo","Tonga","Trinidad &amp; Tobago","Tunisia","Turkey","Turkmenistan","Turks &amp; Caicos","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States of America","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Virgin Islands (US)","Yemen","Zambia","Zimbabwe"];
 
+function showCTRLChoices(){
+  $('.ctrl-select').removeClass('hide');
+  $('.'+getCTRLClass()).addClass('hide');
+}
+function hideCTRLChoices(){
+  $('.ctrl-select').addClass('hide');
+}
+
+function getCTRLClass(){
+  var val = $('#showMeMenu').val();
+  if(val == VIEW_TYPE_CLASSES) return 'ctrl-select-c';
+  else if(val == VIEW_TYPE_PROPERTIES) return 'ctrl-select-f';
+  else if(val == VIEW_TYPE_TEXT_PROPERTIES) return 'ctrl-select-t';
+  else if(val == VIEW_TYPE_PROPERTIES_IN) return 'ctrl-select-r';
+  else if(val == VIEW_TYPE_GRAPHS) return 'ctrl-select-l';
+}
 
 
 function showProfileManagerPreview(){
@@ -5418,7 +5460,7 @@ function activate(){
     $('#recordsListWidgetContainer').addClass('hide');
     if(nav_type == NAV_TYPE_3) $('#facetCollectorWidgetContainer').addClass('hide');
 
-    selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES); // POI: be sure to load the fields menu after 'hide' class logic is applied to table, since this controls the visibility of group-by 'pinch' icon
+    if(!$('#showMeMenu').val()==VIEW_TYPE_TEXT_PROPERTIES && !$('#showMeMenu').val()==VIEW_TYPE_PROPERTIES) selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES); // POI: be sure to load the fields menu after 'hide' class logic is applied to table, since this controls the visibility of group-by 'pinch' icon
     loadTable();
 
   }
@@ -6463,9 +6505,9 @@ function checkBreadCrumbs(){
 
 function checkHelpButton(){
   $('#helpButton').addClass('hide');
-  var sparql = 'select count(distinct *) where {graph <dsn:'+dataspace.replace('http://', '').replace('https://', '')+'/help> { ?s ?p ?o}}';
+  var sparql = 'ask {graph <dsn:'+dataspace.replace('http://', '').replace('https://', '')+'/help> { ?s ?p ?o}}';
   var opt = new Object();
-  opt.tar = 'countHelp';
+  opt.tar = 'askHelp';
   fct_sparql(sparql, opt);
 
   //checkLibraries();
@@ -6486,10 +6528,10 @@ function checkHelpButton(){
 
 function checkGlossaryButton(){
   $('#glossaryButton').addClass('hide');
-  var sparql = buildTypeCountQuery('http://dbpedia.org/class/yago/Glossary106420781');
+  var sparql = buildTypeAskQuery('http://dbpedia.org/class/yago/Glossary106420781');
 
   var opt = new Object();
-  opt.tar = 'countGlossaries';
+  opt.tar = 'askGlossaries';
   fct_sparql(sparql, opt);
   /*
   if( ( dataspace == 'http://dbpedia.org' || dataspace == 'http://data.vios.network' || dataspace == 'http://lod.openlinksw.com')  && (
@@ -6508,9 +6550,9 @@ function checkGlossaryButton(){
 function checkLibraryButton(){
   $('#libraryButton').addClass('hide');
   if(getMainFocus().attr('class') != ID_QUERY) return;
-  var sparql = buildTypeCountQuery('http://www.w3.org/ns/sparql-service-description#NamedGraph');
+  var sparql = buildTypeAskQuery('http://www.w3.org/ns/sparql-service-description#NamedGraph');
   var opt = new Object();
-  opt.tar = 'countLibraries';
+  opt.tar = 'askLibraries';
   fct_sparql(sparql, opt);
 /*
   if( 
@@ -6568,7 +6610,7 @@ function checkArrowLeftButton(){
 }
 
 function checkTextProperties(){
-  if(!isExpandSearch || getMainFocus() != ID_QUERY){
+  if(!isExpandSearch || getMainFocus().attr('class') != ID_QUERY){
     if($('#showMeMenu').val()==VIEW_TYPE_TEXT_PROPERTIES) selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES);;
   }
 }
@@ -6621,14 +6663,14 @@ function buildGraphClause(where){
   return where;
 }
 
-function buildTypeCountQuery(clazz){
+function buildTypeAskQuery(clazz){
   var where = '?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <'+clazz+'>';
   if(getQueryGraph() && getQueryGraph().length > 0){
     where = '{graph <'+getQueryGraph()+'> {' + where + '}}';
   }
   else where = '{' + where + '}';
 
-  return 'select count(distinct *) where ' + where;;
+  return 'ask ' + where;// + ' limit 1';
 }
 
 function doLoadLibraries(){
@@ -6640,9 +6682,9 @@ function doLoadLibraries(){
   clearFacets(true); 
   addClassFacet(cid, 'http://www.w3.org/ns/sparql-service-description#NamedGraph', 'Library');
 
-  var sparql = buildTypeCountQuery('dsn:data.vios.network/o/Origin');
+  var sparql = buildTypeAskQuery('dsn:data.vios.network/o/Origin');
   var opt = new Object();
-  opt.tar = 'countDefaultLoadOriginLibraries';
+  opt.tar = 'askDefaultLoadOriginLibraries';
   fct_sparql(sparql, opt);  
 }
 
@@ -6658,7 +6700,6 @@ function doFindDataspaces(){
   var cid = createId(); 
   setQueryText($('#keywords').val()); 
   addClassFacet(cid, 'http://www.vios.network/o/DataServer/Index', 'Indexed Content', true);  
-  var pid = createId(); 
   addPropertyFacet(pid, 'http://www.vios.network/o/DataServer/Index/dataserver', 'dataserver');
   takeMainFocus(pid);
 }
@@ -6723,7 +6764,7 @@ function selectDataspace(url, label, silent){
   //service_sparql = $('#dataSpaceMenu :selected').attr('value') + '/sparql';
   service_fct = getRudiEndpoint(url) + '/fct/service';
   service_sparql = getRudiEndpoint(url) + '/sparql';
-  LABEL_ROOT = '<i class="fa fa-book" style="padding-bottom:4px;padding-right:2px;"></i>Welcome to ' + getDataspaceLabel() + '!';// getDataspaceLabel();//.toUpperCase(); //<i class="fa fa-home" style="padding-bottom:4px;padding-right:2px;"></i>
+  LABEL_ROOT = '<i class="fa fa-book" style="padding-bottom:4px;padding-right:2px;"></i>&nbsp;Welcome to ' + getDataspaceLabel() + '!';// getDataspaceLabel();//.toUpperCase(); //<i class="fa fa-home" style="padding-bottom:4px;padding-right:2px;"></i>
 
   //if(url.indexOf('data.vios.network') >= 0) LABEL_ROOT = 'VIOS';
 
@@ -7567,7 +7608,7 @@ if(true){
               else {
                 if(datatype=='uri') {
                   rows += '<img style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
-                  rows += '<i class="hide hidable'+id+' linkout fa fa-external-link fa-lg text-secondary" '+buildTitle('open \''+label+'\' in WWW browser')+' onclick="javascript:linkOut(\''+value+'\')" ></i>';
+                  rows += '<i class="hide hidable'+id+' linkout la la-external-link la-lg text-secondary" '+buildTitle('open \''+label+'\' in WWW browser')+' onclick="javascript:linkOut(\''+value+'\')" ></i>';
                                     //rows +=  '<i class="status status-bottom bg-'+color+'"></i>';
                 }
                 else {
@@ -7605,18 +7646,30 @@ if(true){
 
               else {
                 var dataserverClass = getQuery().children('class[iri="http://www.vios.network/o/DataServer/Index"]');
-                if(dataserverClass && dataserverClass.length > 0){
+                var sparqlServerClass = getQuery().children('class[iri="http://www.w3.org/ns/sparql-service-description#Service"]');
+                var isSparqlServer = sparqlServerClass && sparqlServerClass.length > 0;
+
+                
+                if( ( dataserverClass && dataserverClass.length > 0 ) || 
+                    isSparqlServer 
+                ){
 
                   var isDataserver = getMainFocus().parent().attr('class') == ID_QUERY;
                   //isDataserver = isDataserver && getMainFocus().attr('iri')=='http://www.vios.network/o/DataServer/Index/dataserver';
                   //isNewDataserver = isNewDataserver;
-                  if(isDataserver && getMainFocus().attr('iri')=='http://www.vios.network/o/DataServer/Index/dataserver'){
+                  if(
+                    ( isDataserver && getMainFocus().attr('iri')=='http://www.vios.network/o/DataServer/Index/dataserver' ) ||
+                    isSparqlServer 
+                    ){
 //                  if(dataserverClass.attr('iri') == 'http://www.vios.network/o/DataServer'){
+
+                    var serverDomain = value;
+                    if(isSparqlServer) serverDomain = getHostName(serverDomain);
 
                     checked=(ds.indexOfDataspace(value) >= 0) ? ' checked="checked"': '';
                     hideCkbxClass = (ds.indexOfDataspace(value) >= 0) ? '': ' hide';
                     rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-circle abc-checkbox-info'+hideCkbxClass+'">';
-                    rows += '<input '+buildTitle('Add ' +label+ ' to dataspace list', 'right')+' id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {doRemoveDataspace(\''+value+'\', true);}else{addDataspace(\''+value+'\', \''+label+'\', false, true);}" />&nbsp;';
+                    rows += '<input '+buildTitle('Add ' +label+ ' to dataspace list', 'right')+' id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {doRemoveDataspace(\''+serverDomain+'\', true);}else{addDataspace(\''+serverDomain+'\', \''+label+'\', false, true);}" />&nbsp;';
                     rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
                     rows += '</div>';
 
@@ -8057,13 +8110,14 @@ function hideAlignButton(){
       $('#alignButton').unbind('click');
 }
 
+
 function loadCategoriesResults(xml){
       $('#'+ID_SHOW_ME+'').empty();
       $('#angular_showMeList').empty();
 
       var reverse = getMainFocus().prop('nodeName').toLowerCase();
       if(reverse == 'property') reverse = 'property-of';
-      else reverse = 'property';
+      //else reverse = 'property';
 
       var rows = "";
       var result = $(xml).find("fct\\:result")[0];
@@ -8121,6 +8175,62 @@ function loadCategoriesResults(xml){
       }
 
 
+
+if(showMePage == 0){
+ 
+      getMainFocus().children('class[exclude="yes"]').each(function(i){
+
+          var uri = $(this).attr('iri');
+          var label = $(this).attr('label');
+          var id = $(this).attr('class').trim();
+          var ct = 0;
+          var iriAttr = ' iri="' + uri + '"';
+
+
+          var opts = new Object();
+          opts.tag = TAG_CLASS;
+          opts.parentId = 'smr_'+id;
+          opts.childrenId = opts.tag + opts.parentId;
+          opts.contextId = id;
+
+
+          rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'.hidable'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'.hidable'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
+          rows +=  '<span class="thumb-sm float-left mr">';
+
+
+
+          var ckcolor = 'dark';
+          var badgeColor = 'dark';
+
+          var rowId = opts.parentId;
+
+
+
+          rows +=  '<span _ngcontent-c9="" class="total badge badge-'+badgeColor+'" onclick="javascript: removeFacet(\''+id+'\');">';
+          rows+= '<i class="fa fa-ban"></i>';
+          rows += '</span>';
+
+                                rows +=  '</span>';
+            rows +=  '<div>';
+          rows +=  '<h6 class="row-result text-ellipsis m-0" >';
+          rows += '<span '+buildTitle(uri)+' onclick="javascript:describe(\''+rowId+'\', \''+uri+'\');">' + label + '</span>';
+
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
+          rows += '<input class="form-check-input" id="ckbx'+id+'" type="checkbox" checked="checked" style="display:inline;" onclick="javascript: removeFacet(\''+id+'\');" />&nbsp;';
+          rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
+          rows += '</div>';
+          rows += '<i '+buildTitle('reverse filter')+' class="hide hidable'+id+' group la la-exchange ctrl-reverse-1 text-secondary" onclick="javascript:removeExcludeFacet(\''+id+'\');" ></i>';
+
+          rows +='</h6>';
+            rows +=  '</div>';
+          rows +=  '</a>';
+
+
+      });
+ 
+}
+
+
       // POI: custom logic for demo of MyVios Record category
       /*if(showMePage==0 && $('#nav0 > table > tbody > tr > td.via').text() == VALUE_ROOT) rows += '<tr><td><div class="up" id="'+ID_MY_RECORDS+'"><a href="#'+id+'" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')"><img src="http://icon-park.com/imagefiles/folder_icon_purple.png" width="16" height="16"/></a>&nbsp;<a title="'+VALUE_MANAGED_RECORD+'" href="#'+id+'">'+VALUE_MANAGED_RECORD+'</a> <span class="disabled">'+(Math.floor(Math.random() * 10000) + 1)+'<span></div></td></tr>';*/
       $("fct\\:row", result).each(function(i) {
@@ -8156,7 +8266,9 @@ function loadCategoriesResults(xml){
           opts.contextId = id;
 
 
-rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
+
+rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'.hidable'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'.hidable'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
+//rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
                                     //rows +=  '<img alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
 //                                    rows +=  '<span _ngcontent-c9="" class="badge badge-pill badge-info" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addClassFacet(\''+id+'\', \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</span>';
@@ -8204,13 +8316,15 @@ if(true){
 
           //rows += '</td><td id="ctrl'+id+'" class="hideCtrl" style="white-space:nowrap; vertical-align:top;">';
           rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+''+hideCkbxClass+'">';
-          rows += '<input class="form-check-input" id="ckbx'+id+'" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\', false, '+isXKeyDown+')}" />&nbsp;';
+          rows += '<input class="form-check-input" id="ckbx'+id+'" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\', false, isXKeyDown())}" />&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
           //rows += '<img title="view instances" class="count" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
 //          rows += '<a title="view instances" class="count" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>';
           //rows += '</td></tr>';
           rows += '<i '+buildTitle('preview category members')+' class="expand la la-ellipsis-v la-lg text-secondary" onclick="javascript:expandShowMe(\''+uri+'\', \''+label+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          if(checked) rows += '<i '+buildTitle('reverse filter')+' class="hide hidable'+id+' group la la-exchange ctrl-reverse-1 text-secondary" onclick="javascript:addExcludeFacet(\''+facet.attr('class')+'\');" ></i>';
+          else if(!isUseShortcuts) rows += '<i '+buildTitle('exclude')+' class="hide hidable'+id+' group la la-close ctrl-reverse-3 text-secondary" onclick="javascript: $(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\'); var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\', false, true);" ></i>';
 
           rows +='</h6>';
             rows +=  '</div>';
@@ -8364,6 +8478,64 @@ function loadPropertiesResults(xml){
           setTitle('showMeRightButton', 'page ' + (showMePage+2), 'bottom');
       }
 
+if(showMePage == 0){
+
+
+      getMainFocus().children('property[exclude="yes"]').each(function(i){
+
+          var uri = $(this).attr('iri');
+          var label = $(this).attr('label');
+          var id = $(this).attr('class').trim();
+          var ct = 0;
+          var iriAttr = ' iri="' + uri + '"';
+
+
+          var opts = new Object();
+          opts.tag = TAG_CLASS;
+          opts.parentId = 'smr_'+id;
+          opts.childrenId = opts.tag + opts.parentId;
+          opts.contextId = id;
+
+
+          rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'.hidable'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'.hidable'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
+          rows +=  '<span class="thumb-sm float-left mr">';
+
+
+
+          var ckcolor = 'dark';
+          var badgeColor = 'dark';
+
+          var rowId = opts.parentId;
+
+
+
+          rows +=  '<span _ngcontent-c9="" class="total badge badge-'+badgeColor+'" onclick="javascript: removeFacet(\''+id+'\');">';
+          rows+= '<i class="fa fa-ban"></i>';
+          rows += '</span>';
+
+                                rows +=  '</span>';
+            rows +=  '<div>';
+          rows +=  '<h6 class="row-result text-ellipsis m-0" >';
+          rows += '<span '+buildTitle(uri)+' onclick="javascript:describe(\''+rowId+'\', \''+uri+'\');">' + label + '</span>';
+
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
+          rows += '<input class="form-check-input" id="ckbx'+id+'" type="checkbox" checked="checked" style="display:inline;" onclick="javascript: removeFacet(\''+id+'\');" />&nbsp;';
+          rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
+          rows += '</div>';
+          rows += '<i '+buildTitle('reverse filter')+' class="hide hidable'+id+' group la la-exchange ctrl-reverse-1 text-secondary" onclick="javascript:removeExcludeFacet(\''+id+'\');" ></i>';
+
+          rows +='</h6>';
+            rows +=  '</div>';
+          rows +=  '</a>';
+
+
+      });
+
+
+}
+
+
+
       // POI: demo code
       /*if(showMePage==0 && $('#nav0 > table > tbody > tr > td.via').text() == VALUE_ROOT) rows += '<tr><td><div class="up" id="'+ID_MY_RECORDS+'"><a href="#'+id+'" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')"><img src="http://icon-park.com/imagefiles/folder_icon_purple.png" width="16" height="16"/></a>&nbsp;<a title="'+VALUE_RECORD_MANAGER+'" href="#'+id+'">'+VALUE_RECORD_MANAGER+'</a> <span class="disabled">'+(Math.floor(Math.random() * 10000) + 1)+'<span></div></td></tr>';*/
 
@@ -8454,7 +8626,7 @@ var rowId = opts.parentId;
           var ctAbbr = getCountLabel(ct);
           var ctTitle = '';
           if(ctAbbr != ct) ctTitle = buildTitle(ct, 'left');
-          rows +=  '<span '+ctTitle+' _ngcontent-c9="" class="total badge badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\', undefined, undefined, undefined, undefined, true, isXKeyDown()); takeMainFocus(pid);">';
+          rows +=  '<span '+ctTitle+' _ngcontent-c9="" class="total badge badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\', undefined, undefined, undefined, undefined, !isXKeyDown(), isXKeyDown()); if(!isXKeyDown()) {takeMainFocus(pid);}">';
           rows+=ctAbbr;
           rows+='</span>';
                                 rows +=  '</span>';
@@ -8469,7 +8641,7 @@ var rowId = opts.parentId;
           //rows += '</span></td><td id="ctrl'+id+'" style="white-space:nowrap; vertical-align:top;">';          
           if(propIRI != GROUP_BY_NONE_VALUE){
           rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+''+hideCkbxClass+'">';
-          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); }" />&nbsp;'; //generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query
+          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\', undefined, undefined, undefined, undefined, false, isXKeyDown()); }" />&nbsp;'; //generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
               //rows += '<img title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
@@ -8477,6 +8649,8 @@ var rowId = opts.parentId;
 //              rows += '<a title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>&nbsp;';
           //if((facet && facet.length > 0) && !isTableShowing())
             if(!isTableShowing()) rows += '<i '+buildTitle('group the contents list by \''+propLabel+'\'')+' class="hide hidable'+id+' group la la-compress text-secondary" onclick="javascript:if(!$(\'#ckbx'+id+'\').is(\':checked\')){var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\');}doGroup(\''+propIRI+'\', \''+propLabel+'\');" ></i>';
+            if(checked) rows += '<i '+buildTitle('reverse filter')+' class="hide hidable'+id+' group la la-exchange ctrl-reverse-2 text-secondary" onclick="javascript:addExcludeFacet(\''+facet.attr('class')+'\');" ></i>';
+            else if(!isUseShortcuts) rows += '<i '+buildTitle('exclude')+' class="hide hidable'+id+' group la la-close ctrl-reverse-4 text-secondary" onclick="javascript: var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\', undefined, undefined, undefined, undefined, false, true);" ></i>';
           }
           rows +='</h6>';
             rows +=  '</div>';
@@ -8578,6 +8752,63 @@ function loadPropertiesInResults(xml){
           setTitle('showMeRightButton', 'page ' + (showMePage+2), 'bottom');
       }
 
+
+if(showMePage == 0){
+      getMainFocus().children('property-of[exclude="yes"]').each(function(i){
+
+          var uri = $(this).attr('iri');
+          var label = $(this).attr('label');
+          var id = $(this).attr('class').trim();
+          var ct = 0;
+          var iriAttr = ' iri="' + uri + '"';
+
+
+          var opts = new Object();
+          opts.tag = TAG_CLASS;
+          opts.parentId = 'smr_'+id;
+          opts.childrenId = opts.tag + opts.parentId;
+          opts.contextId = id;
+
+
+          rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'.hidable'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'.hidable'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
+          rows +=  '<span class="thumb-sm float-left mr">';
+
+
+
+          var ckcolor = 'dark';
+          var badgeColor = 'dark';
+
+          var rowId = opts.parentId;
+
+
+
+          rows +=  '<span _ngcontent-c9="" class="total badge badge-'+badgeColor+'" onclick="javascript: removeFacet(\''+id+'\');">';
+          rows+= '<i class="fa fa-ban"></i>';
+          rows += '</span>';
+
+                                rows +=  '</span>';
+            rows +=  '<div>';
+          rows +=  '<h6 class="row-result text-ellipsis m-0" >';
+          rows += '<span '+buildTitle(uri)+' onclick="javascript:describe(\''+rowId+'\', \''+uri+'\');">' + label + '</span>';
+
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
+          rows += '<input class="form-check-input" id="ckbx'+id+'" type="checkbox" checked="checked" style="display:inline;" onclick="javascript: removeFacet(\''+id+'\');" />&nbsp;';
+          rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
+          rows += '</div>';
+          rows += '<i '+buildTitle('reverse filter')+' class="hide hidable'+id+' group la la-exchange ctrl-reverse-1 text-secondary" onclick="javascript:removeExcludeFacet(\''+id+'\');" ></i>';
+
+          rows +='</h6>';
+            rows +=  '</div>';
+          rows +=  '</a>';
+
+
+      });
+
+}
+
+
+
+
       $("fct\\:row", result).each(function(i) {
           //console.log($(this).html());
           var col = $(this).find("fct\\:column");
@@ -8638,7 +8869,7 @@ var ckcolor = 'primary';
           var ctAbbr = getCountLabel(ct);
           var ctTitle = '';
           if(ctAbbr != ct) ctTitle = buildTitle(ct, 'left');
-          rows +=  '<span _ngcontent-c9="" '+ctTitle+' class="total badge badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\', undefined, undefined, undefined, undefined, true, isXKeyDown()); takeMainFocus(pid)">';
+          rows +=  '<span _ngcontent-c9="" '+ctTitle+' class="total badge badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\', undefined, undefined, undefined, undefined, !isXKeyDown(), isXKeyDown()); if(!isXKeyDown()) {takeMainFocus(pid);}">';
           rows+=ctAbbr;
           rows+='</span>';
                                 rows +=  '</span>';
@@ -8651,13 +8882,15 @@ var ckcolor = 'primary';
           //rows += '</span></td><td id="ctrl'+id+'" class="hideCtrl" style="white-space:nowrap; vertical-align:top;">';          
           if(propIRI != GROUP_BY_NONE_VALUE){
           rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+''+hideCkbxClass+'">';
-          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\');}"/>&nbsp;';//generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query
+          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\', undefined, undefined, undefined, undefined, false, isXKeyDown());}"/>&nbsp;';//generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
           rows += '<i '+buildTitle('preview rolees')+' class="expand la la-ellipsis-v la-lg text-secondary" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+propLabel+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
               //rows += '<img title="shows up in the \''+propLabel+'\' field of these records" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
           //if((facet && facet.length > 0) && !isTableShowing())
            if(!isTableShowing()) rows += '<i '+buildTitle('group the contents list by role: \''+propLabel+'\'')+' class="hide hidable'+id+' group la la-compress text-secondary" onclick="javascript:if(!$(\'#ckbx'+id+'\').is(\':checked\')){var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\');}doGroup(\''+propIRI+'\', \''+propLabel+'\', true);" ></i>';
+           if(checked) rows += '<i '+buildTitle('reverse filter')+' class="hide hidable'+id+' group la la-exchange ctrl-reverse-2 text-secondary" onclick="javascript:addExcludeFacet(\''+facet.attr('class')+'\');" ></i>';
+           else if(!isUseShortcuts) rows += '<i '+buildTitle('exclude')+' class="hide hidable'+id+' group la la-close ctrl-reverse-4 text-secondary" onclick="javascript: var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\', undefined, undefined, undefined, undefined, false, true);" ></i>';
           }
 
           rows +='</h6>';
@@ -9003,10 +9236,11 @@ function loadDescribeResults(xml, opt) {
     var comments = new Array();
 
     var libraryFetched;
-
+    var ctGloss = 0;
 
 
     var rows = '';
+
     $('rdf\\:Description', xml).each(function(i) {
         var subject = $(this).attr('rdf:about');
         if(!subject) subject = 'nodeID://'+$(this).attr('rdf:nodeID');
@@ -9175,8 +9409,10 @@ function loadDescribeResults(xml, opt) {
             col = $.createElement('td');
             col.attr('id', colId);
             var gloss = getMainFocus().children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]');
+
             if(gloss && gloss.length > 0 && propIRI == 'http://dbpedia.org/property/content' && objectIRI && objectIRI.length > 0){
-              fetchContentDesc(objectIRI, colId);
+              if(ctGloss < SIZE_RESULT_SET) fetchContentDesc(objectIRI, colId);
+              ctGloss++;
             }
             var cid = 'copy_' + createId();
             var loid = 'linkout_' + createId();
@@ -9195,12 +9431,12 @@ function loadDescribeResults(xml, opt) {
             if (objectIRI == uri) {
                 if (subject) {
                     col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + subject + '\', \'' + processLabel(subLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(subLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right la la-thumbs-o-up fa-lg text-inverse"></span><span class="hide hidable'+hid+' record-action-nix pull-right la la-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(subject) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
-                    col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field fa fa-external-link fa-sm" onclick="linkOut(\''+subject+'\')"></i>');
+                    col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field la la-external-link" onclick="linkOut(\''+subject+'\')"></i>');
                 } else col.text(objectValue);
             } else {
                 if (objectIRI) {
                     col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(objLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right la la-thumbs-o-up fa-lg text-inverse"></span><span class="hide hidable'+hid+' record-action-nix pull-right la la-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(objectIRI) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
-                    col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field fa fa-external-link fa-sm" onclick="linkOut(\''+objectIRI+'\')"></i>');
+                    col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field la la-external-link" onclick="linkOut(\''+objectIRI+'\')"></i>');
                 } else {
                     col.text(objectValue); 
                     col.prepend('<span class="hide hidable'+hid+' record-action-nix pull-right la la-thumbs-o-down fa-lg text-danger"></span><span class="hide hidable'+hid+' record-action-highlight pull-right la la-thumbs-o-up fa-lg text-inverse"></span><span style="cursor:pointer" class="pull-right icon-literal glyphicon glyphicon-tag" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + sanitizeLabel(objectValue) + '\', \'uri\', \'' + lang + '\');"></span>' );
@@ -9228,7 +9464,7 @@ function loadDescribeResults(xml, opt) {
       onclickLinkOut = '';
     }
     var lbid = createId();
-    body.prepend('<tr><td class="libraryRowCell">library</td><td onmouseover="$(\'.hidable' + lbid +'\').removeClass(\'hide\');" onmouseout="$(\'.hidable' + lbid + '\').addClass(\'hide\');" class="libraryRowCell" style="width:100%"><a id="libraryRowLink" '+buildTitle( libraryIRI )+' '+onclick+' class="link-field">'+libraryIRI+'</a>&nbsp;&nbsp;<i id="'+lbid+'" style="cursor:pointer;" class="libraryRowLinkOut hide hidable'+lbid+' link-field fa fa-external-link fa-sm" '+onclickLinkOut+'></i></td></tr>');
+    body.prepend('<tr><td class="libraryRowCell">library</td><td onmouseover="$(\'.hidable' + lbid +'\').removeClass(\'hide\');" onmouseout="$(\'.hidable' + lbid + '\').addClass(\'hide\');" class="libraryRowCell" style="width:100%"><a id="libraryRowLink" '+buildTitle( libraryIRI )+' '+onclick+' class="link-field">'+libraryIRI+'</a>&nbsp;&nbsp;<i id="'+lbid+'" style="cursor:pointer;" class="libraryRowLinkOut hide hidable'+lbid+' link-field la la-external-link" '+onclickLinkOut+'></i></td></tr>');
 
 /*
     var graph = $('.libraryLink').attr('iri');
@@ -10318,7 +10554,7 @@ rows += '<tr><td '+iriAttr+' id="'+rowId+'"'+((recordActive)?' class="record-act
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left ">';
 if(datatype == 'uri'){
-                  rows += '<img style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\', true, isXKeyDown()); takeMainFocus(\''+opts.contextId+'\')" src="'+getFaviconUrl(value)+'">';
+                  rows += '<img style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\', !isXKeyDown(), isXKeyDown()); if(!isXKeyDown()) { takeMainFocus(\''+opts.contextId+'\'); }" src="'+getFaviconUrl(value)+'">';
                                     //rows +=  '<i class="status status-bottom bg-success"></i>';
 }
                 else {
@@ -11210,19 +11446,21 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
 
             if(cval){
 
-                tooltip += ', and each of them is' + not;
+                tooltip += ', and each of them is';
 
                 var cvals = _root.find('.'+id + ' > class');
                 for(i = 0; i < cvals.length; i++){
+                  var cexclude = $( cvals[i] ).attr('exclude') == 'yes';
                   if(i > 0 && cvals.length == 1) break;
                   var aoran = aOrAn($( cvals[i] ).attr('label').substring(0, 1));
                   var cv = $( cvals[i] ).attr('label');
+                  if(cexclude) tooltip += ' not';
                   tooltip += ' ' + aoran + ' ' + $( cvals[i] ).attr('label');
                   if(i+1 < cvals.length) {
                     tooltip += ',';
                   }
                   if(i+2 == cvals.length) {
-                    tooltip += ' and' + not;
+                    tooltip += ' and';
                   }
                 }
             }
