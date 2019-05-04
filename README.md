@@ -1,4 +1,4 @@
-# <a name="rn"/>Da.R.Y.L.
+# <a name="rn"/>Facets Framework
 Data Relationships and YASGUI Lister - a JS client framework for the [Virtuoso Faceted Browser (FCT) Service](http://vos.openlinksw.com/owiki/wiki/VOS/VirtuosoFacetsWebService)
 
 
