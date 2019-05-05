@@ -1,46 +1,3 @@
-//var json = JSON.parse(fs.readFileSync('./content.json').toString());
-/*
-var fs = require('fs');
-var json = JSON.parse(fs.readFileSync('./content.json').toString());
-*/
-/*
-var json = (function() {
-        var json = null;
-        $.ajax({
-            'async': false,
-            'global': false,
-            'url': "/DAV/home/sdmonroe/lod.json",
-            'dataType': "json",
-            'success': function (data) {
-                json = data;
-            }
-        });
-        return json;
-    })();*/
-    
-//console.log(json);
-//console.log(count());
-
-/*
-function count(){
-var total = 0;
-var triples = 0;
-var rows = '';
-
-jQuery.each(json, function(i, val) {
-  triples = parseInt(val.triples) ;
-  if(triples) total+=triples;
-  rows += ('<tr><td>'+val._id+'</td><td>'+triples+'</td></tr>');
-});
-
-  $('table tbody').append(rows);
-  $('table tbody').append('<tr><td><b>Total</b></td><td>'+total+'</td></tr>');
-  return total;
-
-}
-*/
-
-
 function Rainbow(){"use strict";var e=null,r=0,F=100,t=["ff0000","ffff00","00ff00","0000ff"];function n(n){if(n.length<2)throw new Error("Rainbow must have two or more colours.");var a=(F-r)/(n.length-1),i=new ColourGradient;i.setGradient(n[0],n[1]),i.setNumberRange(r,r+a),e=[i];for(var o=1;o<n.length-1;o++){var l=new ColourGradient;l.setGradient(n[o],n[o+1]),l.setNumberRange(r+a*o,r+a*(o+1)),e[o]=l}t=n}n(t),this.setSpectrum=function(){return n(arguments),this},this.setSpectrumByArray=function(e){return n(e),this},this.colourAt=function(t){if(isNaN(t))throw new TypeError(t+" is not a number");if(1===e.length)return e[0].colourAt(t);var n=(F-r)/e.length,a=Math.min(Math.floor((Math.max(t,r)-r)/n),e.length-1);return e[a].colourAt(t)},this.colorAt=this.colourAt,this.setNumberRange=function(e,a){if(!(a>e))throw new RangeError("maxNumber ("+a+") is not greater than minNumber ("+e+")");return r=e,F=a,n(t),this}}function ColourGradient(){"use strict";var e="ff0000",r="0000ff",F=0,t=100;function n(e,r,n){var a=e;a<F&&(a=F),a>t&&(a=t);var i,o=t-F,l=parseInt(r,16),u=(parseInt(n,16)-l)/o,s=Math.round(u*(a-F)+l);return 1===(i=s.toString(16)).length?"0"+i:i}function a(e){if(/^#?[0-9a-fA-F]{6}$/i.test(e))return e.substring(e.length-6,e.length);var r=e.toLowerCase();if(i.hasOwnProperty(r))return i[r];throw new Error(e+" is not a valid colour.")}this.setGradient=function(F,t){e=a(F),r=a(t)},this.setNumberRange=function(e,r){if(!(r>e))throw new RangeError("maxNumber ("+r+") is not greater than minNumber ("+e+")");F=e,t=r},this.colourAt=function(F){return n(F,e.substring(0,2),r.substring(0,2))+n(F,e.substring(2,4),r.substring(2,4))+n(F,e.substring(4,6),r.substring(4,6))};var i={aliceblue:"F0F8FF",antiquewhite:"FAEBD7",aqua:"00FFFF",aquamarine:"7FFFD4",azure:"F0FFFF",beige:"F5F5DC",bisque:"FFE4C4",black:"000000",blanchedalmond:"FFEBCD",blue:"0000FF",blueviolet:"8A2BE2",brown:"A52A2A",burlywood:"DEB887",cadetblue:"5F9EA0",chartreuse:"7FFF00",chocolate:"D2691E",coral:"FF7F50",cornflowerblue:"6495ED",cornsilk:"FFF8DC",crimson:"DC143C",cyan:"00FFFF",darkblue:"00008B",darkcyan:"008B8B",darkgoldenrod:"B8860B",darkgray:"A9A9A9",darkgreen:"006400",darkgrey:"A9A9A9",darkkhaki:"BDB76B",darkmagenta:"8B008B",darkolivegreen:"556B2F",darkorange:"FF8C00",darkorchid:"9932CC",darkred:"8B0000",darksalmon:"E9967A",darkseagreen:"8FBC8F",darkslateblue:"483D8B",darkslategray:"2F4F4F",darkslategrey:"2F4F4F",darkturquoise:"00CED1",darkviolet:"9400D3",deeppink:"FF1493",deepskyblue:"00BFFF",dimgray:"696969",dimgrey:"696969",dodgerblue:"1E90FF",firebrick:"B22222",floralwhite:"FFFAF0",forestgreen:"228B22",fuchsia:"FF00FF",gainsboro:"DCDCDC",ghostwhite:"F8F8FF",gold:"FFD700",goldenrod:"DAA520",gray:"808080",green:"008000",greenyellow:"ADFF2F",grey:"808080",honeydew:"F0FFF0",hotpink:"FF69B4",indianred:"CD5C5C",indigo:"4B0082",ivory:"FFFFF0",khaki:"F0E68C",lavender:"E6E6FA",lavenderblush:"FFF0F5",lawngreen:"7CFC00",lemonchiffon:"FFFACD",lightblue:"ADD8E6",lightcoral:"F08080",lightcyan:"E0FFFF",lightgoldenrodyellow:"FAFAD2",lightgray:"D3D3D3",lightgreen:"90EE90",lightgrey:"D3D3D3",lightpink:"FFB6C1",lightsalmon:"FFA07A",lightseagreen:"20B2AA",lightskyblue:"87CEFA",lightslategray:"778899",lightslategrey:"778899",lightsteelblue:"B0C4DE",lightyellow:"FFFFE0",lime:"00FF00",limegreen:"32CD32",linen:"FAF0E6",magenta:"FF00FF",maroon:"800000",mediumaquamarine:"66CDAA",mediumblue:"0000CD",mediumorchid:"BA55D3",mediumpurple:"9370DB",mediumseagreen:"3CB371",mediumslateblue:"7B68EE",mediumspringgreen:"00FA9A",mediumturquoise:"48D1CC",mediumvioletred:"C71585",midnightblue:"191970",mintcream:"F5FFFA",mistyrose:"FFE4E1",moccasin:"FFE4B5",navajowhite:"FFDEAD",navy:"000080",oldlace:"FDF5E6",olive:"808000",olivedrab:"6B8E23",orange:"FFA500",orangered:"FF4500",orchid:"DA70D6",palegoldenrod:"EEE8AA",palegreen:"98FB98",paleturquoise:"AFEEEE",palevioletred:"DB7093",papayawhip:"FFEFD5",peachpuff:"FFDAB9",peru:"CD853F",pink:"FFC0CB",plum:"DDA0DD",powderblue:"B0E0E6",purple:"800080",red:"FF0000",rosybrown:"BC8F8F",royalblue:"4169E1",saddlebrown:"8B4513",salmon:"FA8072",sandybrown:"F4A460",seagreen:"2E8B57",seashell:"FFF5EE",sienna:"A0522D",silver:"C0C0C0",skyblue:"87CEEB",slateblue:"6A5ACD",slategray:"708090",slategrey:"708090",snow:"FFFAFA",springgreen:"00FF7F",steelblue:"4682B4",tan:"D2B48C",teal:"008080",thistle:"D8BFD8",tomato:"FF6347",turquoise:"40E0D0",violet:"EE82EE",wheat:"F5DEB3",white:"FFFFFF",whitesmoke:"F5F5F5",yellow:"FFFF00",yellowgreen:"9ACD32"}}"undefined"!=typeof module&&(module.exports=Rainbow);
 
 
@@ -110,6 +67,209 @@ var fct_getUrlParameter = function getUrlParameter(sParam) {
 var fct_isPermalink = false;
 var fct_queryTimeout = '5000';
 
+/*  This work is licensed under Creative Commons GNU LGPL License.
+
+  License: http://creativecommons.org/licenses/LGPL/2.1/
+  Version: 0.9
+  Author:  Stefan Goessner/2006
+  Web:     http://goessner.net/ 
+*/
+function json2xml(o, tab) {
+   var toXml = function(v, name, ind) {
+      var xml = "";
+      if (v instanceof Array) {
+         for (var i=0, n=v.length; i<n; i++)
+            xml += ind + toXml(v[i], name, ind+"\t") + "\n";
+      }
+      else if (typeof(v) == "object") {
+         var hasChild = false;
+         xml += ind + "<" + name;
+         for (var m in v) {
+            if (m.charAt(0) == "@")
+               xml += " " + m.substr(1) + "=\"" + v[m].toString() + "\"";
+            else
+               hasChild = true;
+         }
+         xml += hasChild ? ">" : "/>";
+         if (hasChild) {
+            for (var m in v) {
+               if (m == "#text")
+                  xml += v[m];
+               else if (m == "#cdata")
+                  xml += "<![CDATA[" + v[m] + "]]>";
+               else if (m.charAt(0) != "@")
+                  xml += toXml(v[m], m, ind+"\t");
+            }
+            xml += (xml.charAt(xml.length-1)=="\n"?ind:"") + "</" + name + ">";
+         }
+      }
+      else {
+         xml += ind + "<" + name + ">" + v.toString() +  "</" + name + ">";
+      }
+      return xml;
+   }, xml="";
+   for (var m in o)
+      xml += toXml(o[m], m, "");
+   return tab ? xml.replace(/\t/g, tab) : xml.replace(/\t|\n/g, "");
+}
+
+/*  This work is licensed under Creative Commons GNU LGPL License.
+
+  License: http://creativecommons.org/licenses/LGPL/2.1/
+   Version: 0.9
+  Author:  Stefan Goessner/2006
+  Web:     http://goessner.net/ 
+*/
+function xml2json(xml, tab, excludeAts) {
+  var atSymbol = (excludeAts) ? '' :'@';
+   var X = {
+      toObj: function(xml) {
+         var o = {};
+         if (xml.nodeType==1) {   // element node ..
+            if (xml.attributes.length)   // element with attributes  ..
+               for (var i=0; i<xml.attributes.length; i++)
+                  o[atSymbol+xml.attributes[i].nodeName] = (xml.attributes[i].nodeValue||"").toString();
+            if (xml.firstChild) { // element has child nodes ..
+               var textChild=0, cdataChild=0, hasElementChild=false;
+               for (var n=xml.firstChild; n; n=n.nextSibling) {
+                  if (n.nodeType==1) hasElementChild = true;
+                  else if (n.nodeType==3 && n.nodeValue.match(/[^ \f\n\r\t\v]/)) textChild++; // non-whitespace text
+                  else if (n.nodeType==4) cdataChild++; // cdata section node
+               }
+               if (hasElementChild) {
+                  if (textChild < 2 && cdataChild < 2) { // structured element with evtl. a single text or/and cdata node ..
+                     X.removeWhite(xml);
+                     for (var n=xml.firstChild; n; n=n.nextSibling) {
+                        if (n.nodeType == 3)  // text node
+                           o["#text"] = X.escape(n.nodeValue);
+                        else if (n.nodeType == 4)  // cdata node
+                           o["#cdata"] = X.escape(n.nodeValue);
+                        else if (o[n.nodeName]) {  // multiple occurence of element ..
+                           if (o[n.nodeName] instanceof Array)
+                              o[n.nodeName][o[n.nodeName].length] = X.toObj(n);
+                           else
+                              o[n.nodeName] = [o[n.nodeName], X.toObj(n)];
+                        }
+                        else  // first occurence of element..
+                           o[n.nodeName] = X.toObj(n);
+                     }
+                  }
+                  else { // mixed content
+                     if (!xml.attributes.length)
+                        o = X.escape(X.innerXml(xml));
+                     else
+                        o["#text"] = X.escape(X.innerXml(xml));
+                  }
+               }
+               else if (textChild) { // pure text
+                  if (!xml.attributes.length)
+                     o = X.escape(X.innerXml(xml));
+                  else
+                     o["#text"] = X.escape(X.innerXml(xml));
+               }
+               else if (cdataChild) { // cdata
+                  if (cdataChild > 1)
+                     o = X.escape(X.innerXml(xml));
+                  else
+                     for (var n=xml.firstChild; n; n=n.nextSibling)
+                        o["#cdata"] = X.escape(n.nodeValue);
+               }
+            }
+            if (!xml.attributes.length && !xml.firstChild) o = null;
+         }
+         else if (xml.nodeType==9) { // document.node
+            o = X.toObj(xml.documentElement);
+         }
+         else
+            alert("unhandled node type: " + xml.nodeType);
+         return o;
+      },
+      toJson: function(o, name, ind) {
+         var json = name ? ("\""+name+"\"") : "";
+         if (o instanceof Array) {
+            for (var i=0,n=o.length; i<n; i++)
+               o[i] = X.toJson(o[i], "", ind+"\t");
+            json += (name?":[":"[") + (o.length > 1 ? ("\n"+ind+"\t"+o.join(",\n"+ind+"\t")+"\n"+ind) : o.join("")) + "]";
+         }
+         else if (o == null)
+            json += (name&&":") + "null";
+         else if (typeof(o) == "object") {
+            var arr = [];
+            for (var m in o)
+               arr[arr.length] = X.toJson(o[m], m, ind+"\t");
+            json += (name?":{":"{") + (arr.length > 1 ? ("\n"+ind+"\t"+arr.join(",\n"+ind+"\t")+"\n"+ind) : arr.join("")) + "}";
+         }
+         else if (typeof(o) == "string")
+            json += (name&&":") + "\"" + o.toString() + "\"";
+         else
+            json += (name&&":") + o.toString();
+         return json;
+      },
+      innerXml: function(node) {
+         var s = ""
+         if ("innerHTML" in node)
+            s = node.innerHTML;
+         else {
+            var asXml = function(n) {
+               var s = "";
+               if (n.nodeType == 1) {
+                  s += "<" + n.nodeName;
+                  for (var i=0; i<n.attributes.length;i++)
+                     s += " " + n.attributes[i].nodeName + "=\"" + (n.attributes[i].nodeValue||"").toString() + "\"";
+                  if (n.firstChild) {
+                     s += ">";
+                     for (var c=n.firstChild; c; c=c.nextSibling)
+                        s += asXml(c);
+                     s += "</"+n.nodeName+">";
+                  }
+                  else
+                     s += "/>";
+               }
+               else if (n.nodeType == 3)
+                  s += n.nodeValue;
+               else if (n.nodeType == 4)
+                  s += "<![CDATA[" + n.nodeValue + "]]>";
+               return s;
+            };
+            for (var c=node.firstChild; c; c=c.nextSibling)
+               s += asXml(c);
+         }
+         return s;
+      },
+      escape: function(txt) {
+         return txt.replace(/[\\]/g, "\\\\")
+                   .replace(/[\"]/g, '\\"')
+                   .replace(/[\n]/g, '\\n')
+                   .replace(/[\r]/g, '\\r');
+      },
+      removeWhite: function(e) {
+         e.normalize();
+         for (var n = e.firstChild; n; ) {
+            if (n.nodeType == 3) {  // text node
+               if (!n.nodeValue.match(/[^ \f\n\r\t\v]/)) { // pure whitespace text node
+                  var nxt = n.nextSibling;
+                  e.removeChild(n);
+                  n = nxt;
+               }
+               else
+                  n = n.nextSibling;
+            }
+            else if (n.nodeType == 1) {  // element node
+               X.removeWhite(n);
+               n = n.nextSibling;
+            }
+            else                      // any other node
+               n = n.nextSibling;
+         }
+         return e;
+      }
+   };
+   if (xml.nodeType == 9) // document node
+      xml = xml.documentElement;
+   var json = X.toJson(X.toObj(X.removeWhite(xml)), xml.nodeName, "\t");
+   return "{\n" + tab + (tab ? json.replace(/\t/g, tab) : json.replace(/\t|\n/g, "")) + "\n}";
+}
+
 function fct_init(){
 
   // Simple helper function creates a new element from a name, so you don't have to add the brackets etc.
@@ -139,6 +299,11 @@ function fct_init(){
 
 
   var qxml = fct_getUrlParameter('qxml');
+  var qjson = fct_getUrlParameter('qjson');
+
+  if(qjson && qjson.length > 0){
+    qxml = json2xml(JSON.parse(qjson), '');
+  }
 
   if(qxml && qxml.length > 0){
     idct = fct_getUrlParameter('idCt');
@@ -181,7 +346,7 @@ function fct_init(){
 }
 
 function getQuery(){
-  return $(_root.children('query')); //TODO: this code needs to be refactored to use getter/setters in place of the calls to _root, also, need to replace the string concats with more efficient routines
+  return $(_root.children('query')[0]); //TODO: this code needs to be refactored to use getter/setters in place of the calls to _root, also, need to replace the string concats with more efficient routines
 }
 
 function setQueryText(str){
@@ -191,24 +356,24 @@ function setQueryText(str){
   }
   query = getQuery();
   if( (!str || str.length <= 0) && $(_root.find('query > view')).attr('type') != 'list-count') return;
-  if(_root.find('text').length <= 0) {
+  if(query.children('text').length <= 0) {
     query.append('<text class="'+ID_TEXT+'"/>');
     //text = _root.find('text');
   }
-  query.find('text').text(str);
+  query.children('text').text(str);
   if(!isExpandSearch) {
-    query.find('text').attr('property', 'http://www.w3.org/2000/01/rdf-schema#label');
+    query.children('text').attr('property', 'http://www.w3.org/2000/01/rdf-schema#label');
     $('#showMeMenu > option[value=text-properties]').remove();
   }
   else {
-    query.find('text').removeAttr('property');
+    query.children('text').removeAttr('property');
     var textOption =  $.createElement('option');
     textOption.attr('class', $('#showMeMenu > option[value='+VIEW_TYPE_PROPERTIES+']').attr('class'));
     textOption.val(VIEW_TYPE_TEXT_PROPERTIES);
     textOption.text('Text');
     $('#showMeMenu > option[value='+VIEW_TYPE_PROPERTIES+']').after(textOption);
   }
-  query.find('text').attr('label', str.split('  ').join(' ').split(' ').join(' + '));
+  query.children('text').attr('label', str.split('  ').join(' ').split(' ').join(' + '));
 
   var clearKeywords = $('span.clear-data').filter(function() {return $(this).text().indexOf('Keywords') >= 0;});
   clearKeywords.parent().removeClass('hide');
@@ -233,11 +398,82 @@ function setQueryGraph(g, label){
   clearLibrary.parent().removeClass('hide');
 }
 
+function popQueryGraph(){
+  var ancestors = _root.children('query').attr('graphAncestors');
+  var ancestorLabels = _root.children('query').attr('graphAncestorLabels');
+  var next = '';
+  var nextLabel = '';
+  if(ancestors && ancestors.length > 0){
+    next = ancestors.substring(ancestors.lastIndexOf(',')+1);
+    ancestors = ancestors.substring(0, ancestors.lastIndexOf(','));
+    nextLabel = ancestorLabels.substring(ancestorLabels.lastIndexOf(',')+1);
+    ancestorLabels = ancestorLabels.substring(0, ancestorLabels.lastIndexOf(','));
+    setQueryGraph(next, nextLabel);
+    _root.children('query').attr('graphAncestors', ancestors);
+    _root.children('query').attr('graphAncestorLabels', ancestorLabels);
+  }
+  else { 
+    _root.find('query').removeAttr('graph');
+    _root.find('query').removeAttr(ATTR_GRAPH_LABEL);
+    _root.find('query').removeAttr('graphAncestors');
+    _root.find('query').removeAttr('graphAncestorLabels');
+  }
+}
+
+function stackQueryGraph(g, label){
+  if(getQueryGraph() && getQueryGraph().length > 0){
+    var ancestors = _root.children('query').attr('graphAncestors');
+    if(ancestors && ancestors.length > 0) ancestors += ', ';
+    else ancestors = '';
+
+    var ancestorLabels = _root.children('query').attr('graphAncestorLabels');
+    if(ancestorLabels && ancestorLabels.length > 0) ancestorLabels += ', ';
+    else ancestorLabels = '';
+
+    ancestors += getQueryGraph();
+    ancestorLabels += getQueryGraphLabel();
+
+    _root.find('query').attr('graphAncestors', ancestors);
+    _root.find('query').attr('graphAncestorLabels', ancestorLabels);
+  }
+
+  setQueryGraph(g, label);
+
+  // ELF
+  checkLibraries();
+}
+
+function checkLibraries(){
+  if(getQueryGraph() && getQueryGraph().length > 0){
+    if(getMainFocus().attr('class') != ID_QUERY) return;
+    var sparql = buildTypeAskQuery('http://www.w3.org/ns/sparql-service-description#NamedGraph');
+    var opt = new Object();
+    opt.tar = 'askDefaultLoadLibraries';
+    fct_sparql(sparql, opt);
+  }
+}
+
 function clearQueryGraph(){
+/*  _root.find('query').removeAttr('graph');
+  _root.find('query').removeAttr(ATTR_GRAPH_LABEL);
+  _root.find('query').removeAttr('graphAncestors');
+  _root.find('query').removeAttr('graphAncestorLabels');*/
+  popQueryGraph();
+}
+
+function emptyQueryGraph(){
   _root.find('query').removeAttr('graph');
   _root.find('query').removeAttr(ATTR_GRAPH_LABEL);
+  _root.find('query').removeAttr('graphAncestors');
+  _root.find('query').removeAttr('graphAncestorLabels');
   var clearLibrary = $('span.clear-data').filter(function() {return $(this).text().indexOf('Library') >= 0;});
-  clearLibrary.parent().addClass('hide');
+
+  if(getQueryGraph() && getQueryGraph().length > 0) {
+    clearLibrary.parent().removeClass('hide');
+  }
+  else{
+    clearLibrary.parent().addClass('hide');
+  }
 }
 
 function getQueryText(){
@@ -248,51 +484,6 @@ function setViewType(type, q){
   $(q).find('view').attr('type', type);
 }
 
-function setMutex(mtx, type, isCount){
-  if(isCount) {
-    if(type == 'showMeMenu'){
-      $('#showMeCount').attr('mutex', mtx);
-    }
-    else if(type == 'groupByMenu'){
-      $('#groupByCount').attr('mutex', mtx);
-    }
-    else if(type == 'table'){
-      $('#tableCount').attr('mutex', mtx);
-    }
-  }
-  else if(type == 'record'){
-    $('#angular_recordViewer').attr('mutex', mtx);
-  }
-  else if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN || type == VIEW_TYPE_GRAPHS || type == VIEW_TYPE_TEXT_PROPERTIES){
-    $('#showMeColumn').attr('mutex', mtx);
-  }
-  else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT || type == VIEW_TYPE_TEXT){
-    $('#recordsListWidgetContainer').attr('mutex', mtx);
-  }
-}
-
-function getMutex(type, isCount){
-  if(isCount) {
-    if(type == 'showMeMenu'){
-      return $('#showMeCount').attr('mutex');
-    }
-    else if(type == 'groupByMenu'){
-      return $('#groupByCount').attr('mutex');
-    }
-    else if(type == 'table'){
-      return $('#tableCount').attr('mutex');
-    }
-  }
-  else if(type == 'record'){
-    return $('#angular_recordViewer').attr('mutex');
-  }
-  else if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN || type == VIEW_TYPE_GRAPHS || type == VIEW_TYPE_TEXT_PROPERTIES){
-    return $('#showMeColumn').attr('mutex');
-  }
-  else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT || type == VIEW_TYPE_TEXT){
-    return $('#recordsListWidgetContainer').attr('mutex');
-  }
-}
 
 function setViewLimit(lim){
   _root.find('view').attr('limit', lim);
@@ -338,8 +529,8 @@ function getDbActivity(xml){
 //var fct_sparql, fct_time, fct_complete, fct_timeout, fct_dbActivity;
 
 var dataspace = 'http://lod.openlinksw.com';
-var service_fct = getProxyEndpoint(dataspace) + "/fct/service";
-var service_sparql = getProxyEndpoint(dataspace) + "/sparql";
+var service_fct = getRudiEndpoint(dataspace) + "/fct/service";
+var service_sparql = getRudiEndpoint(dataspace) + "/sparql";
 var service_fct_label = "LOD";
 var dataspaceAdded = false;
 
@@ -378,7 +569,11 @@ function fct_removeVariableData(query){
   query.removeAttr('varname');
   query.removeAttr('class');
   query.removeAttr('timeout');
+  query.removeAttr('label');
   query.removeAttr('qid');
+  query.removeAttr('graphAncestors');
+  query.removeAttr('graphLabel');
+  query.removeAttr('graphAncestorLabels');
 
 
   query.find('*').removeAttr('class');
@@ -400,12 +595,23 @@ function formatDate(date) {
   return date.getMonth()+1 + "/" + date.getDate() + "/" + date.getFullYear() + "  " + strTime;
 }
 
+function getRudiEndpoint(url){
+//  if(url == 'http://lod.openlinksw.com') url = 'http://dbpedia.org';
+  if(url.startsWith( 'http://localhost') || url.startsWith('http://localhost/') || url .startsWith('http://127.0.0.1') || url.startsWith('http://127.0.0.1/')) return url;
+  if(url.startsWith('http://127.0.0.1')) return url;
+  url = url.replace('http://', 'http/');
+  url = url.replace('https://', 'https/');
+//  return 'http://poc.vios.network/proxy/-start-'+url+'-end-';
+  return this_endpoint + '/rudi/'+url;
+  //return url;
+}
+
 function getProxyEndpoint(url){
 //  if(url == 'http://lod.openlinksw.com') url = 'http://dbpedia.org';
   if(url == 'http://localhost' || url == 'http://localhost/') return url;
   if(url.startsWith('http://127.0.0.1')) return url;
-  url = url.replace('http://', 'http/');
-  url = url.replace('https://', 'https/');
+  ///url = url.replace('http://', 'http/');
+  //url = url.replace('https://', 'https/');
 //  return 'http://poc.vios.network/proxy/-start-'+url+'-end-';
   return this_endpoint + '/proxy/'+url;
   //return url;
@@ -426,7 +632,82 @@ function getGGGURL(url){
 
 
 var mainSparql = '';
+function setMainSparql(s){
+  mainSparql = s;
+  $('#query').text(s);
+  $('#queryTarget').text(dataspace + "/sparql");
+  $('#queryDescription').text(queryArticulation);
+  if(!getQueryText() || getQueryText().length < 0) $('#queryKeywords').removeAttr('property');
+  else {
+    $('#queryKeywords').attr('property', 'object');
+    $('#queryKeywords').text(getQueryText());
+  }
+  $('#metaKeywords').attr('content', getQueryText());
+  $('.searchActionObject').remove();
+  getMainFocus().children('class').each(function(i){
+      $('#copyQuery').append('<span property="object" class="hide searchActionObject">'+$(this).attr('iri')+'</span>');
+  });
+  $('#queryLocation').text(getQueryGraph());
+  $('title').text(queryArticulation);
+}
+
 var bid = createId();
+
+
+/** Associates a mutex with 'type' */
+function setMutex(mtx, type, isCount){
+  if(isCount) {
+    if(type == 'showMeMenu'){
+      $('#showMeCount').attr('mutex', mtx);
+    }
+    else if(type == 'groupByMenu'){
+      $('#groupByCount').attr('mutex', mtx);
+    }
+    else if(type == 'table'){
+      $('#tableCount').attr('mutex', mtx);
+    }
+  }
+  else if(type == 'record'){
+    $('#angular_recordViewer').attr('mutex', mtx);
+  }
+  else if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN || type == VIEW_TYPE_GRAPHS || type == VIEW_TYPE_TEXT_PROPERTIES){
+    $('#showMeColumn').attr('mutex', mtx);
+  }
+  else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT || type == VIEW_TYPE_TEXT){
+    $('#recordsListWidgetContainer').attr('mutex', mtx);
+  }
+  else if(type == 'fetchLibraries'){
+    $('.libraryLink').attr('mutex', mtx);
+  }
+}
+
+/** Returns the mutex associated with 'type' */
+function getMutex(type, isCount){
+  if(isCount) {
+    if(type == 'showMeMenu'){
+      return $('#showMeCount').attr('mutex');
+    }
+    else if(type == 'groupByMenu'){
+      return $('#groupByCount').attr('mutex');
+    }
+    else if(type == 'table'){
+      return $('#tableCount').attr('mutex');
+    }
+  }
+  else if(type == 'record'){
+    return $('#angular_recordViewer').attr('mutex');
+  }
+  else if(type == VIEW_TYPE_PROPERTIES || type == VIEW_TYPE_CLASSES || type == VIEW_TYPE_PROPERTIES_IN || type == VIEW_TYPE_GRAPHS || type == VIEW_TYPE_TEXT_PROPERTIES){
+    return $('#showMeColumn').attr('mutex');
+  }
+  else if(type == VIEW_TYPE_LIST || type == VIEW_TYPE_LIST_COUNT || type == VIEW_TYPE_TEXT){
+    return $('#recordsListWidgetContainer').attr('mutex');
+  }
+  else if(type == 'fetchLibraries'){
+    return $('.libraryLink').attr('mutex');
+  }
+}
+
 function fct_query(q, viewType, opt){
   var tstamp = new Date().getTime();
   if(!opt) opt = new Object();
@@ -446,13 +727,13 @@ function fct_query(q, viewType, opt){
   var qstr = q.prop('outerHTML');
   var id = (qstr) ? (service_fct+qstr).hashCode() : 0;
   getQuery().attr('qid', id);
-  if(!opt.branches) setMutex(id, viewType);
+  if(!opt.branches && opt.tar != 'countIncrementProperty' && opt.tar != 'fetchIndex') setMutex(id, viewType);
   ha.push(id);
   q.attr('timeout', fct_queryTimeout); // add all neccessary variable data back to the query, if possible
   var resp;
   if(fct_isCache){
     try{
-      resp = localStorage.getItem(id);
+      resp = sessionStorage.getItem(id);
       if(!resp || resp.length == 0) resp = fct_cache[id];
     }
     catch(err){ // TODO: what if localstorage *is* available, but something else went wrong on this try
@@ -464,44 +745,56 @@ function fct_query(q, viewType, opt){
   $('#dataSpaceLabel').parent().children('i').removeClass('text-danger');
 
   if (resp != null) { // if exist on cache
-        switch(viewType){
-          case VIEW_TYPE_LIST: {
-            mainSparql = getSparql(resp);
-            fct_handleListResults(resp, opt);
-          } break;
-          case VIEW_TYPE_LIST_COUNT: {
-            mainSparql = getSparql(resp);
-            fct_handleListCountResults(resp, opt);
-          } break;
-          case VIEW_TYPE_TEXT: {
-            fct_handleTextResults(resp, opt);
-          }; break;
-          case VIEW_TYPE_CLASSES: {
-            fct_handleClassesResults(resp, opt);
-          }; break;
-          case VIEW_TYPE_PROPERTIES: {
-            fct_handlePropertiesResults(resp, opt);
-          }; break;
-          case VIEW_TYPE_PROPERTIES_IN: {
-            fct_handlePropertiesInResults(resp, opt);
-          }; break;
-          case VIEW_TYPE_TEXT_PROPERTIES: {
-            fct_handleTextPropertiesResults(resp, opt);
-          }; break;
-          case VIEW_TYPE_GRAPHS: {
-            fct_handleGraphResults(resp, opt);
-          }; break;
-          case VIEW_TYPE_GEO_LIST: {
-            fct_handleGeoListResults(resp, opt);
-          }; break;
+    if(opt.tar == 'countIncrementProperty'){
+        fct_handleIncrementPropertyResults(resp, opt);
     }
-  $('[data-toggle="tooltip"]').tooltip();
+    else if(opt.tar == 'fetchIndex'){
+        fct_handleIndexResults(resp, opt);
+    }
+    else {
+      switch(viewType){
+        case VIEW_TYPE_LIST: {
+          setMainSparql( getSparql(resp) );
+          fct_handleListResults(resp, opt);
+        } break;
+        case VIEW_TYPE_LIST_COUNT: {
+          setMainSparql( getSparql(resp) );
+          fct_handleListCountResults(resp, opt);
+        } break;
+        case VIEW_TYPE_TEXT: {
+          fct_handleTextResults(resp, opt);
+        }; break;
+        case VIEW_TYPE_CLASSES: {
+          fct_handleClassesResults(resp, opt);
+        }; break;
+        case VIEW_TYPE_PROPERTIES: {
+          fct_handlePropertiesResults(resp, opt);
+        }; break;
+        case VIEW_TYPE_PROPERTIES_IN: {
+          fct_handlePropertiesInResults(resp, opt);
+        }; break;
+        case VIEW_TYPE_TEXT_PROPERTIES: {
+          fct_handleTextPropertiesResults(resp, opt);
+        }; break;
+        case VIEW_TYPE_GRAPHS: {
+          fct_handleGraphResults(resp, opt);
+        }; break;
+        case VIEW_TYPE_GEO_LIST: {
+          fct_handleGeoListResults(resp, opt);
+        }; break;
+      }
+    }
+    $('[data-toggle="tooltip"]').tooltip();
     updatePermalink();
     return;
   }
+
+
+  var headers = {};
+  if(!service_fct.startsWith('http://127.0.0.1')) headers = {'X-VIOS-AGENT': ((opt.tar && opt.tar.length > 0) ? opt.tar : viewType), 'X-VIOS-Type': 'fct', 'X-VIOS-QID': id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid, 'X-VIOS-BID': bid};
   var req = $.ajax({
       url: service_fct,
-      headers: {'X-VIOS-Type': 'fct', 'X-VIOS-QID': id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid, 'X-VIOS-BID': bid},
+      headers: headers,
       data: $(q).prop('outerHTML'), 
       type: 'POST',
       contentType: "text/xml",
@@ -565,7 +858,7 @@ function fct_query(q, viewType, opt){
 
           if(fct_isCache){
             try{
-              localStorage.setItem(id, xml);
+              sessionStorage.setItem(id, xml);
             }
             catch(err){
               fct_cache[id] = xml;
@@ -573,41 +866,53 @@ function fct_query(q, viewType, opt){
             }
           }
         }
+
+            if(opt.tar == 'countIncrementProperty'){
+              fct_handleIncrementPropertyResults(xml, opt);
+            }
+            else if(opt.tar == 'fetchIndex'){
+                fct_handleIndexResults(xml, opt);
+            }
+
+            else {
               if(!opt.branches && getMutex(viewType) != id){ // POI: make sure to cache the results always!, i.e. place this after the cache above
                 return;
               }
         
-        switch(viewType){
-          case VIEW_TYPE_LIST: {
-            mainSparql = sparql;
-            fct_handleListResults(xml, opt);
-          } break;
-          case VIEW_TYPE_LIST_COUNT: {
-            mainSparql = sparql;
-            fct_handleListCountResults(xml, opt);
-          } break;
-          case VIEW_TYPE_TEXT: {
-            fct_handleTextResults(xml, opt);
-          }; break;
-          case VIEW_TYPE_CLASSES: {
-            fct_handleClassesResults(xml, opt);
-          }; break;
-          case VIEW_TYPE_PROPERTIES: {
-            fct_handlePropertiesResults(xml, opt);
-          }; break;
-          case VIEW_TYPE_PROPERTIES_IN: {
-            fct_handlePropertiesInResults(xml, opt);
-          }; break;
-          case VIEW_TYPE_TEXT_PROPERTIES: {
-            fct_handleTextPropertiesResults(xml, opt);
-          }; break;
-          case VIEW_TYPE_GRAPHS: {
-            fct_handleGraphResults(xml, opt);
-          }; break;
-          case VIEW_TYPE_GEO_LIST: {
-            fct_handleGeoListResults(xml, opt);
-          }; break;
-        }
+              switch(viewType){
+                case VIEW_TYPE_LIST: {
+                  setMainSparql( sparql );
+                  fct_handleListResults(xml, opt);
+                } break;
+                case VIEW_TYPE_LIST_COUNT: {
+                  setMainSparql( sparql );
+                  fct_handleListCountResults(xml, opt);
+                } break;
+                case VIEW_TYPE_TEXT: {
+                  fct_handleTextResults(xml, opt);
+                }; break;
+                case VIEW_TYPE_CLASSES: {
+                  fct_handleClassesResults(xml, opt);
+                }; break;
+                case VIEW_TYPE_PROPERTIES: {
+                  fct_handlePropertiesResults(xml, opt);
+                }; break;
+                case VIEW_TYPE_PROPERTIES_IN: {
+                  fct_handlePropertiesInResults(xml, opt);
+                }; break;
+                case VIEW_TYPE_TEXT_PROPERTIES: {
+                  fct_handleTextPropertiesResults(xml, opt);
+                }; break;
+                case VIEW_TYPE_GRAPHS: {
+                  fct_handleGraphResults(xml, opt);
+                }; break;
+                case VIEW_TYPE_GEO_LIST: {
+                  fct_handleGeoListResults(xml, opt);
+                }; break;
+              }
+
+            }
+
                 
   $('[data-toggle="tooltip"]').tooltip();
       },
@@ -648,7 +953,8 @@ function fct_sparql(sparql, opt){
   if(!opt) opt = new Object();
   fct_isCache = $('#isCache').is(':checked');
   fct_isDebug = $('#isDebug').is(':checked');
-  fct_queryTimeout = $('#queryTimeout :selected').attr('value');
+//  fct_queryTimeout = $('#queryTimeout :selected').attr('value');
+  fct_queryTimeout = getQueryTimeout();
   //console.clear();
   //setViewType(viewType, q);
   //q = _root.find('query *').removeAttr('class'); // be sure semantically equivalent queries are non-unique
@@ -661,12 +967,14 @@ function fct_sparql(sparql, opt){
   //var qstr = q.prop('outerHTML');
   var sparqlSvr = (opt.srv) ? opt.srv : service_sparql;
   var id = sparql ? (sparqlSvr + sparql).hashCode() : 0;
-  setMutex(id, opt.tar, opt.tar!='record');
+
+  // need to use a register pattern for these
+  setMutex(id, opt.tar, opt.tar!='record' && opt.tar != 'askLibraries' && opt.tar != 'askGlossaries' && opt.tar != 'askHelp' && opt.tar != 'askDefaultLoadLibraries' && opt.tar != 'askDefaultLoadOriginLibraries' && opt.tar != 'fetchLibraries' && opt.tar != 'fetchContentDesc');
   //q.attr('timeout', fct_queryTimeout);
   var resp;
   if(fct_isCache){
     try{
-      resp = localStorage.getItem(id);
+      resp = sessionStorage.getItem(id);
       if(!resp || resp.length == 0) resp = fct_cache[id];
     }
     catch(err){ // TODO: what if localstorage *is* available, but something else went wrong on this try
@@ -681,7 +989,7 @@ function fct_sparql(sparql, opt){
     //console.log('sparql results: ' + resp);
 
             if(!opt.tar){
-                mainSparql = sparql;
+                setMainSparql( sparql );
                fct_handleSparqlResults(resp, opt);
             }
             else {
@@ -713,6 +1021,30 @@ function fct_sparql(sparql, opt){
                 }
                 fct_handleSparqlDescribe(resp, opt);
               }
+              else if(opt.tar == 'askLibraries'){
+                fct_handleSparqlLibraryAsk(resp, opt);
+              }
+              else if(opt.tar == 'askGlossaries'){
+                fct_handleSparqlGlossaryAsk(resp, opt);
+              }
+              else if(opt.tar == 'askHelp'){
+                fct_handleSparqlHelpAsk(resp, opt);
+              }
+              else if(opt.tar == 'askDefaultLoadLibraries'){
+                fct_handleSparqlDefaultLoadLibrariesAsk(resp, opt);
+              }
+              else if(opt.tar == 'askDefaultLoadOriginLibraries'){
+                fct_handleSparqlDefaultLoadOriginLibrariesAsk(resp, opt);
+              }
+              else if(opt.tar == 'fetchLibraries'){
+                if(getMutex(opt.tar) != id){
+                  return;
+                }
+                fct_handleSparqlFetchLibraries(resp, opt);
+              }
+              else if(opt.tar == 'fetchContentDesc'){
+                fct_handleSparqlFetchContentDesc(resp, opt);
+              }
             }
 
     updatePermalink();
@@ -721,11 +1053,13 @@ function fct_sparql(sparql, opt){
 
   var accept = 'application/sparql-results+xml';
   if(opt.tar == 'record') accept = 'application/rdf+xml';
+  var headers = {'Accept': accept};
+  if(!sparqlSvr.startsWith('http://127.0.0.1')) headers = {'Accept': accept, 'X-VIOS-AGENT': opt.tar,'X-VIOS-Type': 'sparql', 'X-VIOS-QID': (isMainQueryCount) ? getQuery().attr('qid') : id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid, 'X-VIOS-BID': bid};
   var isMainQueryCount = opt && (opt.tar == 'showMeMenu' || opt.tar == 'groupByMenu');
   var req = $.ajax({
-      url: sparqlSvr + "?query=" + encodeURIComponent(sparql),
+      url: sparqlSvr + '?query=' + encodeURIComponent(sparql) + '&timeout='+fct_queryTimeout,
       type: 'GET',
-      headers: {'Accept': accept, 'X-VIOS-Type': 'sparql', 'X-VIOS-QID': (isMainQueryCount) ? getQuery().attr('qid') : id, 'X-VIOS-Dataspace-Label': getDataspaceLabel(), 'X-VIOS-SID': client_sid, 'X-VIOS-BID': bid},
+      headers: headers,
       dataType: "text", // POI: can't do dataType: xml, since the service sometimes returns malformed XML
       beforeSend: function(jqXHR, settings) {
           jqXHR.url = settings.url;
@@ -737,7 +1071,7 @@ function fct_sparql(sparql, opt){
             xml = xml.replaceAll('xml:lang', 'lang');
 
             if(!opt.tar){
-              mainSparql = sparql;
+              setMainSparql( sparql );
               fct_handleSparqlResults(xml, opt);
             }
             else {
@@ -766,14 +1100,39 @@ function fct_sparql(sparql, opt){
               else if(opt.tar == 'record'){
                 if(getMutex(opt.tar, false) != id){
                   $('#'+opt.srcId).removeClass('loading');
+                  return;
                 }
-                else fct_handleSparqlDescribe(xml, opt); // POI: be sure to cache the work
+                fct_handleSparqlDescribe(xml, opt); // POI: be sure to cache the work
+              }
+              else if(opt.tar == 'askLibraries'){
+                fct_handleSparqlLibraryAsk(xml, opt);
+              }
+              else if(opt.tar == 'askGlossaries'){
+                fct_handleSparqlGlossaryAsk(xml, opt);
+              }
+              else if(opt.tar == 'askHelp'){
+                fct_handleSparqlHelpAsk(xml, opt);
+              }
+              else if(opt.tar == 'askDefaultLoadLibraries'){
+                fct_handleSparqlDefaultLoadLibrariesAsk(xml, opt);
+              }              
+              else if(opt.tar == 'askDefaultLoadOriginLibraries'){
+                fct_handleSparqlDefaultLoadOriginLibrariesAsk(xml, opt);
+              }
+              else if(opt.tar == 'fetchLibraries'){
+                if(getMutex(opt.tar) != id){
+                  return;
+                }
+                fct_handleSparqlFetchLibraries(xml, opt);
+              }
+              else if(opt.tar == 'fetchContentDesc'){
+                fct_handleSparqlFetchContentDesc(xml, opt);
               }
             }
           //console.log('sparql results: ' + xml);
           if(fct_isCache){
             try{
-              localStorage.setItem(id, xml);
+              sessionStorage.setItem(id, xml);
             }
             catch(err){
               fct_cache[id] = xml;
@@ -837,6 +1196,164 @@ function fct_handleSparqlTableCount(xml, opt){
     $('#tableCount').text( x + ' / ' + ct);
   });
   tablePage();
+}
+
+
+function fct_handleSparqlLibraryAsk(xml, opt){
+  var exists = $($(xml).find('boolean')[0]).text().trim() == 'true';
+  if(!exists){
+    $('#libraryButton').addClass('hide');
+  }
+  else {
+    if( 
+      !_root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]') || 
+      _root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]').length <= 0
+      
+      ){
+      $('#libraryButton').removeClass('hide');
+    }
+    else if( !$('#libraryButton').hasClass('hide') ){
+      $('#libraryButton').addClass('hide');
+
+      var sparql = buildTypeAskQuery('dsn:data.vios.network/o/Origin');
+      var opt = new Object();
+      opt.tar = 'askDefaultLoadOriginLibraries';
+      fct_sparql(sparql, opt);
+    }
+  }
+}
+
+
+function fct_handleSparqlDefaultLoadLibrariesAsk(xml, opt){
+  var exists = $($(xml).find('boolean')[0]).text().trim() == 'true';
+  if(exists){
+    if(
+      !_root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]') || 
+      _root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]').length <= 0
+    ) {
+      clearFacets(true);
+      addClassFacet(createId(), 'http://www.w3.org/ns/sparql-service-description#NamedGraph', 'Library');
+      if( !$('#libraryButton').hasClass('hide') ){
+        $('#libraryButton').addClass('hide');
+      }
+    }
+  }
+}
+
+function fct_handleSparqlDefaultLoadOriginLibrariesAsk(xml, opt){
+  var exists = $($(xml).find('boolean')[0]).text().trim() == 'true';
+  if(exists){
+    if(
+      !_root.children('query').children('class[iri="dsn:data.vios.network/o/Origin"]') || 
+      _root.children('query').children('class[iri="dsn:data.vios.network/o/Origin"]').length <= 0
+    ) {
+      addClassFacet(createId(), 'dsn:data.vios.network/o/Origin', 'Origin');
+    }
+  }
+}
+
+function fct_handleSparqlFetchContentDesc(xml, opt){
+    var results = $(xml).find('results');
+  $('result', results).each(function(i){
+    var content = $($(this).children('binding')[0]).text().trim();
+    var snip = content;
+    if(content.indexOf('.') > 0){
+      var snip = content.substring(0, content.indexOf('.')) + '.';
+      content = content.substring(content.indexOf('.')+1);
+      if(content.indexOf('.') > 0){
+        snip += ' ' + content.substring(0, content.indexOf('.')) + '.';
+      }
+    }
+    $('#'+opt.id).append('<span class="help-block">'+snip+'</span>');
+  });
+
+}
+
+function fct_handleSparqlFetchLibraries(xml, opt){
+
+  var results = $(xml).find('results');
+  $('result', results).each(function(i){
+    var graph = $($(this).children('binding')[0]).text().trim();
+    var graphLabel = $($(this).children('binding')[1]);
+    if(graphLabel && graphLabel.length > 0) graphLabel = graphLabel.text();
+    if(!graphLabel || graphLabel.length <= 0) graphLabel = graph;
+    graphLabel = processLabel(graphLabel);
+    $('.libraryLink').attr('iri', graph);
+    $('.libraryLink').attr('irilabel', graphLabel);
+    $('.libraryLink').text('Library - '+graph);
+    $('.libraryLink').on('click', function(e){
+      linkOut(graph);
+    });
+
+
+
+
+    //if(dataSpace.indexOf('linkeddata.uriburner.com') > 0){
+      if($('#libraryRowLink') && $('#libraryRowLink').length > 0){
+        $('#libraryRowLink').on('click', function(e){
+          setGraphFacet(graph, graphLabel);
+        });
+        $('.libraryRowLinkOut').on('click', function(e){
+          linkOut(graph);
+        });
+        $('#libraryRowLink').text(graph);
+      }
+
+      setTitleOnElement($('#libraryRowLink'), graphLabel);
+
+    //}
+
+
+
+  });
+
+/*
+  var results = $(xml).find('results');
+  $('result', results).each(function(i){
+    var ct = $(this).text().trim();
+    if(ct > 0){
+      if(
+        !_root.children('query').children('class[iri="dsn:data.vios.network/o/Origin"]') || 
+        _root.children('query').children('class[iri="dsn:data.vios.network/o/Origin"]').length <= 0
+      ) {
+        addClassFacet(createId(), 'dsn:data.vios.network/o/Origin', 'Origin');
+      }
+    }
+  });
+*/
+
+
+}
+
+
+function fct_handleSparqlGlossaryAsk(xml, opt){
+  var exists = $($(xml).find('boolean')[0]).text().trim() == 'true';
+  if(!exists){
+    $('#glossaryButton').addClass('hide');
+  }
+  else {
+    if( 
+      !_root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]') || 
+      _root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]').length <= 0
+      
+      ){
+      $('#glossaryButton').removeClass('hide');
+    }
+    else if( !$('#glossaryButton').hasClass('hide') ){
+      $('#glossaryButton').addClass('hide');
+    }
+  }
+}
+
+
+function fct_handleSparqlHelpAsk(xml, opt){
+  var exists = $($(xml).find('boolean')[0]).text().trim() == 'true';
+  if(!exists || getQueryGraph() == 'dsn:'+dataspace.replace('http://', '').replace('https://', '')+'/help'){
+    $('#helpButton').addClass('hide');
+  }
+  else {
+    $('#helpButton').removeClass('hide');
+  }
 }
 
 /*
@@ -933,9 +1450,44 @@ function fct_handleSparqlDescribe(xml, opt){
   loadDescribeResults(xml, opt);
 }
 
+function fct_handleIndexResults(xml, opt){
+    var result = $(xml).find("fct\\:result")[0];
+      $("fct\\:row", result).each(function(i) {
+          //console.log($(this).html());
+          var col = $(this).find("fct\\:column");
+
+          // shortform can be used in lieu of the label for URI values
+          var value, datatype, shortform, label, lang, ct; // TODO: need to utilize the lang property for filtering results for the user
+          
+          $("fct\\:column", this).each(function(j) {
+              // can't figure out how to access CDATA value of the element, tried many combinations of accessors, none worked
+              val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
+              val = val.replace("&lt;![CDATA[","").replace("]]&gt;","");
+              //console.log(val);
+              switch(j){
+                case 0: value = val; shortform = $(this).attr('shortform'); datatype = $(this).attr('datatype'); lang = $(this).attr('lang'); break;
+                case 1: label = val; break;
+                case 2: ct = val; break;
+              }
+          });
+
+          doRobot(value);
+      });
+}
+
+function fct_handleIncrementPropertyResults(xml, opt){
+  var exists = $($(xml).find('boolean')[0]).text().trim() == 'true';
+  if(!exists){
+    $('.la-arrow-right').parent().addClass('hide');
+  }
+  else {
+    $('.la-arrow-right').parent().removeClass('hide');
+  }
+}
+
 function fct_handleGeoListResults(xml, opt){
-    loadGeoListResults(xml);
-    $('#showMeMenu').removeClass('loading');
+  loadGeoListResults(xml);
+  $('#showMeMenu').removeClass('loading');
 }
 
 function toggleChartHeaders(){
@@ -1257,7 +1809,7 @@ function fct_handleSparqlResults(xml, opt) {
                 //str += '<a data-target="#">';
 
 
-                if(j == 0 && isRollup()) str += '<i class="la la-bars expand float-right"></i>';
+                if(j == 0 && isRollup()) str += '<i class="la la-ellipsis-v text-secondary expand float-right la-lg"></i>';
                 //str += '<span class="thumb-sm float-left mr">';
                 var onclick = 'onclick="javascript:setValue(\'' + id + '\', \'' + value + '\', \'' + label + '\', \'' + datatype + '\', \'' + lang + '\')"';
                 if(isRollup() && j == 0) onclick = 'onclick="javascript: addClassFacet(\''+id+'\', \''+sanitizeLabel($(this).text())+'\', \''+sanitizeLabel(label)+'\')"';
@@ -1279,7 +1831,7 @@ function fct_handleSparqlResults(xml, opt) {
                         //str += '<img class="pull-right" style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' alt="..." class="rounded-circle" src="' + getFaviconUrl($(this).text()) + '"/>&nbsp;';
                         //str += '<i class="status status-bottom bg-success"></i>';
                     } else {
-                        str += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' class="pull-right icon-literal glyphicon glyphicon-tag"></span>';
+                        str += '<i onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" ' + onclick + ' class="pull-right icon-literal glyphicon glyphicon-tag"></i>';
                     }
 
                 } // if j == 0
@@ -1293,13 +1845,26 @@ function fct_handleSparqlResults(xml, opt) {
                 label = deSanitizeLabel(label);
                 //if(datatype == 'uri') label = '<a href="#">' + label + '</a>';
                 var labelLink = (datatype == 'uri') ? '' + buildTitle($(this).text()) : '';
+                var nodeClass = (datatype == 'uri') ? 'link-table' : 'literal-table';
+
+
+                if(datatype != 'uri' && $('#showMeMenu').val()==VIEW_TYPE_TEXT_PROPERTIES){
+                  var kwords = getQueryText().split(' ');
+                  for(m = 0; m < kwords.length; kwords++){
+                    var regex = new RegExp('('+kwords[m]+')', 'gi');
+                    label = label.replace(regex, '<span class="text-search-hit">$1</span>');
+                  }
+                }
+
                 //str += '<h6 >';
-                str += '<span ' + onclick + ' ' + labelLink + '>' + label + '</span>';
+                str += '<span class="' + nodeClass + '"" ' + onclick + ' ' + labelLink + '>' + label + '</span>';
 
                 //str += '</h6>';
                 //str += '</a>';
 
-                if(j == 0) col.attr('nowrap', 'true');
+                if(j == 0) {
+                  col.attr('nowrap', 'true');
+                }
                 col.append(str);
                 if(isRollup() && j > 0) col.css('text-align', 'right');
 
@@ -1562,7 +2127,7 @@ function fct_handleListCountResults(xml, opt){
         sparqlMap[opt.focusId] = sparql;
         fct_sparql(getSparqlCount(sparql, VIEW_TYPE_PROPERTIES), opt);
 
-        loadGroupByResults(xml, focus);
+        loadContents(xml, focus);
         $('#groupByHeader').removeClass('loading');
         //$('#focusHeader').removeClass('loading');
 
@@ -1741,10 +2306,12 @@ function getSparqlCount(sparql, type){
     default: ctVar = getSparqlFocus(sparql); break;
   }
   if(VIEW_TYPE_TEXT != type && sparql.indexOf('group')>0) sparql = sparql.substring(0, sparql.indexOf('group'));
+  var prefix = sparql.substring(0, sparql.indexOf('select '));
   sparql = setSparqlProjection(sparql, 'count('+distinctStr+ctVar+') as ?c1');
   if(sparql.match(/{\s*select.*distinct.*?{/gi)){
     sparql = sparql.substring(sparql.indexOf('select')+6);
     sparql = sparql.substring(sparql.indexOf('select'), sparql.lastIndexOf('}'));
+    sparql = prefix + sparql;
   }
   //if(sparql.indexOf('distinct') < 0) sparql = sparql.replace('select ', 'select distinct ');
   if(type == VIEW_TYPE_TEXT) {
@@ -1757,7 +2324,7 @@ function getSparqlCount(sparql, type){
 
 
 function getSPARQLDescribe(uri, isURIBurner){
-  if(isURIBurner || dataspace == 'http://linkeddata.uriburner.com'){
+  if(isURIBurner || dataspace == 'http://' + sponger){
     var doc = uri;
     if(doc.indexOf('#') > 0) {
       doc = doc.substring(0, doc.lastIndexOf('#'));
@@ -1816,7 +2383,7 @@ function fct_handleClassesResults(xml, opt){
         }
         if(!opt || !opt.isTablePaging) pageTable = 0;
 */
-        //loadGroupByResults(xml, focus);
+        //loadContents(xml, focus);
         //$('#groupByHeader').removeClass('loading');
         //$('#focusHeader').removeClass('loading');
         //if(!opt) opt = new Object();
@@ -2009,7 +2576,7 @@ function removeFacet(id){
   doQuery(getQueryText());
 }
 
-function setValue(id, val, valLabel, datatype, lang){
+function setValue(id, val, valLabel, datatype, lang, exclude){
     exitGroupBy(id);
 
   val = deSanitizeLabel(val);
@@ -2044,7 +2611,7 @@ function setValue(id, val, valLabel, datatype, lang){
   //getFocus(query).append(p);
 }
 
-function setPropertyValue(id, nodeName, contextId, propIRI, propLabel, val, valLabel, datatype, lang, silent){
+function setPropertyValue(id, nodeName, contextId, propIRI, propLabel, val, valLabel, datatype, lang, silent, exclude){
     exitGroupBy(id);
 
   if(propIRI) propIRI = deSanitizeLabel(propIRI);
@@ -2080,7 +2647,7 @@ function setPropertyValue(id, nodeName, contextId, propIRI, propLabel, val, valL
   //getFocus(query).append(p);
 }
 
-function addPropertyFacet(id, prop, propLabel, val, valLabel, datatype, lang, silent){
+function addPropertyFacet(id, prop, propLabel, val, valLabel, datatype, lang, silent, exclude){
   exitGroupBy(id);
   if(prop) prop = deSanitizeLabel(prop);
   if(val) val = deSanitizeLabel(val);
@@ -2088,6 +2655,7 @@ function addPropertyFacet(id, prop, propLabel, val, valLabel, datatype, lang, si
   p.attr('class', id);
   p.attr('iri', prop);
   p.attr('label', propLabel);
+  if(exclude) p.attr('exclude', 'yes');
   if(val){
       var v = $.createElement('value');
       v.attr('label', valLabel);
@@ -2111,7 +2679,7 @@ function addPropertyFacet(id, prop, propLabel, val, valLabel, datatype, lang, si
   if(!silent) doQuery(getQueryText());
 }
 
-function addPropertyOfFacet(id, prop, propLabel, val, valLabel, datatype, lang, silent){
+function addPropertyOfFacet(id, prop, propLabel, val, valLabel, datatype, lang, silent, exclude){
     exitGroupBy(id);
 
   if(prop) prop = deSanitizeLabel(prop);
@@ -2120,6 +2688,7 @@ function addPropertyOfFacet(id, prop, propLabel, val, valLabel, datatype, lang, 
   p.attr('class', id);
   p.attr('iri', prop);
   p.attr('label', propLabel);
+  if(exclude) p.attr('exclude', 'yes');
   if(val){
       var v = $.createElement('value');
       v.attr('label', valLabel);
@@ -2143,7 +2712,7 @@ function addPropertyOfFacet(id, prop, propLabel, val, valLabel, datatype, lang, 
   if(!silent) doQuery(getQueryText());
 }
 
-function addClassFacet(id, clazz, label, silent){
+function addClassFacet(id, clazz, label, silent, exclude){
     exitGroupBy(id);
 
   //clazz = deSanitizeLabel(clazz);
@@ -2152,6 +2721,7 @@ function addClassFacet(id, clazz, label, silent){
   c.attr('class', id);
   c.attr('iri', clazz);
   c.attr('label', label);
+  if(exclude) c.attr('exclude', 'yes');
   //prop.attr('exclude', 'yes');
   //console.log('focus: ' + getFocus().attr('label'));
 
@@ -2165,16 +2735,36 @@ function addClassFacet(id, clazz, label, silent){
   if(!silent) doQuery(getQueryText());
 }
 
-function setGraphFacet(graph, graphLabel){
+function addExcludeFacet(id, silent){
+  getMainFocus().find('.'+id).attr('exclude', 'yes');
+  if(!silent) doQuery(getQueryText());
+}
+
+function removeExcludeFacet(id, silent){
+  getMainFocus().find('.'+id).removeAttr('exclude');
+  if(!silent) doQuery(getQueryText());
+}
+
+
+function setGraphFacet(graph, graphLabel, silent){
   setQueryGraph(graph, graphLabel);
-  doQuery(getQueryText());
+  if(!silent) doQuery(getQueryText());
 }
 
-function removeGraphFacet(){
+function stackGraphFacet(graph, graphLabel, silent){
+  stackQueryGraph(graph, graphLabel);
+  if(!silent) doQuery(getQueryText());
+}
+
+function removeGraphFacet(silent){
   clearQueryGraph();
-  doQuery(getQueryText());
+  if(!silent) doQuery(getQueryText());
 }
 
+function clearFacets(silent){
+  _root.children('query').children('property, property-of, class, value').remove();
+  if(!silent) doQuery(getQueryText());
+}
 
 //** FILE: main.js **/
 
@@ -2215,9 +2805,9 @@ var TAG_GRAPH = 'g';
 
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://myopenlink.net/DAV/home/sdmonroe/poc_draft.html";
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://poc.vios.network";
-var this_endpoint = 'http://dev.vios.network';
+var this_endpoint = 'https://dev.vios.network';
 
-var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qPage, qshowMePage, qTimeout, qNavType, qSubjectBadges, qVerticalChartHeaders, qViewType, qIsChart, qIsRollup, qShowIDN, qFilterRecordViewFields;
+var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qPage, qshowMePage, qTimeout, qNavType, qSubjectBadges, qVerticalChartHeaders, qViewType, qIsChart, qIsRollup, qShowIDN, qFilterRecordViewFields, qShowRecordRoles;
 
 var icon_folder_black = 'http://icon-park.com/imagefiles/folder_icon_black.png';
 var icon_file = 'http://myopenlink.net/DAV/home/sdmonroe/img/blank-file-xxl.png';
@@ -2265,6 +2855,7 @@ var SIZE_MIN_DIGITS = 7;
 var SIZE_MAX_DIGITS = 20;
 
 var isExpandSearch = $('#isSearchAllFields').parent().hasClass('active');
+var isContractSearch = $('#isExactLabelMatch').parent().hasClass('active');
 
 var labels = {};
 
@@ -2284,7 +2875,10 @@ var labels = {};
 
 function setShowIDN(b){
   showIDN = b;  
-  if(showIDN) $('#idnButton').text('Record');
+  if(showIDN) {
+    $('#idnButton').children('i').addClass('fa-barcode');
+    $('#idnButton').children('i').removeClass('fa-newspaper-o');
+  }
 }
 
 function toggleIDN(){
@@ -2296,11 +2890,13 @@ function toggleIDN(){
 
   }
   if(showIDN){
-    $('#idnButton').text('Record');
+    $('#idnButton').children('i').addClass('fa-barcode');
+    $('#idnButton').children('i').removeClass('fa-newspaper-o');
     //detailResultsColumnWidths();
   }
   else {
-    $('#idnButton').text('IDN');
+    $('#idnButton').children('i').removeClass('fa-barcode');
+    $('#idnButton').children('i').addClass('fa-newspaper-o');
     //resetColumnWidths();
   }
   describe(undefined, $('#angular_recordViewer').attr('iri') );
@@ -2415,9 +3011,20 @@ function bookmark(){
         linkOut(short_url);
       });
       */
-      linkOut('http://data.vios.network/bookmark/1/bookmarks.vspx?URL='+short_url+'&TITLE='+document.title);
+      linkOut('https://data.vios.network/bookmark/1/bookmarks.vspx?URL='+short_url+'&TITLE='+document.title);
     });
 }
+
+// USER PREFERENCES
+
+var isTableStriped = localStorage.getItem('table.isStripped') == 'true';
+var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+var isSubjectElf = localStorage.getItem('contents.isSubjectElf') == 'true';
+var isUseShortcuts = localStorage.getItem('ui.useShortcuts') == 'true';
+var sponger = localStorage.getItem('sponger');
+var referrerAddress = localStorage.getItem('user.referrerAddress');
+
+
 
 function init(){
     fct_init(); // this method must be the first method called by the implementation of the fct_ framework
@@ -2448,6 +3055,11 @@ function init(){
         localStorage.setItem('orientationType', orientationType); // attempt to claim memory before cache uses it all
         localStorage.setItem('colSz.'+screenSz, colSz); // attempt to claim memory before cache uses it all
         localStorage.setItem('SIZE_RESULT_SET.'+screenSz, SIZE_RESULT_SET); // attempt to claim memory before cache uses it all
+
+
+        if(!sponger || sponger.length <= 0){
+          sponger = 'linkeddata.uriburner.com';
+        }
       }
       catch(e){
 
@@ -2455,6 +3067,12 @@ function init(){
 
 
 //************************************//
+
+
+        link = document.createElement('script');
+        link.type = 'application/javascript';
+        link.src = getProxyEndpoint('https://www.myersdaily.org/joseph/javascript/md5.js');
+        //document.head.appendChild(link);
 
     if(!document.getElementById('id2')) { 
         /*var link = document.createElement('link');
@@ -2478,10 +3096,17 @@ function init(){
         link.id = 'id2';
         link.rel = 'stylesheet';
         link.type = 'text/css';
-        link.href = 'http://data.vios.network/DAV/home/vios/dev/css/vios.css';
-        document.head.appendChild(link);
+        link.href = 'https://data.vios.network/DAV/home/vios/dev/css/vios.css';
+        //document.head.appendChild(link);
     }  
 
+
+        link = document.createElement('meta');
+        link.id = 'metaKeywords';
+        link.name = 'keywords';
+        document.head.appendChild(link);
+
+/*
         link = document.createElement('script');
         link.type = 'text/javascript';
         link.src = 'http://data.vios.network/DAV/home/vios/js/solid-auth-client.bundle.js';
@@ -2506,12 +3131,22 @@ function init(){
         link.type = 'text/javascript';
         link.src = 'http://data.vios.network/DAV/home/vios/js/jquery.capslockstate.js';
         document.head.appendChild(link);
+        */
 
         link = document.createElement('script');
         link.type = 'text/javascript';
         link.src = 'https://demo.flatlogic.com/sing-app/angular/profile-profile-module.js';
         document.head.appendChild(link);
 
+        link = document.createElement('script');
+        link.type = 'text/javascript';
+        link.src = 'https://demo.flatlogic.com/sing-app/angular/charts-charts-module.js';
+        document.head.appendChild(link);
+
+        link = document.createElement('script');
+        link.type = 'text/javascript';
+        link.src = 'https://demo.flatlogic.com/sing-app/angular/default~charts-charts-module~core-core-elements-module~dashboard-dashboard-module~forms-forms-module~65277faf.js';
+        document.head.appendChild(link);
 /*
         link = document.createElement('script');
         link.type = 'application/javascript';
@@ -2531,6 +3166,11 @@ function init(){
 
 
 // Q&D data canvas ******************//
+
+  $('.la-arrow-left').removeClass('hide');
+  $('.la-arrow-left').parent().addClass('hide');
+  $('.la-arrow-right').removeClass('hide');
+  $('.la-arrow-right').parent().addClass('hide');
 
 
   //$('body').attr('oncontextmenu', 'return false;');
@@ -2571,11 +3211,79 @@ function init(){
   // ***** END TODO
 
 //$('#isSearchAllFields').parent().append('to <span class="badge badge-info">34523</span>');
+
+
+var nearByButton = $.createElement('label');
+nearByButton.addClass('btn');
+nearByButton.addClass('hide');
+nearByButton.addClass('btn-primary');
+nearByButton.append('<input id="nearByButton" type="checkbox" ></input><i class="fa fa-map-marker fa-lg"></i>');
+
+$('#isSearchAllFields').parent().after(nearByButton);
+setTitleOnElement(nearByButton, 'Nearby Contents Only', 'bottom');
+
+
+var timePickerButton = $.createElement('label');
+timePickerButton.addClass('btn');
+timePickerButton.addClass('hide');
+timePickerButton.addClass('btn-primary');
+timePickerButton.append('<input id="timePickerButton" type="checkbox" ></input><i class="fa fa-calendar fa-lg"></i>');
+
+$('#isSearchAllFields').parent().after(timePickerButton);
+setTitleOnElement(timePickerButton, 'Time-box Contents', 'bottom');
+
+
+var exactMatchButton = $.createElement('label');
+exactMatchButton.addClass('btn');
+exactMatchButton.addClass('btn-primary');
+exactMatchButton.append('<input id="isExactLabelMatch" type="checkbox" ></input><i class="fa fa-search-plus fa-lg"></i>');
+
+exactMatchButton.on('click', function(e){
+  isContractSearch = !exactMatchButton.hasClass('active'); 
+  doQuery(getQueryText());
+});
+
+$("#isSearchAllFields").parent().contents().filter(function(){
+    return (this.nodeType == 3);
+}).remove();
+
+$('#isSearchAllFields').parent().after(exactMatchButton);
+setTitleOnElement($('#isSearchAllFields').parent().next(), 'Narrow Search', 'bottom');
+
+
+$('#isSearchAllFields').parent().children('span').remove();
+$('#isSearchAllFields').parent().append('<i class="fa fa-search-minus fa-lg"></i>');
+setTitleOnElement($('#isSearchAllFields').parent(), 'Expand Search', 'bottom');
+
+
   isExpandSearch = $('#isSearchAllFields').parent().hasClass('active');
   $('#isSearchAllFields').parent().click(function(e){
     isExpandSearch = !$('#isSearchAllFields').parent().hasClass('active');
     doQuery(getQueryText());
   });
+
+
+
+
+$("#isDebug").parent().contents().filter(function(){
+    return (this.nodeType == 3);
+}).remove();
+
+$('#isDebug').parent().children('span').remove();
+$('#isDebug').parent().append('<i class="fa fa-bug fa-lg"></i>');
+setTitleOnElement($('#isDebug').parent(), 'Enable Debug', 'bottom');
+
+
+$("#isCache").parent().contents().filter(function(){
+    return (this.nodeType == 3);
+}).remove();
+
+$('#isCache').parent().children('span').remove();
+$('#isCache').parent().append('<i class="fa fa-hdd-o fa-lg"></i>');
+setTitleOnElement($('#isCache').parent(), 'Enable Cache', 'bottom');
+
+
+$('#keywords').attr('placeholder', 'Press Ctrl key or click here to enter keywords');
 
       /*
       $('#favButton').click(function(e) {
@@ -2628,16 +3336,21 @@ function init(){
   });
 */
 
-      var copyButton = '<li class="nav-item d-none d-md-block"><a class="nav-link pl-2 text-info" ><i id="copySPARQL" onmouseout="$(\'#copySPARQL\').tooltip(\'hide\');$(\'#copySPARQL\').attr(\'data-original-title\', \'Copy SPARQL to clipboard\');$(\'#copySPARQL\').tooltip();" '+buildTitle('Copy SPARQL to clipboard')+' onclick="javascript:$(\'#copySPARQL\').tooltip(\'hide\');copySPARQL(); $(\'#copySPARQL\').attr(\'data-original-title\', \'Copied\');$(\'#copySPARQL\').tooltip(\'show\');" style="cursor:pointer;" class="la la-copy fa-lg"></i></a></li>'; //la-heart-o
+      var copyButton = '<li class="nav-item d-none d-md-block"><a id="copyQuery" vocab="http://schema.org/" typeOf="FindAction" class="nav-link pl-2 text-inverse" >';
+      copyButton += '<span id="query" class="hide" property="query"></span>';
+      copyButton += '<span id="queryDescription" class="hide" property="http://purl.org/dc/terms/description"></span>';
+      copyButton += '<span id="queryTarget" class="hide" property="target"></span>';
+      copyButton += '<span id="queryUrl" class="hide"></span>';
+      copyButton += '<span id="queryKeywords" property="object" class="hide"></span>';
+      copyButton += '<span id="queryLocation" property="location" class="hide"></span>';
+      copyButton += '<i id="copySPARQL" onmouseout="$(\'#copySPARQL\').tooltip(\'hide\');$(\'#copySPARQL\').attr(\'data-original-title\', \'Copy SPARQL to clipboard\');$(\'#copySPARQL\').tooltip();" '+buildTitle('Copy SPARQL to clipboard')+' onclick="javascript:$(\'#copySPARQL\').tooltip(\'hide\');copySPARQL(); $(\'#copySPARQL\').attr(\'data-original-title\', \'Copied\');$(\'#copySPARQL\').tooltip(\'show\');" style="cursor:pointer;" class="la la-copy fa-lg"></i>';
+      copyButton += '</a></li>'; //la-heart-o
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(copyButton);
 
+      var libraryButton = '<li class="nav-item d-none d-md-block"><a '+buildTitle('Enter Library')+' onclick="javascript:doLoadLibraries()" class="hide nav-link pl-2 text-warning" id="libraryButton" ><i class="la la-sign-in la-lg"></i></a></li>'; //la-heart-o
 
-
-
-      var bountyButton = '<li class="nav-item d-none d-md-block"><a '+buildTitle('Publish a Bounty')+' onclick="javascript:save($(\'#keywords\').text()); $(\'keywords\').text(\'\');" class="nav-link pl-2 text-info" id="favButton" ><i class="la la-bullhorn la-lg text-default"></i></a></li>'; //la-heart-o
-
-      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(bountyButton);
+      $('.page-controls > .navbar-nav .la-chain').parent().parent().prev().before(libraryButton);
 
 /*
   var fastForwardButton = '';
@@ -2671,20 +3384,20 @@ function init(){
 
 */
 
-      var bookmarkButton = '<li class="nav-item d-none d-md-block"><a onclick="javascript:bookmark();" class="nav-link pl-2 text-info" id="favButton" ><i class="la la-bookmark la-lg text-info"></i></a></li>'; //la-heart-o
+      var bookmarkButton = '<li class="nav-item d-none d-md-block"><a onclick="javascript:bookmark();" class="nav-link pl-2 text-inverse" id="favButton" ><i class="la la-bookmark la-lg"></i></a></li>'; //la-heart-o
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(bookmarkButton);
 
 
-      var glossaryButton = '<li class="nav-item d-none d-md-block"><a  id="glossaryButton" '+buildTitle('Find a Glossary')+' class="hide nav-link pl-2 text-info" onclick="javascript: isExpandSearch = true; var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/Glossary106420781\', \'Glossary\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\'); takeMainFocus(pid);" style="cursor:pointer;"><i class="la la-book la-lg text-info"></i></a></li>'; //la-heart-o
+      var glossaryButton = '<li class="nav-item d-none d-md-block"><a  id="glossaryButton" '+buildTitle('Find a Glossary')+' class="hide nav-link pl-2 text-info" onclick="javascript: isExpandSearch = true; filterRecordViewFields = true; takeMainFocus(ID_QUERY); clearFacets(true); var cid = createId(); setQueryText($(\'#keywords\').val()); addClassFacet(cid, \'http://dbpedia.org/class/yago/Glossary106420781\', \'Glossary\', true);  var pid = createId(); addPropertyFacet(pid, \'http://dbpedia.org/property/content\', \'content\');" style="cursor:pointer;"><i class="la la-book la-lg text-info"></i></a></li>'; //la-heart-o
 
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(glossaryButton);
 
 
 
 
-      var demoButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" href="http://vio.sn/c/9LK72AN" class="nav-link pl-2 text-info" id="demoButton" ><i class="la la-map-signs la-lg text-info"></i></a></li>'; //la-heart-o
-
+      var demoButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" class="hide nav-link pl-2 text-warning" id="helpButton" '+buildTitle('Click WWW on the next canvas to visit the demo smart folders')+' onclick="javascript:clearKeywords(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(true); clearQueryGraph(true); doSetLibrary(); checkLibraries();"><i class="la la-question la-lg"></i></a></li>'; //la-heart-o la-map-signs
+//href="http://vio.sn/c/9LK72AN"
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(demoButton);
 
 
@@ -2699,6 +3412,7 @@ function init(){
   //$('a#dataSpaceMenu').parent().children('.dropdown-menu').prepend('<li><a id="dataspace-dbp" class="dropdown-item" onclick="selectDataspace(\'http://poc.vios.network/proxyDBPedia\', \'dbpedia\')">Dbpedia</a></li>');
   //$('a#dataSpaceMenu').parent().children('.dropdown-menu').prepend('<li><a id="dataspace-vios" class="dropdown-item" onclick="selectDataspace(\'http://poc.vios.network/proxy/-start-http://data.vios.network-end-\', \'vios\')">VIOS</a></li>');
 
+
   $('#permalink').on('mouseover', function(e){
     get_short_url($('#permalink').attr('href'), function(short_url) {
         $('#permalink').attr('href',  short_url); //+ '&idCt=' + idCt
@@ -2711,22 +3425,47 @@ function init(){
     });
   });
 
+  $('.la-arrow-right').parent().on('click', function(e){
+    if(getMainFocus().attr('class') == ID_QUERY){
+
+    }
+    else {
+      var pid = createId();
+      if(getMainFocus().prop('nodeName').toLowerCase() == 'property-of') addPropertyOfFacet(pid, getMainFocus().attr('iri'), getMainFocus().attr('label'), undefined, undefined, undefined, undefined, true);
+      else addPropertyFacet(pid, getMainFocus().attr('iri'), getMainFocus().attr('label'), undefined, undefined, undefined, undefined, true);
+      takeMainFocus(pid);
+    }
+  });
+
 
   selectMenuItem('queryTimeout', '30000');
 
+  $('dashboard').append('<div class="row" id="angular_libraries"></div>');
   $('dashboard').append('<div class="row" id="angular_breadcrumbs"></div>');
-  $('dashboard').append('<div class="row" id="angular_facets"></div>');
   $('dashboard').append('<div class="row" id="dataCanvas"></div>');
   $('#queryTimeout').val('30000');
 
-
-  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doFindDataspaces()">Find Dataspaces</a></li>');
-  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" href="http://data.vios.network/ods">Create Dataspace</a></li>');
-  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doRemoveDataspace()">Remove Dataspace</a></li>');
-
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').children().children().text('Add');
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doFindDataspaces()">Find</a></li>');
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" href="http://data.vios.network/ods">Create</a></li>');
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doRemoveDataspace()">Remove</a></li>');
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li class="dropdown-divider"></li>');
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').append('<li><a class="dropdown-item" onclick="doImportLibrary()">Import Library</a></li>');
 
 
   $('#keywords').css('padding-left', '10px');
+
+
+$('#isSearchAllFields').parent().removeClass('btn-gray');
+$('#isCache').parent().removeClass('btn-gray');
+$('#isDebug').parent().removeClass('btn-gray');
+
+$('#isSearchAllFields').parent().addClass('btn-primary');
+$('#isCache').parent().addClass('btn-inverse');
+$('#isDebug').parent().addClass('btn-inverse');
+
+
+//$('input#keywords').parent().css('width', '80%');
 
     var clearKeywords = $('span.clear-data').filter(function() {return $(this).text().indexOf('Keywords') >= 0;});
     var clearLibrary = $('span.clear-data').filter(function() {return $(this).text().indexOf('Library') >= 0;});
@@ -2755,8 +3494,27 @@ function init(){
     //ict.addClass('fa-times-circle');
     //icl.addClass('fa-times-circle');
 
+    $('#keywords').parent().css('width', '100%');
+    $('#keywords').next().css('margin-right', '1em');
+
     clearKeywords.text('Clear Keywords');
-    clearLibrary.text('Clear Library');
+    clearKeywords.css('white-space', 'nowrap');
+    clearKeywords.parent().removeClass('btn-default');
+    clearKeywords.parent().addClass('btn-danger');
+
+    clearLibrary.text('Exit Library');
+    clearLibrary.css('white-space', 'nowrap');
+    clearLibrary.parent().removeClass('btn-default');
+    clearLibrary.parent().addClass('btn-danger');
+
+    clearLibrary.parent().on('click', function(e){
+      if(!getQueryGraph() || getQueryGraph().length <= 0) {
+        //getMainFocus().children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]').remove();
+        //getMainFocus().children('class[iri="dsn:data.vios.network/o/Origin"]').remove();
+        //return;
+      }
+      checkLibraries();
+    });
 
     //ict.css('font-family', 'Montserrat, sans-serif');
     //icl.css('font-family', 'Montserrat, sans-serif');
@@ -2837,15 +3595,15 @@ gbcol += '<div _ngcontent-c4="" class="mb-sm">';
 
 gbcol += '<button _ngcontent-c4="" class="btn btn-gray" onclick="javascript:clearKeywords();doQuery($(\'#keywords\').val())">';
             /*gbcol += '<i _ngcontent-c4="" class="fa fa-ban text-danger"></i>';
-            gbcol += ' <i _ngcontent-c4="" class="fa fa-font text"></i>';*/
+            gbcol += ' <i _ngcontent-c4="" class="fa fa-newspaper-o text"></i>';*/
             gbcol += 'Clear keywords';
           gbcol += '</button>';
  gbcol += '&nbsp;&nbsp;&nbsp;';
 
-gbcol += '<button _ngcontent-c4="" class="btn btn-gray" onclick="javascript:clearQueryGraph();doQuery($(\'#keywords\').val())">';
+gbcol += '<button _ngcontent-c4="" class="btn btn-gray" onclick="javascript:clearQueryGraph(true); checkLibraries(); doQuery($(\'#keywords\').val())">';
             /*gbcol += '<i _ngcontent-c4="" class="fa fa-ban text-danger"></i>';
             gbcol += ' <i _ngcontent-c4="" class="fa fa-bank text"></i>';*/
-            gbcol += 'Clear libraries';
+            gbcol += 'Exit Library';
           gbcol += '</button>';
 
           gbcol += '</div>';
@@ -2864,19 +3622,11 @@ gbcol += '</app-navbar>';
 
 
 
-gbcol = '<div class="col-lg-12 col-xl-12 col-12"><ul class="steps" id="angular_breadcrumbBar">';
+gbcol = '<div id="angular_libraryBarContainer" class="col-lg-12 col-xl-12 col-12"><ul class="m-0 libraries" id="angular_libraryBar">';
+gbcol += '</ul></div>';
+$('#angular_libraries').append(gbcol);
 
-
-/*
-  gbcol += '<li><a  title=""><em>keywords</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-primary btn-block text-ellipsis" onclick="javascript:takeMainFocus(\'0\')">Et nequ a quam turpis duisi</button></li>';
-  gbcol += '<li><a  title=""><em>distributor</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-outline-default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\'0\')">'+VALUE_ANON_NODE+'</button></li>';
-//  gbcol += '<li><a  title=""><em>Step 2: XXXXXXXX</em><span>Et nequ a quam turpis duisi</span></a></li>';
-  gbcol += '<li class="current"><a  title=""><em>Step 3: XXXXXXXX</em><span>Et nequ a quam turpis duisi</span></a></li>';
-  gbcol += '<li><a  title=""><em>keywords</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\'0\')">metropolis</button></li>';
-  gbcol += '<li><a  title=""><em>distributor</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-outline-default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\'0\')">'+VALUE_ANON_NODE+'</button></li>';
-
-*/
-
+gbcol = '<div id="angular_breadcrumbBarContainer" class="col-lg-12 col-xl-12 col-12"><ul class="m-0 steps" id="angular_breadcrumbBar">';
 gbcol += '</ul></div>';
 $('#angular_breadcrumbs').append(gbcol);
 
@@ -2901,17 +3651,29 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
       gbcol += '<li class="nav-item active">';
         gbcol += '<a id="edit" class="nav-link" data-target="#">Edit</a>';
       gbcol += '</li>';
-      gbcol += '<li class="nav-item active">';
-        gbcol += '<a id="view" class="nav-link" data-target="#">View</a>';
+      gbcol += '<li class="nav-item dropdown active">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="viewDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'View';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="viewDropdown">';
+          gbcol += '<a class="dropdown-item" data-target="#">Owner Profile</a>';
+        gbcol += '</div>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
       gbcol += '</li>';
-      gbcol += '<li class="nav-item">';
-        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG Cluster</a>';
+      gbcol += '<li class="nav-item dropdown">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="altDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'Alt';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="altDropdown">';
+        gbcol += '<a id="ggg" class="ggg-toolbar-item dropdown-item" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
+        gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="www-toolbar-item dropdown-item" data-target="#" onclick="linkOut()">WWW</a>';
+        gbcol += '<div class="dropdown-divider"></div>';
+        gbcol += '<a class="libraryLink dropdown-item" data-target="#">Library</a>';
+        gbcol += '</div>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
-        gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
       gbcol += '</li>';
       /*
       gbcol += '<li class="nav-item">';
@@ -2946,7 +3708,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a class="nav-link disabled" data-target="#">Edit</a>';
       gbcol += '</li>';
     gbcol += '</ul>';
-      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">'+(showIDN ? 'Record' : 'IDN')+'</button>';
+      gbcol += '<button id="idnButton" style="margin-right:4px" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();"><i class="fa fa-lg '+(showIDN ? 'fa-barcode' : 'fa-newspaper-o')+'"></i></button>';
 //    gbcol += '<form class="form-inline my-2 my-lg-0">';
       //gbcol += '<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">';
 //    gbcol += '</form>';
@@ -2954,7 +3716,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
 gbcol += '</nav>';
 
 
-            gbcol += '<div id="angular_recordViewer" class="embed-responsive">'; //embed-responsive-1by1
+            gbcol += '<div id="angular_recordViewer" class="embed-responsive table-responsive">'; //embed-responsive-1by1
 
 
 //gbcol += '<iframe id="describe" class="iframe embed-responsive-item" src="" height="100%"></iframe>';
@@ -3008,7 +3770,7 @@ $('#dataCanvas').append(gbcol);
 
 
 gbcol = '<div id="groupByColumn" class="hide col-xl-'+SIZE_GROUP_BY+' col-lg-3 col-12">';
-gbcol += '<div id="facetCollectorWidgetContainer" class="short-div"><section class="widget bg-info text-white focusHeaderSec" widget>';
+gbcol += '<div id="facetCollectorWidgetContainer" class="short-div"><section class="mb-0 widget bg-info text-white focusHeaderSec" widget>';
 gbcol += '<header id="focusHeader">';
         gbcol += '<h3 id="angular_focusCollector" class="fw-semi-bold">'+LABEL_ROOT+'</h3>';
 
@@ -3034,7 +3796,7 @@ gbcol += '<div class="row"><span style="padding-right:3em">thisIsAFacet</span><b
 
                         gbcol += '</section></div>';
 
-gbcol += '<div id="recordsListWidgetContainer" class="short-div"><section class="widget" widget>';
+gbcol += '<div id="recordsListWidgetContainer" vocab="http://schema.org/" typeof="ItemList" class="short-div"><section class="widget" widget>';
 gbcol += '<header id="groupByHeader" style="cursor:pointer;" >';
         gbcol += '<h4 id="contentsListHeader" onclick="javascript: var p = getMainFocus().children(\'property, property-of\'); if(p && p.length > 0){doGroup(p.attr(\'iri\'), p.attr(\'label\'), p.prop(\'nodeName\').toLowerCase() == \'property-of\');}else {}"><span id="groupByCount" class="badge badge-info">0/0</span> '+GROUP_BY_NONE_LABEL+'</h4>';
         gbcol += '<div class="widget-controls">';
@@ -3065,7 +3827,7 @@ gbcol += '<header id="groupByHeader" style="cursor:pointer;" >';
 
 gbcol += '<div id="tabularResults" class="short-div hide"><section class="widget p-0" widget>';
 
-gbcol += '<header class="m-1" id="groupByTableHeader">';
+gbcol += '<header class="mr-1 mt-0 ml-0" id="groupByTableHeader">'; //mt-0 ml-0
         gbcol += '<h5>';
           gbcol += '<h4><span id="tableCount" class="badge badge-info">0/0</span> <span id="tableType"  class="fw-semi-bold">'+DISCOVER_LABEL+'</span> <span id="tableSubType">'+((isChart()) ? TABLE_HEADER_LABEL_CHART : TABLE_HEADER_LABEL_DETAILS)+'</span></h4>';
         gbcol += '</h5>';
@@ -3123,7 +3885,8 @@ gbcol += '</td></tr></table>';
 
 */
 
-gbcol += '<table id="resultsTable" class=" table table-hover table-striped table-sm mt-sm m-0" width="100%" style="border:0px solid transparent; border-right:0px solid transparent;">';
+
+gbcol += '<table id="resultsTable" class=" table table-hover '+ ((isTableStriped) ?'table-striped' :'') +' table-sm mt-sm m-0" width="100%" style="border:0px solid transparent; border-right:0px solid transparent;">'; //table-striped
 gbcol += '<thead>';
 gbcol += '<tr>';
 gbcol += '<th>';
@@ -3216,17 +3979,27 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
       gbcol += '<li class="nav-item active">';
         gbcol += '<a id="edit" class="nav-link" data-target="#">Edit</a>';
       gbcol += '</li>';
-      gbcol += '<li class="nav-item active">';
-        gbcol += '<a id="view" class="nav-link" data-target="#">View</a>';
+      gbcol += '<li class="nav-item dropdown active">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="viewDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'View';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="viewDropdown">';
+          gbcol += '<a class="dropdown-item" data-target="#">Owner Profile</a>';
+        gbcol += '</div>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
       gbcol += '</li>';
-      gbcol += '<li class="nav-item">';
-        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
-      gbcol += '</li>';
-      gbcol += '<li class="nav-item">';
-        gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
+      gbcol += '<li class="nav-item dropdown">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="altDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'Alt';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="altDropdown">';
+        gbcol += '<a id="ggg" class="ggg-toolbar-item dropdown-item" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
+        gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="www-toolbar-item dropdown-item" data-target="#" onclick="linkOut()">WWW</a>';
+          gbcol += '<div class="dropdown-divider"></div>';
+          gbcol += '<a class="libraryLink dropdown-item" data-target="#">Library</a>';
+        gbcol += '</div>';
       gbcol += '</li>';
       /*
       gbcol += '<li class="nav-item">';
@@ -3261,7 +4034,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a class="nav-link disabled" data-target="#">Edit</a>';
       gbcol += '</li>';
     gbcol += '</ul>';
-      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">'+(showIDN ? 'Record' : 'IDN')+'</button>';
+      gbcol += '<button id="idnButton" style="margin-right:4px" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();"><i class="fa fa-lg '+(showIDN ? 'fa-barcode' : 'fa-newspaper-o')+'"></i></button>';
 //    gbcol += '<form class="form-inline my-2 my-lg-0">';
       //gbcol += '<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">';
 //    gbcol += '</form>';
@@ -3269,7 +4042,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
 gbcol += '</nav>';
 
 
-            gbcol += '<div id="angular_recordViewer" class="embed-responsive">'; //embed-responsive-1by1
+            gbcol += '<div id="angular_recordViewer" class="embed-responsive table-responsive">'; //embed-responsive-1by1
 
 
 //gbcol += '<iframe id="describe" class="iframe embed-responsive-item" src="" height="100%"></iframe>';
@@ -3326,13 +4099,20 @@ $('#dataCanvas').append(gbcol);
 
 gbcol = '<div id="showMeColumn" class="hide col-xl-'+SIZE_SHOW_ME+' col-lg-3 col-12"><section class="widget" widget>';
 gbcol += '<header id="showMeHeader">';
-        gbcol += '<h4><span id="showMeCount" class="badge badge-info">0/0</span>&nbsp;<span id="showMeMenuSelectLabel">Categories</span></h4>';
+        gbcol += '<h4 onmouseout="hideCTRLChoices()" onmouseover="showCTRLChoices();"><span id="showMeCount" class="badge badge-info">0/0</span>&nbsp;<span id="showMeMenuSelectLabel">Categories</span>';
+
+        gbcol += '&nbsp;<a '+buildTitle('Categories')+' onmouseover="$(\'#showMeMenuSelectLabel\').addClass(\'text-muted\')" onmouseout="$(\'#showMeMenuSelectLabel\').removeClass(\'text-muted\')" class="hide ctrl-select ctrl-select-c d-inline text-muted" onclick="selectMenuItem(\'showMeMenu\', VIEW_TYPE_CLASSES);">C&nbsp;</a>';
+        gbcol += '<a'+buildTitle('Fields')+' onmouseover="$(\'#showMeMenuSelectLabel\').addClass(\'text-muted\')" onmouseout="$(\'#showMeMenuSelectLabel\').removeClass(\'text-muted\')" class="hide ctrl-select ctrl-select-f d-inline text-muted" onclick="selectMenuItem(\'showMeMenu\', VIEW_TYPE_PROPERTIES);">F&nbsp;</a>';
+        gbcol += '<a'+buildTitle('Text')+' onmouseover="$(\'#showMeMenuSelectLabel\').addClass(\'text-muted\')" onmouseout="$(\'#showMeMenuSelectLabel\').removeClass(\'text-muted\')" class="hide ctrl-select ctrl-select-t d-inline text-muted" onclick="isExpandSearch = true;takeMainFocus(ID_QUERY);selectMenuItem(\'showMeMenu\', VIEW_TYPE_TEXT_PROPERTIES);selectMenuItem(\'groupByMenu\', GROUP_BY_TEXT_VALUE);">T&nbsp;</a>';
+        gbcol += '<a'+buildTitle('Roles')+' onmouseover="$(\'#showMeMenuSelectLabel\').addClass(\'text-muted\')" onmouseout="$(\'#showMeMenuSelectLabel\').removeClass(\'text-muted\')" class="hide ctrl-select ctrl-select-r d-inline text-muted" onclick="selectMenuItem(\'showMeMenu\', VIEW_TYPE_PROPERTIES_IN);">R&nbsp;</a>';
+        gbcol += '<a'+buildTitle('Libraries')+' onmouseover="$(\'#showMeMenuSelectLabel\').addClass(\'text-muted\')" onmouseout="$(\'#showMeMenuSelectLabel\').removeClass(\'text-muted\')" class="hide ctrl-select ctrl-select-l d-inline text-muted" onclick="selectMenuItem(\'showMeMenu\', VIEW_TYPE_GRAPHS);">L&nbsp;</a>';
+        gbcol += '</h4>';
 
 
 
         gbcol += '<div class="widget-controls">';
           //gbcol += '<a data-target="#"><i class="fa fa-refresh"></i></a>';
-          gbcol += '<a data-target="#" id="alignButton" class="disabled" ><i class="glyphicon glyphicon-filter text-secondary" '+buildTitle('Align this subject to its parent smart folders')+'></i></a>';
+          gbcol += '<a data-target="#" id="alignButton" class="disabled" ><i class="fa fa-filter text-secondary" '+buildTitle('Align this subject to its parent smart folders')+'></i></a>';
           gbcol += '<a data-target="#" id="showMeLeftButton" '+buildTitle('')+' class="hide" onclick="javascript:showMePageLeft()"><i class="glyphicon glyphicon-backward text-secondary"></i></a>';
           gbcol += '<a data-target="#" id="showMeRightButton" '+buildTitle('')+' class="hide" onclick="javascript:showMePageRight()"><i class="glyphicon glyphicon-forward text-secondary"></i></a>';
 //          gbcol += '<a data-widgster="close" data-target="#"><i class="glyphicon glyphicon-remove"></i></a>';
@@ -3395,17 +4175,27 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
       gbcol += '<li class="nav-item active">';
         gbcol += '<a id="edit" class="nav-link" data-target="#">Edit</a>';
       gbcol += '</li>';
-      gbcol += '<li class="nav-item active">';
-        gbcol += '<a id="view" class="nav-link" data-target="#">View</a>';
+      gbcol += '<li class="nav-item dropdown active">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="viewDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'View';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="viewDropdown">';
+          gbcol += '<a class="dropdown-item" data-target="#">Owner Profile</a>';
+        gbcol += '</div>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
       gbcol += '</li>';
-      gbcol += '<li class="nav-item">';
-        gbcol += '<a id="ggg" class="nav-link" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
-      gbcol += '</li>';
-      gbcol += '<li class="nav-item">';
-        gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="nav-link" data-target="#" onclick="linkOut()">WWW</a>';
+      gbcol += '<li class="nav-item dropdown">';
+        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="altDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'Alt';
+        gbcol += '</a>';
+        gbcol += '<div class="dropdown-menu" aria-labelledby="altDropdown">';
+        gbcol += '<a id="ggg" class="ggg-toolbar-item dropdown-item" '+buildTitle('Fetch record from the Giant Global Graph using URIBurner service')+' data-target="#" onclick="describe(\'recordNavBar\',  $(\'#angular_recordViewer\').attr(\'iri\'), true )"><i></i>GGG</a>';
+        gbcol += '<a id="www" '+buildTitle('Fetch document from the World Wide Web')+' class="www-toolbar-item dropdown-item" data-target="#" onclick="linkOut()">WWW</a>';
+          gbcol += '<div class="dropdown-divider"></div>';
+          gbcol += '<a class="libraryLink dropdown-item" data-target="#">Library</a>';
+        gbcol += '</div>';
       gbcol += '</li>';
       /*
       gbcol += '<li class="nav-item">';
@@ -3440,7 +4230,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a class="nav-link disabled" data-target="#">Edit</a>';
       gbcol += '</li>';
     gbcol += '</ul>';
-      gbcol += '<button id="idnButton" style="margin-right:1em" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();">'+(showIDN ? 'Record' : 'IDN')+'</button>';
+      gbcol += '<button id="idnButton" style="margin-right:4px" class="btn btn-secondary my-2 my-sm-0" onclick="javascript:toggleIDN();"><i class="fa fa-lg '+(showIDN ? 'fa-barcode' : 'fa-newspaper-o')+'"></i></button>';
 //    gbcol += '<form class="form-inline my-2 my-lg-0">';
       //gbcol += '<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">';
 //    gbcol += '</form>';
@@ -3448,7 +4238,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
 gbcol += '</nav>';
 
 
-            gbcol += '<div id="angular_recordViewer" class="embed-responsive">'; //embed-responsive-1by1
+            gbcol += '<div id="angular_recordViewer" class="embed-responsive table-responsive">'; //embed-responsive-1by1
 
 
 //gbcol += '<iframe id="describe" class="iframe embed-responsive-item" src="" height="100%"></iframe>';
@@ -3523,8 +4313,8 @@ gbcol += '<div class="modal fade" id="helpModal" tabindex="-1" role="dialog" ari
         gbcol += '</button>';
       gbcol += '</div>';
       gbcol += '<div class="modal-body">';
-      gbcol += '  <p><i>Group-by</i>: Click the pinch icon <i class="la la-compress"></i> to group contents by <a href="http://bit.ly/2tRFCX8">Field</a> or <a href="http://bit.ly/2tQ29DZ">Role</a></p>';
-      gbcol += '  <p><i>Preview</i>: Click the expand icon <i class="la la-bars"></i> to preview the smart folder contents</p>';
+      gbcol += '  <p><i>Group-by</i>: Click the pinch icon <i class="la la-compress text-secondary"></i> to group contents by <a href="http://bit.ly/2tRFCX8">Field</a> or <a href="http://bit.ly/2tQ29DZ">Role</a></p>';
+      gbcol += '  <p><i>Preview</i>: Click the expand icon <i class="la la-ellipsis-v text-secondary"></i> to preview the smart folder contents</p>';
       gbcol += '  <p><i>UI Modes</i>: Press the <i>Ctrl</i> key to toggle Command and Edit Modes';
       gbcol += '  </p><p>';
       gbcol += '  In Commmand Mode:';
@@ -3547,8 +4337,23 @@ gbcol += '<div class="modal fade" id="helpModal" tabindex="-1" role="dialog" ari
       gbcol += '  </li><li>';
       gbcol += '  Hold down <i>1</i> (number one) key, then click Field checkbox to prepend Field to filter collector';
       gbcol += '  </li><li>';
+      gbcol += '  Hold down <i>X</i> key, then add CTRL filter to exclude the choosen item';
+      gbcol += '  </li><li>';
+      gbcol += '  Press <i>Return</i> or <i>Enter</i> keys to clear the data canvas';
+      gbcol += '  </li><li>';
       gbcol += '  Press <i>H</i> key to view this menu';
       gbcol += '  </li></ul>';
+
+      gbcol += '  <p><i>Legend:</i></p>';
+      gbcol += '  <p _ngcontent-c13="">';
+//      gbcol += '  <span _ngcontent-c13="" class="badge badge-default">Default</span>';
+      gbcol += '  <span _ngcontent-c13="" class="badge badge-primary">Filter</span>';
+      gbcol += '  <span _ngcontent-c13="" class="badge badge-info">Navigation</span>';
+//      gbcol += '  <span _ngcontent-c13="" class="badge badge-success">Success</span>';
+      gbcol += '  <span _ngcontent-c13="" class="badge badge-warning">Guidance</span>';
+      gbcol += '  <span _ngcontent-c13="" class="badge badge-danger">Sensitive</span>';
+      gbcol += '  </p>';
+
       gbcol += '  <p>';
       gbcol += '  '+newLabel+'See <a href="https://medium.com/@sdmonroe/vios-network-99488f5bf29d">this article</a> for more tips';
       gbcol += '  </p>';
@@ -3570,6 +4375,132 @@ if(!hideHelpOnEnter){
   $('#helpModal').modal({});
 }
 
+
+gbcol = '<div id="idn_content" class="hide" extra-search-results="">';
+/*   gbcol += '<ol class="breadcrumb">';
+      gbcol += '<li class="breadcrumb-item">YOU ARE HERE</li>';
+      gbcol += '<li class="breadcrumb-item active">Search Results</li>';
+   gbcol += '</ol>';
+   gbcol += '<h1 class="page-title">Matching - <span class="fw-semi-bold">Results</span></h1>';*/
+   gbcol += '<div class="clearfix">';
+      gbcol += '<div class="btn-toolbar">';
+         gbcol += '<div class="btn-group">';
+            gbcol += '<a class="btn dropdown-toggle btn-default" data-toggle="dropdown" aria-expanded="false"> Popular <span class="caret"></span></a>';
+            gbcol += '<ul class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 33px, 0px); top: 0px; left: 0px; will-change: transform;">';
+               gbcol += '<li><a class="dropdown-item" href="#">All</a></li>';
+               gbcol += '<li><a class="dropdown-item" href="#">Popular</a></li>';
+               gbcol += '<li><a class="dropdown-item" href="#">Interesting</a></li>';
+               gbcol += '<li><a class="dropdown-item" href="#">Latest</a></li>';
+            gbcol += '</ul>';
+         gbcol += '</div>';
+         gbcol += '<div class="btn-group ml-xs">';
+            gbcol += '<a class="btn dropdown-toggle btn-default" data-toggle="dropdown" aria-expanded="false"> All Time <span class="caret"></span></a>';
+            gbcol += '<ul class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 33px, 0px); top: 0px; left: 0px; will-change: transform;">';
+               gbcol += '<li><a class="dropdown-item" href="#">Last 24h</a></li>';
+               gbcol += '<li><a class="dropdown-item" href="#">Last Month</a></li>';
+               gbcol += '<li><a class="dropdown-item" href="#">Last Year</a></li>';
+            gbcol += '</ul>';
+         gbcol += '</div>';
+         gbcol += '<div class="btn-group ml-auto"><button class="btn btn-gray active" type="button"><i class="fa fa-th-list"></i></button><button class="btn btn-gray" type="button"><i class="fa fa-th-large"></i></button></div>';
+      gbcol += '</div>';
+   gbcol += '</div>';
+   gbcol += '<div class="row">';
+      gbcol += '<div class="col-lg-3 order-lg-2">';
+/*         gbcol += '<h5>Results <span class="fw-semi-bold">Filtering</span></h5>';
+         gbcol += '<p class="text-muted fs-mini">Listed content is categorized by the following groups:</p>';*/
+         gbcol += '<ul class="nav nav-pills nav-stacked flex-column search-result-categories mt">';
+            gbcol += '<li class="nav-item"><a class="nav-link" href="#"> Hot Ideas <span class="badge badge-pill badge-secondary float-right">34</span></a></li>';
+            gbcol += '<li class="nav-item"><a class="nav-link" href="#"> Latest Pictures <span class="badge badge-pill badge-secondary float-right">9</span></a></li>';
+            gbcol += '<li class="nav-item"><a class="nav-link" href="#">tags of Day</a></li>';
+            gbcol += '<li class="nav-item"><a class="nav-link" href="#"> Recent Movies </a></li>';
+            gbcol += '<li class="nav-item"><a class="nav-link" href="#">Globals <span class="badge badge-pill badge-secondary float-right">18</span></a></li>';
+         gbcol += '</ul>';
+      gbcol += '</div>';
+      gbcol += '<div class="col-lg-9 order-lg-1">';
+         gbcol += '<p class="search-results-count">About 94 700 000 (0.39 sec.) results</p>';
+         gbcol += '<section class="search-result-item">';
+            gbcol += '<a class="image-link" href="#"><img class="image" src="assets/img/pictures/1.jpg"></a>';
+            gbcol += '<div class="search-result-item-body">';
+               gbcol += '<div class="row">';
+                  gbcol += '<div class="col-md-9 col-12">';
+                     gbcol += '<h5 class="search-result-item-heading"><a href="#">Next generation admin template</a></h5>';
+                     gbcol += '<p class="info"> New York, NY 20188 </p>';
+                     gbcol += '<p class="description"> Not just usual Metro. But something bigger. Not just usual widgets, but real widgets. Not just yet another admin template, but next generation admin template. </p>';
+                  gbcol += '</div>';
+                  gbcol += '<div class="col-md-3 col-12 text-center">';
+                     gbcol += '<p class="value3 mt-sm"> $9, 700 </p>';
+                     gbcol += '<p class="fs-mini text-muted"> PER WEEK </p>';
+                     gbcol += '<a class="btn btn-primary btn-info btn-sm" href="#">Learn More</a>';
+                  gbcol += '</div>';
+               gbcol += '</div>';
+            gbcol += '</div>';
+         gbcol += '</section>';
+         gbcol += '<section class="search-result-item">';
+            gbcol += '<a class="image-link" href="#"><img class="image" src="assets/img/pictures/5.jpg"></a>';
+            gbcol += '<div class="search-result-item-body">';
+               gbcol += '<div class="row">';
+                  gbcol += '<div class="col-md-9 col-12">';
+                     gbcol += '<h5 class="search-result-item-heading"><a href="#">Try. Posted by Okendoken</a><span class="badge badge-pill badge-danger fw-normal float-right">Best Deal!</span></h5>';
+                     gbcol += '<p class="info"> Los Angeles, NY 20188 </p>';
+                     gbcol += '<p class="description"> You will never know exactly how something will go until you try it. You can think three hundred times and still have no precise result. </p>';
+                  gbcol += '</div>';
+                  gbcol += '<div class="col-md-3 col-12 text-center">';
+                     gbcol += '<p class="value3 mt-sm"> $10, 300 </p>';
+                     gbcol += '<p class="fs-mini text-muted"> PER WEEK </p>';
+                     gbcol += '<a class="btn btn-primary btn-info btn-sm" href="#">Learn More</a>';
+                  gbcol += '</div>';
+               gbcol += '</div>';
+            gbcol += '</div>';
+         gbcol += '</section>';
+         gbcol += '<section class="search-result-item">';
+            gbcol += '<a class="image-link" href="#"><img class="image" src="assets/img/pictures/13.jpg"></a>';
+            gbcol += '<div class="search-result-item-body">';
+               gbcol += '<div class="row">';
+                  gbcol += '<div class="col-md-9 col-12">';
+                     gbcol += '<h5 class="search-result-item-heading"><a href="#">Vitaut the Great</a></h5>';
+                     gbcol += '<p class="info"> New York, NY 20188 </p>';
+                     gbcol += '<p class="description"> The Great Prince of the Grand Duchy of Lithuania he had stopped the invasion to Europe of Timur (Tamerlan) from Asia heading a big Army of Belarusians, Lithuanians. </p>';
+                  gbcol += '</div>';
+                  gbcol += '<div class="col-md-3 col-12 text-center">';
+                     gbcol += '<p class="value3 mt-sm"> $3, 200 </p>';
+                     gbcol += '<p class="fs-mini text-muted"> PER WEEK </p>';
+                     gbcol += '<a class="btn btn-info btn-sm" href="#">Learn More</a>';
+                  gbcol += '</div>';
+               gbcol += '</div>';
+            gbcol += '</div>';
+         gbcol += '</section>';
+         gbcol += '<section class="search-result-item">';
+            gbcol += '<a class="image-link" href="#"><img class="image" src="assets/img/pictures/3.jpg"></a>';
+            gbcol += '<div class="search-result-item-body">';
+               gbcol += '<div class="row">';
+                  gbcol += '<div class="col-md-9 col-12">';
+                     gbcol += '<h5 class="search-result-item-heading"><a href="#">Can I use CSS3 Radial-Gradient?</a></h5>';
+                     gbcol += '<p class="info"> Minsk, NY 20188 </p>';
+                     gbcol += '<p class="description"> Yes you can! Further more, you should! It let\'s you create really beautiful images either for elements or for the entire background. </p>';
+                  gbcol += '</div>';
+                  gbcol += '<div class="col-md-3 col-12 text-center">';
+                     gbcol += '<p class="value3 mt-sm"> $2, 400 </p>';
+                     gbcol += '<p class="fs-mini text-muted"> PER MONTH </p>';
+                     gbcol += '<a class="btn btn-info btn-sm" href="#">Learn More</a>';
+                  gbcol += '</div>';
+               gbcol += '</div>';
+            gbcol += '</div>';
+         gbcol += '</section>';
+         gbcol += '<div class="d-flex justify-content-center mt-3">';
+            gbcol += '<ul class="pagination">';
+               gbcol += '<li class="disabled page-item"><a class="page-link" href="#">Prev</a></li>';
+               gbcol += '<li class="active page-item"><a class="page-link" href="#">1</a></li>';
+               gbcol += '<li class="page-item"><a class="page-link" href="#">2</a></li>';
+               gbcol += '<li class="page-item"><a class="page-link" href="#">3</a></li>';
+               gbcol += '<li class="page-item"><a class="page-link" href="#">4</a></li>';
+               gbcol += '<li class="page-item"><a class="page-link" href="#">5</a></li>';
+               gbcol += '<li class="page-item"><a class="page-link" href="#">Next</a></li>';
+            gbcol += '</ul>';
+         gbcol += '</div>';
+      gbcol += '</div>';
+   gbcol += '</div>';
+gbcol += '</div>';
+$('#dataCanvas').before(gbcol);
 
 
 gbcol = '<app-notifications class="dropdown-menu dropdown-menu-right animated animated-last ladeInUp" _nghost-c1="" style="left: auto; right: 0px;">';
@@ -3628,11 +4559,14 @@ $('.avatar').parent().parent().append(gbcol);
 //widget shadows interfer with the breadcrumbs
 $('.widget').css('box-shadow', '');
 $('.widget').css('-webkit-box-shadow', '');
+$('.avatar').parent().parent().remove();
+
+/*
 $('.avatar').parent().children('.small').css('padding-left', '8px');
     $('.avatar').parent().children('.small').text('Sign In');
-    $('.avatar').children('img').attr('src', 'https://solid.inrupt.com/themes/custom/solid/logo.svg');// 'http://www.gravatar.com/avatar/' + ('info@vios.network'));
+    $('.avatar').children('img').remove();//.attr('src', 'https://solid.inrupt.com/themes/custom/solid/logo.svg');// 'http://www.gravatar.com/avatar/' + ('info@vios.network'));
     //$('.avatar').children('img').attr('width', '24');
-    $('.avatar').children('img').addClass('rounded-circle');
+   // $('.avatar').children('img').addClass('rounded-circle');
 //    $('.avatar').children('img').attr('height', '24');
     $('.avatar').parent().children('.circle').addClass('hide');
     $('.avatar').removeClass('mr-2');
@@ -3650,7 +4584,7 @@ $('.avatar').parent().children('.caret').on('click', function(e){
   showProfileManagerPreview();
 
 });
-
+*/
 $('#profileName').on('click', function(e){
   //solid.auth.popupLogin({ "popupUri":"http://data.vios.network/DAV/home/vios/popup.html" });
   solid.auth.popupLogin({ "popupUri":"https://solid.github.io/solid-auth-client/dist/popup.html" });
@@ -3736,11 +4670,16 @@ $('.avatar').parent().children('.circle').each(async (i) => {
     qShowIDN = fct_getUrlParameter('showIDN');
     qSubjectBadges = fct_getUrlParameter('subjectBadges');
     qFilterRecordViewFields = fct_getUrlParameter('filterRecordViewFields');
+    qShowRecordRoles = fct_getUrlParameter('showRecordRoles');
 
     qVerticalChartHeaders = fct_getUrlParameter('verticalChartHeaders');
 
     qIsRollup = fct_getUrlParameter('isRollup');
 
+    if(qShowRecordRoles && qShowRecordRoles.length > 0) {
+      showRecordRoles = qShowRecordRoles == 'true';
+      qShowRecordRoles = null;
+    }
     if(qShowMe && qShowMe.length > 0) {
       selectMenuItem('showMeMenu', qShowMe, true);
       qShowMe = null;
@@ -3808,13 +4747,15 @@ $('.avatar').parent().children('.circle').each(async (i) => {
         }
     }
 
-    addDataspace('dbpedia.org','DBPedia',false,true); // try to add DBPedia
-    addDataspace('lod.openlinksw.com','LOD',false,true); // try to add LOD Cloud Cache
-    addDataspace('demo.openlinksw.com','OpenLink Demo',false,true); // try to add OpenLink Demo
-    addDataspace('linkeddata.uriburner.com','URIBurner',false,true); // try to add URI Burner
-    addDataspace('data.vios.network','VIOS',false,true); // try to add VIOS
-    addDataspace('ggg.vios.network','GGG',false,true); // try to add GGG
-    if(ds.length <= 0) selectDataspace('dbpedia.org', 'DBPedia', false, true);
+    addDataspace('dbpedia.org','DBPedia',false,false,true); // try to add DBPedia
+    addDataspace('lod.openlinksw.com','LOD',false,false,true); // try to add LOD Cloud Cache
+    //addDataspace('demo.openlinksw.com','OpenLink Demo',false,true); // try to add OpenLink Demo
+    addDataspace('linkeddata.uriburner.com','URIBurner',false,true,true); // try to add URI Burner
+    addDataspace('dbpedia-live.openlinksw.com','DBPedia Live',false,false,true); // try to add URI Burner
+
+    //addDataspace('data.vios.network','VIOS',false,true); // try to add VIOS
+    //addDataspace('ggg.vios.network','GGG',false,true); // try to add GGG
+    if(ds.length <= 0) selectDataspace('dbpedia.org', 'DBPedia', false,false,true);
 
     try{
       if(idx){
@@ -3904,21 +4845,33 @@ $('.avatar').parent().children('.circle').each(async (i) => {
 $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
 
 
+checkLibraryButton();
+
+//autocomplete(document.getElementById("keywords"), countries);
+  $('#backHistoryLi, #forwardHistoryLi, #permalinkLi, #searchForm, #optionsButtons, #clearButtonsXs, #clearButtonsSm, #addDataspaceButton').removeClass('hide');
+
+
 }
 
-function doRemoveDataspace(){
-  var idx = ds.indexOfDataspace(dataspace);
-  $('a#dataSpaceMenu').parent().children('.dropdown-menu').children('li').children('a[url="'+dataspace+'"]').remove();
-  ds.splice(idx, 1);
-  if(idx >= ds.length) idx = ds.length - 1;
-  if(idx < 0) idx = 0;  
-  if(ds.length > 0) {
-    selectDataspace(ds[idx][0], ds[idx][1]);
-  }
-  else {
-    addDataspace('lod.openlinksw.com','LOD',false,false); // try to add LOD Cloud Cache
-  }
+//var countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Anguilla","Antigua &amp; Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia &amp; Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Cayman Islands","Central Arfrican Republic","Chad","Chile","China","Colombia","Congo","Cook Islands","Costa Rica","Cote D Ivoire","Croatia","Cuba","Curacao","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Ethiopia","Falkland Islands","Faroe Islands","Fiji","Finland","France","French Polynesia","French West Indies","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guam","Guatemala","Guernsey","Guinea","Guinea Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Isle of Man","Israel","Italy","Jamaica","Japan","Jersey","Jordan","Kazakhstan","Kenya","Kiribati","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Macau","Macedonia","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Montserrat","Morocco","Mozambique","Myanmar","Namibia","Nauro","Nepal","Netherlands","Netherlands Antilles","New Caledonia","New Zealand","Nicaragua","Niger","Nigeria","North Korea","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Puerto Rico","Qatar","Reunion","Romania","Russia","Rwanda","Saint Pierre &amp; Miquelon","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","St Kitts &amp; Nevis","St Lucia","St Vincent","Sudan","Suriname","Swaziland","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor L'Este","Togo","Tonga","Trinidad &amp; Tobago","Tunisia","Turkey","Turkmenistan","Turks &amp; Caicos","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States of America","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Virgin Islands (US)","Yemen","Zambia","Zimbabwe"];
+
+function showCTRLChoices(){
+  $('.ctrl-select').removeClass('hide');
+  $('.'+getCTRLClass()).addClass('hide');
 }
+function hideCTRLChoices(){
+  $('.ctrl-select').addClass('hide');
+}
+
+function getCTRLClass(){
+  var val = $('#showMeMenu').val();
+  if(val == VIEW_TYPE_CLASSES) return 'ctrl-select-c';
+  else if(val == VIEW_TYPE_PROPERTIES) return 'ctrl-select-f';
+  else if(val == VIEW_TYPE_TEXT_PROPERTIES) return 'ctrl-select-t';
+  else if(val == VIEW_TYPE_PROPERTIES_IN) return 'ctrl-select-r';
+  else if(val == VIEW_TYPE_GRAPHS) return 'ctrl-select-l';
+}
+
 
 function showProfileManagerPreview(){
   var isProfileManagerOpen = $('.avatar').parent().parent().hasClass('open');
@@ -4443,6 +5396,10 @@ function addTab(fctId, tabCounter) {
     $('[data-toggle="tooltip"]').tooltip();
 
     //$(document).on('click touch', doCtrlMode);
+  $('input').on('click', function(e){
+    doCtrlMode(e);
+  });
+
 }
 
 
@@ -4521,7 +5478,7 @@ function activate(){
     $('#recordsListWidgetContainer').addClass('hide');
     if(nav_type == NAV_TYPE_3) $('#facetCollectorWidgetContainer').addClass('hide');
 
-    selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES); // POI: be sure to load the fields menu after 'hide' class logic is applied to table, since this controls the visibility of group-by 'pinch' icon
+    if($('#showMeMenu').val()!=VIEW_TYPE_TEXT_PROPERTIES && $('#showMeMenu').val()!=VIEW_TYPE_PROPERTIES) selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES); // POI: be sure to load the fields menu after 'hide' class logic is applied to table, since this controls the visibility of group-by 'pinch' icon
     loadTable();
 
   }
@@ -4671,11 +5628,15 @@ document.onkeyup = checkKeyRelease;
 
 var ctrlDown = false;
 var oneKeyDown = false;
+var xKeyDown = false;
 function isCTRLKeyDown(){
   return ctrlDown;
 }
 function isOneKeyDown(){
   return oneKeyDown;
+}
+function isXKeyDown(){
+  return xKeyDown;
 }
 
 function checkKeyRelease(e) {
@@ -4685,6 +5646,9 @@ function checkKeyRelease(e) {
     }
     else if (e.keyCode == '49') { // 1 KEY
         oneKeyDown = false;
+    }
+    else if (e.keyCode == '88') { // X KEY
+        xKeyDown = false;
     }
 }
 
@@ -4698,9 +5662,12 @@ function checkKey(e) {
     }
 
 
-if(!$('input[type="text"], input[type="search"]').is(":focus")){
+if(!$('input[type="text"], input[type="password"], input[type="search"], input[type="number"]').is(":focus")){
     if (e.keyCode == '49') {
       oneKeyDown = true;
+    }
+    else if (e.keyCode == '88') {
+      xKeyDown = true;
     }
     else if (e.keyCode == '188') { // period key
         if(page > 0 && !$('#leftButton').hasClass('hide')) pageLeft();
@@ -4750,11 +5717,6 @@ if(!$('input[type="text"], input[type="search"]').is(":focus")){
   }
   else {
     if (e.keyCode == '8') { // Delete key
-        clearKeywords();
-        doQuery($('#keywords').val());
-        //$('#keywords').removeAttr('disabled');
-        //$('#keywords').removeClass('disabled');
-        //$('#keywords').focus(); 
     }
     else if (e.keyCode == '16') { // Shift key
     }
@@ -4793,7 +5755,7 @@ if(!$('input[type="text"], input[type="search"]').is(":focus")){
       isExpandSearch = true;
       takeMainFocus(ID_QUERY);
       selectMenuItem('showMeMenu', VIEW_TYPE_TEXT_PROPERTIES);
-      selectMenuItem('groupByMenu', GROUP_BY_TEXT_VALUE);
+      selectMenuItem('groupByMenu', GROUP_BY_TEXT_VALUE); // TODO: the groupby menu is used to reveal text matches because in the old PoC, the 'text matches' function was in the groupBy select menu, need to quit using the select menus and store all state in variables
       showRecordRoles == false;
       describe(undefined, $('#angular_recordViewer').attr('iri'));
     }
@@ -4955,7 +5917,12 @@ $(document).ready(function() {
 function doCtrlMode(e){
   e = e || window.event;
   var target = e.target || e.srcElement;
-  if($('input[type="text"], input[type="search"]').is(":focus") || (target.tagName.toUpperCase() == 'INPUT' && target.getAttribute('type') == 'text') || (target.tagName.toUpperCase() == 'INPUT' && target.getAttribute('type') == 'search')){
+  if($('input[type="text"], input[type="password"], input[type="search"], input[type="number"]').is(":focus") || 
+    (target.tagName.toUpperCase() == 'INPUT' && target.getAttribute('type') == 'text') || 
+    (target.tagName.toUpperCase() == 'INPUT' && target.getAttribute('type') == 'search') || 
+    (target.tagName.toUpperCase() == 'INPUT' && target.getAttribute('type') == 'password') ||
+    (target.tagName.toUpperCase() == 'INPUT' && target.getAttribute('type') == 'number')
+  ){
       $('#keywords').removeAttr('disabled');
       $('#keywords').removeClass('disabled');
 
@@ -4966,6 +5933,9 @@ if(target.id == 'keywords'){
 
   }
   else{
+      if(target.parentNode && target.parentNode.getAttribute('id') == 'permalink'){
+        linkOut(target.parentNode.getAttribute('href'));
+      }
       $('#keywords').blur();
       $('#keywords').attr('disabled', 'true');
       $('#keywords').addClass('disabled');
@@ -5041,13 +6011,13 @@ return iri;
 function spaceCamelCase(label){
     // insert a space before all caps
     ///*
-    if(label.toUpperCase() != label){
+    if(isChrome && label.toUpperCase() != label){
     //label = label.replace(/([A-Z])([a-z])(.*)/g, ' $1$2$3')
 
-    // see here: https://stackoverflow.com/questions/5020906/python-convert-camel-case-to-space-delimited-using-regex-and-taking-acronyms-in
-    label = label.replace(/((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))/g, ' $1')
-    // uppercase the first character
-    .replace(/^./, function(str){ return str.toUpperCase(); });
+      // see here: https://stackoverflow.com/questions/5020906/python-convert-camel-case-to-space-delimited-using-regex-and-taking-acronyms-in
+      label = label.replace(new RegExp('((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))', 'g'), ' $1')
+      // uppercase the first character
+      .replace(/^./, function(str){ return str.toUpperCase(); });
     }
     //*/
     return label.trim();
@@ -5064,6 +6034,9 @@ function processLabel(label, value, datatype, lang, labelSize, includeHostName){
 
     if(!label) return ''; 
     label = label.trim();
+
+    label = label.replace(/\[.+\]\s+/g, '');
+
     label = label.replaceAll('&#39;', '&apos;');
 
     var host = '';
@@ -5088,12 +6061,22 @@ function processLabel(label, value, datatype, lang, labelSize, includeHostName){
 
 
     // *** business Category processing - TODO: this need to be removed
+
+if(dataspace.startsWith('http://dbpedia.org') || dataspace.startsWith('http://lod.openlinksw.com')){
+      label = label.replace(/wikiPage/g, '');
       label = label.replace('WikiCat', '');
       label = label.replace('Wikicat', '');
       label = label.replace('YagoLegal', '');
       label = label.replace('Wiki Cat', '');
       label = label.replace('Wiki cat', '');
       label = label.replace('Yago Legal', '');
+
+      label = label.replace('Category:', '');
+      label = label.replace('Link from a Wikipage to another Wikipage', 'internal link');
+      label = label.replace('Link from a Wikipage to an external page', 'external link');  
+}
+
+
 
 
     if(label.length > 1) {
@@ -5136,8 +6119,8 @@ function processLabel(label, value, datatype, lang, labelSize, includeHostName){
 //var beep1Str = '//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vmz+Zt//+mm3Wm3Q576v////+32///5/EOgAAADVghQAAAAA//uQZAUAB1WI0PZugAAAAAoQwAAAEk3nRd2qAAAAACiDgAAAAAAABCqEEQRLCgwpBGMlJkIz8jKhGvj4k6jzRnqasNKIeoh5gI7BJaC1A1AoNBjJgbyApVS4IDlZgDU5WUAxEKDNmmALHzZp0Fkz1FMTmGFl1FMEyodIavcCAUHDWrKAIA4aa2oCgILEBupZgHvAhEBcZ6joQBxS76AgccrFlczBvKLC0QI2cBoCFvfTDAo7eoOQInqDPBtvrDEZBNYN5xwNwxQRfw8ZQ5wQVLvO8OYU+mHvFLlDh05Mdg7BT6YrRPpCBznMB2r//xKJjyyOh+cImr2/4doscwD6neZjuZR4AgAABYAAAABy1xcdQtxYBYYZdifkUDgzzXaXn98Z0oi9ILU5mBjFANmRwlVJ3/6jYDAmxaiDG3/6xjQQCCKkRb/6kg/wW+kSJ5//rLobkLSiKmqP/0ikJuDaSaSf/6JiLYLEYnW/+kXg1WRVJL/9EmQ1YZIsv/6Qzwy5qk7/+tEU0nkls3/zIUMPKNX/6yZLf+kFgAfgGyLFAUwY//uQZAUABcd5UiNPVXAAAApAAAAAE0VZQKw9ISAAACgAAAAAVQIygIElVrFkBS+Jhi+EAuu+lKAkYUEIsmEAEoMeDmCETMvfSHTGkF5RWH7kz/ESHWPAq/kcCRhqBtMdokPdM7vil7RG98A2sc7zO6ZvTdM7pmOUAZTnJW+NXxqmd41dqJ6mLTXxrPpnV8avaIf5SvL7pndPvPpndJR9Kuu8fePvuiuhorgWjp7Mf/PRjxcFCPDkW31srioCExivv9lcwKEaHsf/7ow2Fl1T/9RkXgEhYElAoCLFtMArxwivDJJ+bR1HTKJdlEoTELCIqgEwVGSQ+hIm0NbK8WXcTEI0UPoa2NbG4y2K00JEWbZavJXkYaqo9CRHS55FcZTjKEk3NKoCYUnSQ0rWxrZbFKbKIhOKPZe1cJKzZSaQrIyULHDZmV5K4xySsDRKWOruanGtjLJXFEmwaIbDLX0hIPBUQPVFVkQkDoUNfSoDgQGKPekoxeGzA4DUvnn4bxzcZrtJyipKfPNy5w+9lnXwgqsiyHNeSVpemw4bWb9psYeq//uQZBoABQt4yMVxYAIAAAkQoAAAHvYpL5m6AAgAACXDAAAAD59jblTirQe9upFsmZbpMudy7Lz1X1DYsxOOSWpfPqNX2WqktK0DMvuGwlbNj44TleLPQ+Gsfb+GOWOKJoIrWb3cIMeeON6lz2umTqMXV8Mj30yWPpjoSa9ujK8SyeJP5y5mOW1D6hvLepeveEAEDo0mgCRClOEgANv3B9a6fikgUSu/DmAMATrGx7nng5p5iimPNZsfQLYB2sDLIkzRKZOHGAaUyDcpFBSLG9MCQALgAIgQs2YunOszLSAyQYPVC2YdGGeHD2dTdJk1pAHGAWDjnkcLKFymS3RQZTInzySoBwMG0QueC3gMsCEYxUqlrcxK6k1LQQcsmyYeQPdC2YfuGPASCBkcVMQQqpVJshui1tkXQJQV0OXGAZMXSOEEBRirXbVRQW7ugq7IM7rPWSZyDlM3IuNEkxzCOJ0ny2ThNkyRai1b6ev//3dzNGzNb//4uAvHT5sURcZCFcuKLhOFs8mLAAEAt4UWAAIABAAAAAB4qbHo0tIjVkUU//uQZAwABfSFz3ZqQAAAAAngwAAAE1HjMp2qAAAAACZDgAAAD5UkTE1UgZEUExqYynN1qZvqIOREEFmBcJQkwdxiFtw0qEOkGYfRDifBui9MQg4QAHAqWtAWHoCxu1Yf4VfWLPIM2mHDFsbQEVGwyqQoQcwnfHeIkNt9YnkiaS1oizycqJrx4KOQjahZxWbcZgztj2c49nKmkId44S71j0c8eV9yDK6uPRzx5X18eDvjvQ6yKo9ZSS6l//8elePK/Lf//IInrOF/FvDoADYAGBMGb7FtErm5MXMlmPAJQVgWta7Zx2go+8xJ0UiCb8LHHdftWyLJE0QIAIsI+UbXu67dZMjmgDGCGl1H+vpF4NSDckSIkk7Vd+sxEhBQMRU8j/12UIRhzSaUdQ+rQU5kGeFxm+hb1oh6pWWmv3uvmReDl0UnvtapVaIzo1jZbf/pD6ElLqSX+rUmOQNpJFa/r+sa4e/pBlAABoAAAAA3CUgShLdGIxsY7AUABPRrgCABdDuQ5GC7DqPQCgbbJUAoRSUj+NIEig0YfyWUho1VBBBA//uQZB4ABZx5zfMakeAAAAmwAAAAF5F3P0w9GtAAACfAAAAAwLhMDmAYWMgVEG1U0FIGCBgXBXAtfMH10000EEEEEECUBYln03TTTdNBDZopopYvrTTdNa325mImNg3TTPV9q3pmY0xoO6bv3r00y+IDGid/9aaaZTGMuj9mpu9Mpio1dXrr5HERTZSmqU36A3CumzN/9Robv/Xx4v9ijkSRSNLQhAWumap82WRSBUqXStV/YcS+XVLnSS+WLDroqArFkMEsAS+eWmrUzrO0oEmE40RlMZ5+ODIkAyKAGUwZ3mVKmcamcJnMW26MRPgUw6j+LkhyHGVGYjSUUKNpuJUQoOIAyDvEyG8S5yfK6dhZc0Tx1KI/gviKL6qvvFs1+bWtaz58uUNnryq6kt5RzOCkPWlVqVX2a/EEBUdU1KrXLf40GoiiFXK///qpoiDXrOgqDR38JB0bw7SoL+ZB9o1RCkQjQ2CBYZKd/+VJxZRRZlqSkKiws0WFxUyCwsKiMy7hUVFhIaCrNQsKkTIsLivwKKigsj8XYlwt/WKi2N4d//uQRCSAAjURNIHpMZBGYiaQPSYyAAABLAAAAAAAACWAAAAApUF/Mg+0aohSIRobBAsMlO//Kk4soosy1JSFRYWaLC4qZBYWFRGZdwqKiwkNBVmoWFSJkWFxX4FFRQWR+LsS4W/rFRb/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU=';
 //var snd = new Audio("data:audio/wav;base64,"+beep1Str);  
 
-var snd = new Audio('http://www.soundjay.com/button/beep-24.wav');
-var snd2 = new Audio('http://www.soundjay.com/button/beep-07.wav');
+var snd = new Audio(getProxyEndpoint('https://www.soundjay.com/button/beep-24.wav'));
+var snd2 = new Audio(getProxyEndpoint('https://www.soundjay.com/button/beep-07.wav'));
 
 function beep() {
     try{
@@ -5164,8 +6147,13 @@ function updatePermalink(){
     if(isTableShowing()) canvasViewType = 'table';
     else if(isFormShowing()) canvasViewType = 'form';
 
+
+    var xmlStr = _root.find('query').prop('outerHTML');
+    var parser = new DOMParser();
+    var xmlDoc = parser.parseFromString(xmlStr, "text/xml"); //important to use "text/xml"
+
     var long_url = this_endpoint + '?' + 
-      '&dataSpace=' + encodeURIComponent( dataspace ) + 
+      'dataSpace=' + encodeURIComponent( dataspace ) + 
       '&dataSpaceLabel=' + encodeURIComponent( getDataspaceLabel() ) + 
       '&groupBy=' + encodeURIComponent( $('#groupByMenu :selected').attr('json') ) + 
       '&showMe=' + $('#showMeMenu :selected').attr('value') + 
@@ -5180,8 +6168,13 @@ function updatePermalink(){
       '&isRollup=' + isRollup() + 
       '&isChart=' + isChart() + 
       '&showIDN=' + showIDN + 
+      '&showRecordRoles=' + showRecordRoles +
       '&filterRecordViewFields=' + filterRecordViewFields + 
-      '&qxml=' + encodeURIComponent(_root.find('query').prop('outerHTML'));
+      '&qxml=' + encodeURIComponent(_root.find('query').prop('outerHTML') +
+      ((referrerAddress) ? '&vios-referrer=' + referrerAddress : '')
+
+        );
+      //'&qjson=' + encodeURIComponent( xml2json( xmlDoc , '' ) );
   
     $('#permalink').attr('href', long_url); // use long url by default in case of rate limit
     $('#permalink').unbind('mouseover');
@@ -5192,6 +6185,8 @@ function updatePermalink(){
       mouseOnPermalink = true;
       get_short_url(long_url, function(short_url) {
         $('#permalink').attr('href',  short_url); //+ '&idCt=' + idCt
+        $('#queryUrl').text(short_url);
+        $('#queryUrl').attr('property', 'url'); // url property only visiable to human users, after URL has been shortened - we assume the caller of this page has the long URL, if they want the short one, they need to call vio.sn/c/create
   /*
         $('#permalink').removeAttr('href');
         $('#permalink').unbind('click');
@@ -5438,13 +6433,107 @@ function doQuery(keywords) {
 
     checkTextProperties();
     checkGlossaryButton();
+    checkLibraryButton();
+    checkArrowRightButton();
+    checkArrowLeftButton();
+    checkHelpButton();
+    checkLibraryBreadCrumbs();
+    checkBreadCrumbs();
+    checkExitLibraryButton();
+    checkIndex();
+
+    checkExpandSearchButton();
+    checkNarrowSearchButton();
 
     /* TODO: use qTip for tooltips, see http://qtip2.com/api
     $('[title!=""]').qtip();
     */
 }
 
-function checkGlossaryButton(){
+function checkNarrowSearchButton(){
+  if(isContractSearch){
+    $('#isSearchAllFields').parent().addClass('hide');
+    $('#isExactLabelMatch').parent().css('border-top-left-radius', '0.25rem');
+    $('#isExactLabelMatch').parent().css('border-bottom-left-radius', '0.25rem');
+  }
+  else {
+    $('#isSearchAllFields').parent().removeClass('hide');
+    $('#isExactLabelMatch').parent().css('border-top-left-radius', '0rem');
+    $('#isExactLabelMatch').parent().css('border-bottom-left-radius', '0rem');
+  }
+}
+
+function checkExpandSearchButton(){
+  if(isExpandSearch){
+    $('#isExactLabelMatch').parent().addClass('hide');
+  }
+  else {
+    $('#isExactLabelMatch').parent().removeClass('hide');
+  }
+}
+
+function checkIndex(){
+  if((getQueryText() && getQueryText().length > 0) || (getQuery().children('class') && getQuery().children('class').length > 0)) return;
+  if(getQueryGraph() && getQueryGraph().length > 0){ // check graph robot
+    var q = getQuery().clone();
+    var p = $.createElement('property');
+    var pid = createId();
+    p.attr('class', pid);
+    p.attr('iri', 'dsn:data.vios.network/o/p/index');
+    p.attr('label', 'index');
+    getFocus(q).append(p);
+    takeFocus(p, q);
+
+    q.find('view').attr('limit', '1');
+
+    var opt = new Object();
+    opt.tar = 'fetchIndex';
+    fct_query(q, VIEW_TYPE_LIST_COUNT, opt);
+  }
+  else { // check dataspace robot
+
+  }
+}
+
+function checkExitLibraryButton(){
+  var clearLibrary = $('span.clear-data').filter(function() {return $(this).text().indexOf('Library') >= 0;});
+
+  if(getQueryGraph() && getQueryGraph().length > 0) {
+    clearLibrary.parent().removeClass('hide');
+  }
+  else{
+    clearLibrary.parent().addClass('hide');
+  }
+}
+
+function checkLibraryBreadCrumbs(){
+  if(!getQueryGraph() || getQueryGraph().length <= 0){
+    $('#angular_libraries').addClass('hide');
+  }
+  else {
+    $('#angular_libraries').removeClass('hide'); // TODO: the hide class is also removed in buildNavPath(), need to determine where this needs to happen
+  }
+}
+
+function checkBreadCrumbs(){
+  if(nav_type == NAV_TYPE_2 || (nav_type == NAV_TYPE_3 && getMainFocus().attr('class') != ID_QUERY)){
+    $('#angular_breadcrumbs').removeClass('hide'); // TODO: the hide class is also removed in buildNavPath(), need to determine where this needs to happen
+  }
+  else {
+    $('#angular_breadcrumbs').addClass('hide');
+  }
+}
+
+function checkHelpButton(){
+  $('#helpButton').addClass('hide');
+  var sparql = 'ask {graph <dsn:'+dataspace.replace('http://', '').replace('https://', '')+'/help> { ?s ?p ?o}}';
+  var opt = new Object();
+  opt.tar = 'askHelp';
+  fct_sparql(sparql, opt);
+
+  //checkLibraries();
+
+  /*
   if( ( dataspace == 'http://dbpedia.org' || dataspace == 'http://data.vios.network' || dataspace == 'http://lod.openlinksw.com')  && (
     !_root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]') || 
     _root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]').length <= 0
@@ -5455,10 +6544,94 @@ function checkGlossaryButton(){
   else if( !$('#glossaryButton').hasClass('hide') ){
     $('#glossaryButton').addClass('hide');
   }
+  */
+}
+
+function checkGlossaryButton(){
+  $('#glossaryButton').addClass('hide');
+  var sparql = buildTypeAskQuery('http://dbpedia.org/class/yago/Glossary106420781');
+
+  var opt = new Object();
+  opt.tar = 'askGlossaries';
+  fct_sparql(sparql, opt);
+  /*
+  if( ( dataspace == 'http://dbpedia.org' || dataspace == 'http://data.vios.network' || dataspace == 'http://lod.openlinksw.com')  && (
+    !_root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]') || 
+    _root.children('query').children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]').length <= 0
+    )
+    ){
+    $('#glossaryButton').removeClass('hide');
+  }
+  else if( !$('#glossaryButton').hasClass('hide') ){
+    $('#glossaryButton').addClass('hide');
+  }
+  */
+}
+
+function checkLibraryButton(){
+  $('#libraryButton').addClass('hide');
+  if(getMainFocus().attr('class') != ID_QUERY) return;
+  var sparql = buildTypeAskQuery('http://www.w3.org/ns/sparql-service-description#NamedGraph');
+  var opt = new Object();
+  opt.tar = 'askLibraries';
+  fct_sparql(sparql, opt);
+/*
+  if( 
+    !_root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]') || 
+    _root.children('query').children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]').length <= 0
+    
+    ){
+    $('#libraryButton').removeClass('hide');
+  }
+  else if( !$('#libraryButton').hasClass('hide') ){
+    $('#libraryButton').addClass('hide');
+  }
+*/  
+}
+
+function checkArrowRightButton(){
+  $('.la-arrow-right').parent().addClass('hide');
+  if(getMainFocus().attr('class') == ID_QUERY){
+    $('.la-arrow-right').parent().addClass('hide');
+  }
+  else {
+    if(!getMainFocus().prop('nodeName')) return;
+    var q = getQuery().clone();
+    var p = $.createElement(getMainFocus().prop('nodeName').toLowerCase());
+    var pid = createId();
+    p.attr('class', pid);
+    p.attr('iri', getMainFocus().attr('iri'));
+    p.attr('label', getMainFocus().attr('label'));
+    getFocus(q).append(p);
+    takeFocus(p, q);
+
+    q.find('view').attr('limit', '1');
+
+    var opt = new Object();
+    opt.tar = 'countIncrementProperty';
+    fct_query(q, VIEW_TYPE_LIST_COUNT, opt);
+  }
+
+  /*
+
+  if(getMainFocus().attr('class') == ID_QUERY){
+    $('.la-arrow-right').parent().addClass('hide');
+  }
+  else {
+    $('.la-arrow-right').parent().removeClass('hide');
+  }
+
+  */
+
+}
+
+function checkArrowLeftButton(){
+  $('.la-arrow-left').removeClass('hide');
+  $('.la-arrow-left').parent().addClass('hide');
 }
 
 function checkTextProperties(){
-  if(!isExpandSearch || getMainFocus() != ID_QUERY){
+  if(!isExpandSearch || getMainFocus().attr('class') != ID_QUERY){
     if($('#showMeMenu').val()==VIEW_TYPE_TEXT_PROPERTIES) selectMenuItem('showMeMenu', VIEW_TYPE_PROPERTIES);;
   }
 }
@@ -5476,9 +6649,85 @@ function savePermalink(name){
 
 }
 
-function doFindDataspaces(){}
 
-function addDataspace(url, label, secure, silent){  
+function doRemoveDataspace(dsurl, silent){
+  if(!dsurl) dsurl = dataspace;
+  var idx = ds.indexOfDataspace(dsurl);
+  $('a#dataSpaceMenu').parent().children('.dropdown-menu').children('li').children('a[url="'+dsurl+'"]').remove();
+  ds.splice(idx, 1);
+  if(idx >= ds.length) idx = ds.length - 1;
+  if(idx < 0) idx = 0;  
+  if(ds.length > 0) {
+    selectDataspace(ds[idx][0], ds[idx][1], silent);
+  }
+  else {
+    addDataspace('dbpedia.org','DBPedia',false,false,silent); // try to add DBPedia
+  }
+
+    try{
+      localStorage.setItem('dataspaces', JSON.stringify(ds));
+    }
+    catch(err){
+      if(fct_isDebug) console.log('Dataspace cache failed: ' + err);
+    }
+}
+
+function doSetLibrary(){
+  setGraphFacet('dsn:'+dataspace.replace('http://', '').replace('https://', '')+'/help', 'Help Contents');
+}
+
+function buildGraphClause(where){
+  if(getQueryGraph() && getQueryGraph().length > 0){
+    where = '{graph <'+getQueryGraph()+'> {' + where + '}}';
+  }
+  else where = '{' + where + '}';
+  return where;
+}
+
+function buildTypeAskQuery(clazz){
+  var where = '?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <'+clazz+'>';
+  if(getQueryGraph() && getQueryGraph().length > 0){
+    where = '{graph <'+getQueryGraph()+'> {' + where + '}}';
+  }
+  else where = '{' + where + '}';
+
+  return 'ask ' + where;// + ' limit 1';
+}
+
+function doLoadLibraries(){
+  // an ELF revealed the button that calls this method, so we are certain Libraries exist in this context
+  clearKeywords(); 
+  var cid = createId(); 
+  setQueryText(''); 
+  takeMainFocus(ID_QUERY); 
+  clearFacets(true); 
+  addClassFacet(cid, 'http://www.w3.org/ns/sparql-service-description#NamedGraph', 'Library');
+
+  var sparql = buildTypeAskQuery('dsn:data.vios.network/o/Origin');
+  var opt = new Object();
+  opt.tar = 'askDefaultLoadOriginLibraries';
+  fct_sparql(sparql, opt);  
+}
+
+function doFindDataspaces(){
+  if(ds.indexOfDataspace('http://data.vios.network') < 0) {
+    addDataspace('http://data.vios.network', 'VIOS');
+  }
+  else selectDataspace('http://data.vios.network', 'VIOS');
+  takeMainFocus(ID_QUERY); 
+  clearFacets(true); 
+  emptyQueryGraph();
+  clearKeywords();
+  var cid = createId(); 
+  setQueryText($('#keywords').val()); 
+  addClassFacet(cid, 'http://www.vios.network/o/DataServer/Index', 'Indexed Content', true);  
+
+  var pid = createId(); 
+  addPropertyFacet(pid, 'http://www.vios.network/o/DataServer/Index/dataserver', 'dataserver');
+  takeMainFocus(pid);
+}
+
+function addDataspace(url, label, secure, sponger, silent){  
   var protocol = (secure) ? 'https://' : 'http://';
   if(url.startsWith('http')) protocol = '';
   if(ds.indexOfDataspace(protocol+url) >= 0) return;
@@ -5511,7 +6760,7 @@ function addDataspace(url, label, secure, silent){
       });
   }
 
-  selectDataspace(protocol+url, label, silent);
+  if(!silent) selectDataspace(protocol+url, label);
 
     ds.push([protocol+url, label]);
     try{
@@ -5536,9 +6785,9 @@ function selectDataspace(url, label, silent){
   service_fct_label = label;
   //service_fct = $('#dataSpaceMenu :selected').attr('value') + '/fct/service';
   //service_sparql = $('#dataSpaceMenu :selected').attr('value') + '/sparql';
-  service_fct = getProxyEndpoint(url) + '/fct/service';
-  service_sparql = getProxyEndpoint(url) + '/sparql';
-  LABEL_ROOT = '<i class="fa fa-cube" style="padding-bottom:4px;padding-right:2px;"></i>Root';// getDataspaceLabel();//.toUpperCase(); //<i class="fa fa-home" style="padding-bottom:4px;padding-right:2px;"></i>
+  service_fct = getRudiEndpoint(url) + '/fct/service';
+  service_sparql = getRudiEndpoint(url) + '/sparql';
+  LABEL_ROOT = '<i class="fa fa-book" style="padding-bottom:4px;padding-right:2px;"></i>&nbsp;Welcome to ' + getDataspaceLabel() + '!';// getDataspaceLabel();//.toUpperCase(); //<i class="fa fa-home" style="padding-bottom:4px;padding-right:2px;"></i>
 
   //if(url.indexOf('data.vios.network') >= 0) LABEL_ROOT = 'VIOS';
 
@@ -5613,14 +6862,14 @@ function pageTableLeft(){
 
 var page = 0;
 
-var groupByResultsCt = 0;
+var contentsCt = 0;
 
 //query.append(view);
 //doQuery();
 
 function resetPaging(){
   page = 0;
-  //groupByResultsCt = 0;
+  //contentsCt = 0;
   getMainFocus().find('view').attr('offset', 0);
 }
 
@@ -5648,7 +6897,7 @@ function loadTextResults(xml){
 
       var rows = "";
       var result = $(xml).find("fct\\:result")[0];
-      groupByResultsCt = $("fct\\:row", result).length;
+      contentsCt = $("fct\\:row", result).length;
         if(page == 0){
           $("#leftButton").addClass('hide');
           $('#leftButton').removeAttr('title');
@@ -5660,7 +6909,7 @@ function loadTextResults(xml){
           setTitle('leftButton', 'page ' + (page), 'bottom');
 
         }
-      if(groupByResultsCt < SIZE_RESULT_SET) {
+      if(contentsCt < SIZE_RESULT_SET) {
         $("#rightButton").addClass('hide');
         $('#rightButton').removeAttr('title');
       }
@@ -5673,6 +6922,7 @@ function loadTextResults(xml){
 
 
       var loadedUri = false;
+              var isGroupByCriteria = isGrouped(); // POI: For now, "Used As" fields are not treated as "group by", since they are not "added" from the Group by menu, but are instead added from the Used As menu
 
 
       $("fct\\:row", result).each(function(i) {
@@ -5748,7 +6998,6 @@ function loadTextResults(xml){
               var facet = false;
 
               //var groupByCriteria = getMainFocus();
-              var isGroupByCriteria = isGrouped(); // POI: For now, "Used As" fields are not treated as "group by", since they are not "added" from the Group by menu, but are instead added from the Used As menu
               //if(isGroupByCriteria){
                 //propIRI = groupByCriteria.attr('iri');
                 //propLabel = groupByCriteria.attr('label');
@@ -5948,11 +7197,11 @@ if(!isGroupByCriteria){
 } // loadTextResults
 
 function getFavicon(value){
-return '<img class="rounded-circle" height="16" width="16" src="http://www.google.com/s2/favicons?domain='+getHostName(value)+'" />';
+return '<img class="rounded-circle" height="16" width="16" src="https://www.google.com/s2/favicons?domain='+getHostName(value)+'" />';
 }
 
 function getFaviconUrl(value){
-return 'http://www.google.com/s2/favicons?domain='+getHostName(value);
+return 'https://www.google.com/s2/favicons?domain='+getHostName(value);
 }
 
 
@@ -6038,8 +7287,8 @@ function getGroupById(){
 }
 
 
-function loadGroupByResults(xml, focusVarName){
-      $('#'+ID_GROUP_BY+'').empty();
+function loadContents(xml, focusVarName){
+      //$('#'+ID_GROUP_BY+'').empty();
       $('#angular_recordsList').empty();
 
       // associate the focus with its corresponding SPARQL variable
@@ -6047,7 +7296,7 @@ function loadGroupByResults(xml, focusVarName){
 
       var rows = "";
       var result = $(xml).find("fct\\:result")[0];
-      groupByResultsCt = $("fct\\:row", result).length;
+      contentsCt = $("fct\\:row", result).length;
 /*      
         if(page == 0){
           $("#leftButton").attr('disabled', 'true');
@@ -6061,7 +7310,7 @@ function loadGroupByResults(xml, focusVarName){
           $('#leftButton').attr('title', 'page ' + (page));
 
         }
-      if(groupByResultsCt < SIZE_RESULT_SET) {
+      if(contentsCt < SIZE_RESULT_SET) {
         $("#rightButton").attr('disabled', 'true');
         $("#rightButton").addClass('disabled');
         $('#rightButton').removeAttr('title');
@@ -6085,7 +7334,7 @@ function loadGroupByResults(xml, focusVarName){
           setTitle('leftButton', 'page ' + (page), 'bottom');
 
         }
-      if(groupByResultsCt < SIZE_RESULT_SET) {
+      if(contentsCt < SIZE_RESULT_SET) {
         $("#rightButton").addClass('hide');
         $('#rightButton').removeAttr('title');
       }
@@ -6098,6 +7347,7 @@ function loadGroupByResults(xml, focusVarName){
 
 
       var loadedUri = false;
+              var isGroupByCriteria = isGrouped(); // POI: For now, "Used As" fields are not treated as "group by", since they are not "added" from the Group by menu, but are instead added from the Used As menu
 
 
       $("fct\\:row", result).each(function(i) {
@@ -6165,7 +7415,7 @@ rows += '<p class="description"> A digital camera is a device that records image
 rows += '</div>';
 rows += '<div class="col-md-3 col-12 text-center">';
 rows += '<p class="value3 mt-sm">9, 700 AVI</p>';
-rows += '<p class="fs-mini text-muted"> PER WEEK </p><a class="btn btn-primary btn-info btn-sm" href="#">Buy Now</a>';
+rows += '<p class="fs-mini text-muted"> PER WEEK </p><a class="btn btn-primary btn-info btn-sm" href="#">Rent Now</a>';
 rows += '</div>';
 rows += '</div>';
 rows += '</div>';
@@ -6183,7 +7433,7 @@ rows += '<p class="description"> St. Martin\'s history shares many commonalities
 rows += '</div>';
 rows += '<div class="col-md-3 col-12 text-center">';
 rows += '<p class="value3 mt-sm"> 1, 700 AVI </p>';
-rows += '<p class="fs-mini text-muted"> PER WEEK </p><a class="btn btn-primary btn-info btn-sm" href="#">Buy Now</a>';
+rows += '<p class="fs-mini text-muted"> PER WEEK </p><a class="btn btn-primary btn-info btn-sm" href="#">Rent Now</a>';
 rows += '</div>';
 rows += '</div>';
 rows += '</div>';
@@ -6278,7 +7528,6 @@ rows += '</section>';
               var facet = false;
 
               //var groupByCriteria = getMainFocus();
-              var isGroupByCriteria = isGrouped(); // POI: For now, "Used As" fields are not treated as "group by", since they are not "added" from the Group by menu, but are instead added from the Used As menu
               //if(isGroupByCriteria){
                 //propIRI = groupByCriteria.attr('iri');
                 //propLabel = groupByCriteria.attr('label');
@@ -6295,6 +7544,7 @@ rows += '</section>';
                 }
               });
               var checked = (facet) ? ' checked="checked"': '';
+              var hideCkbxClass = (facet) ? '': ' hide';
               var active = (facet) ? 'active': '';
 
               label = processLabel(label, value, datatype, lang);
@@ -6322,8 +7572,15 @@ var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'p
                 rows += '</div>';
                 rows += '</button>';
 */
-rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item'+((recordActive)?' record-active':'')+'" data-target="#">';
-                                rows +=  '<span class="thumb-sm float-left m-0 mr-1">';
+rows += '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item'+((recordActive)?' record-active':'')+'" data-target="#" onmouseover="$(\'.hidable'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'.hidable'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
+rows += '<div property="itemListElement" typeOf="Thing" class="hide">';
+rows += '<img property="logo" src="'+getFaviconUrl(value)+'" />';
+if(datatype == 'uri') rows += '<span property="url">'+value+'</span>';
+rows += '<span property="title">'+label+'</span>';
+rows += '</div>';
+
+                                var float = (isGroupByCriteria) ? ' float-left' : ' pull-right';
+                                rows +=  '<span class="thumb-sm'+float+' mr-1">';
 
 /*
 
@@ -6364,16 +7621,23 @@ if(true){
                 var propOrPropOf = (isReverse) ? "property-of" : "property";
                 var nodeType = (isReverse) ? NODE_TYPE_PROPERTY_OF: NODE_TYPE_PROPERTY;
                 //rows += '<a class="count" onclick="javascript: remove(\''+getMainFocus().attr('class')+'\', true); '+propOrPropOf+'(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\'); selectMenuItem(\''+id+'\', \''+propIRI+'\');">'+ct+'</a>&nbsp;-&nbsp;';
-                rows +=  '<span style="cursor:pointer" _ngcontent-c9="" class="badge badge-pill badge-'+badgeColor+'" onclick="javascript: removeEmptyFacet(\''+propOrPropOf+'\',\''+propIRI+'\', true); '+addPropOrPropOf+'(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\', \''+lang+'\'); selectMenuItem(\''+id+'\', \''+propIRI+'\');">'+ct+'</span>';
+                var ctAbbr = getCountLabel(ct);
+                var ctTitle = '';
+                if(ctAbbr != ct) ctTitle = buildTitle(ct, 'left');
+                rows +=  '<span '+ctTitle+' style="cursor:pointer" _ngcontent-c9="" class="badge badge-'+badgeColor+'" onclick="javascript: removeEmptyFacet(\''+propOrPropOf+'\',\''+propIRI+'\', true); '+addPropOrPropOf+'(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+sanitizeLabel(value)+'\', \''+sanitizeLabel(label)+'\', \''+datatype+'\', \''+lang+'\');">';
+                rows+=ctAbbr;
+                rows+='</span>';
               }
               else {
                 if(datatype=='uri') {
                   rows += '<img style="cursor:pointer" onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
+                  rows += '<i class="hide hidable'+id+' linkout la la-external-link la-lg text-secondary" '+buildTitle('open \''+label+'\' in WWW browser')+' onclick="javascript:linkOut(\''+value+'\')" ></i>';
                                     //rows +=  '<i class="status status-bottom bg-'+color+'"></i>';
                 }
                 else {
                   rows += '<span onmouseover="javascript:$(\'#focusValue\').addClass(\'queryFocusValue\')" onmouseout="javascript:$(\'#focusValue\').removeClass(\'queryFocusValue\')" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="icon-literal glyphicon glyphicon-tag"></span>';
                 }
+
               }
                                 rows +=  '</span>';
 
@@ -6383,7 +7647,7 @@ if(true){
 
               label = deSanitizeLabel(label);
               var labelLink = (datatype=='uri') ? ' onclick="javascript:describe(\''+rowId+'\', \''+value+'\');"' : '';
-              rows +=  '<h6 class="row-result text-ellipsis m-0" >';
+              rows +=  '<h6 id="rw'+rowId+'" class="row-result text-ellipsis m-0" >';
               rows+='<span '+buildTitle(value)+' '+labelLink+'>'+label+'</span>';
               //rows +=  '<p class="help-block text-ellipsis m-0"></p>';
 
@@ -6394,13 +7658,75 @@ if(true){
                   //rows += '<label _ngcontent-c6="" btncheckbox="" class="btn btn-default ng-untouched ng-valid '+active+' ng-dirty">';
                  // rows += 'Right way'
                   //rows += '</label>';
-          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-primary">';
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-primary'+hideCkbxClass+'">';
           rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {removeFacetValue(\''+propOrPropOf+'\',\''+propIRI+'\', \''+value+'\');}else{setPropertyValue(\''+createId()+'\', \''+nodeType+'\', \''+id+'\', \''+propIRI+'\', \''+propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')} doGroup(\''+propIRI+'\', \''+propLabel+'\');" />&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
 //                 rows += '<img title="click to drop-down" class="count" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
                  // rows += '<a title="click to drop-down" class="count" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"><img width="16" height="16"/>&nbsp;&nbsp;</a>&nbsp;';
-          rows += '<i '+buildTitle('acts as \''+propLabel+'\' of these things')+' class="expand la la-bars" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\')"></i>' + ((i==0) ? '<script type="text/javascript">expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\');</script>' :'');
+          rows += '<i '+buildTitle('acts as \''+propLabel+'\' of these things')+' class="expand la la-ellipsis-v text-secondary la-lg" onclick="javascript:expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\')"></i>' + ((i==0 && page==0) ? '<script type="text/javascript">expand(\''+value+'\', \''+datatype+'\', \''+lang+'\', \''+toJSONString(opts)+'\');</script>' :'');
+              }
+
+              else {
+                var dataserverClass = getQuery().children('class[iri="http://www.vios.network/o/DataServer/Index"]');
+                var sparqlServerClass = getMainFocus().children('class[iri="http://www.w3.org/ns/sparql-service-description#Service"]');
+                var isSparqlServer = sparqlServerClass && sparqlServerClass.length > 0;
+
+                
+                if( ( dataserverClass && dataserverClass.length > 0 ) || 
+                    isSparqlServer 
+                ){
+
+                  var isDataserver = getMainFocus().parent().attr('class') == ID_QUERY;
+                  //isDataserver = isDataserver && getMainFocus().attr('iri')=='http://www.vios.network/o/DataServer/Index/dataserver';
+                  //isNewDataserver = isNewDataserver;
+                  if(
+                    ( isDataserver && getMainFocus().attr('iri')=='http://www.vios.network/o/DataServer/Index/dataserver' ) ||
+                    isSparqlServer 
+                    ){
+//                  if(dataserverClass.attr('iri') == 'http://www.vios.network/o/DataServer'){
+
+                    var serverDomain = value;
+                    if(isSparqlServer) serverDomain = getHostName(serverDomain);
+
+                    checked=(ds.indexOfDataspace(value) >= 0) ? ' checked="checked"': '';
+                    hideCkbxClass = (ds.indexOfDataspace(value) >= 0) ? '': ' hide';
+                    rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-circle abc-checkbox-info'+hideCkbxClass+'">';
+                    rows += '<input '+buildTitle('Add ' +label+ ' to dataspace list', 'right')+' id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {doRemoveDataspace(\''+serverDomain+'\', true);}else{addDataspace(\''+serverDomain+'\', \''+label+'\', false, true);}" />&nbsp;';
+                    rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
+                    rows += '</div>';
+
+                    rows = rows.replace('id="'+opts.parentId+'" class="up', 'id="'+opts.parentId+'" class="up eventHandler');
+
+
+                    rows = rows.replace('id="'+opts.parentId+'"', 'id="'+opts.parentId+'" style="border-left: 3px solid #9964e3;"');
+
+                    //rows = rows.replace('<h6 id="rw'+rowId+'"', '<h6 id="rw'+rowId+'" style="color:#36393D;"');
+                    rows = rows.replace('class="rounded-circle"', 'class="rounded-circle hide"');
+                    rows = rows.replace('<i class="hide hidable'+id, '<i class="hide hidable');
+
+                    //rows += '<i '+buildTitle('Add dataspace', 'right')+'  onclick="javascript:addDataspace(\''+value+'\', \''+label+'\');takeMainFocus(ID_QUERY); clearFacets();" class="fa fa-plus-circle fa-lg text-inverse"></i>';
+                  }
+                }
+                  else {
+                      var libraryClass = getMainFocus().children('class[iri="http://www.w3.org/ns/sparql-service-description#NamedGraph"]');
+
+                        if(libraryClass && libraryClass.length > 0){
+                          /*
+                          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-circle abc-checkbox-warning">';
+                          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript:if(!$(this).is(\':checked\')) {removeGraphFacet();}else{takeMainFocus(ID_QUERY); clearFacets(true); stackGraphFacet(\''+value+'\', \''+label+'\');}" />&nbsp;';
+                          rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
+                          rows += '</div>';*/
+
+                          rows += '<button '+buildTitle('Enter '+label+' Library', 'top')+' id="filterbtn'+id+'" class="hide hidable'+id+' btn btn-warning btn-xs mb-xs btn-set-focus" type="button" onclick="javascript:takeMainFocus(ID_QUERY); clearFacets(true); stackGraphFacet(\''+value+'\', \''+label+'\');"><b class="la la-sign-in la-lg"></b></button>';
+                          rows += '<button '+buildTitle('Apply filter', 'right')+' id="entbtn'+id+'" class="hide hidable'+id+' btn btn-warning btn-xs mb-xs btn-enter-lib" type="button" onclick="javascript:setValue(\''+id+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')"><b class="la la-filter la-lg"></b></button>';
+                    rows = rows.replace('id="'+opts.parentId+'"', 'id="'+opts.parentId+'" style="border-left: 3px solid #ffc247;"');
+                    //rows = rows.replace('<h6 id="rw'+rowId+'"', '<span _ngcontent-c9="" class="badge badge-pill badge-warning">8</span><h6 id="rw'+rowId+'""');
+                    rows = rows.replace('class="rounded-circle"', 'class="rounded-circle hide"');
+                    rows = rows.replace('<i class="hide hidable'+id, '<i class="hide hidable');
+                        }
+                  }
+
               }
              // rows += '</td></tr>';
 
@@ -6429,8 +7755,7 @@ if(!isGroupByCriteria){
         //return total;
 
 
-
-} // loadGroupByResults
+} // loadContents
 
 /*
 function loadSubjectBadge(iri, propIRI, id, isReverse){
@@ -6546,7 +7871,7 @@ function expand(propVal, datatype, lang, optStr){
 
     fct_query(q, VIEW_TYPE_LIST_COUNT,opt);
 
-
+/*
     var q2 = q.clone();
     var prop2 = getFocus(q2).find((isReverse ? 'property-of' : 'property')+'[iri=\''+propIRI+'\']').filter(function() {return $(this).children('value').text() === propVal;});
     // branches query
@@ -6561,7 +7886,7 @@ function expand(propVal, datatype, lang, optStr){
     branch_opt.childrenId = opt.childrenId;
     branch_opt.branches = true;
     fct_query(q2, VIEW_TYPE_LIST_COUNT, branch_opt);
-
+*/
 
 }
 
@@ -6808,13 +8133,14 @@ function hideAlignButton(){
       $('#alignButton').unbind('click');
 }
 
+
 function loadCategoriesResults(xml){
       $('#'+ID_SHOW_ME+'').empty();
       $('#angular_showMeList').empty();
 
       var reverse = getMainFocus().prop('nodeName').toLowerCase();
       if(reverse == 'property') reverse = 'property-of';
-      else reverse = 'property';
+      //else reverse = 'property';
 
       var rows = "";
       var result = $(xml).find("fct\\:result")[0];
@@ -6872,6 +8198,62 @@ function loadCategoriesResults(xml){
       }
 
 
+
+if(showMePage == 0){
+ 
+      getMainFocus().children('class[exclude="yes"]').each(function(i){
+
+          var uri = $(this).attr('iri');
+          var label = $(this).attr('label');
+          var id = $(this).attr('class').trim();
+          var ct = 0;
+          var iriAttr = ' iri="' + uri + '"';
+
+
+          var opts = new Object();
+          opts.tag = TAG_CLASS;
+          opts.parentId = 'smr_'+id;
+          opts.childrenId = opts.tag + opts.parentId;
+          opts.contextId = id;
+
+
+          rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'.hidable'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'.hidable'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
+          rows +=  '<span class="thumb-sm float-left mr">';
+
+
+
+          var ckcolor = 'dark';
+          var badgeColor = 'danger';
+
+          var rowId = opts.parentId;
+
+
+
+          rows +=  '<span _ngcontent-c9="" class="total badge badge-'+badgeColor+'" onclick="javascript: removeFacet(\''+id+'\');">';
+          rows+= '<i class="fa fa-ban"></i>';
+          rows += '</span>';
+
+                                rows +=  '</span>';
+            rows +=  '<div>';
+          rows +=  '<h6 class="row-result text-ellipsis m-0" >';
+          rows += '<span '+buildTitle(uri)+' onclick="javascript:describe(\''+rowId+'\', \''+uri+'\');">' + label + '</span>';
+
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
+          rows += '<input class="form-check-input" id="ckbx'+id+'" type="checkbox" checked="checked" style="display:inline;" onclick="javascript: removeFacet(\''+id+'\');" />&nbsp;';
+          rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
+          rows += '</div>';
+          rows += '<i '+buildTitle('reverse filter')+' class="hide hidable'+id+' group la la-exchange ctrl-reverse-1 text-secondary" onclick="javascript:removeExcludeFacet(\''+id+'\');" ></i>';
+
+          rows +='</h6>';
+            rows +=  '</div>';
+          rows +=  '</a>';
+
+
+      });
+ 
+}
+
+
       // POI: custom logic for demo of MyVios Record category
       /*if(showMePage==0 && $('#nav0 > table > tbody > tr > td.via').text() == VALUE_ROOT) rows += '<tr><td><div class="up" id="'+ID_MY_RECORDS+'"><a href="#'+id+'" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')"><img src="http://icon-park.com/imagefiles/folder_icon_purple.png" width="16" height="16"/></a>&nbsp;<a title="'+VALUE_MANAGED_RECORD+'" href="#'+id+'">'+VALUE_MANAGED_RECORD+'</a> <span class="disabled">'+(Math.floor(Math.random() * 10000) + 1)+'<span></div></td></tr>';*/
       $("fct\\:row", result).each(function(i) {
@@ -6907,7 +8289,9 @@ function loadCategoriesResults(xml){
           opts.contextId = id;
 
 
-rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
+
+rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'.hidable'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'.hidable'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
+//rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
                                     //rows +=  '<img alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
 //                                    rows +=  '<span _ngcontent-c9="" class="badge badge-pill badge-info" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addClassFacet(\''+id+'\', \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</span>';
@@ -6934,11 +8318,17 @@ if(true){
           var facet = getMainFocus().children('class[iri=\''+uri+'\']');
           if((!facet || facet.length) <= 0 && getMainFocus().children('value') && getMainFocus().children('value').length > 0) facet = align;
           var checked = (facet && facet.length > 0) ? ' checked="checked"': '';
+          var hideCkbxClass = (facet && facet.length > 0) ? '': ' hide';
           var focusTarget = (getMainFocus().attr('class') == ID_QUERY+"") ? 'focusHeader' : 'focusValue';
           var focusTargetClass = (getMainFocus().attr('class') == ID_QUERY+"") ? 'queryFocus' : 'queryFocusValue';
           //rows += '<tr  id="rw'+id+'" onmouseover="javascript:showControls(\''+id+'\')" onmouseout="javascript:hideControls(\''+id+'\')"><td class="up" id="'+opts.parentId+'">';
 
-          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onmouseover="javascript:$(\'#'+focusTarget+'\').addClass(\''+focusTargetClass+'\')" onmouseout="javascript:$(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\')" onclick="javascript: $(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\'); var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</span>';
+          var ctAbbr = getCountLabel(ct);
+          var ctTitle = '';
+          if(ctAbbr != ct) ctTitle = buildTitle(ct, 'left');
+          rows +=  '<span '+ctTitle+' _ngcontent-c9="" class="total badge badge-'+badgeColor+'" onmouseover="javascript:$(\'#'+focusTarget+'\').addClass(\''+focusTargetClass+'\')" onmouseout="javascript:$(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\')" onclick="javascript: $(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\'); var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\', false, isXKeyDown())">';
+          rows+= ctAbbr;
+          rows += '</span>';
 //          rows += '<a class="count" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addClassFacet(\''+id+'\', \''+uri+'\', \''+sanitizeLabel(label)+'\')">'+ct+'</a>&nbsp;-&nbsp;';
           //rows += '<a title="'+uri+'" onclick="javascript:describe(\''+uri+'\');">'+ spaceCamelCase(label) +'</a>&nbsp;';
                                 rows +=  '</span>';
@@ -6948,20 +8338,36 @@ if(true){
               //rows +=  '<p class="help-block text-ellipsis m-0"></p>';
 
           //rows += '</td><td id="ctrl'+id+'" class="hideCtrl" style="white-space:nowrap; vertical-align:top;">';
-          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
-          rows += '<input class="form-check-input" id="ckbx'+id+'" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\')}" />&nbsp;';
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+''+hideCkbxClass+'">';
+          rows += '<input class="form-check-input" id="ckbx'+id+'" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\', false, isXKeyDown())}" />&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
           //rows += '<img title="view instances" class="count" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
 //          rows += '<a title="view instances" class="count" onclick="javascript:expandShowMe(\''+uri+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>';
           //rows += '</td></tr>';
-          rows += '<i '+buildTitle('preview category members')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+uri+'\', \''+label+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('preview category members')+' class="expand la la-ellipsis-v la-lg text-secondary" onclick="javascript:expandShowMe(\''+uri+'\', \''+label+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          if(checked) rows += '<i '+buildTitle('reverse filter')+' class="hide hidable'+id+' group la la-exchange ctrl-reverse-1 text-secondary" onclick="javascript:addExcludeFacet(\''+facet.attr('class')+'\');" ></i>';
+          else if(!isUseShortcuts) rows += '<i '+buildTitle('exclude')+' class="hide hidable'+id+' group la la-close ctrl-reverse-3 text-secondary" onclick="javascript: $(\'#'+focusTarget+'\').removeClass(\''+focusTargetClass+'\'); var cid = createId(); addClassFacet(cid, \''+uri+'\', \''+sanitizeLabel(label)+'\', false, true);" ></i>';
 
           rows +='</h6>';
             rows +=  '</div>';
           rows +=  '</a>';
 
-} // if false          
+
+
+
+if(showMeResultsCt == 1){
+  //addClassFacet(createId(), uri, label);
+}
+
+
+} // if false    
+
+
+
+
+
+
       });
       //console.log(rows);
 
@@ -6988,6 +8394,8 @@ if(getMainFocus().attr('class') != ID_QUERY && (!getMainFocus().children('value'
           else { 
           }  
 }
+
+
 
         //$('#groupby').append(rows);
         //return total;
@@ -7093,6 +8501,64 @@ function loadPropertiesResults(xml){
           setTitle('showMeRightButton', 'page ' + (showMePage+2), 'bottom');
       }
 
+if(showMePage == 0){
+
+
+      getMainFocus().children('property[exclude="yes"]').each(function(i){
+
+          var uri = $(this).attr('iri');
+          var label = $(this).attr('label');
+          var id = $(this).attr('class').trim();
+          var ct = 0;
+          var iriAttr = ' iri="' + uri + '"';
+
+
+          var opts = new Object();
+          opts.tag = TAG_CLASS;
+          opts.parentId = 'smr_'+id;
+          opts.childrenId = opts.tag + opts.parentId;
+          opts.contextId = id;
+
+
+          rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'.hidable'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'.hidable'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
+          rows +=  '<span class="thumb-sm float-left mr">';
+
+
+
+          var ckcolor = 'dark';
+          var badgeColor = 'danger';
+
+          var rowId = opts.parentId;
+
+
+
+          rows +=  '<span _ngcontent-c9="" class="total badge badge-'+badgeColor+'" onclick="javascript: removeFacet(\''+id+'\');">';
+          rows+= '<i class="fa fa-ban"></i>';
+          rows += '</span>';
+
+                                rows +=  '</span>';
+            rows +=  '<div>';
+          rows +=  '<h6 class="row-result text-ellipsis m-0" >';
+          rows += '<span '+buildTitle(uri)+' onclick="javascript:describe(\''+rowId+'\', \''+uri+'\');">' + label + '</span>';
+
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
+          rows += '<input class="form-check-input" id="ckbx'+id+'" type="checkbox" checked="checked" style="display:inline;" onclick="javascript: removeFacet(\''+id+'\');" />&nbsp;';
+          rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
+          rows += '</div>';
+          rows += '<i '+buildTitle('reverse filter')+' class="hide hidable'+id+' group la la-exchange ctrl-reverse-1 text-secondary" onclick="javascript:removeExcludeFacet(\''+id+'\');" ></i>';
+
+          rows +='</h6>';
+            rows +=  '</div>';
+          rows +=  '</a>';
+
+
+      });
+
+
+}
+
+
+
       // POI: demo code
       /*if(showMePage==0 && $('#nav0 > table > tbody > tr > td.via').text() == VALUE_ROOT) rows += '<tr><td><div class="up" id="'+ID_MY_RECORDS+'"><a href="#'+id+'" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')"><img src="http://icon-park.com/imagefiles/folder_icon_purple.png" width="16" height="16"/></a>&nbsp;<a title="'+VALUE_RECORD_MANAGER+'" href="#'+id+'">'+VALUE_RECORD_MANAGER+'</a> <span class="disabled">'+(Math.floor(Math.random() * 10000) + 1)+'<span></div></td></tr>';*/
 
@@ -7149,7 +8615,7 @@ if(isCategory && false) {
 }
 
 
-rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
+rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'.hidable'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'.hidable'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
                                     //rows +=  '<img alt="..." class="rounded-circle" src="'+getFaviconUrl(value)+'">';
                                    // rows +=  '<span _ngcontent-c9="" class="badge badge-pill badge-info" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addPropertyFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\');">'+ct+'</span>';
@@ -7176,10 +8642,16 @@ var rowId = opts.parentId;
 
           var facet = _root.find('.' + getMainFocus().attr('class') + ' > property[iri=\''+opts.propIRI+'\']');
           var checked = (facet && facet.length > 0) ? ' checked="checked"': '';
+          var hideCkbxClass = (facet && facet.length > 0) ? '': ' hide';
           //rows += '<tr id="'+id+'" onmouseover="javascript:showControls(\''+id+'\')" onmouseout="javascript:hideControls(\''+id+'\')"><td class="up" id="'+opts.parentId+'"><span id="'+id+'">';
           //var propIRI = $('#groupByMenu :selected').attr('value');
           //var propLabel = $('#groupByMenu :selected').text();
-          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(pid);">'+ct+'</span>';
+          var ctAbbr = getCountLabel(ct);
+          var ctTitle = '';
+          if(ctAbbr != ct) ctTitle = buildTitle(ct, 'left');
+          rows +=  '<span '+ctTitle+' _ngcontent-c9="" class="total badge badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\', undefined, undefined, undefined, undefined, !isXKeyDown(), isXKeyDown()); if(!isXKeyDown()) {takeMainFocus(pid);}">';
+          rows+=ctAbbr;
+          rows+='</span>';
                                 rows +=  '</span>';
             rows +=  '<div>';
 //          rows += '<a class="count" onmouseover="javascript:$(\'#focusHeader\').addClass(\'queryFocus\')" onmouseout="javascript:$(\'#focusHeader\').removeClass(\'queryFocus\')" onclick="javascript: addPropertyFacet(\''+id+'\', \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(\''+id+'\');">'+ct+'</a>&nbsp;-&nbsp;';
@@ -7191,14 +8663,17 @@ var rowId = opts.parentId;
 //          }
           //rows += '</span></td><td id="ctrl'+id+'" style="white-space:nowrap; vertical-align:top;">';          
           if(propIRI != GROUP_BY_NONE_VALUE){
-          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
-          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); }" />&nbsp;'; //generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+''+hideCkbxClass+'">';
+          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\', undefined, undefined, undefined, undefined, false, isXKeyDown()); }" />&nbsp;'; //generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
               //rows += '<img title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
-          rows += '<i '+buildTitle('preview field values')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+propLabel+'\' , \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('preview field values')+' class="expand la la-ellipsis-v la-lg text-secondary" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+propLabel+'\' , \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
 //              rows += '<a title="view values" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')">&nbsp;<img width="16" height="16"/></a>&nbsp;';
-          if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the contents list by \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\')" ></i>';
+          //if((facet && facet.length > 0) && !isTableShowing())
+            if(!isTableShowing()) rows += '<i '+buildTitle('group the contents list by \''+propLabel+'\'')+' class="hide hidable'+id+' group la la-compress text-secondary" onclick="javascript:if(!$(\'#ckbx'+id+'\').is(\':checked\')){var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\');}doGroup(\''+propIRI+'\', \''+propLabel+'\');" ></i>';
+            if(checked) rows += '<i '+buildTitle('reverse filter')+' class="hide hidable'+id+' group la la-exchange ctrl-reverse-2 text-secondary" onclick="javascript:addExcludeFacet(\''+facet.attr('class')+'\');" ></i>';
+            else if(!isUseShortcuts) rows += '<i '+buildTitle('exclude')+' class="hide hidable'+id+' group la la-close ctrl-reverse-4 text-secondary" onclick="javascript: var pid = createId(); addPropertyFacet(pid, \''+propIRI+'\', \''+propLabel+'\', undefined, undefined, undefined, undefined, false, true);" ></i>';
           }
           rows +='</h6>';
             rows +=  '</div>';
@@ -7300,6 +8775,63 @@ function loadPropertiesInResults(xml){
           setTitle('showMeRightButton', 'page ' + (showMePage+2), 'bottom');
       }
 
+
+if(showMePage == 0){
+      getMainFocus().children('property-of[exclude="yes"]').each(function(i){
+
+          var uri = $(this).attr('iri');
+          var label = $(this).attr('label');
+          var id = $(this).attr('class').trim();
+          var ct = 0;
+          var iriAttr = ' iri="' + uri + '"';
+
+
+          var opts = new Object();
+          opts.tag = TAG_CLASS;
+          opts.parentId = 'smr_'+id;
+          opts.childrenId = opts.tag + opts.parentId;
+          opts.contextId = id;
+
+
+          rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'.hidable'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'.hidable'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
+          rows +=  '<span class="thumb-sm float-left mr">';
+
+
+
+          var ckcolor = 'dark';
+          var badgeColor = 'danger';
+
+          var rowId = opts.parentId;
+
+
+
+          rows +=  '<span _ngcontent-c9="" class="total badge badge-'+badgeColor+'" onclick="javascript: removeFacet(\''+id+'\');">';
+          rows+= '<i class="fa fa-ban"></i>';
+          rows += '</span>';
+
+                                rows +=  '</span>';
+            rows +=  '<div>';
+          rows +=  '<h6 class="row-result text-ellipsis m-0" >';
+          rows += '<span '+buildTitle(uri)+' onclick="javascript:describe(\''+rowId+'\', \''+uri+'\');">' + label + '</span>';
+
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
+          rows += '<input class="form-check-input" id="ckbx'+id+'" type="checkbox" checked="checked" style="display:inline;" onclick="javascript: removeFacet(\''+id+'\');" />&nbsp;';
+          rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
+          rows += '</div>';
+          rows += '<i '+buildTitle('reverse filter')+' class="hide hidable'+id+' group la la-exchange ctrl-reverse-1 text-secondary" onclick="javascript:removeExcludeFacet(\''+id+'\');" ></i>';
+
+          rows +='</h6>';
+            rows +=  '</div>';
+          rows +=  '</a>';
+
+
+      });
+
+}
+
+
+
+
       $("fct\\:row", result).each(function(i) {
           //console.log($(this).html());
           var col = $(this).find("fct\\:column");
@@ -7340,13 +8872,14 @@ function loadPropertiesInResults(xml){
           var rowId = opts.parentId;
 
 
-rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
+rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'.hidable'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'.hidable'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
                                 rows +=  '<span class="thumb-sm float-left mr">';
 
 
 
           var facet = _root.find('.' + getMainFocus().attr('class') + ' > property-of[iri=\''+opts.propIRI+'\']');
           var checked = (facet && facet.length > 0) ? ' checked="checked"': '';
+          var hideCkbxClass = (facet && facet.length > 0) ? '': ' hide';
   //        rows += '<tr id="'+id+'" onmouseover="javascript:showControls(\''+id+'\')" onmouseout="javascript:hideControls(\''+id+'\')"><td class="up" id="'+opts.parentId+'"><span id="'+id+'">';
           //var propIRI = $('#groupByMenu :selected').attr('value');
           //var propLabel = $('#groupByMenu :selected').text();
@@ -7355,7 +8888,13 @@ var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'i
 
 var ckcolor = 'primary';
  
-          rows +=  '<span _ngcontent-c9="" class="total badge badge-pill badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\'); takeMainFocus(pid)">'+ct+'</span>';
+
+          var ctAbbr = getCountLabel(ct);
+          var ctTitle = '';
+          if(ctAbbr != ct) ctTitle = buildTitle(ct, 'left');
+          rows +=  '<span _ngcontent-c9="" '+ctTitle+' class="total badge badge-'+badgeColor+'" onclick="javascript: var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\', undefined, undefined, undefined, undefined, !isXKeyDown(), isXKeyDown()); if(!isXKeyDown()) {takeMainFocus(pid);}">';
+          rows+=ctAbbr;
+          rows+='</span>';
                                 rows +=  '</span>';
             rows +=  '<div>';
           rows +=  '<h6 class="row-result text-ellipsis m-0" >';
@@ -7365,13 +8904,16 @@ var ckcolor = 'primary';
             rows += '<span '+buildTitle(propIRI)+' onclick="javascript:describe(\''+rowId+'\', \''+propIRI+'\');">' + propLabel + '</span>';
           //rows += '</span></td><td id="ctrl'+id+'" class="hideCtrl" style="white-space:nowrap; vertical-align:top;">';          
           if(propIRI != GROUP_BY_NONE_VALUE){
-          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
-          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\');}"/>&nbsp;';//generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+''+hideCkbxClass+'">';
+          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' style="display:inline;" onclick="javascript: if(!$(this).is(\':checked\')) {removeFacet(\''+facet.attr('class')+'\')}else{var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\', undefined, undefined, undefined, undefined, false, isXKeyDown());}"/>&nbsp;';//generate pid here, in case user clicks this badge multiple times, otherwise, we get duplicate ids added to the nav path, and thus, multiple <view> elements in the query
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
-          rows += '<i '+buildTitle('preview rolees')+' class="expand la la-bars" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+propLabel+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
+          rows += '<i '+buildTitle('preview rolees')+' class="expand la la-ellipsis-v la-lg text-secondary" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+propLabel+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')"></i>';
               //rows += '<img title="shows up in the \''+propLabel+'\' field of these records" class="count" onclick="javascript:expandShowMe(\''+propIRI+'\', \''+datatype+'\', \''+toJSONString(opts)+'\')" width="16" height="16"/>';
-          if((facet && facet.length > 0) && !isTableShowing())rows += '<i '+buildTitle('group the contents list by role: \''+propLabel+'\'')+' class="group la la-compress" onclick="javascript:doGroup(\''+propIRI+'\', \''+propLabel+'\', true)" ></i>';
+          //if((facet && facet.length > 0) && !isTableShowing())
+           if(!isTableShowing()) rows += '<i '+buildTitle('group the contents list by role: \''+propLabel+'\'')+' class="hide hidable'+id+' group la la-compress text-secondary" onclick="javascript:if(!$(\'#ckbx'+id+'\').is(\':checked\')){var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\');}doGroup(\''+propIRI+'\', \''+propLabel+'\', true);" ></i>';
+           if(checked) rows += '<i '+buildTitle('reverse filter')+' class="hide hidable'+id+' group la la-exchange ctrl-reverse-2 text-secondary" onclick="javascript:addExcludeFacet(\''+facet.attr('class')+'\');" ></i>';
+           else if(!isUseShortcuts) rows += '<i '+buildTitle('exclude')+' class="hide hidable'+id+' group la la-close ctrl-reverse-4 text-secondary" onclick="javascript: var pid = createId(); addPropertyOfFacet(pid, \''+propIRI+'\', \''+propLabel+'\', undefined, undefined, undefined, undefined, false, true);" ></i>';
           }
 
           rows +='</h6>';
@@ -7490,7 +9032,7 @@ function loadGraphResults(xml){
           opts.propLabel = graphLabel;
 
 
-rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#">';
+rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-target="#" onmouseover="$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
                                // rows +=  '<span class="thumb-sm float-left mr">';
 
 
@@ -7499,6 +9041,7 @@ rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-
 
           var facet = _root.find('.' + ID_QUERY + '[graph=\''+graphIRI+'\']');
           var checked = (facet && facet.length > 0) ? ' checked="checked" ': '';
+          var hideCkbxClass = (facet && facet.length > 0) ? '': ' hide';
           //rows += '<tr><td class="up" id="'+opts.parentId+'"><span id="'+id+'">';
           //var propIRI = $('#groupByMenu :selected').attr('value');
           //var propLabel = $('#groupByMenu :selected').text();
@@ -7522,7 +9065,7 @@ rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-
                                     //rows +=  '<i class="status status-bottom bg-success"></i>';
 rows += '</span>';
 
-var ckcolor = 'primary';
+var ckcolor = 'warning';
 
 var rowId = opts.parentId;
 
@@ -7542,7 +9085,7 @@ var rowId = opts.parentId;
           //else 
           //rows += propLabel;
 //          rows += '</span></td><td id="ctrl'+id+'" class="hideCtrl" style="white-space:nowrap; vertical-align:top;">';          
-          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+'">';
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-'+ckcolor+''+hideCkbxClass+'">';
           rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' onclick="javascript: if(!$(this).is(\':checked\')) {removeGraphFacet();}else{setGraphFacet(\''+graphIRI+'\', \''+graphLabel+'\')}"/>&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
@@ -7573,7 +9116,42 @@ function updateInfoTab(b){
   updatePermalink();
 }
 
+function prepareFetchLibraries(){
+  $('.libraryLink').unbind('click');
+
+  if($('#libraryRowLink') && $('#libraryRowLink').length > 0){
+    $('#libraryRowLink').unbind('click');
+  }
+
+  $('.libraryLink').removeAttr('iri');
+  $('.libraryLink').removeAttr('irilabel');
+  $('.libraryLink').text('Library - unavailable');  
+}
+
+function fetchContentDesc(iri, id){
+  var graphClause = buildGraphClause('{<'+iri+'> <http://purl.org/dc/terms/description> ?o.} UNION {<'+iri+'> <http://www.w3.org/2000/01/rdf-schema#comment> ?o.}');
+  var sparql = 'select distinct ?o where{'+graphClause+'} limit 1';
+  var opt = new Object();
+  opt.tar = 'fetchContentDesc';
+  opt.id = id;
+  //$('.libraryRowCell').addClass('loading');
+  fct_sparql(sparql, opt);  
+}
+
+function fetchLibraries(s, p, oIRI, oValue){
+  var union = (oIRI) ? 'UNION {'+((oIRI && oIRI != 'undefined')? '<'+oIRI+'>' : '?o')+' <'+p+'> <'+s+'>.}' : '';
+  var sparql = 'select distinct ?g ?l where {graph ?g {{<'+s+'> <'+p+'> '+((oIRI && oIRI != 'undefined')? '<'+oIRI+'>' : '?o')+'.} '+union+' OPTIONAL{?g <http://www.w3.org/2000/01/rdf-schema#label> ?l} }}  limit 1';
+  var opt = new Object();
+  opt.tar = 'fetchLibraries';
+  //$('.libraryRowCell').addClass('loading');
+  fct_sparql(sparql, opt);  
+}
+
 function loadDescribeResults(xml, opt) {
+    var fixmeTop = $('.record-table').offset()
+    if(fixmeTop) fixmeTop = fixmeTop.top;     
+    prepareFetchLibraries();
+
     recordRDF = xml;
     $('#angular_recordViewer').empty();
 
@@ -7596,15 +9174,17 @@ function loadDescribeResults(xml, opt) {
     //var description = $(xml).children('rdf\\:Description')[0];
     //var triples = description.children();
     var table = $.createElement('table');
+    table.addClass('record-table');
     table.addClass('table');
     table.addClass('table-hover');
-    table.addClass('table-striped');
+    if(isTableStriped) table.addClass('table-striped');
 
     var header = $.createElement('thead');
     var body = $.createElement('tbody');
     table.append(header);
     var row = $.createElement('tr');
     var col = $.createElement('th');
+    col.css('padding-right', '3em');
     col.addClass('d-none');
     col.addClass('d-md-table-cell');
     col.css('cursor', 'pointer');
@@ -7613,6 +9193,7 @@ function loadDescribeResults(xml, opt) {
     row.append(col);
 
     col = $.createElement('th');
+    col.css('width', '100%');
     col.addClass('d-none');
     col.addClass('d-md-table-cell');
     col.text((showRecordRoles ? 'Of This' : 'Content'));
@@ -7620,6 +9201,9 @@ function loadDescribeResults(xml, opt) {
 
     //header.append(row);
     var namespaces = {};
+    var iris = {};
+    var fragIds = {};
+    var qnames = {};
 
     $('rdf\\:RDF', xml).each(function() {
         // this.attributes is not a plain object, but an array
@@ -7637,6 +9221,17 @@ function loadDescribeResults(xml, opt) {
 
     });
 
+    // .prop('nodeName') returns uppercase value
+    // create a map of the original values
+    var reg = /<(\w+):(\w+)[>|\s]/gm;
+    var result;
+    while((result = reg.exec(xml)) !== null) {
+        var qname = result[1];
+        var fragId = result[2];
+        iris[qname.toLowerCase() +':'+ fragId.toLowerCase()] = namespaces[qname] + fragId;
+        fragIds[fragId.toLowerCase()] = fragId;
+        qnames[qname.toLowerCase()] = qname;
+    }
 
     var desc;
     var categoryBadges = '';
@@ -7661,9 +9256,17 @@ function loadDescribeResults(xml, opt) {
     var homepage;
     var url;
 
+    var comments = new Array();
+
+    var libraryFetched;
+    var ctGloss = 0;
+
+
     var rows = '';
+
     $('rdf\\:Description', xml).each(function(i) {
         var subject = $(this).attr('rdf:about');
+        if(!subject) subject = 'nodeID://'+$(this).attr('rdf:nodeID');
         var subLabel = subject;
         if (getLabel(subject)) subLabel = getLabel(subject);
         $('*', this).each(function(j) {
@@ -7676,14 +9279,20 @@ function loadDescribeResults(xml, opt) {
             var propLabel = $(this).prop('nodeName').toLowerCase();
             var qname = propLabel.substring(0, propLabel.indexOf(':'));
             var fragId = propLabel.substring(propLabel.indexOf(':') + 1);
+            var propIRI = iris[qname+':'+fragId];
+            fragId = fragIds[fragId];
+            qname = qnames[qname];
+            propLabel = qname+':'+fragId;
+            // var propIRI = (namespaces[qname] + fragId;
+
             var lang = ($(this).attr('lang') && $(this).attr('lang').length > 0) ? $(this).attr('lang') : undefined;
             if (lang && lang != 'en') return;
 
             var isRole = objectIRI == uri; //propLabel.trim().toLowerCase().endsWith('of') || 
 
-            var proplink = $.createElement('a');
-            proplink.attr('href', namespaces[qname] + fragId);
-            setTitleOnElement(proplink, namespaces[qname] + fragId);
+            var proplink = $.createElement('span');
+            proplink.css('cursor', 'pointer');
+            setTitleOnElement(proplink, propIRI);
             if (propLabel == 'rdf:type') {
                 if (categoryBadges.length > 0) categoryBadges += '&nbsp;'; //;'<strong class="text-dark">&middot;</strong>';
 
@@ -7714,18 +9323,19 @@ function loadDescribeResults(xml, opt) {
 
 
             }
-            if ((namespaces[qname] + fragId) == 'http://www.w3.org/2000/01/rdf-schema#label' && !isRole) uriLabel = processLabel(deSanitizeLabel(objectValue)).replace(/\b\w/g, function(l) {
+            if (propIRI == 'http://www.w3.org/2000/01/rdf-schema#label' && !isRole) uriLabel = processLabel(deSanitizeLabel(objectValue)).replace(/\b\w/g, function(l) {
                 return l.toUpperCase()
             });
-            if ((namespaces[qname] + fragId) == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' && objectIRI == 'http://www.w3.org/2002/07/owl#Class') hasClass = true;
-            if ((namespaces[qname] + fragId) == 'http://xmlns.com/foaf/0.1/depiction'){// || (namespaces[qname]+fragId) == 'http://xmlns.com/foaf/0.1/logo' ){
+            if (propIRI == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' && objectIRI == 'http://www.w3.org/2002/07/owl#Class') hasClass = true;
+            if (propIRI == 'http://xmlns.com/foaf/0.1/depiction' && objectIRI && objectIRI.length > 0){// || (namespaces[qname]+fragId) == 'http://xmlns.com/foaf/0.1/logo' ){
                 //hasImage = true;
+                objectIRI = objectIRI.replace('http://', 'https://');
                 img = '<div class="pull-right"><img onclick="javascript:linkOut(\'' + objectIRI + '\');" style="cursor:pointer;width:200px; margin-left:.55em;" class="class="rounded img-thumbnail" src="' + objectIRI + '"/></div>';
                 imgIri = objectIRI;
             }
-            if (!desc && propLabel.endsWith(':comment')) desc = objectValue;
-            if (!desc && propLabel.endsWith(':abstract')) desc = objectValue;
-            if (!desc && propLabel.endsWith(':description')) desc = objectValue;
+            if (!desc && propLabel.endsWith('comment')) desc = objectValue;
+            if (propLabel.endsWith('abstract')) desc = objectValue;
+            if (propLabel.endsWith('description')) desc = objectValue; // foaf:description always overrides comments 
             if (propLabel.endsWith(':long')) long = objectValue;
             if (propLabel.endsWith(':lat')) lat = objectValue;
             if (propLabel.endsWith(':name')) name = objectValue;
@@ -7737,25 +9347,33 @@ function loadDescribeResults(xml, opt) {
             }
 
 
-            if ((namespaces[qname] + fragId) == 'http://www.w3.org/ns/prov#wasDerivedFrom'.toLowerCase()) wikiPage = (!objectValue) ? objectIRI : objectValue;
-            if ((namespaces[qname] + fragId) == 'http://www.w3.org/ns/prov#hadPrimarySource'.toLowerCase()) wikiPage = (!objectValue) ? objectIRI : objectValue;
-            if ((namespaces[qname] + fragId).toLowerCase() == 'http://schema.org/url'.toLowerCase()) url = (!objectValue) ? objectIRI : objectValue;
+            if (propIRI == 'http://www.w3.org/ns/prov#wasDerivedFrom') wikiPage = (!objectValue) ? objectIRI : objectValue;
+            if (propIRI == 'http://www.w3.org/ns/prov#hadPrimarySource') wikiPage = (!objectValue) ? objectIRI : objectValue;
+            if (propIRI == 'http://schema.org/url') url = (!objectValue) ? objectIRI : objectValue;
 
-            if ((namespaces[qname] + fragId).toLowerCase() == 'http://xmlns.com/foaf/0.1/phone'.toLowerCase()) phone = objectValue;
-            if ((namespaces[qname] + fragId).toLowerCase() == 'http://xmlns.com/foaf/0.1/homepage'.toLowerCase()) homepage = (!objectValue) ? objectIRI : objectValue;
+            if (propIRI == 'http://xmlns.com/foaf/0.1/phone') phone = objectValue;
+            if (propIRI == 'http://xmlns.com/foaf/0.1/homepage') homepage = (!objectValue) ? objectIRI : objectValue;
+
+            if (propIRI == 'http://www.w3.org/2000/01/rdf-schema#comment') comments.push(objectValue);
+
 
             //if(objectIRI == uri && !propLabel.trim().toLowerCase().endsWith('of')) propLabel += ' of';
             if (propLabel == 'RDF:TYPE') propLabel = 'category';
             proplink.css('color', '#495057');
             proplink.css('text-decoration', 'none');
-            propLabel = propLabel.toLowerCase();
+            proplink.addClass('link-prop-field');
+            //propLabel = propLabel.toLowerCase();
 
 
+            if(!libraryFetched){
+              fetchLibraries(subject, propIRI, objectIRI, objectValue);
+              libraryFetched = true;
+            }
 
             // skip the row if...
             if (isRole && !showRecordRoles) return;
             if (!isRole && showRecordRoles) return;
-            var propIRI = namespaces[qname] + fragId;
+            //var propIRI = namespaces[qname] + fragId;
             var facets = matchFocusProperties(propIRI, showRecordRoles);
             var ctxId = (facets && facets.length > 0) ? facets.attr('class') : createId();
             if (facets && facets.length > 0) propIRI = facets.attr('iri');
@@ -7763,7 +9381,7 @@ function loadDescribeResults(xml, opt) {
             if (propLabel == 'category') return;
 
             if (getLabel(propIRI)) propLabel = getLabel(propIRI);
-            proplink.text(propLabel);
+            proplink.append(processLabel(propLabel));
 
             if (!headerAdded) {
                 header.append(row);
@@ -7772,47 +9390,116 @@ function loadDescribeResults(xml, opt) {
 
             row = $.createElement('tr');
             col = $.createElement('td');
+            col.css('white-space', 'nowrap');
+            col.css('padding-right', '3em');
             //col.css('font-weight', '400');
             //col.addClass('d-none');
             //col.addClass('d-md-table-cell');
+            proplink.on('click', function (e){
+              var pid = createId();
+              if(showRecordRoles)addPropertyOfFacet(pid, propIRI, propLabel, undefined, undefined, undefined, undefined, true);
+              else addPropertyFacet(pid, propIRI, propLabel, undefined, undefined, undefined, undefined, true);
+              takeMainFocus(pid);
+            });
             col.append(proplink);
+
+            var hid = createId();
+            var filterBtn = $.createElement('i');
+            filterBtn.addClass('la');
+            filterBtn.addClass('la-filter');
+            filterBtn.addClass('text-primary');
+            filterBtn.addClass('hide');
+            filterBtn.css('position', 'absolute');
+            filterBtn.css('cursor', 'pointer');
+            filterBtn.on('click', function (e){
+              filterRecordViewFields = true;
+              if(showRecordRoles) addPropertyOfFacet(createId(), propIRI, propLabel);
+              else addPropertyFacet(createId(), propIRI, propLabel);
+            });
+            filterBtn.addClass('hidable'+hid);
+            col.append('&nbsp;&nbsp;');
+            col.append(filterBtn);
+            col.on('mouseover', function() {
+                $('.hidable' + hid).removeClass('hide');
+            });
+            col.on('mouseout', function() {
+                $('.hidable' + hid).addClass('hide');
+            });
+
             row.append(col);
 
+            var colId = createId();
             col = $.createElement('td');
+            col.attr('id', colId);
+            var gloss = getMainFocus().children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]');
+
+            if(gloss && gloss.length > 0 && propIRI == 'http://dbpedia.org/property/content' && objectIRI && objectIRI.length > 0){
+              if(ctGloss < SIZE_RESULT_SET) fetchContentDesc(objectIRI, colId);
+              ctGloss++;
+            }
             var cid = 'copy_' + createId();
             var loid = 'linkout_' + createId();
             col.on('mouseover', function() {
-                $('#' + cid).removeClass('hide');
-                $('#' + loid).removeClass('hide');
+                $('.hidable' + hid).removeClass('hide');
+//                $('#' + loid).removeClass('hide');
             });
             col.on('mouseout', function() {
-                $('#' + cid).addClass('hide');
-                $('#' + loid).addClass('hide');
+                $('.hidable' + hid).addClass('hide');
+//                $('#' + cid).addClass('hide');
+//                $('#' + loid).addClass('hide');
             });
             //col.attr('width', '100%');
             //col.addClass('d-none');
             //col.addClass('d-md-table-cell');
             if (objectIRI == uri) {
                 if (subject) {
-                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + subject + '\', \'' + processLabel(subLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(subLabel) + '</a>&nbsp;<img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(subject) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
-                    col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide link-field fa fa-external-link fa-sm" onclick="linkOut(\''+subject+'\')"></i>');
+                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + subject + '\', \'' + processLabel(subLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(subLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right la la-thumbs-o-up fa-lg text-inverse"></span><span class="hide hidable'+hid+' record-action-nix pull-right la la-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(subject) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
+                    col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field la la-external-link" onclick="linkOut(\''+subject+'\')"></i>');
                 } else col.text(objectValue);
             } else {
                 if (objectIRI) {
-                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(objLabel) + '</a>&nbsp;<img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(objectIRI) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
-                    col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide link-field fa fa-external-link fa-sm" onclick="linkOut(\''+objectIRI+'\')"></i>');
+                    col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(objLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right la la-thumbs-o-up fa-lg text-inverse"></span><span class="hide hidable'+hid+' record-action-nix pull-right la la-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(objectIRI) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
+                    col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field la la-external-link" onclick="linkOut(\''+objectIRI+'\')"></i>');
                 } else {
-                    col.text(objectValue); 
-                    col.prepend('<span style="cursor:pointer" class="pull-right icon-literal glyphicon glyphicon-tag" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + sanitizeLabel(objectValue) + '\', \'uri\', \'' + lang + '\');"></span>' );
-                    col.append('&nbsp;&nbsp;<i id="' + cid + '" onmouseout="$(\'#' + cid + '\').tooltip(\'hide\');$(\'#' + cid + '\').attr(\'data-original-title\', \'Copy to clipboard\');$(\'#' + cid + '\').tooltip();" ' + buildTitle('Copy to clipboard') + ' onclick="javascript:$(\'#' + cid + '\').tooltip(\'hide\');copy(\'' + sanitizeLabel(objectValue) + '\'); $(\'#' + cid + '\').attr(\'data-original-title\', \'Copied\');$(\'#' + cid + '\').tooltip(\'show\');" style="cursor:pointer;" class="hide fa fa-copy fa-sm"></i>');
+                    col.html(objectValue); 
+                    col.prepend('<span class="hide hidable'+hid+' record-action-nix pull-right la la-thumbs-o-down fa-lg text-danger"></span><span class="hide hidable'+hid+' record-action-highlight pull-right la la-thumbs-o-up fa-lg text-inverse"></span><span style="cursor:pointer" class="pull-right icon-literal glyphicon glyphicon-tag" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + sanitizeLabel(objectValue) + '\', \'uri\', \'' + lang + '\');"></span>' );
+                    col.append('&nbsp;&nbsp;<i id="' + cid + '" onmouseout="$(\'#' + cid + '\').tooltip(\'hide\');$(\'#' + cid + '\').attr(\'data-original-title\', \'Copy to clipboard\');$(\'#' + cid + '\').tooltip();" ' + buildTitle('Copy to clipboard') + ' onclick="javascript:$(\'#' + cid + '\').tooltip(\'hide\');copy(\'' + sanitizeLabel(objectValue) + '\'); $(\'#' + hid + '\').attr(\'data-original-title\', \'Copied\');$(\'#' + cid + '\').tooltip(\'show\');" style="cursor:pointer;" class="hide hidable'+hid+' fa fa-copy fa-sm"></i>');
                 }
             }
             row.append(col);
 
             body.append(row);
+
         });
     });
 
+
+
+
+    var libraryIRI = $('.libraryLink').attr('iri');
+    var libraryLabel = $('.libraryLink').attr('irilabel');
+    var onclick = 'onclick="javascript:setGraphFacet(\''+libraryIRI+'\', \''+libraryLabel+'\');"';
+    var onclickLinkOut = 'onclick="javascript:linkOut(\''+libraryIRI+'\');"';
+    if(!libraryIRI || libraryIRI == 'undefined') {
+      libraryIRI = 'unavailable';
+      libraryLabel = 'unavailable';
+      onclick = '';
+      onclickLinkOut = '';
+    }
+    var lbid = createId();
+    body.prepend('<tr onmouseover="$(\'.hidable' + lbid +'\').removeClass(\'hide\');" onmouseout="$(\'.hidable' + lbid + '\').addClass(\'hide\');"><td class="libraryRowCell">library</td><td  class="libraryRowCell" style="width:100%"><a id="libraryRowLink" '+buildTitle( libraryIRI )+' '+onclick+' class="link-field">'+libraryIRI+'</a>&nbsp;&nbsp;<i id="'+lbid+'" style="cursor:pointer;" class="libraryRowLinkOut hide hidable'+lbid+' link-field la la-external-link" '+onclickLinkOut+'></i></td></tr>');
+
+/*
+    var graph = $('.libraryLink').attr('iri');
+    if(dataspace.indexOf('linkeddata.uriburner.com') > 0 && graph && graph.length > 0) uri = graph;
+    if(!uriLabel || uriLabel.length <= 0){
+      uriLabel = uri;
+      if (getLabel(uri)) uriLabel = getLabel(uri);
+      uriLabel = processLabel(uriLabel).replace(/\b\w/g, function(l) {
+          return l.toUpperCase()
+      });
+    }
+*/
     uriLabel = uriLabel.replace('\'S', '\'s');
     uriLabel = uriLabel.replace('\'T', '\'t');
 
@@ -7823,6 +9510,7 @@ function loadDescribeResults(xml, opt) {
 
 
     if (showIDN) {
+        //$('#idn_content').removeClass('hide');
 
         uriLabel = '';
         for (i = 0; i < uriLabalArray.length; i++) {
@@ -7858,29 +9546,212 @@ content += '</section>';
 
 
 
+        var imgClass = createId();
+        var fetchUnsplashPhoto = !imgIri;
+        var photoAuthId = '';
+        var photoAuthURL = '';
         content += '<div class="widget-top-overflow text-white">';
-        content += '<div class="height-250 overflow-hidden">';
-        content += '<img class="img-fluid" src="'+imgIri+'">';//https://demo.flatlogic.com/sing-app/angular/assets/img/pictures/3.jpg //assets/img/pictures/19.jpg
+        content += '<div class="height-250 overflow-hidden text-center" style="background-color: #36393D">';
+        content += '<img class="'+imgClass+' img-fluid" src="'+imgIri+'">';//https://demo.flatlogic.com/sing-app/angular/assets/img/pictures/3.jpg //assets/img/pictures/19.jpg
+        if(fetchUnsplashPhoto) {
+          var photoSearch = buttonLabel;
+          photoSearch = photoSearch.replaceAll('(', ' ');
+          photoSearch = photoSearch.replaceAll(')', ' ');
+          photoSearch = photoSearch.trim();
+          getPhoto(photoSearch, function(photoURL, authId, authURL){
+            $('.'+imgClass).attr('src', photoURL);
+            photoAuthId = authId;
+            photoAuthURL = authURL;
+            $('#photoAuthorAttribution').attr('href', authURL);
+            $('#photoAuthorAttribution').text(authId);
+          });
+        }
         content += '</div>';
+
         content += '<div class="btn-toolbar">';
         content += '<a class="btn btn-outline btn-sm pull-right mr-1" href="#">';
-        content += '<i class="glyphicon glyphicon-shopping-cart mr-xs"></i> Buy Now ';
+        content += ' Edit <i class="fa fa-ticket"></i>';
         content += '</a>';
         content += '</div>';
         content += '</div>';
 
         content += '<div class="row">';
         content += '<div class="col-md-5 col-12 text-center">';
+
+/*
         content += '<div class="post-user post-user-profile">';
-        content += '<span class="thumb-xl"><img alt="..." class="rounded-circle" src="assets/img/people/a5.jpg"></span>';
-        content += '<h5 class="fw-normal">IDN: '+uriLabel+'</h5>';
+        content += '<span class="thumb-xl"><img alt="..." class="rounded-circle" src="assets/img/avatar.png"></span>';
+        content += '<h5 class="fw-normal"><legend>Idenity Node</legend> '+uriLabel+'</h5>';
         content += '<p>Owner: jnash</p>';
         content += '<p>Price: 0.03 ETH</p>';
         content += '<p>Price Valid Through: 10/03/2020</p>';
+        if(fetchUnsplashPhoto) content += '<a class="btn btn-inverse btn-sm mt-sm" href="#"> &nbsp;Buy Now <i class="fa fa-ticket ml-xs text-info"></i>&nbsp; </a><br/>';
+        content += '<a class="btn btn-inverse btn-sm mt-sm" href="#"> &nbsp;Tip Owner <i class="fa fa-ticket text-info ml-xs"></i>&nbsp; </a><br/>';
         content += '<a class="btn btn-danger btn-sm mt-sm" href="#"> &nbsp;Private Message <i class="fa fa-envelope ml-xs"></i>&nbsp; </a>';
         content += '<ul class="contacts">';
-        /*    content += '<li><i class="fa fa-lg fa-phone fa-fw mr-xs"></i><a href="#"> +375 29 555-55-55</a></li>';
-            content += '<li><i class="fa fa-lg fa-envelope fa-fw mr-xs"></i><a href="#"> psmith@example.com</a></li>';*/
+
+        content += '<li><i class="fa fa-lg fa-map-marker fa-fw mr-xs"></i><a href="#"> Minsk, Belarus</a></li>';
+        content += '</ul>';
+        content += '</div>';
+        */
+
+
+        content += '<div class="list-group">';
+          content += '<a href="#" class="list-group-item active">Info Feed</a>';
+          content += '<a href="#" class="list-group-item">Videos and media</a>';
+          content += '<a href="#" class="list-group-item">Articles and stories</a>';
+          content += '<a href="#" class="list-group-item">See also</a>';
+          content += '<a href="#" class="list-group-item">References</a>';
+          content += '<a href="#" class="list-group-item">External links</a>';
+        content += '</div>';
+
+
+
+        content += '</div>';
+        content += '<div class="col-md-7 col-12">';
+
+        content += '<h5 class="fw-normal text-center">'+uriLabel+'</h5>';
+
+
+        content += '<div class="stats-row stats-row-profile mt text-center">';
+        
+        content += '<div class="stat-item">';
+        content += '<p class="value text-left">9, 700</p>';
+        content += '<h6 class="name">AVI</h6>';
+        content += '</div>';
+        content += '<div class="stat-item">';
+        content += '<p class="value text-left">9.38%</p>';
+        content += '<h6 class="name">Prevelance</h6>';
+        content += '</div>';
+        content += '<div class="stat-item">';
+        content += '<p class="value text-left">842</p>';
+        content += '<h6 class="name">Performance</h6>';
+        content += '</div>';
+        
+
+
+
+        content += '</div>';
+
+
+
+/*
+        content += '<p class="text-left mt-lg">';
+        content += '<a class="badge badge-warning rounded-0" href="#"><i class="fa fa-ticket"></i> Identity </a>';
+        content += '<a class="badge badge-danger rounded-0 ml-xs" href="#"><i class="fi flaticon-diamond"></i> Genesis </a>';
+        content += '<a class="badge badge-success rounded-0 ml-xs" href="#"> Claimed </a>';
+        content += '</p>';
+*/
+
+        if(desc) {
+          var descAbbrv = desc;
+          if(descAbbrv.length > 50) descAbbrv = descAbbrv.substring(0, 500) + '...';
+          content += '<p> '+descAbbrv+' </p>';
+        }
+        content += '<legend> Fast Facts </legend>';
+        content += '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus non arcu aliquet, gravida nisl eget, gravida mi. Proin vitae augue sit amet massa cursus imperdiet dapibus dapibus leo. Praesent nisl tortor, blandit sed feugiat sit amet, egestas sit amet nisi. Aenean imperdiet elementum purus, a euismod odio interdum sit amet. </p>';
+        if(fetchUnsplashPhoto) content += '<legend>Photo Details</legend> Author: <a id="photoAuthorAttribution" href="'+photoAuthURL+'">'+photoAuthId+'</a>, Dataspace: <a href="https://www.unsplash.com">Unsplash</a></p>';
+        content += '</div>';
+
+        content += '</div>';
+        content += '<div id="ownerDIV" style="padding:1em;">';
+
+        /*
+        if(uri == 'http://dbpedia.org/resource/Kingsley_Idehen'){
+          content += '<span></span>';
+        }
+        else {
+          content += '<i class="fa fa-asterisk"></i>&nbsp;<span>The owner has not yet posted content here.</span>';
+        }
+        */
+
+        content += '<legend>Background</legend>';
+        content += '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus non arcu aliquet, gravida nisl eget, gravida mi. Proin vitae augue sit amet massa cursus imperdiet dapibus dapibus leo. Praesent nisl tortor, blandit sed feugiat sit amet, egestas sit amet nisi. Aenean imperdiet elementum purus, a euismod odio interdum sit amet.</p>';
+
+        content += '<legend>Innovations and design</legend>';
+        content += '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus non arcu aliquet, gravida nisl eget, gravida mi. Proin vitae augue sit amet massa cursus imperdiet dapibus dapibus leo. Praesent nisl tortor, blandit sed feugiat sit amet, egestas sit amet nisi. Aenean imperdiet elementum purus, a euismod odio interdum sit amet. </p>';
+
+/*
+content += '<section class="widget" widget="">';
+   content += '<div class="widget-body">';
+      content += '<div class="mt mb" flot-chart-animator="" id="flot-main" style="width: 100%; height: 260px; padding: 0px; position: relative;" ng-reflect-data="[object Object],[object Object">';
+         content += '<canvas class="flot-base" width="713" style="direction: ltr; position: absolute; left: 0px; top: 0px; width: 713.328px; height: 260px;" height="260"></canvas>';
+         content += '<div class="flot-text" style="position: absolute; top: 0px; left: 0px; bottom: 0px; right: 0px; font-size: smaller; color: rgb(84, 84, 84);">';
+            content += '<div class="flot-x-axis flot-x1-axis xAxis x1Axis" style="position: absolute; top: 0px; left: 0px; bottom: 0px; right: 0px;">';
+               content += '<div style="position: absolute; max-width: 118px; top: 246px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 32px; text-align: center;">2</div>';
+               content += '<div style="position: absolute; max-width: 118px; top: 246px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 167px; text-align: center;">3</div>';
+               content += '<div style="position: absolute; max-width: 118px; top: 246px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 301px; text-align: center;">4</div>';
+               content += '<div style="position: absolute; max-width: 118px; top: 246px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 436px; text-align: center;">5</div>';
+               content += '<div style="position: absolute; max-width: 118px; top: 246px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 571px; text-align: center;">6</div>';
+               content += '<div style="position: absolute; max-width: 118px; top: 246px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 706px; text-align: center;">7</div>';
+            content += '</div>';
+            content += '<div class="flot-y-axis flot-y1-axis yAxis y1Axis" style="position: absolute; top: 0px; left: 0px; bottom: 0px; right: 0px;">';
+               content += '<div style="position: absolute; top: 220px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 8px; text-align: right;">0</div>';
+               content += '<div style="position: absolute; top: 188px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 8px; text-align: right;">5</div>';
+               content += '<div style="position: absolute; top: 157px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 3px; text-align: right;">10</div>';
+               content += '<div style="position: absolute; top: 126px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 4px; text-align: right;">15</div>';
+               content += '<div style="position: absolute; top: 94px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 1px; text-align: right;">20</div>';
+               content += '<div style="position: absolute; top: 63px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 2px; text-align: right;">25</div>';
+               content += '<div style="position: absolute; top: 32px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 1px; text-align: right;">30</div>';
+               content += '<div style="position: absolute; top: 1px; font: bold 11px/13px Montserrat, sans-serif; color: rgb(119, 119, 119); left: 2px; text-align: right;">35</div>';
+            content += '</div>';
+         content += '</div>';
+         content += '<canvas class="flot-overlay" width="713" style="direction: ltr; position: absolute; left: 0px; top: 0px; width: 713.328px; height: 260px;" height="260"></canvas>';
+      content += '</div>';
+      content += '<div class="chart-tooltip" id="flot-main-tooltip" style="opacity: 0"></div>';
+      content += '<p class="fs-mini text-muted"> Flot is a <span class="fw-semi-bold">pure</span> JavaScript plotting library for jQuery, with a focus on simple usage, attractive looks and interactive features. </p>';
+      content += '<h5 class="mt">Growth by <span class="fw-semi-bold">Year</span></h5>';
+      content += '<div class="row mt">';
+         content += '<div class="col-md-6 col-12">';
+            content += '<div class="stats-row">';
+               content += '<div class="stat-item">';
+                  content += '<p class="value5 fw-thin">34 567</p>';
+                  content += '<h6 class="name text-muted m-0 fs-mini">Overall Values</h6>';
+               content += '</div>';
+               content += '<div class="stat-item stat-item-mini-chart">';
+                  content += '<div class="sparkline" jq-sparkline="" ng-reflect-data="9,12,14,15,10,14,20" ng-reflect-options="[object Object]">';
+                     content += '<canvas width="54" height="30" style="display: inline-block; width: 54px; height: 30px; vertical-align: top;"></canvas>';
+                  content += '</div>';
+               content += '</div>';
+            content += '</div>';
+         content += '</div>';
+         content += '<div class="col-md-6 col-12">';
+            content += '<div class="stats-row">';
+               content += '<div class="stat-item">';
+                  content += '<p class="value5 fw-thin">34 567</p>';
+                  content += '<h6 class="name text-muted m-0 fs-mini">Overall Values</h6>';
+               content += '</div>';
+               content += '<div class="stat-item stat-item-mini-chart">';
+                  content += '<div class="sparkline" jq-sparkline="" ng-reflect-data="9,12,14,15,10,14,20" ng-reflect-options="[object Object]">';
+                     content += '<canvas width="54" height="30" style="display: inline-block; width: 54px; height: 30px; vertical-align: top;"></canvas>';
+                  content += '</div>';
+               content += '</div>';
+            content += '</div>';
+         content += '</div>';
+      content += '</div>';
+//      content += '<p class="fs-mini text-muted"> This jQuery plugin generates sparklines (small inline charts) directly in the browser using data supplied either inline in the HTML, or via javascript. </p>';
+   content += '</div>';
+content += '</section>';
+*/
+        content += '<legend>Honors and awards</legend>';
+        content += '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus non arcu aliquet, gravida nisl eget, gravida mi. Proin vitae augue sit amet massa cursus imperdiet dapibus dapibus leo. Praesent nisl tortor, blandit sed feugiat sit amet, egestas sit amet nisi. Aenean imperdiet elementum purus, a euismod odio interdum sit amet.</p>';
+
+        content += '<legend>See also</legend>';
+        content += '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus non arcu aliquet, gravida nisl eget, gravida mi. Proin vitae augue sit amet massa cursus imperdiet dapibus dapibus leo. Praesent nisl tortor, blandit sed feugiat sit amet, egestas sit amet nisi. Aenean imperdiet elementum purus, a euismod odio interdum sit amet.</p>';
+
+        content += '<legend>References</legend>';
+        content += '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus non arcu aliquet, gravida nisl eget, gravida mi. Proin vitae augue sit amet massa cursus imperdiet dapibus dapibus leo. Praesent nisl tortor, blandit sed feugiat sit amet, egestas sit amet nisi. Aenean imperdiet elementum purus, a euismod odio interdum sit amet.</p>';
+
+        content += '<legend>External links</legend>';
+        content += '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus non arcu aliquet, gravida nisl eget, gravida mi. Proin vitae augue sit amet massa cursus imperdiet dapibus dapibus leo. Praesent nisl tortor, blandit sed feugiat sit amet, egestas sit amet nisi. Aenean imperdiet elementum purus, a euismod odio interdum sit amet.</p>';
+
+        content += '</div>';
+
+
+
+
+/* OLD IDN - SAVE 
+
 
         content += '<li><i class="fa fa-lg fa-map-marker fa-fw mr-xs"></i><a href="#"> Minsk, Belarus</a></li>';
         content += '</ul>';
@@ -7902,16 +9773,30 @@ content += '</section>';
         content += '</div>';
         content += '</div>';
         content += '<p class="text-left mt-lg">';
-        content += '<a class="badge badge-warning rounded-0" href="#"> Identity </a>';
-        content += '<a class="badge badge-danger rounded-0 ml-xs" href="#"> Genesis </a>';
+        content += '<a class="badge badge-warning rounded-0" href="#"><i class="fa fa-ticket"></i> Identity </a>';
+        content += '<a class="badge badge-danger rounded-0 ml-xs" href="#"><i class="fi flaticon-diamond"></i> Genesis </a>';
         content += '<a class="badge badge-success rounded-0 ml-xs" href="#"> Claimed </a>';
         content += '</p>';
-        if(desc) content += '<p class="lead mt-lg"> '+desc+' </p>';
+        if(desc) {
+          var descAbbrv = desc;
+          if(descAbbrv.length > 50) descAbbrv = descAbbrv.substring(0, 500) + '...';
+          content += '<p class="lead mt-lg"> '+descAbbrv+' </p>';
+        }
         content += '<legend> About </legend>';
         content += '<p>An identity node (IDN) is a non-fungible token that represents a data asset (e.g. the URI of a physical location). VIOS Network data assets are assigned unique identifiers which are linked to a non-fungible token called an Identity Node (aka IDN). The IDN is a VIP 181 token. </p>';
+        if(fetchUnsplashPhoto) content += '<legend>Photo Details</legend> Author: <a id="photoAuthorAttribution" href="'+photoAuthURL+'">'+photoAuthId+'</a>, Dataspace: <a href="https://www.unsplash.com">Unsplash</a></p>';
         content += '</div>';
+        content += '</div>';
+        content += '<div id="ownerDIV" style="padding:1em;">';
+        if(uri == 'http://dbpedia.org/resource/Kingsley_Idehen'){
+          content += '<>';
+        }
+        else {
+          content += '<i class="fa fa-asterisk"></i>&nbsp;<span>The owner has not yet posted content here.</span>';
+        }
         content += '</div>';
 
+*/ // end OLD IDN
 
 
         /*
@@ -7977,6 +9862,7 @@ content += '</section>';
 
     } //
     else {
+        $('#idn_content').addClass('hide');
 
         if (isMovie) {
             if (!actions) actions = '';
@@ -8002,9 +9888,23 @@ content += '</section>';
             else tools += '&nbsp;';
             //tools += '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer"  style="cursor:pointer" '+buildTitle('View in Wikipedia')+' onclick="javascript:linkOut(\''+wikiPage+'\')" class="fa fa-wikipedia-w fa-lg"></i>';        
             $('#angular_recordViewer').attr('src', wikiPage);
+            if(wikiPage.startsWith('dsn://')) {
+              $('.www-toolbar-item').addClass('hide');
+            }
+            else {
+              $('.www-toolbar-item').removeClass('hide');
+              $('.www-toolbar-item').text('WWW - ' + wikiPage);
+            }
         }
         if (url) {
             $('#angular_recordViewer').attr('src', url);
+            if(url.startsWith('dsn://')) {
+              $('.www-toolbar-item').addClass('hide');
+            }
+            else {
+              $('.www-toolbar-item').removeClass('hide');
+              $('.www-toolbar-item').text('WWW - ' + url);
+            }
         }
 
 
@@ -8015,7 +9915,7 @@ content += '</section>';
         }
         uriLabel = uriLabel.trim();
 
-        $('#angular_recordViewer').append('<h3 onclick="javascript:linkOut(\'' + uri + '\');" ' + buildTitle('Visit ' + sanitizeLabel(uri)) + ' style="cursor:pointer;padding-top:1em; padding-left:.55rem; padding-right:.55rem;">' + uriLabel + '</h3>' + (tools ? tools : '') + '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \'' + sanitizeLabel(uri) + '\')" class="p-2 glyphicon glyphicon-filter text-' + ((filterRecordViewFields) ? 'info' : 'muted') + '"></i>'); //((body.children().length <= 0 && filterRecordViewFields)?'<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = false; describe(\''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-info"></i>':''));
+        $('#angular_recordViewer').append('<h3 id="recordTitle" onclick="javascript:linkOut(\'' + uri + '\');" ' + buildTitle('Visit ' + sanitizeLabel(uri)) + ' style="cursor:pointer;padding-top:1em; padding-left:.55rem; padding-right:.55rem;">' + uriLabel + '</h3>' + (tools ? tools : '') + '<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \'' + sanitizeLabel(uri) + '\')" class="p-2 la la-ellipsis-v la-2x text-' + ((filterRecordViewFields) ? 'primary' : 'danger') + '"></i>');//glyphicon glyphicon-filter //((body.children().length <= 0 && filterRecordViewFields)?'<i style="position:absolute; right:0; top:0; margin-bottom:4px;cursor:pointer" onclick="javascript:filterRecordViewFields = false; describe(\''+sanitizeLabel(uri)+'\')" class="p-2 glyphicon glyphicon-filter text-info"></i>':''));
         if (desc) {
             $('#angular_recordViewer').append('<div style="padding-left:.55rem; padding-right:.55rem; ">' + (img ? img + desc : desc) + '</div>');
         } else if (img) {
@@ -8044,18 +9944,21 @@ content += '</section>';
         $('#angular_recordViewer').append('<p/>');
         $('#angular_recordViewer').append('<p/>');
         var tabs = '<div class="clearfix"><ul class="nav nav-tabs float-left" id="infoTabButton" role="tablist"> ';
+        //tabs += '<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"> Dropdown <b class="caret"></b></a><div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 45px, 0px); top: 0px; left: 0px; will-change: transform;"><a aria-controls="dropdown1" aria-expanded="true" class="dropdown-item show" data-toggle="tab" href="#dropdown1" id="dropdown1-tab" role="tab" aria-selected="true">@fat</a><a aria-controls="dropdown2" aria-expanded="true" class="dropdown-item active show" data-toggle="tab" href="#dropdown2" id="dropdown2-tab" role="tab" aria-selected="true">@mdo</a></div></li>
+        tabs += '<li class="nav-item dropdown">';
+        tabs += '<a aria-controls="info" aria-haspopup="true" aria-expanded="true" class="nav-link dropdown-toggle active" data-toggle="dropdown" href="#info" id="info-tab" role="button"> '+(showRecordRoles?'Roles':'Fields')+' <b class="caret"></b></a>';
+        tabs += '<div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 45px, 0px); top: 0px; left: 0px; will-change: transform;">';
+        tabs += '<a onclick="javascript:updateInfoTab(false);" onclick="$(\'#info-tab\').text(\' Info: Fields \'); showRecordRoles = false; updatePermalink();" aria-controls="fields" aria-expanded="false" class="dropdown-item show'+((showRecordRoles) ? '' : ' active')+'" data-toggle="tab" href="#fields" id="fields-tab" role="tab" aria-selected="'+((showRecordRoles) ? 'false' : 'true')+'">Fields</a>';
+        tabs += '<a onclick="javascript:updateInfoTab(true);" onclick="$(\'#info-tab\').text(\' Info: Roles \'); showRecordRoles = true; updatePermalink();" aria-controls="roles" aria-expanded="false" class="dropdown-item show'+((showRecordRoles) ? ' active' : '')+'" data-toggle="tab" href="#roles" id="roles-tab" role="tab" aria-selected="'+((showRecordRoles) ? 'true' : 'false')+'">Roles</a></div>';
+        tabs += '</li>';
+        tabs += '<li class="nav-item"><a aria-controls="tools" aria-expanded="false" class="nav-link" data-toggle="tab" href="#tools" id="tools-tab" role="tab"> Options </a></li>';
         if (isFastFood) {
             tabs += '<li class="nav-item"><a aria-controls="menu" aria-expanded="false" class="nav-link" data-toggle="tab" href="#menu" id="menu-tab" role="tab">Menu</a></li>';
             tabs += '<li class="nav-item"><a aria-controls="review" aria-expanded="false" class="nav-link" data-toggle="tab" href="#review" id="review-tab" role="tab">Reviews</a></li>';
         }
-        //tabs += '<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"> Dropdown <b class="caret"></b></a><div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 45px, 0px); top: 0px; left: 0px; will-change: transform;"><a aria-controls="dropdown1" aria-expanded="true" class="dropdown-item show" data-toggle="tab" href="#dropdown1" id="dropdown1-tab" role="tab" aria-selected="true">@fat</a><a aria-controls="dropdown2" aria-expanded="true" class="dropdown-item active show" data-toggle="tab" href="#dropdown2" id="dropdown2-tab" role="tab" aria-selected="true">@mdo</a></div></li>
-        tabs += '<li class="nav-item dropdown">';
-        tabs += '<a aria-controls="info" aria-haspopup="true" aria-expanded="true" class="nav-link dropdown-toggle active" data-toggle="dropdown" href="#info" id="info-tab" role="button"> Info <b class="caret"></b></a>';
-        tabs += '<div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 45px, 0px); top: 0px; left: 0px; will-change: transform;">';
-        tabs += '<a onclick="javascript:updateInfoTab(false);" aria-controls="fields" aria-expanded="false" class="dropdown-item show'+((showRecordRoles) ? '' : ' active')+'" data-toggle="tab" href="#fields" id="fields-tab" role="tab" aria-selected="'+((showRecordRoles) ? 'false' : 'true')+'">Fields</a>';
-        tabs += '<a onclick="javascript:updateInfoTab(true);" aria-controls="roles" aria-expanded="false" class="dropdown-item show'+((showRecordRoles) ? ' active' : '')+'" data-toggle="tab" href="#roles" id="roles-tab" role="tab" aria-selected="'+((showRecordRoles) ? 'true' : 'false')+'">Roles</a></div>';
-        tabs += '</li>';
-        tabs += '<li class="nav-item"><a aria-controls="tools" aria-expanded="false" class="nav-link" data-toggle="tab" href="#tools" id="tools-tab" role="tab"> Options </a></li>';
+        if (comments.length > 0) {
+            tabs += '<li class="nav-item"><a aria-controls="comments" aria-expanded="false" class="nav-link" data-toggle="tab" href="#comments" id="menu-comments" role="tab">Comments</a></li>';
+        }
         tabs += '</ul></div>';
         $('#angular_recordViewer').append(tabs);
         var d = $.createElement('div');
@@ -8119,7 +10022,7 @@ content += '</section>';
         var sz = lengthInUtf8Bytes(recordRDF);
         recordToolBar += '<button _ngcontent-c9="" class="btn btn-block btn-inverse mb-xs" role="button" onclick="javascript:downloadRecordRDF();">';
         recordToolBar += 'Download Record - ' + getBytesDenomination(sz) + ' ' + getBytesDenominationUnit(sz) + '';
-        recordToolBar += '&nbsp;&nbsp;<i class="fa fa-file-code-o"></i>';
+        recordToolBar += '&nbsp;&nbsp;<i class="fa fa-barcode"></i>';
         recordToolBar += '</button>';
         if (isFastFood) {
             if (phone) {
@@ -8234,6 +10137,87 @@ content += '</section>';
             d.append(d4);
         }
 
+        if (comments.length > 0) {
+            var d4 = $.createElement('div');
+            //d4.attr('aria-expanded', 'true');
+            d4.attr('aria-labelledby', 'comments-tab');
+            d4.addClass('tab-pane');
+            //d4.addClass('active');
+            //d4.addClass('in');
+            //d4.addClass('clearfix');
+            d4.css('padding-top', '1em');
+            d4.css('padding-left', '0px');
+            d4.css('padding-right', '0px');
+            d4.attr('id', 'comments');
+            d4.attr('role', 'tabpanel');
+            //      var d2 = $('#angular_recordViewer').append('<div aria-expanded="true" aria-labelledby="info-tab" class="tab-pane active in clearfix" style="padding-top:0px" id="info" role="tabpanel">');
+            //$('#angular_recordViewer').append('<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');
+            //d4.append(table);
+            var commentDiv = '<section class="activities">';
+
+            for(j = 0; j < comments.length; j++){
+              commentDiv += '<section class="event">';            
+              commentDiv += '<span class="thumb-sm avatar pull-left mr-sm">';
+              commentDiv += '<img alt="..." class="rounded-circle" src="assets/img/avatar.png">';
+              commentDiv += '</span>';
+              commentDiv += '<h5 class="event-heading">';
+              commentDiv += '<a href="#">Unknown author</a>';
+              commentDiv += '<small><a href="#">@nils</a></small>';
+              commentDiv += '</h5>';
+              commentDiv += '<p class="text-muted">February 22, 2019 at 01:59 PM</p>';
+              commentDiv += '<p class="fs-mini">'+comments[j]+'</p>';
+              commentDiv += '<footer>';
+              commentDiv += '<ul class="post-links">';
+              commentDiv += '<li><a href="#">1 hour</a></li>';
+              commentDiv += '<li><a href="#"><span class="text-danger"><i class="fa fa-heart"></i> Like</span></a></li>';
+              commentDiv += '<li><a href="#">Comment</a></li>';
+              commentDiv += '</ul>';
+              commentDiv += '</footer>';
+              commentDiv += '</section>';
+            }
+
+
+            commentDiv += '<section class="event">';
+            commentDiv += '<h5 class="event-heading">';
+            commentDiv += '<a href="#">Marvin</a><small>@vios</small>';
+            commentDiv += '</h5>';
+            commentDiv += '<p class="text-muted">February 22, 2019 at 01:59 PM</p>';
+            commentDiv += '<p class="fs-mini"> Add <span class="badge badge-secondary">rdfs:comment</span> to a record to begin a discussion. </p>';
+            commentDiv += '<footer>';
+            commentDiv += '<div class="clearfix">';
+            commentDiv += '<ul class="post-links mt-sm pull-left">';
+            commentDiv += '<li><a href="#">1 hour</a></li>';
+            commentDiv += '<li><a href="#"><span class="text-danger"><i class="fa fa-heart-o"></i> Like</span></a></li>';
+            commentDiv += '<li><a href="#">Comment</a></li>';
+            commentDiv += '</ul>';
+            commentDiv += '<span class="thumb thumb-sm pull-right"><a href="#"><img class="rounded-circle" src="assets/img/people/a1.jpg"></a></span>';
+            commentDiv += '<span class="thumb thumb-sm pull-right"><a href="#"><img class="rounded-circle" src="assets/img/people/a5.jpg"></a></span>';
+            commentDiv += '<span class="thumb thumb-sm pull-right"><a href="#"><img class="rounded-circle" src="assets/img/people/a3.jpg"></a></span>';
+            commentDiv += '</div>';
+            commentDiv += '<ul class="post-comments mt-sm">';
+            commentDiv += '<li><span class="thumb-xs avatar pull-left mr-sm"><img alt="..." class="rounded-circle" src="assets/img/avatar.png"></span>';
+            commentDiv += '<div class="comment-body">';
+            commentDiv += '<h6 class="author fs-sm fw-semi-bold">Admin <small>6 mins ago</small></h6><p>Users can then post replies to their PODs and they\'ll show up here</p></div></li>';
+            commentDiv += '<li><span class="thumb-xs avatar pull-left mr-sm"><img alt="..." class="rounded-circle" src="assets/img/avatar.png"></span>';
+            commentDiv += '<div class="comment-body"><input class="form-control form-control-sm" placeholder="Reply to this comment..." type="text"></div></li>';
+            commentDiv += '</ul>';
+            commentDiv += '</footer>';
+            commentDiv += '</section>';
+            commentDiv += '<form action="#" class="mt ng-untouched ng-pristine ng-valid" novalidate="">';
+            commentDiv += '<div class="form-group mb-0"><label class="sr-only" for="new-event">New event</label>';
+            commentDiv += '<textarea class="form-control" id="new-event" placeholder="Post something..." rows="3"></textarea>';
+            commentDiv += '</div>';
+            commentDiv += '<div class="btn-toolbar">';
+            commentDiv += '<div class="btn-group"><a class="btn btn-sm btn-gray" href="#"><i class="fa fa-camera fa-lg"></i></a><a class="btn btn-sm btn-gray" href="#"><i class="fa fa-map-marker fa-lg"></i></a></div>';
+            commentDiv += '<button class="btn btn-danger btn-sm ml-auto" type="submit">Post</button>';
+            commentDiv += '</div>';
+            commentDiv += '</form>';
+            commentDiv += '</section>';
+
+            d4.append(commentDiv);
+            d.append(d4);
+        }
+
         if (hasClass) d2.append('<div class="form-actions"><div class="text-center"><button _ngcontent-c7="" class="btn btn-info " role="button">New ' + buttonLabel + '</button>&nbsp;<button _ngcontent-c7="" class="btn btn-inverse " role="button"> New Subclass </button></div></div>');
         //      $('#angular_recordViewer').append('</div></div>');
         $('#angular_recordViewer').append(d);
@@ -8257,7 +10241,24 @@ content += '</section>';
     }
 
 
+    // see here https://stackoverflow.com/questions/15850271/how-to-make-div-fixed-after-you-scroll-to-that-div
+    $(window).scroll(function() {                  // assign scroll event listener
 
+      var currentScroll = $(window).scrollTop(); // get current position
+
+      if (currentScroll >= fixmeTop) {           // apply position: fixed if you
+          $('.fixme').css({                      // scroll to that element or below it
+              position: 'fixed',
+              top: '0',
+              left: '0'
+          });
+      } else {                                   // apply position: static
+          $('.fixme').css({                      // if you scroll above it
+              position: 'static'
+          });
+      }
+
+    });
 } //recordViewerColumn
 
 function getBytesDenominationUnit(sz){
@@ -8274,6 +10275,51 @@ function getBytesDenomination(sz){
   else return sz/(1000*1000*1000);
 }
 
+function getCountDenominationUnit(sz){
+  sz = parseInt(sz);
+  if(sz < 1000) return '';
+  else if(sz >= 1000 && sz < (1000*1000)) return 'K';
+  else if(sz >= (1000*1000) && sz < (1000*1000*1000)) return 'M';
+  else return 'B';
+}
+
+function getCountDenomination(sz){
+  sz = parseInt(sz);
+  if(sz < 1000) sz;
+  else if(sz >= 1000 && sz < (1000*1000)) sz = sz/1000;
+  else if(sz >= (1000*1000) && sz < (1000*1000*1000)) sz = sz/(1000*1000);
+  else sz = sz/(1000*1000*1000);
+  return abbreviateNumber(sz);
+}
+
+// see https://stackoverflow.com/questions/10599933/convert-long-number-into-abbreviated-string-in-javascript-with-a-special-shortn
+function getCountLabel(value) {
+    value = parseInt(value);
+    var newValue = value;
+    if (value >= 1000) {
+        var suffixes = ["", "k", "m", "b","t"];
+        var suffixNum = Math.floor( (""+value).length/3 );
+        var shortValue = '';
+        for (var precision = 2; precision >= 1; precision--) {
+            shortValue = parseFloat( (suffixNum != 0 ? (value / Math.pow(1000,suffixNum) ) : value).toPrecision(precision));
+            var dotLessShortValue = (shortValue + '').replace(/[^a-zA-Z 0-9]+/g,'');
+            if (dotLessShortValue.length <= 2) { break; }
+        }
+        if(shortValue < 1) {
+          shortValue = shortValue * 1000;
+          suffixNum--;
+        }
+        if (shortValue % 1 != 0)  shortValue = shortValue.toFixed(1);
+        if(shortValue.toString().indexOf('.') < 0 && shortValue.toString().length == 1) shortValue = shortValue + '.0';
+        newValue = shortValue+suffixes[suffixNum];
+    }
+    return newValue;
+}
+
+//function getCountLabel(sz){
+//  return getCountDenomination(sz) + getCountDenominationUnit(sz);
+//}
+
 function lengthInUtf8Bytes(str) {
   // Matches only the 10.. bytes that are non-initial characters in a multi-byte sequence.
   var m = encodeURIComponent(str).match(/%[89ABab]/g);
@@ -8286,7 +10332,7 @@ function downloadRecordRDF(){
 
 function matchFocusProperties(propIRI, isReverse){
   return getMainFocus().children('property' + (isReverse ? '-of' : '') ).filter(function() {
-            return $(this).attr('iri').toLowerCase() == propIRI.toLowerCase();
+            return $(this).attr('iri') == propIRI;
           });
 }
 
@@ -8380,8 +10426,9 @@ exitGroupBy();
     if(showMeType == VIEW_TYPE_TEXT_PROPERTIES){
       if(!_root.find('query text') || _root.find('query text').length <= 0){
         //('Please enter keywords to view corresponding text fields');
-       $('#'+ID_SHOW_ME+'').empty();
-       return;
+       $('#angular_showMeList').empty();
+       beep2();
+      return;
       }
     }
     $('#showMeHeader').addClass('loading');
@@ -8528,15 +10575,15 @@ function loadPropertyValues(xml, opts){
               }
 
 
-rows += '<tr><td '+iriAttr+' id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+'>';
+rows += '<tr><td '+iriAttr+' id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+' onmouseover="$(\'.hidable'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'.hidable'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left ">';
 if(datatype == 'uri'){
-                  rows += '<img style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\'); takeMainFocus(\''+opts.contextId+'\')" src="'+getFaviconUrl(value)+'">';
+                  rows += '<img style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\', !isXKeyDown(), isXKeyDown()); if(!isXKeyDown()) { takeMainFocus(\''+opts.contextId+'\'); }" src="'+getFaviconUrl(value)+'">';
                                     //rows +=  '<i class="status status-bottom bg-success"></i>';
 }
                 else {
-                  rows += '<span style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')" class="icon-literal glyphicon glyphicon-tag"></span>';
+                  rows += '<span style="cursor:pointer" onclick="javascript: remove(\''+_root.find('.' + getMainFocus().attr('class') + ' > [iri=\''+opts.propIRI+'\']').attr('class')+'\'); setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\', false, isXKeyDown())" class="icon-literal glyphicon glyphicon-tag"></span>';
                 }
 rows += '</span>';
 //rows += '</a>';
@@ -8547,11 +10594,14 @@ if(datatype=='uri') link = 'style="cursor:pointer" onclick="javascript:describe(
           rows +=  '<h6 class="row-result" '+buildTitle(value)+' '+link+'>'+label
 
           var facet = _root.find('.' + getMainFocus().attr('class') + ' > property[iri=\''+opts.propIRI+'\'] > value');
+          var hideCkbxClass = ' hide';
+
           var checked = false;
           if(facet && facet.length > 0){
             facet.each(function (z){
  if( $(this).text() == value ){
  checked = ' checked="checked"';        
+          hideCkbxClass = '';
 return;  
  }     
             });
@@ -8564,7 +10614,7 @@ return;
                 var propOrPropOf = (isReverse) ? "property-of" : "property";
 
 
-          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-primary">';
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-primary'+hideCkbxClass+'">';
           rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' onclick="javascript:if(!$(this).is(\':checked\')) {removeFacetValue(\''+propOrPropOf+'\',\''+opts.propIRI+'\', \''+value+'\');}else{setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', \''+lang+'\')}"/>&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
@@ -8643,7 +10693,7 @@ function loadPropertyOfValues(xml, opts){
               }
 
 
-rows += '<tr><td '+iriAttr+' id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+'>';
+rows += '<tr><td '+iriAttr+' id="'+rowId+'"'+((recordActive)?' class="record-active"':'')+' onmouseover="$(\'.hidable'+id+'\').removeClass(\'hide\');$(\'#form-ckbx'+id+'\').removeClass(\'hide\');" onmouseout="$(\'.hidable'+id+'\').addClass(\'hide\'); if(!$(\'#ckbx'+id+'\').is(\':checked\')){$(\'#form-ckbx'+id+'\').addClass(\'hide\');}">';
 //rows +=  '<a class="list-group-item" data-target="#">';
                                 rows +=  '<span class="thumb-sm float-left ">';
 
@@ -8656,11 +10706,13 @@ rows += '</span>';
 
 
           var facet = _root.find('.' + getMainFocus().attr('class') + ' > property-of[iri=\''+opts.propIRI+'\'] > value');
+          var hideCkbxClass =' hide';
           var checked = false;
           if(facet && facet.length > 0){
             facet.each(function (z){
  if( $(this).text() == value ){
- checked = ' checked="checked"';        
+ checked = ' checked="checked"';
+ hideCkbxClass =' hide';        
 return;  
  }     
             });
@@ -8672,8 +10724,8 @@ return;
                 var propOrPropOf = (isReverse) ? "property-of" : "property";
 
 
-          rows += '<div class="form-check-inline abc-checkbox abc-checkbox-primary">';
-          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' onclick="javascript:if(!$(this).is(\':checked\')) {removeFacetValue(\''+propOrPropOf+'\',\''+opts.propIRI+'\', \''+value+'\');}else{setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY_OF+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\')}"/>&nbsp;';
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-primary">';
+          rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' onclick="javascript:if(!$(this).is(\':checked\')) {removeFacetValue(\''+propOrPropOf+'\',\''+opts.propIRI+'\', \''+value+'\');}else{setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY_OF+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', true, isXKeyDown())}"/>&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
 rows +='</h6>';
@@ -8780,7 +10832,7 @@ if(len1 > len2){
 }
 
 if(false){
-  rows +=  '<table class="table table-striped">';
+  rows +=  '<table class="table '+((isTableStriped) ?'table-striped' :'')+'">'; //table-striped
           rows +=  '<tbody>';
           rows +=  '<tr>';
             rows +=  '<td>';
@@ -8838,6 +10890,7 @@ function isInterlinked(){
 }
 
 function describe(id, src, isGGGRecord){
+    if(!src || src.length <= 0) return;
     if(id && id != 'recordNavBar' && $('#'+id) && $('#'+id).length > 0){
       var rec = $('.record-active');
       if($('#'+id).prop('nodeName').toLowerCase() == 'td'){
@@ -8852,9 +10905,9 @@ function describe(id, src, isGGGRecord){
       }
     }
 
-    var linkOutURI = src;
-    if(linkOutURI.startsWith('http://linkeddata.uriburner.com/') && false){
-      linkOutURI = linkOutURI.substring(linkOutURI.indexOf('http://linkeddata.uriburner.com/')+'http://linkeddata.uriburner.com/'.length);
+    var linkOutURI = src;    
+    if(linkOutURI.startsWith('http://' + sponger) && false){
+      linkOutURI = linkOutURI.substring(linkOutURI.indexOf('http://'+sponger)+('http://'+sponger).length);
       linkOutURI = linkOutURI.substring(linkOutURI.indexOf('http'));
       linkOutURI = linkOutURI.replace('https/', 'https://');
       linkOutURI = linkOutURI.replace('http/', 'http://');
@@ -8867,10 +10920,20 @@ function describe(id, src, isGGGRecord){
     $('#angular_recordViewer').attr('src', linkOutURI); // deprecated
     //$('#recordLabel').val(label);
 
+    $('.www-toolbar-item').text('WWW - ' + linkOutURI);
+    $('.ggg-toolbar-item').text('GGG - ' + linkOutURI);
+    if(linkOutURI.startsWith('dsn://')) {
+      $('.www-toolbar-item').addClass('hide');
+    }
+    else {
+      $('.www-toolbar-item').removeClass('hide');
+      $('.www-toolbar-item').text('WWW - ' + linkOutURI);
+    }
+
 
     var opt = new Object();
     opt.tar = 'record';
-    if(isGGGRecord) opt.srv = getProxyEndpoint( 'http://linkeddata.uriburner.com/sparql' );
+    if(isGGGRecord) opt.srv = getRudiEndpoint( 'http://'+sponger+'sparql' );
     if(id) {
       opt.srcId = id;
       //if(id == 'recordNavBar') $('.'+id).addClass('loading');
@@ -9130,15 +11193,18 @@ rows += '</td></tr>';
   var BC_FACET_TYPE_FACET = 1;
   var BC_FACET_TYPE_FOCUS = 2;
 
+  var queryArticulation = '';
 
     // POI: this function is responsible for building the breadcrumbs and facetCollector
     function buildNavPath(){
+      queryArticulation = '';
+      $('#libraryPanel').removeClass('hide');
       $('#breadcrumbPanel').removeClass('hide');
 
       //var breadcrumbs = $('#breadcrumbs');
       //var facetCollector = $('#facetCollector');
       //var focusCollector = $('#focusCollector');
-      var breadcrumbs, facetCollector,focusCollector;
+      var breadcrumbs, facetCollector,focusCollector, libraries;
       if(nav_type == NAV_TYPE_1){
         $('#facetCollectorWidgetContainer').addClass('hide');
 
@@ -9148,16 +11214,19 @@ rows += '</td></tr>';
         breadcrumbs  = $('#angular_breadcrumbBar');
         facetCollector = $('#angular_breadcrumbBar');
         focusCollector = $('#angular_breadcrumbBar');
+        libraries = $('#angular_libraryBar');
       }
       else if(nav_type == NAV_TYPE_3){
         $('#facetCollectorWidgetContainer').removeClass('hide');
         breadcrumbs  = $('#angular_breadcrumbBar');
         facetCollector = $('#angular_facetCollector');
         focusCollector = $('#angular_focusCollector');
+        libraries = $('#angular_libraryBar');
       }
       breadcrumbs.empty();
       facetCollector.empty();
       focusCollector.empty();
+      libraries.empty();
       
       var isRootWithoutProps = true;
       $(getMainFocus().children('property, property-of')).each(function(i) {
@@ -9209,6 +11278,29 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
 //var obj = { "show": 5000, "hide": 0 };
 //$('[data-toggle="tooltip"]').attr('data-delay',obj);
 
+
+          // build library breadcrumbs
+
+          var graphLabel = getQueryGraphLabel();
+          if(!graphLabel || graphLabel.length <= 0) graphLabel = getQueryGraph();
+
+          if(graphLabel && graphLabel.length > 0){
+            libraries.append('<li><a href="#">'+graphLabel+'</a></li>');
+            var graphAncestors = getQuery().attr('graphAncestors');
+            var graphAncestorLabels = getQuery().attr('graphAncestorLabels');
+            if(graphAncestors && graphAncestors.length > 0){
+              var ga = graphAncestors.split(',');
+              var gal = graphAncestorLabels.split(',');
+              var ancestors = '';
+              for(i = 0; i < ga.length; i++){
+                ancestors += '<li><a href="#">'+gal[i]+'</a></li>';
+              }
+              libraries.prepend(ancestors);
+            }
+          }
+
+
+
     }
 
     function buildNavigationNode(ele, desc, bcFacetType, len){
@@ -9225,6 +11317,11 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
         //val = val.trim();
 
         var isPropOf = ($(ele).prop('nodeName')) ? $(ele).prop('nodeName').toLowerCase() === 'property-of' : false;
+        var exclude = $(ele).attr('exclude') == 'yes';
+        if(id == ID_QUERY && c.length > 0) exclude = c.attr('exclude') == 'yes';
+
+        var not = exclude ? ' not ' : '';
+        var doesNot = exclude ? ' does not ' : '';
         //console.log('nodeName: ' + $(ele).prop('nodeName'));
         //if(isPropOf) console.log('is property-of: ' + label);
 
@@ -9265,23 +11362,23 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
                 if(ttd.indexOf('[') > 0) ttd = ttd.substring(0, ttd.lastIndexOf('[')); 
                 ttd = ttd.trim();
             }
-            var tooltip = 'and for what does it act as ' + ttd;        
+            var tooltip = 'and for what does it '+not+' act as ' + ttd;        
             if(ttd.endsWith(' to') || ttd.endsWith('To')){
                 tooltip = 'and what ' + ttd + ' it';
             }
             else if(ttd.endsWith(' of') || ttd.endsWith('Of')){
-                var isa = 'is a ';
+                var isa = 'is '+not+' a ';
                 if( (ttd.startsWith('is') || ttd.startsWith('Is')) && ttd.length > 2 && (ttd.charAt(2).toUpperCase() == ttd.charAt(2) || ttd.charAt(2) == ' ') ) isa = '';
                 tooltip = 'and what ' + isa + ttd + ' it';
             }
             else if(ttd.startsWith('has')){
-                tooltip = 'and what ' + ttd + ' represented by it';
+                tooltip = 'and what ' + doesNot + ttd + ' represented by it';
             }
             else if(ttd.endsWith('by') || ttd.endsWith('By')){
-                tooltip = 'and what is ' + ttd + ' it';
+                tooltip = 'and what is '+ not + ttd + ' it';
             }
             else if(ttd.endsWith('ing')){
-                tooltip = 'and what is ' + ttd + ' it';
+                tooltip = 'and what is '+ not + ttd + ' it';
             }
             //desc = desc + '';
         }
@@ -9291,23 +11388,23 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
                 if(ttd.indexOf('[') > 0) ttd = ttd.substring(0, ttd.lastIndexOf('[')); 
                 ttd = ttd.trim();
             }
-            var tooltip = 'and what is its ' + ttd;        
+            var tooltip = 'and what is ' + not + ' its ' + ttd;        
             if(ttd.endsWith(' to') || ttd.endsWith('To')){
-                tooltip = 'and what it ' + ttd;
+                tooltip = 'and what it ' + doesNot + ttd;
             }
             else if(ttd.endsWith(' of') || ttd.endsWith('Of')){
-                var isa = 'is a ';
+                var isa = 'is '+not+' a ';
                 if( (ttd.startsWith('is') || ttd.startsWith('Is')) && ttd.length > 2 && (ttd.charAt(2).toUpperCase() == ttd.charAt(2) || ttd.charAt(2) == ' ') ) isa = '';
                 tooltip = 'and it ' + isa + ttd + ' what';
             }
             else if(ttd.startsWith('has') || ttd.startsWith('Has')){
-                tooltip = 'and it ' + ttd + ' among these';
+                tooltip = 'and it ' + doesNot + ttd + ' among these';
             }
             else if(ttd.endsWith('by') || ttd.endsWith('By')){
-                tooltip = 'and what is it ' + ttd;
+                tooltip = 'and what is it ' + not + ttd;
             }
             else if(ttd.endsWith('ing')){
-                tooltip = 'and what is it ' + ttd;
+                tooltip = 'and what is it ' + not + ttd;
             }
         }
         if(val != VALUE_ANON_NODE && !categoryAsValue) {
@@ -9349,65 +11446,40 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
             searchLabel = 'contain keywords';
           }
 
-          var libdiv = '&nbsp;<i class="fa fa-chevron-right"></i>&nbsp;';
+          //var libdiv = '&nbsp;<i class="fa fa-chevron-right"></i>&nbsp;';
+
+          var graphLabel = getQueryGraphLabel();
+          if(!graphLabel || graphLabel.length <= 0) graphLabel = getQueryGraph();
 
           if(v.attr('datatype') == 'uri'){
               tooltip = 'the record for ' + val;
               desc = 'Record';
-              if(getQueryGraphLabel() && getQueryGraphLabel().length > 0) {
-                desc = getQueryGraphLabel() + libdiv + desc;
-              }
-              else if(getQueryGraph() && getQueryGraph().length > 0) {
-                desc = getQueryGraph() + libdiv + desc;
-              }
               if(getQueryText() && getQueryText().length){
                 tooltip = tooltip + ' '+searchLabel+': \'' + getQueryText() + '\'';
               }
           }
           else if(val){
               tooltip = 'what records '+searchLabel+': ' + val;
-              if(getQueryGraphLabel() && getQueryGraphLabel().length > 0) {
-                tooltip += ', in library: ' + getQueryGraphLabel();
-                desc = getQueryGraphLabel() + libdiv + desc;
-              }
-              else if(getQueryGraph() && getQueryGraph().length > 0) {
-                tooltip += ', in library: ' + getQueryGraph();
-                desc = getQueryGraph() + libdiv + desc;
-              }
           }
           else {
               tooltip = 'any record';
               if(!cval) {
-                  if(getQueryGraphLabel() && getQueryGraphLabel().length > 0) {
-                    tooltip += ', in library: ' + getQueryGraphLabel();
-                    desc = getQueryGraphLabel() + libdiv + desc;
-                  }
-                  else if(getQueryGraph() && getQueryGraph().length > 0) {
-                    tooltip += ', in library: ' + getQueryGraph();
-                    desc = getQueryGraph() + libdiv + desc;
-                  }
-                  else desc = LABEL_ROOT;
-              }
-              else {
-                  if(getQueryGraphLabel() && getQueryGraphLabel().length > 0) {
-                    tooltip += ', in library: ' + getQueryGraphLabel();
-                    desc = getQueryGraphLabel() + libdiv + desc;
-                  }
-                  else if(getQueryGraph() && getQueryGraph().length > 0) {
-                    tooltip += ', in library: ' + getQueryGraph();
-                    desc = getQueryGraph() + libdiv + desc;
-                  }
+                  desc = LABEL_ROOT;
               }
           }
+          if(graphLabel && graphLabel.length > 0) tooltip += ', in library: ' + graphLabel;
+
             if(cval){
 
                 tooltip += ', and each of them is';
 
                 var cvals = _root.find('.'+id + ' > class');
                 for(i = 0; i < cvals.length; i++){
+                  var cexclude = $( cvals[i] ).attr('exclude') == 'yes';
                   if(i > 0 && cvals.length == 1) break;
                   var aoran = aOrAn($( cvals[i] ).attr('label').substring(0, 1));
                   var cv = $( cvals[i] ).attr('label');
+                  if(cexclude) tooltip += ' not';
                   tooltip += ' ' + aoran + ' ' + $( cvals[i] ).attr('label');
                   if(i+1 < cvals.length) {
                     tooltip += ',';
@@ -9418,12 +11490,19 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
                 }
             }
         }
+
+        desc = desc.replaceAll('  ', ' ');
+
         if( (v.attr('datatype') != 'uri' && (!v.attr('iri') || v.attr('iri').length <= 0)) && ( !cval || id == ID_QUERY)){
               if(val.length > 0 && val != VALUE_ANON_NODE) val = '\'' + val + '\'';
         }
 
         // update root
         getQuery().attr('label', (desc == 'name' || desc == 'keywords') ? val : desc);
+
+        // POI: the breadcrumb iterator builds from leaf to root
+        if(queryArticulation.length > 0) queryArticulation = ', ' + queryArticulation;
+        queryArticulation = tooltip + queryArticulation;
 
         //var slash = (!isFacet) ? '/' : '';
 
@@ -9448,12 +11527,19 @@ if(false){
         }
 
 }
+        if(exclude){
+          desc = '<i style="cursor:pointer" class="fa fa-ban" onclick="$(\''+id+'\').removeAttr(\'exclude\')"></i>&nbsp;' + desc;
+
+        }
+
 
         var isEmptyValue = val === VALUE_ANON_NODE;
         var outline = (isEmptyValue) ? 'outline-default': 'default';
         var bcOutline = (isEmptyValue) ? 'outline-default': 'primary';
         var bcOutlineRemove = (isEmptyValue) ? 'outline-': '';
         var of = (isPropOf && !desc.toLowerCase().endsWith('of')) ? ' of' : '';
+
+        var excludeIcon = '';// exclude ? '<i class="fa fa-ban"></i>&nbsp;' : '';
 
         if(nav_type == NAV_TYPE_1){
 
@@ -9468,21 +11554,21 @@ if(false){
           }
 
           var roleBadge = '';// '&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>';
-          ret = '<li '+buildTitle(tooltip)+' class="breadcrumb-item'+focusClass+'" id="nav'+id+'"><a ><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?roleBadge:'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
+          ret = '<li '+buildTitle(tooltip)+' class="'+focusClass+'" id="nav'+id+'">'+excludeIcon+'<a ><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?roleBadge:'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
 
 
         }
         else if(nav_type == NAV_TYPE_3){
           var roleBadge = '';// '&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">role</span>';
           if(bcFacetType == BC_FACET_TYPE_FACET) {
-            ret = '<div style="padding: 0px; background-color:transparent;" class="row" '+buildTitle(tooltip)+' id="nav'+id+'" '+focus+'><div style="display:inline; padding:0px;" class="text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6 style="vertical-align:bottom;margin-bottom:0px">&nbsp;<span onclick="javascript:'+action+'(\''+id+'\')" class="via" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')">' + ''+desc+of+((isPropOf)?roleBadge:'')+((len > 0) ? '</span>&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">'+len+'</span>' : '')+'</h6></div><button class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
+            ret = '<div style="padding: 0px; background-color:transparent;" class="row" '+buildTitle(tooltip)+' id="nav'+id+'" '+focus+'><div style="display:inline; padding:0px;" class="text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6 style="vertical-align:bottom;margin-bottom:0px">'+excludeIcon+'&nbsp;<span onclick="javascript:'+action+'(\''+id+'\')" class="via" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')">' + ''+desc+of+((isPropOf)?roleBadge:'')+((len > 0) ? '</span>&nbsp;<span style="margin-bottom:4px" class="badge badge-pill badge-default">'+len+'</span>' : '')+'</h6></div><button class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
           }
           else if(bcFacetType == BC_FACET_TYPE_FOCUS) {
-            ret = '<div style="padding: 0px; background-color:transparent;" class="row" '+buildTitle(tooltip)+' id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')"><h3 class="fw-semi-bold" style="padding-bottom:4px" >'+desc+of+((isPropOf)?roleBadge:'')+'</h3></div><button id="focusValue" class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
+            ret = '<div style="padding: 0px; background-color:transparent;" class="row" '+buildTitle(tooltip)+' id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'" onmouseover="mouseOverFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+outline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')"><h3 class="fw-semi-bold" style="padding-bottom:4px" >'+excludeIcon+''+desc+of+((isPropOf)?roleBadge:'')+'</h3></div><button id="focusValue" class="btn-rounded-f btn btn-'+outline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div>';
           }
           else { // isBreadCrumb
             //ret = '<li class="breadcrumb-item"><div class="row" style="background-color:transparent;" title="'+tooltip+'" id="nav'+id+'" '+focus+'><div onclick="javascript:'+action+'(\''+id+'\')" class="via text-ellipsis'+((!bcFacetType == BC_FACET_TYPE_FACET)?' breadcrumb':'')+'"><h6>' + ''+desc+'</h6></div><button class="btn-rounded-f  btn btn-'+outline+'default btn-block btn-xs text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\')">'+val+'</button></div></li>';
-    ret = '<li '+buildTitle(tooltip)+' class="breadcrumb-item" id="nav'+id+'"><a><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?roleBadge:'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
+    ret = '<li '+buildTitle(tooltip)+' class="" id="nav'+id+'">'+excludeIcon+'<a><em onmouseover="mouseOverFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onmouseout="mouseOutFacet(\''+id+'\', \''+bcOutline+'\', \''+bcOutlineRemove+'\', '+isEmptyValue+')" onclick="javascript:'+action+'(\''+id+'\')" class="text-ellipsis">'+desc+of+((isPropOf)?roleBadge:'')+'</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-'+bcOutline+' btn-block text-ellipsis" onclick="javascript:takeMainFocus(\''+id+'\',false,\''+getMainFocus().attr('class')+'\')">'+val+'</button></li>';
   //  gbcol += '<li class="breadcrumb-item"><a  title=""><em>distributor</em></span></a><span><button class="m-0 btn-rounded-f  btn btn-outline-default btn-block text-ellipsis" onclick="javascript:takeMainFocus(\'0\')">'+VALUE_ANON_NODE+'</button></li>';
           }
 
@@ -9602,12 +11688,12 @@ function get_short_url(long_url, func)
     $('#permalink > i').removeClass('la-chain');
     $('#permalink > i').addClass('la-chain-broken');
     $.getJSON(
-        "http://vio.sn/c/create?uri="+ encodeURIComponent( long_url ), 
+        "https://vio.sn/c/create?uri="+ encodeURIComponent( long_url ), 
         { 
         },
         function(response)
         {
-            if(response.c_uri) func(response.c_uri);
+            if(response.c_uri) func(response.c_uri.replace('http://','https://'));
             $('#permalink').removeClass('text-default');
             $('#permalink').addClass('text-info');
             $('#permalink > i').removeClass('la-chain-broken');
@@ -9615,3 +11701,308 @@ function get_short_url(long_url, func)
         }
     );
 }
+
+
+function doRobot(json){
+  json = htmlDecode(json);
+  var obj = toJSONObject(json);
+  var actions = obj.actions;
+  var type = actions.type;
+  var action, id = createId();
+  for(i = 0; i < actions.length; i++){
+    action = actions[i];
+    switch(action.id){
+      case "takeMainFocus": {
+        takeMainFocus(id, action.silent);
+      }; break;
+      case "addPropertyFacet": {
+        id = createId();
+        var tar = action.tar;
+        addPropertyFacet(id, action.prop, action.propLabel, action.val, action.valLabel, action.datatype, action.lang, action.silent);
+      }; break;
+      case "addPropertyOfFacet": {
+        id = createId();
+        var tar = action.tar;
+        addPropertyOfFacet(id, action.prop, action.propLabel, action.val, action.valLabel, action.datatype, action.lang, action.silent);
+      }; break;
+      case "addClassFacet": {
+        id = createId();
+        addClassFacet(id, action.uri, action.label, action.silent);
+      }; break;
+      case "setGraphFacet": {
+        setGraphFacet(action.graph, action.graphLabel, action.silent);
+      }; break;
+      case "stackGraphFacet": {
+        stackGraphFacet(action.graph, action.graphLabel, action.silent);
+      }; break;
+      case "removeGraphFacet": {
+        removeGraphFacet(action.silent);
+      }; break;
+      case "clearFacets": {
+        clearFacets(action.silent);
+      }; break;
+    }
+  }
+}
+
+
+var urib_nonce;
+var urib_password = localStorage.getItem('dataspace.password');
+function doLogin()
+{
+$.ajax({
+
+    url : getProxyEndpoint( 'http://'+dataspace+'/val/api/request_login_nonce' ),
+    type : 'GET',
+    data : {
+        //'numberOfWords' : 10
+    },
+    dataType:'text/html',
+    success : function(data) {              
+        //alert('Data: '+data);
+        urib_nonce = data.responseText;
+        var pwdHash = md5(urib_password + urib_nonce);
+        get_urib_session('digest', pwdHash, urib_nonce, encodeURIComponent('http://www.openlinksw.com/ontology/acl#DefaultRealm'), 'rudi');
+    },
+    error : function(response,error)
+    {
+        //console.log("Error in request: "+request+error);
+        urib_nonce = request.responseText;
+        var pwdHash = md5(urib_password + urib_nonce);
+        get_urib_session('digest', pwdHash, urib_nonce, 'http%253A%252F%252Fwww.openlinksw.com%252Fontology%252Facl%2523DefaultRealm', 'rudi');
+    }
+});
+}
+
+function get_urib_session(service, pwdHash, nonce, realm, usr){
+  $.ajax({
+
+    url : getProxyEndpoint( 'https://'+dataspace+'/sparql/login.vsp' ),
+    type : 'POST',
+    data : {
+        'service' : service,
+        'pwdHash' : pwdHash,
+        'nonce' : nonce,
+        'realm' : realm,
+        'usr' : usr
+    },
+    dataType:'text/html',
+    success : function(data) {
+      console.log('URIBurner login successful');
+    },
+    error : function(response,error)
+    {
+        console.log("Error in request: "+error);
+    }
+  });
+}
+
+
+function getPhoto(keywords, func){
+  console.log('photo search: ' + keywords);
+  $.ajax({
+
+    url : getProxyEndpoint( 'https://api.unsplash.com/search/photos/?query=' + keywords + '&orientation=landscape&client_id=' + localStorage.getItem('unsplash.key') ),
+    type : 'GET',
+    data : {
+    },
+    dataType:'json',
+    success : function(data) {
+      //console.log('Unsplash photos: ' + data.results[1].urls.raw);
+      if(data.results.length <= 1){
+        func('', '', '');
+        return;
+      }
+      var photoURL = data.results[1].urls.regular;
+      var photoAuthorURL = 'https://unsplash.com/@' + data.results[1].user.username + '?utm_source=VIOS+Network&utm_medium=referral';
+      var photoAuthorId = data.results[1].user.name;
+      console.log('attribution: ' + photoAuthorId + ', ' + photoAuthorURL);
+      if(data.results.length > 0) func(photoURL, photoAuthorId, photoAuthorURL);
+      else return 'https://images.unsplash.com/photo-1481819613568-3701cbc70156?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2016&q=80';
+    },
+    error : function(response,error)
+    {
+        console.log("Error in request: "+error + ' request: ' + request.responseText);
+    }
+  });
+}
+
+
+// DATAO
+
+
+var ns_datao_type = 'http://workspace/type#';
+var ns_datao_facet = 'http://facet/#';
+var ns_datao_j2 = 'http://workspace/udc#';
+
+
+
+var dataoRDF;
+
+function getDataoRDF(){
+  dataoRDF = $.createElement('rdf:RDF');
+  addNode(getQuery());
+  var str = dataoRDF.prop('outerHTML');
+  str = str.replaceAll('rdf:rdf', 'rdf:RDF');
+  str = str.replaceAll('hastitle', 'hasTitle');
+  str = str.replaceAll('hasdefault', 'hasDefault');
+  str = str.replaceAll('islabel', 'isLabel');
+  str = str.replaceAll('hasvertex', 'hasVertex');
+  str = str.replaceAll('hasedge', 'hasEdge');
+  str = str.replaceAll('directededge', 'directedEdge');
+  return str;
+}
+
+function addNode(ele){
+  if(!$('class', ele) || $('class', ele).length <= 0) return;
+
+  var dgm = $.createElement('type:diagram');
+  var cld = $.createElement('rdf:type');
+  cld.attr('rdf:resource', 'http://facet/#Facettable');
+  dgm.append(cld);
+
+  cld = $.createElement('j.2:hasTitle');
+  cld.text(ele.attr('label'));
+  dgm.append(cld);
+
+  var vid;
+
+  $('class', ele).each(function(i, e){
+    if(i > 0) return;
+    var iri = $(this).attr('iri');
+    var label = $(this).attr('label');
+    var type = $(this).prop('nodeName');
+    vid = $(this).prop('class');
+
+    cld = $.createElement('hasVertex');
+    cld.attr('xmlns', 'http://workspace/diagram#');
+    cld.attr('rdf:resource', 'http://ClassVertex_' + vid);
+    dgm.append(cld);
+
+    var vtx = $.createElement('type:vertex');
+    vtx.attr('rdf:about', 'http://ClassVertex_' + vid);
+    vtx.append('<j.2:hasTitle>'+ label + '</j.2:hasTitle>');
+    vtx.append('<j.2:hasDefault>'+ iri + '</j.2:hasDefault>');
+
+    var isHidden = $.createElement('j.2:isLabel');
+    isHidden.attr('xmlns', 'http://workspace/edge#');
+    isHidden.attr('rdf:datatype', 'http://www.w3.org/2001/XMLSchema#boolean');
+    isHidden.text('false');
+    vtx.append(isHidden);
+
+    dataoRDF.append(vtx);
+
+  });
+
+  $('property', ele).each(function(e){
+    var iri = $(this).attr('iri');
+    var label = $(this).attr('label');
+    var type = $(this).prop('nodeName');
+    var edgeId = $(this).prop('class');
+
+    cld = $.createElement('hasEdge');
+    cld.attr('xmlns', 'http://workspace/diagram#');
+    cld.attr('rdf:resource', 'http://PropertyEdge_' + edgeId);
+    dgm.append(cld);
+
+
+    var de = $.createElement('type:directedEdge');
+    de.attr('rdf:about', 'http://PropertyEdge_' + edgeId);
+
+    var src = $.createElement('source');
+    src.attr('xmlns', 'http://workspace/edge#');
+    src.attr('rdf:resource', 'http://ClassVertex_' + vid);
+    de.append(src);
+
+    de.append('<j.2:hasTitle>'+ label + '</j.2:hasTitle>');
+    de.append('<j.2:hasDefault>'+ iri + '</j.2:hasDefault>');
+
+    var isLabel = $.createElement('j.2:isLabel');
+    isLabel.attr('rdf:datatype', 'http://www.w3.org/2001/XMLSchema#boolean');
+    isLabel.text('true');
+    de.append(isLabel);
+
+
+    var childClass = $($(this).children('class')[0]);
+    var dest = $.createElement('dest');
+    dest.attr('xmlns', 'http://workspace/edge#');
+    dest.attr('rdf:resource', 'http://ClassVertex_' + childClass.attr('class'));
+    de.append(dest);
+
+    dataoRDF.append(de);
+
+    addNode($(this));
+
+
+  });
+
+  $('property-of', ele).each(function(e){
+    var iri = $(this).attr('iri');
+    var label = $(this).attr('label');
+    var type = $(this).prop('nodeName');
+    var edgeId = $(this).prop('class');
+
+    cld = $.createElement('hasEdge');
+    cld.attr('xmlns', 'http://workspace/diagram#');
+    cld.attr('rdf:resource', 'http://PropertyEdge_' + edgeId);
+    dgm.append(cld);
+
+
+    var de = $.createElement('type:directedEdge');
+    de.attr('rdf:about', 'http://PropertyEdge_' + edgeId);
+
+    var dest = $.createElement('dest');
+    dest.attr('xmlns', 'http://workspace/edge#');
+    dest.attr('rdf:resource', 'http://ClassVertex_' + vid);
+    de.append(dest);
+    
+    de.append('<j.2:hasTitle>'+ label + '</j.2:hasTitle>');
+    de.append('<j.2:hasDefault>'+ iri + '</j.2:hasDefault>');
+
+    var isLabel = $.createElement('j.2:isLabel');
+    isLabel.attr('rdf:datatype', 'http://www.w3.org/2001/XMLSchema#boolean');
+    isLabel.text('true');
+    de.append(isLabel);
+
+
+    var childClass = $($(this).children('class')[0]);
+    var src = $.createElement('source');
+    src.attr('xmlns', 'http://workspace/edge#');
+    src.attr('rdf:resource', 'http://ClassVertex_' + childClass.attr('class'));
+    de.append(dest);
+
+    dataoRDF.append(de);
+
+    addNode($(this));
+  });
+
+  dataoRDF.append(dgm);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
