@@ -1476,7 +1476,29 @@ function fct_handleIndexResults(xml, opt){
 }
 
 function fct_handleIncrementPropertyResults(xml, opt){
-  var exists = $($(xml).find('boolean')[0]).text().trim() == 'true';
+    /*var result = $(xml).find("fct\\:result")[0];
+      $("fct\\:row", result).each(function(i) {
+          //console.log($(this).html());
+          var col = $(this).find("fct\\:column");
+
+          // shortform can be used in lieu of the label for URI values
+          var value, datatype, shortform, label, lang, ct; // TODO: need to utilize the lang property for filtering results for the user
+          
+          $("fct\\:column", this).each(function(j) {
+              // can't figure out how to access CDATA value of the element, tried many combinations of accessors, none worked
+              val = $(this).html().replace("<!--[CDATA[","").replace("]]-->","");
+              val = val.replace("&lt;![CDATA[","").replace("]]&gt;","");
+              //console.log(val);
+              switch(j){
+                case 0: value = val; shortform = $(this).attr('shortform'); datatype = $(this).attr('datatype'); lang = $(this).attr('lang'); break;
+                case 1: label = val; break;
+                case 2: ct = val; break;
+              }
+          });
+
+          doRobot(value);
+      });*/
+  var exists = $(xml).find('fct\\:row').length > 0;
   if(!exists){
     $('.la-arrow-right').parent().addClass('hide');
   }
@@ -3701,7 +3723,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '</a>';
         gbcol += '<div class="dropdown-menu" aria-labelledby="navbarDropdown">';
           gbcol += '<a class="dropdown-item" data-target="#">Record</a>';
-          gbcol += '<a class="dropdown-item" data-target="#">Folder</a>';
+          gbcol += '<a class="dropdown-item" data-target="#">Collection</a>';
         gbcol += '</div>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
@@ -4027,7 +4049,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '</a>';
         gbcol += '<div class="dropdown-menu" aria-labelledby="navbarDropdown">';
           gbcol += '<a class="dropdown-item" data-target="#">Record</a>';
-          gbcol += '<a class="dropdown-item" data-target="#">Folder</a>';
+          gbcol += '<a class="dropdown-item" data-target="#">Collection</a>';
         gbcol += '</div>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
@@ -4223,7 +4245,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '</a>';
         gbcol += '<div class="dropdown-menu" aria-labelledby="navbarDropdown">';
           gbcol += '<a class="dropdown-item" data-target="#">Record</a>';
-          gbcol += '<a class="dropdown-item" data-target="#">Folder</a>';
+          gbcol += '<a class="dropdown-item" data-target="#">Collection</a>';
         gbcol += '</div>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
@@ -10707,12 +10729,12 @@ rows += '</span>';
 
           var facet = _root.find('.' + getMainFocus().attr('class') + ' > property-of[iri=\''+opts.propIRI+'\'] > value');
           var hideCkbxClass =' hide';
-          var checked = false;
+          var checked = '';
           if(facet && facet.length > 0){
             facet.each(function (z){
  if( $(this).text() == value ){
  checked = ' checked="checked"';
- hideCkbxClass =' hide';        
+ hideCkbxClass ='';        
 return;  
  }     
             });
@@ -10724,7 +10746,7 @@ return;
                 var propOrPropOf = (isReverse) ? "property-of" : "property";
 
 
-          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-primary">';
+          rows += '<div id="form-ckbx'+id+'" class="form-check-inline abc-checkbox abc-checkbox-primary'+hideCkbxClass+'">';
           rows += '<input id="ckbx'+id+'" class="form-check-input" type="checkbox"'+checked+' onclick="javascript:if(!$(this).is(\':checked\')) {removeFacetValue(\''+propOrPropOf+'\',\''+opts.propIRI+'\', \''+value+'\');}else{setPropertyValue(\''+id+'\', \''+NODE_TYPE_PROPERTY_OF+'\', \''+opts.contextId+'\', \''+opts.propIRI+'\', \''+opts.propLabel+'\', \''+value+'\', \''+label+'\', \''+datatype+'\', true, isXKeyDown())}"/>&nbsp;';
           rows += '<label class="form-check-label" for="ckbx'+id+'"></label>';
           rows += '</div>';
