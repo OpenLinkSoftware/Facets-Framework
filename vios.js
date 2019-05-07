@@ -1470,7 +1470,7 @@ function fct_handleCountGeoResults(xml, opt){
     }
 }
 
-function fct_handleCheckSubjectResults {
+function fct_handleCheckSubjectResults() {
     var results = $(xml).find("fct\\:row"); 
     if(results.length > 0){
       var pid = createId(); 
