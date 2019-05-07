@@ -727,7 +727,7 @@ function fct_query(q, viewType, opt){
   var qstr = q.prop('outerHTML');
   var id = (qstr) ? (service_fct+qstr).hashCode() : 0;
   getQuery().attr('qid', id);
-  if(!opt.branches && opt.tar != 'countIncrementProperty' && opt.tar != 'fetchIndex') setMutex(id, viewType);
+  if(!opt.branches && opt.tar != 'countIncrementProperty' && opt.tar != 'fetchIndex'  && opt.tar != 'countGeo'  && opt.tar != 'checkSubject') setMutex(id, viewType);
   ha.push(id);
   q.attr('timeout', fct_queryTimeout); // add all neccessary variable data back to the query, if possible
   var resp;
@@ -750,6 +750,12 @@ function fct_query(q, viewType, opt){
     }
     else if(opt.tar == 'fetchIndex'){
         fct_handleIndexResults(resp, opt);
+    }
+    else if(opt.tar == 'countGeo'){
+        fct_handleCountGeoResults(resp, opt);
+    }
+    else if(opt.tar == 'checkSubject'){
+        fct_handleCheckSubjectResults(resp, opt);
     }
     else {
       switch(viewType){
@@ -872,6 +878,12 @@ function fct_query(q, viewType, opt){
             }
             else if(opt.tar == 'fetchIndex'){
                 fct_handleIndexResults(xml, opt);
+            }
+            else if(opt.tar == 'countGeo'){
+                fct_handleCountGeoResults(xml, opt);
+            }
+            else if(opt.tar == 'checkSubject'){
+                fct_handleCheckSubjectResults(xml, opt);
             }
 
             else {
@@ -1448,6 +1460,23 @@ function fct_handleSparqlSubject(xml, opt){
 
 function fct_handleSparqlDescribe(xml, opt){
   loadDescribeResults(xml, opt);
+}
+
+
+function fct_handleCountGeoResults(xml, opt){
+    var results = $(xml).find("fct\\:row"); 
+    if(results.length > 0){
+      $('#nearByButton').parent().removeClass('hide');
+    }
+}
+
+function fct_handleCheckSubjectResults {
+    var results = $(xml).find("fct\\:row"); 
+    if(results.length > 0){
+      var pid = createId(); 
+      addPropertyFacet(pid, 'http://purl.org/dc/terms/subject', 'subject');
+      doGroup('http://purl.org/dc/terms/subject', 'subject');      
+    }
 }
 
 function fct_handleIndexResults(xml, opt){
@@ -3211,7 +3240,7 @@ function init(){
 
   $('.input-group-text > i').removeClass('la-search');
   $('.input-group-text > i').removeClass('text-warning');
-  $('.input-group-text > i').addClass('la-refresh');
+  $('.input-group-text > i').addClass('la-search');
   $('.input-group-text > i').addClass('text-info');
 
   $('#dataSpaceMenu > i').removeClass('la');
@@ -3674,12 +3703,12 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a id="edit" class="nav-link" data-target="#">Edit</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item dropdown active">';
-        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="viewDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
-          gbcol += 'View';
+        gbcol += '<a onclick="doTabs();" class="nav-link dropdown-toggle" data-target="#" id="viewDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'Tabs';
         gbcol += '</a>';
-        gbcol += '<div class="dropdown-menu" aria-labelledby="viewDropdown">';
-          gbcol += '<a class="dropdown-item" data-target="#">Owner Profile</a>';
-        gbcol += '</div>';
+//        gbcol += '<div class="dropdown-menu" aria-labelledby="viewDropdown">';
+//          gbcol += '<a class="dropdown-item" data-target="#">Owner Profile</a>';
+//        gbcol += '</div>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
@@ -4002,12 +4031,12 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a id="edit" class="nav-link" data-target="#">Edit</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item dropdown active">';
-        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="viewDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
-          gbcol += 'View';
+        gbcol += '<a onclick="doTabs();" class="nav-link dropdown-toggle" data-target="#" id="viewDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'Tabs';
         gbcol += '</a>';
-        gbcol += '<div class="dropdown-menu" aria-labelledby="viewDropdown">';
-          gbcol += '<a class="dropdown-item" data-target="#">Owner Profile</a>';
-        gbcol += '</div>';
+//        gbcol += '<div class="dropdown-menu" aria-labelledby="viewDropdown">';
+//          gbcol += '<a class="dropdown-item" data-target="#">Owner Profile</a>';
+//        gbcol += '</div>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
@@ -4198,12 +4227,12 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
         gbcol += '<a id="edit" class="nav-link" data-target="#">Edit</a>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item dropdown active">';
-        gbcol += '<a class="nav-link dropdown-toggle" data-target="#" id="viewDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
-          gbcol += 'View';
+        gbcol += '<a onclick="doTabs();" class="nav-link dropdown-toggle" data-target="#" id="viewDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+          gbcol += 'Tabs';
         gbcol += '</a>';
-        gbcol += '<div class="dropdown-menu" aria-labelledby="viewDropdown">';
-          gbcol += '<a class="dropdown-item" data-target="#">Owner Profile</a>';
-        gbcol += '</div>';
+//        gbcol += '<div class="dropdown-menu" aria-labelledby="viewDropdown">';
+//          gbcol += '<a class="dropdown-item" data-target="#">Owner Profile</a>';
+//        gbcol += '</div>';
       gbcol += '</li>';
       gbcol += '<li class="nav-item">';
         gbcol += '<a class="nav-link" data-target="#" onclick="javascript:doTable()">Discover</a>';
@@ -5488,6 +5517,18 @@ function activate(){
 
 }
 
+function getRecordTitle(){
+  return $('#recordTitle').text();
+}
+
+function doTabs(){
+  linkOut('https://www.google.com/search?q='+getRecordTitle(), 'google');
+  linkOut('https://unsplash.com/search/photos/'+getRecordTitle(), 'unsplash');
+  linkOut('https://www.youtube.com/results?search_query='+getRecordTitle(), 'youtube');
+  linkOut('https://www.google.com/search?hl=en&tbm=isch&source=hp&biw=2560&bih=1360&q='+getRecordTitle(), 'googleImages');
+  linkOut('https://www.reddit.com/search?q='+getRecordTitle(), 'reddit');
+}
+
   function doTable(){
     setNavType(NAV_TYPE_2);
     doQuery(getQueryText());
@@ -6463,7 +6504,7 @@ function doQuery(keywords) {
     checkBreadCrumbs();
     checkExitLibraryButton();
     checkIndex();
-
+    checkGeoButton();
     checkExpandSearchButton();
     checkNarrowSearchButton();
 
@@ -6492,6 +6533,23 @@ function checkExpandSearchButton(){
   else {
     $('#isExactLabelMatch').parent().removeClass('hide');
   }
+}
+
+function checkSubject(){
+  var q = getQuery().clone();
+  var p = $.createElement('property');
+  var pid = createId();
+  p.attr('class', pid);
+  p.attr('iri', 'http://purl.org/dc/terms/subject');
+  p.attr('label', 'subject');
+  getFocus(q).append(p);
+  takeFocus(p, q);
+
+  q.find('view').attr('limit', '1');
+
+  var opt = new Object();
+  opt.tar = 'checkSubject';
+  fct_query(q, VIEW_TYPE_LIST_COUNT, opt);
 }
 
 function checkIndex(){
@@ -6589,6 +6647,18 @@ function checkGlossaryButton(){
   }
   */
 }
+
+function checkGeoButton(){
+    $('#nearByButton').parent().addClass('hide');
+    if(!getMainFocus().prop('nodeName')) return;
+    var q = getQuery().clone();
+    q.find('view').attr('limit', '1');
+
+    var opt = new Object();
+    opt.tar = 'countGeo';
+    fct_query(q, VIEW_TYPE_GEO, opt);
+}
+
 
 function checkLibraryButton(){
   $('#libraryButton').addClass('hide');
@@ -8075,7 +8145,7 @@ if(isReverse){
 
         badge = $.createElement('p');
         badge.addClass('badge');
-        badge.addClass('badge-pill');
+        //badge.addClass('badge-pill');
         badge.addClass('badge-primary');
         badge.addClass('gbbadge');
         badge.css('display', 'inline');
@@ -10256,10 +10326,12 @@ content += '</section>';
 
 
     if(isInterlinked()){
+        doTabs();
         //popUnder(src, window.outerWidth, window.outerHeight);
         var win = window.open($('#angular_recordViewer').attr('src'), twin, 'width="'+window.outerWidth+'" height="'+window.outerHeight+'"');
         win.blur();
         this.window.focus();
+
     }
 
 
@@ -10987,10 +11059,11 @@ function popUnder(url, width, height) {
 }
 
 
-function linkOut(src){
+function linkOut(src, name){
+  if(!name) name = twin;
     if(! src ) src = $('#angular_recordViewer').attr('src');
     if(!src || src.length <= 0) return;
-    var win = window.open(deSanitizeLabel(src), twin, 'width="'+window.outerWidth+'" height="'+window.outerHeight+'"');
+    var win = window.open(deSanitizeLabel(src), name, 'width="'+window.outerWidth+'" height="'+window.outerHeight+'"');
     //win.blur();
     //this.window.focus();
 }
