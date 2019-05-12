@@ -981,7 +981,7 @@ function fct_sparql(sparql, opt){
   var id = sparql ? (sparqlSvr + sparql).hashCode() : 0;
 
   // need to use a register pattern for these
-  setMutex(id, opt.tar, opt.tar!='record' && opt.tar != 'askLibraries' && opt.tar != 'askGlossaries' && opt.tar != 'askBounties' && opt.tar != 'askHelp' && opt.tar != 'askDefaultLoadLibraries' && opt.tar != 'askDefaultLoadOriginLibraries' && opt.tar != 'fetchLibraries' && opt.tar != 'fetchContentDesc' && opt.tar != 'fetchPhotos');
+  setMutex(id, opt.tar, opt.tar!='record' && opt.tar != 'askLibraries' && opt.tar != 'askGlossaries' && opt.tar != 'askHelp' && opt.tar != 'askDefaultLoadLibraries' && opt.tar != 'askDefaultLoadOriginLibraries' && opt.tar != 'fetchLibraries' && opt.tar != 'fetchContentDesc');
   //q.attr('timeout', fct_queryTimeout);
   var resp;
   if(fct_isCache){
@@ -1039,9 +1039,6 @@ function fct_sparql(sparql, opt){
               else if(opt.tar == 'askGlossaries'){
                 fct_handleSparqlGlossaryAsk(resp, opt);
               }
-              else if(opt.tar == 'askBounties'){
-                fct_handleSparqlBountyAsk(resp, opt);
-              }
               else if(opt.tar == 'askHelp'){
                 fct_handleSparqlHelpAsk(resp, opt);
               }
@@ -1059,9 +1056,6 @@ function fct_sparql(sparql, opt){
               }
               else if(opt.tar == 'fetchContentDesc'){
                 fct_handleSparqlFetchContentDesc(resp, opt);
-              }
-              else if(opt.tar == 'fetchPhotos'){
-                fct_handleSparqlFetchPhotos(resp, opt);
               }
             }
 
@@ -1128,9 +1122,6 @@ function fct_sparql(sparql, opt){
               else if(opt.tar == 'askGlossaries'){
                 fct_handleSparqlGlossaryAsk(xml, opt);
               }
-              else if(opt.tar == 'askBounties'){
-                fct_handleSparqlBountyAsk(xml, opt);
-              }
               else if(opt.tar == 'askHelp'){
                 fct_handleSparqlHelpAsk(xml, opt);
               }
@@ -1148,9 +1139,6 @@ function fct_sparql(sparql, opt){
               }
               else if(opt.tar == 'fetchContentDesc'){
                 fct_handleSparqlFetchContentDesc(xml, opt);
-              }
-              else if(opt.tar == 'fetchPhotos'){
-                fct_handleSparqlFetchPhotos(xml, opt);
               }
             }
           //console.log('sparql results: ' + xml);
@@ -1293,28 +1281,6 @@ function fct_handleSparqlFetchContentDesc(xml, opt){
 
 }
 
-function fct_handleSparqlFetchPhotos(xml, opt){
-    var results = $(xml).find('results');
-  $('result', results).each(function(i){
-  	$('#recordPhotos').removeClass('hide');
-    var photo = $($(this).children('binding')[0]).text().trim();
-    var title = $($(this).children('binding')[1]).text().trim();
-    var creator = $($(this).children('binding')[2]).text().trim();
-    var creatorLabel = $($(this).children('binding')[3]).text().trim();
-/*    var snip = content;
-    if(content.indexOf('.') > 0){
-      var snip = content.substring(0, content.indexOf('.')) + '.';
-      content = content.substring(content.indexOf('.')+1);
-      if(content.indexOf('.') > 0){
-        snip += ' ' + content.substring(0, content.indexOf('.')) + '.';
-      }
-    }
-    $('#'+opt.id).append('<span class="help-block">'+snip+'</span>');
-    */
-  });
-
-}
-
 function fct_handleSparqlFetchLibraries(xml, opt){
 
   var results = $(xml).find('results');
@@ -1387,26 +1353,6 @@ function fct_handleSparqlGlossaryAsk(xml, opt){
     }
     else if( !$('#glossaryButton').hasClass('hide') ){
       $('#glossaryButton').addClass('hide');
-    }
-  }
-}
-
-
-function fct_handleSparqlBountyAsk(xml, opt){
-  var exists = $($(xml).find('boolean')[0]).text().trim() == 'true';
-  if(!exists){
-    $('#bountyButton').parent().addClass('hide');
-  }
-  else {
-    if( 
-      !_root.children('query').children('class[iri="dsn:data.vios.network/o/Bounty"]') || 
-      _root.children('query').children('class[iri="dsn:data.vios.network/o/Bounty"]').length <= 0
-      
-      ){
-      $('#bountyButton').parent().removeClass('hide');
-    }
-    else if( !$('#bountyButton').parent().hasClass('hide') ){
-      $('#bountyButton').parent().addClass('hide');
     }
   }
 }
@@ -1709,7 +1655,7 @@ col.css('background-color', '#ffffff');
 
   col.html(colStr);
 //  row.append(col);
-  if(!node.attr('exclude')) r1.value += col.prop('outerHTML');
+  r1.value += col.prop('outerHTML');
 
 
     col = $.createElement('td');
@@ -1718,7 +1664,7 @@ col.css('background-color', '#ffffff');
           colStr += '</button>';
   col.html(colStr);
 //  row2.append(col);
-  if(!node.attr('exclude')) r2.value += col.prop('outerHTML');
+  r2.value += col.prop('outerHTML');
           //ret += '</div>';
 
 
@@ -1727,7 +1673,7 @@ col.css('background-color', '#ffffff');
     buildResultTableHeaders(r1, r2, varNames, varCt, $(this));
   });
 
-  if(!node.attr('exclude')) r1.count++;
+  r1.count++;
 }
 
 function tablePage(){
@@ -1955,9 +1901,9 @@ function fct_handleSparqlResults(xml, opt) {
                 var nodeClass = (datatype == 'uri') ? 'link-table' : 'literal-table';
 
 
-                if(getQueryText() && getQueryText().length > 0 && datatype != 'uri' && $('#showMeMenu').val()==VIEW_TYPE_TEXT_PROPERTIES){
+                if(datatype != 'uri' && $('#showMeMenu').val()==VIEW_TYPE_TEXT_PROPERTIES){
                   var kwords = getQueryText().split(' ');
-                  for(m = 0; m < kwords.length; m++){
+                  for(m = 0; m < kwords.length; kwords++){
                     var regex = new RegExp('('+kwords[m]+')', 'gi');
                     label = label.replace(regex, '<span class="text-search-hit">$1</span>');
                   }
@@ -2912,7 +2858,7 @@ var TAG_GRAPH = 'g';
 
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://myopenlink.net/DAV/home/sdmonroe/poc_draft.html";
 //var this_endpoint = (window.location.href.indexOf('dev-team') > 0) ? 'http://vios.dev-team.com/' : "http://poc.vios.network";
-var this_endpoint = 'https://alpha.vios.network';
+var this_endpoint = 'https://dev.vios.network';
 
 var qGroupBy, qShowMe, qdataSpace, qdataSpaceLabel, qSearchAllFields, qPage, qshowMePage, qTimeout, qNavType, qSubjectBadges, qVerticalChartHeaders, qViewType, qIsChart, qIsRollup, qShowIDN, qFilterRecordViewFields, qShowRecordRoles;
 
@@ -2956,8 +2902,8 @@ var recordViewerColumnWidth = SIZE_RECORD_VIEWER;
 var SIZE_RECORD_FORM = (screenSz < SIZE_MAX_SCREEN) ? "6" : "6";
 var SIZE_LABEL = (screenSz < SIZE_MAX_SCREEN) ? 22 : 30; // TODO: this constant is deprecated, using text-ellipsis now
 var SIZE_RESULT_SET = (screenSz < SIZE_MAX_SCREEN) ? 15: 15;
-var SIZE_TABLE_RESULT_SET = (screenSz < SIZE_MAX_SCREEN) ? 150: 300;
-var SIZE_MATRIX_RESULT_SET = (screenSz < SIZE_MAX_SCREEN) ? 150: 300;
+var SIZE_TABLE_RESULT_SET = (screenSz < SIZE_MAX_SCREEN) ? 15: 30;
+var SIZE_MATRIX_RESULT_SET = (screenSz < SIZE_MAX_SCREEN) ? 15: 30;
 var SIZE_MIN_DIGITS = 7;
 var SIZE_MAX_DIGITS = 20;
 
@@ -3204,7 +3150,7 @@ function init(){
         link.id = 'id2';
         link.rel = 'stylesheet';
         link.type = 'text/css';
-        link.href = 'https://data.vios.network/DAV/home/vios/css/vios.css';
+        link.href = 'https://data.vios.network/DAV/home/vios/dev/css/vios.css';
         //document.head.appendChild(link);
     }  
 
@@ -3444,8 +3390,6 @@ $('#keywords').attr('placeholder', 'Press Ctrl key or click here to enter keywor
   });
 */
 
-
-
       var copyButton = '<li class="nav-item d-none d-md-block"><a id="copyQuery" vocab="http://schema.org/" typeOf="FindAction" class="nav-link pl-2 text-inverse" >';
       copyButton += '<span id="query" class="hide" property="query"></span>';
       copyButton += '<span id="queryDescription" class="hide" property="http://purl.org/dc/terms/description"></span>';
@@ -3504,17 +3448,11 @@ $('#keywords').attr('placeholder', 'Press Ctrl key or click here to enter keywor
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(glossaryButton);
 
 
-      var bountyButton = '<li class="hide nav-item d-none d-md-block"><a onclick="javascript:doFindBounties();" class="nav-link pl-2 text-info" id="bountyButton" ><i class="la la-bullhorn la-lg"></i></a></li>'; //la-heart-o
-
-      $('.page-controls > .navbar-nav .la-chain').parent().parent().after(bountyButton);
-
 
 
       var demoButton = '<li class="nav-item d-none d-md-block"><a rel="sidebar" class="hide nav-link pl-2 text-warning" id="helpButton" '+buildTitle('Click WWW on the next canvas to visit the demo smart folders')+' onclick="javascript:clearKeywords(); setQueryText(\'\'); takeMainFocus(ID_QUERY); clearFacets(true); clearQueryGraph(true); doSetLibrary(); checkLibraries();"><i class="la la-question la-lg"></i></a></li>'; //la-heart-o la-map-signs
 //href="http://vio.sn/c/9LK72AN"
       $('.page-controls > .navbar-nav .la-chain').parent().parent().after(demoButton);
-
-
 
 
   //$('#queryTimeout').unbind('click');  
@@ -3758,8 +3696,8 @@ gbcol = '<div id="recordViewerColumn" class="hide col-xl-'+SIZE_RECORD_VIEWER+' 
 gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg-light">';
   gbcol += '<a  style="margin-left: 7px;" class="navbar-brand" data-target="#" onclick="javascript:buildForm()">Compose</a>';
   gbcol += '<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">';
-    //gbcol += '<i class="glyphicon glyphicon-tree-conifer"></i>';
-    gbcol += '<i _ngcontent-c10="" class="la la-bars text-success"></i>';
+    gbcol += '<i class="glyphicon glyphicon-tree-conifer"></i>';
+    gbcol += '<i _ngcontent-c10="" class="glyphicon glyphicon-tree-conifer text-success"></i>';
   gbcol += '</button>';
 
   gbcol += '<div class="collapse navbar-collapse" id="navbarSupportedContent">';
@@ -4086,8 +4024,8 @@ gbcol = '<div id="recordViewerColumn" class="hide col-xl-'+SIZE_RECORD_VIEWER+' 
 gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg-light">';
   gbcol += '<a  style="margin-left: 7px;" class="navbar-brand" data-target="#" onclick="javascript:buildForm()">Compose</a>';
   gbcol += '<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">';
-    //gbcol += '<i class="glyphicon glyphicon-tree-conifer"></i>';
-    gbcol += '<i _ngcontent-c10="" class="la la-bars text-success"></i>';
+    gbcol += '<i class="glyphicon glyphicon-tree-conifer"></i>';
+    gbcol += '<i _ngcontent-c10="" class="glyphicon glyphicon-tree-conifer text-success"></i>';
   gbcol += '</button>';
 
   gbcol += '<div class="collapse navbar-collapse" id="navbarSupportedContent">';
@@ -4282,8 +4220,8 @@ gbcol = '<div id="recordViewerColumn" class="hide col-xl-'+SIZE_RECORD_VIEWER+' 
 gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg-light">';
   gbcol += '<a  style="margin-left: 7px;" class="navbar-brand" data-target="#" onclick="javascript:buildForm()">Compose</a>';
   gbcol += '<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">';
-    //gbcol += '<i class="glyphicon glyphicon-tree-conifer"></i>';
-    gbcol += '<i _ngcontent-c10="" class="la la-bars text-success"></i>';
+    gbcol += '<i class="glyphicon glyphicon-tree-conifer"></i>';
+    gbcol += '<i _ngcontent-c10="" class="glyphicon glyphicon-tree-conifer text-success"></i>';
   gbcol += '</button>';
 
   gbcol += '<div class="collapse navbar-collapse" id="navbarSupportedContent">';
@@ -5979,8 +5917,8 @@ if(!$('input[type="text"], input[type="password"], input[type="search"], input[t
         }
 
     else if(e.keyCode == '9') { // Tab key
-    	doTabs();
-    	interlinked = true;
+      doTabs();
+      interlinked = true;
     }
 
 
@@ -6178,15 +6116,6 @@ function processLabel(label, value, datatype, lang, labelSize, includeHostName){
       label += ' (' + getHostName(label) + ')';
     }
 
-    if(isUri(label)){
-      if(label.lastIndexOf("#") == label.length - 1){
-        label = label.substring(0, label.length-1);
-      }
-      else{
-        label = label.substring(label.lastIndexOf("#")+1);
-      }
-    }
-
     while(label.indexOf('/') >= 0){
       if(label.endsWith("/")){
         label = label.substring(0, label.length-1);
@@ -6195,6 +6124,12 @@ function processLabel(label, value, datatype, lang, labelSize, includeHostName){
         label = label.substring(label.lastIndexOf("/")+1);
       }
     }
+      if(label.lastIndexOf("#") == label.length - 1){
+        label = label.substring(0, label.length-1);
+      }
+      else{
+        label = label.substring(label.lastIndexOf("#")+1);
+      }
 
 
     // *** business Category processing - TODO: this need to be removed
@@ -6574,7 +6509,6 @@ function doQuery(keywords) {
     checkArrowRightButton();
     checkArrowLeftButton();
     checkHelpButton();
-    checkBountyButton();
     checkLibraryBreadCrumbs();
     checkBreadCrumbs();
     checkExitLibraryButton();
@@ -6705,15 +6639,6 @@ function checkHelpButton(){
     $('#glossaryButton').addClass('hide');
   }
   */
-}
-
-function checkBountyButton(){
-  $('#bountyButton').parent().addClass('hide');
-  var sparql = buildTypeAskQuery('dsn:data.vios.network/o/Bounty');
-
-  var opt = new Object();
-  opt.tar = 'askBounties';
-  fct_sparql(sparql, opt);
 }
 
 function checkGlossaryButton(){
@@ -6873,18 +6798,6 @@ function buildTypeAskQuery(clazz){
   else where = '{' + where + '}';
 
   return 'ask ' + where;// + ' limit 1';
-}
-
-function doFindBounties(){
-  isExpandSearch = true;
-  filterRecordViewFields = true;
-  takeMainFocus(ID_QUERY);
-  clearFacets(true); 
-  var cid = createId();
-  setQueryText($('#keywords').val());
-  addClassFacet(cid, 'dsn:data.vios.network/o/Bounty', 'Bounty');  
-  var pid = createId();
-  addPropertyFacet(pid, 'dsn:data.vios.network/p/solution', 'solution', undefined, undefined, undefined, undefined, false, true);
 }
 
 function doLoadLibraries(){
@@ -9449,10 +9362,6 @@ function loadDescribeResults(xml, opt) {
     var homepage;
     var url;
 
-    var email;
-    var emailSubject;
-    var isEmailDelivery = false;
-
     var comments = new Array();
 
     var libraryFetched;
@@ -9544,9 +9453,9 @@ function loadDescribeResults(xml, opt) {
                 img = '<div class="pull-right"><img onclick="javascript:linkOut(\'' + objectIRI + '\');" style="cursor:pointer;width:200px; margin-left:.55em;" class="class="rounded img-thumbnail" src="' + objectIRI + '"/></div>';
                 imgIri = objectIRI;
             }
-            if (!desc && propLabel.endsWith('comment')) desc = objectValue;
-            if (propLabel.endsWith('abstract')) desc = objectValue;
-            if (propLabel.endsWith('description')) desc = objectValue; // foaf:description always overrides comments 
+            if (!desc && propIRI.endsWith('comment')) desc = objectValue;
+            if (propIRI.endsWith('abstract')) desc = objectValue;
+            if (propIRI.endsWith('description')) desc = objectValue; // foaf:description always overrides comments 
             if (propLabel.endsWith(':long')) long = objectValue;
             if (propLabel.endsWith(':lat')) lat = objectValue;
             if (propLabel.endsWith(':name')) name = objectValue;
@@ -9566,16 +9475,6 @@ function loadDescribeResults(xml, opt) {
             if (propIRI == 'http://xmlns.com/foaf/0.1/homepage') homepage = (!objectValue) ? objectIRI : objectValue;
 
             if (propIRI == 'http://www.w3.org/2000/01/rdf-schema#comment') comments.push(objectValue);
-
-            if (propIRI == 'http://schema.org/seeks') {
-              email = subject;
-              emailSubject = objectIRI;
-            }
-
-            if (propIRI == 'http://schema.org/availableDeliveryMethod') {
-              isEmailDelivery = objectValue == 'email';
-            }
-
 
 
             //if(objectIRI == uri && !propLabel.trim().toLowerCase().endsWith('of')) propLabel += ' of';
@@ -10180,7 +10079,6 @@ content += '</section>';
         if (comments.length > 0) {
             tabs += '<li class="nav-item"><a aria-controls="comments" aria-expanded="false" class="nav-link" data-toggle="tab" href="#comments" id="menu-comments" role="tab">Comments</a></li>';
         }
-        tabs += '<li id="recordPhotos" class="hide nav-item"><a aria-controls="photos" aria-expanded="false" class="nav-link" data-toggle="tab" href="#photos" id="photos-tab" role="tab">Photos</a></li>';
         tabs += '</ul></div>';
         $('#angular_recordViewer').append(tabs);
         var d = $.createElement('div');
@@ -10203,7 +10101,6 @@ content += '</section>';
         //$('#angular_recordViewer').append('<i style="cursor:pointer" onclick="javascript:filterRecordViewFields = !filterRecordViewFields; describe(\'recordNavBar\', \''+sanitizeLabel(uri)+'\')" class="p-2 pull-right glyphicon glyphicon-filter text-'+((filterRecordViewFields)?'info':'muted')+'"></i>');
         d2.append(table);
         d.append(d2);
-
         var d3 = $.createElement('div');
         //d3.attr('aria-expanded', 'true');
         d3.attr('aria-labelledby', 'tools-tab');
@@ -10247,12 +10144,6 @@ content += '</section>';
         recordToolBar += 'Download Record - ' + getBytesDenomination(sz) + ' ' + getBytesDenominationUnit(sz) + '';
         recordToolBar += '&nbsp;&nbsp;<i class="fa fa-barcode"></i>';
         recordToolBar += '</button>';
-        if(email && isEmailDelivery){
-                recordToolBar += '<a class="btn btn-block btn-primary" href="' + email + '?subject=VIOS bounty: '+buttonLabel+'&body=This is in response to '+encodeURIComponent( emailSubject )+' %0A%0AHere is the permalink:%0A%0AHere is my VeChain address: ">';
-                recordToolBar += '  Submit permalink - ' + email.substring('mailto:'.length);
-                recordToolBar += '&nbsp;&nbsp;<i class="fa fa-envelope"></i>';
-                recordToolBar += '</a>';
-        }
         if (isFastFood) {
             if (phone) {
 
@@ -10447,22 +10338,6 @@ content += '</section>';
             d.append(d4);
         }
 
-
-        var d5 = $.createElement('div');
-        //d3.attr('aria-expanded', 'true');
-        d5.attr('aria-labelledby', 'photos-tab');
-        d5.addClass('tab-pane');
-        //d3.addClass('active');
-        //d3.addClass('in');
-        //d3.addClass('clearfix');
-        d5.css('padding-top', '1em');
-        d5.css('padding-left', '0px');
-        d5.css('padding-right', '0px');
-        d5.attr('id', 'photos');
-        d5.attr('role', 'tabpanel');
-        d.append(d5);
-
-
         if (hasClass) d2.append('<div class="form-actions"><div class="text-center"><button _ngcontent-c7="" class="btn btn-info " role="button">New ' + buttonLabel + '</button>&nbsp;<button _ngcontent-c7="" class="btn btn-inverse " role="button"> New Subclass </button></div></div>');
         //      $('#angular_recordViewer').append('</div></div>');
         $('#angular_recordViewer').append(d);
@@ -10506,30 +10381,7 @@ content += '</section>';
       }
 
     });
-
-
-
-    fetchPhotos(uri, getQueryText());
 } //recordViewerColumn
-
-
-function fetchPhotos(iri, keywords){
-  var t = '?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://w3id.org/lio/v1#Image>.';
-  t+= '?s <http://www.iptc.org/std/Iptc4xmpCore/1.0/xmlns/CiEmailWork> "info@margaretwarren.us"@en.';
-  //t+= '?s <http://purl.org/dc/elements/1.1/title> ?title.';
-  //t+= '?s <http://purl.org/dc/elements/1.1/creator> ?creator.';
-  //t+= '?creator <http://www.w3.org/2000/01/rdf-schema#label> ?creatorLabel';
-  t += '{?s ?p <'+iri+'>.';
-  t += '}';
-//  t += ' UNION {';
-//  t += '?s ?p "'+keywords+'".';
-//  t += '}';
-  var sparql = 'select ?s  {'+t+'}'; //?title ?creator ?creatorLabel
-  var opt = new Object();
-  opt.tar = 'fetchPhotos';
-  opt.srv = getRudiEndpoint( 'http://www.imagesnippets.com/sparql/images' );
-  fct_sparql(sparql, opt);
-}
 
 function getBytesDenominationUnit(sz){
   if(sz < 1000) return 'bytes';
@@ -11239,7 +11091,7 @@ function linkOut(src, name){
   if(!name) name = twin;
     if(! src ) src = $('#angular_recordViewer').attr('src');
     if(!src || src.length <= 0) return;
-    var win = window.open( deSanitizeLabel(src), name, 'width="'+window.outerWidth+'" height="'+window.outerHeight+'"');
+    var win = window.open( getProxyEndpoint( deSanitizeLabel(src) ), name, 'width="'+window.outerWidth+'" height="'+window.outerHeight+'"');
     //win.blur();
     //this.window.focus();
 }
@@ -12073,7 +11925,7 @@ function getPhoto(keywords, func){
   console.log('photo search: ' + keywords);
   $.ajax({
 
-    url :  'https://api.unsplash.com/search/photos/?query=' + keywords + '&orientation=landscape&client_id=' + localStorage.getItem('unsplash.key') ,
+    url : getProxyEndpoint( 'https://api.unsplash.com/search/photos/?query=' + keywords + '&orientation=landscape&client_id=' + localStorage.getItem('unsplash.key') ),
     type : 'GET',
     data : {
     },
