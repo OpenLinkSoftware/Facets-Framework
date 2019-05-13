@@ -392,6 +392,7 @@ function getQueryGraphLabel(){
 }
 
 function setQueryGraph(g, label){
+  g = g.trim();
   _root.find('query').attr('graph', g);
   _root.find('query').attr(ATTR_GRAPH_LABEL, label);
   var clearLibrary = $('span.clear-data').filter(function() {return $(this).text().indexOf('Library') >= 0;});
@@ -3629,6 +3630,7 @@ $('#isDebug').parent().addClass('btn-inverse');
         //getMainFocus().children('class[iri="dsn:data.vios.network/o/Origin"]').remove();
         //return;
       }
+      clearFacets();
       checkLibraries();
     });
 
@@ -3716,7 +3718,7 @@ gbcol += '<button _ngcontent-c4="" class="btn btn-gray" onclick="javascript:clea
           gbcol += '</button>';
  gbcol += '&nbsp;&nbsp;&nbsp;';
 
-gbcol += '<button _ngcontent-c4="" class="btn btn-gray" onclick="javascript:clearQueryGraph(true); checkLibraries(); doQuery($(\'#keywords\').val())">';
+gbcol += '<button _ngcontent-c4="" class="btn btn-gray" onclick="javascript:clearQueryGraph(true); clearFacets(); checkLibraries(); doQuery($(\'#keywords\').val())">';
             /*gbcol += '<i _ngcontent-c4="" class="fa fa-ban text-danger"></i>';
             gbcol += ' <i _ngcontent-c4="" class="fa fa-bank text"></i>';*/
             gbcol += 'Exit Library';
@@ -5489,12 +5491,12 @@ function addTab(fctId, tabCounter) {
     //footer += '<li><a class="dropdown-item" href="#">Solid POD</a></li>';
     if (!inbox && !storage) {
         //                  footer += '<li class="dropdown-divider"></li>';
-        footer += '<li><a class="dropdown-item" href="#">Save to Data Space...</a></li>';
+        footer += '<li><a class="dropdown-item" href="#">Data Space...</a></li>';
     }
     else {
         footer += '<li class="dropdown-divider"></li>';
     }
-    footer += '<li><a onclick="downloadDataFile(formRDF.prop(\'outerHTML\'), \'rdf_' + createId() + '.rdf\');" class="dropdown-item" href="#">Export</a></li>';
+    footer += '<li><a onclick="downloadDataFile(formRDF.prop(\'outerHTML\'), \'rdf_' + createId() + '.rdf\');" class="dropdown-item" href="#">Local storage</a></li>';
     footer += '</ul>';
     footer += '</div>';
 
@@ -8499,6 +8501,10 @@ rows +=  '<a '+iriAttr+' id="'+opts.parentId+'" class="up list-group-item" data-
 
   var ckcolor = 'primary';
 var badgeColor = ($('#groupByMenu :selected').val() != GROUP_BY_NONE_VALUE) ? 'info' : 'info';
+if(uri == 'http://www.w3.org/ns/sparql-service-description#NamedGraph' || uri == 'dsn:data.vios.network/o/Origin') {
+  badgeColor = 'warning';
+  ckcolor = 'warning';
+}
 
 var rowId = opts.parentId;
 
@@ -10398,7 +10404,7 @@ content += '</section>';
               commentDiv += '<footer>';
               commentDiv += '<ul class="post-links">';
               commentDiv += '<li><a href="#">1 hour</a></li>';
-              commentDiv += '<li><a href="#"><span class="text-danger"><i class="fa fa-heart"></i> Like</span></a></li>';
+              commentDiv += '<li><a href="#"><span class="text-danger"><i class="fa fa-heart"></i> Liked</span></a></li>';
               commentDiv += '<li><a href="#">Comment</a></li>';
               commentDiv += '</ul>';
               commentDiv += '</footer>';
