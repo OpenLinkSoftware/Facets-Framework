@@ -5,8 +5,8 @@
   background-color: #495057;
 }
 
-.list-group-item .badge-info:hover, .list-group-item .badge-primary:hover{
-  background-color:#9964e3;
+.list-group-item .badge-info:hover, .list-group-item .badge-primary:hover, .list-group-item .badge-warning:hover{
+  background-color:#9964e3!important;
 }
 
 

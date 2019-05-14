@@ -6753,6 +6753,9 @@ function checkGeoButton(){
 
 function checkLibraryButton(){
   $('#libraryButton').addClass('hide');
+  if(getQuery().attr('graphAncestors') && getQuery().attr('graphAncestors').trim().length > 0) {
+    return;
+  }
   if(getMainFocus().attr('class') != ID_QUERY) return;
   var sparql = buildTypeAskQuery('http://www.w3.org/ns/sparql-service-description#NamedGraph');
   var opt = new Object();
@@ -9346,7 +9349,11 @@ function fetchLibraries(s, p, oIRI, oValue){
   fct_sparql(sparql, opt);  
 }
 
+
+var propSeen = [];
+
 function loadDescribeResults(xml, opt) {
+    propSeen = [];
     var fixmeTop = $('.record-table').offset()
     if(fixmeTop) fixmeTop = fixmeTop.top;     
     prepareFetchLibraries();
@@ -9502,6 +9509,7 @@ function loadDescribeResults(xml, opt) {
             propLabel = qname+':'+fragId;
             // var propIRI = (namespaces[qname] + fragId;
 
+            var datatype = ($(this).attr('rdf:datatype') && $(this).attr('rdf:datatype').length > 0) ? $(this).attr('rdf:datatype') : undefined;
             var lang = ($(this).attr('lang') && $(this).attr('lang').length > 0) ? $(this).attr('lang') : undefined;
             if (lang && lang != 'en') return;
 
@@ -9550,9 +9558,9 @@ function loadDescribeResults(xml, opt) {
                 img = '<div class="pull-right"><img onclick="javascript:linkOut(\'' + objectIRI + '\');" style="cursor:pointer;width:200px; margin-left:.55em;" class="class="rounded img-thumbnail" src="' + objectIRI + '"/></div>';
                 imgIri = objectIRI;
             }
-            if (!desc && propLabel.endsWith('comment')) desc = objectValue;
-            if (propLabel.endsWith('abstract')) desc = objectValue;
-            if (propLabel.endsWith('description')) desc = objectValue; // foaf:description always overrides comments 
+            if (!desc && propIRI.endsWith('comment')) desc = objectValue;
+            if (propIRI.endsWith('abstract')) desc = objectValue;
+            if (propIRI.endsWith('description')) desc = objectValue; // foaf:description always overrides comments 
             if (propLabel.endsWith(':long')) long = objectValue;
             if (propLabel.endsWith(':lat')) lat = objectValue;
             if (propLabel.endsWith(':name')) name = objectValue;
@@ -9628,30 +9636,43 @@ function loadDescribeResults(xml, opt) {
               else addPropertyFacet(pid, propIRI, propLabel, undefined, undefined, undefined, undefined, true);
               takeMainFocus(pid);
             });
-            col.append(proplink);
 
-            var hid = createId();
-            var filterBtn = $.createElement('i');
-            filterBtn.addClass('la');
-            filterBtn.addClass('la-filter');
-            filterBtn.addClass('text-primary');
-            filterBtn.addClass('hide');
-            filterBtn.css('position', 'absolute');
-            filterBtn.css('cursor', 'pointer');
-            filterBtn.on('click', function (e){
-              filterRecordViewFields = true;
-              if(showRecordRoles) addPropertyOfFacet(createId(), propIRI, propLabel);
-              else addPropertyFacet(createId(), propIRI, propLabel);
-            });
-            filterBtn.addClass('hidable'+hid);
-            col.append('&nbsp;&nbsp;');
-            col.append(filterBtn);
-            col.on('mouseover', function() {
-                $('.hidable' + hid).removeClass('hide');
-            });
-            col.on('mouseout', function() {
-                $('.hidable' + hid).addClass('hide');
-            });
+                          var hid = createId();
+
+            if(propSeen.indexOf(propIRI) < 0) {
+              col.append(proplink);
+              //console.log('propLabel: '+proplink.text() + ' ' + propSeen.indexOf(propIRI) + ' ' + propSeen);
+              propSeen.push(propIRI);
+
+
+
+
+              var filterBtn = $.createElement('i');
+              filterBtn.addClass('la');
+              filterBtn.addClass('la-filter');
+              filterBtn.addClass('text-primary');
+              filterBtn.addClass('hide');
+              filterBtn.css('position', 'absolute');
+              filterBtn.css('cursor', 'pointer');
+              filterBtn.on('click', function (e){
+                filterRecordViewFields = true;
+                if(showRecordRoles) addPropertyOfFacet(createId(), propIRI, propLabel);
+                else addPropertyFacet(createId(), propIRI, propLabel);
+              });
+              filterBtn.addClass('hidable'+hid);
+              col.append('&nbsp;&nbsp;');
+              col.append(filterBtn);
+              col.on('mouseover', function() {
+                  $('.hidable' + hid).removeClass('hide');
+              });
+              col.on('mouseout', function() {
+                  $('.hidable' + hid).addClass('hide');
+              });
+
+            }
+            else {
+              col.css('border-top', '0px solid transparent');
+            }
 
             row.append(col);
 
@@ -9666,6 +9687,7 @@ function loadDescribeResults(xml, opt) {
             }
             var cid = 'copy_' + createId();
             var loid = 'linkout_' + createId();
+            var pvtoid = 'pivot_' + createId();
             col.on('mouseover', function() {
                 $('.hidable' + hid).removeClass('hide');
 //                $('#' + loid).removeClass('hide');
@@ -9682,15 +9704,21 @@ function loadDescribeResults(xml, opt) {
                 if (subject) {
                     col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + subject + '\', \'' + processLabel(subLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(subLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right la la-thumbs-o-up fa-lg text-inverse"></span><span class="hide hidable'+hid+' record-action-nix pull-right la la-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(subject) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
                     col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field la la-external-link" onclick="linkOut(\''+subject+'\')"></i>');
+                    col.append('&nbsp;<i id="'+pvtoid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field la la-crosshairs" onclick="var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');"></i>');
                 } else col.text(objectValue);
             } else {
                 if (objectIRI) {
                     col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(objLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right la la-thumbs-o-up fa-lg text-inverse"></span><span class="hide hidable'+hid+' record-action-nix pull-right la la-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(objectIRI) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
                     col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field la la-external-link" onclick="linkOut(\''+objectIRI+'\')"></i>');
+                    col.append('&nbsp;<i id="'+pvtoid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field la la-crosshairs" onclick="var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\', true, false); var pid2 = createId(); '+(showRecordRoles?'addPropertyFacet' :'addPropertyOfFacet')+'(pid2, \'' + propIRI + '\', \'' + propLabel + '\', undefined, undefined, undefined, undefined, true, false); takeMainFocus(pid2);"></i>');
                 } else {
+                    var literalClass = 'glyphicon glyphicon-tag';
+                    if(propIRI == 'http://www.w3.org/2003/01/geo/wgs84_pos#lat' || propIRI == 'http://www.w3.org/2003/01/geo/wgs84_pos#long' || propIRI == 'http://www.w3.org/2003/01/geo/wgs84_pos#geometry' || propIRI == 'http://www.georss.org/georss/point')literalClass = 'fa fa-map-marker fa-lg';
+                    if(propIRI == 'http://www.w3.org/2000/01/rdf-schema#comment')literalClass = 'fa fa-comment';
                     col.html(objectValue); 
-                    col.prepend('<span class="hide hidable'+hid+' record-action-nix pull-right la la-thumbs-o-down fa-lg text-danger"></span><span class="hide hidable'+hid+' record-action-highlight pull-right la la-thumbs-o-up fa-lg text-inverse"></span><span style="cursor:pointer" class="pull-right icon-literal glyphicon glyphicon-tag" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + sanitizeLabel(objectValue) + '\', \'uri\', \'' + lang + '\');"></span>' );
+                    col.prepend('<span class="hide hidable'+hid+' record-action-nix pull-right la la-thumbs-o-down fa-lg text-danger"></span><span class="hide hidable'+hid+' record-action-highlight pull-right la la-thumbs-o-up fa-lg text-inverse"></span><span style="cursor:pointer" class="pull-right icon-literal '+literalClass+'" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + sanitizeLabel(objectValue) + '\', \'uri\', \'' + lang + '\');"></span>' );
                     col.append('&nbsp;&nbsp;<i id="' + cid + '" onmouseout="$(\'#' + cid + '\').tooltip(\'hide\');$(\'#' + cid + '\').attr(\'data-original-title\', \'Copy to clipboard\');$(\'#' + cid + '\').tooltip();" ' + buildTitle('Copy to clipboard') + ' onclick="javascript:$(\'#' + cid + '\').tooltip(\'hide\');copy(\'' + sanitizeLabel(objectValue) + '\'); $(\'#' + hid + '\').attr(\'data-original-title\', \'Copied\');$(\'#' + cid + '\').tooltip(\'show\');" style="cursor:pointer;" class="hide hidable'+hid+' fa fa-copy fa-sm"></i>');
+                    col.append('&nbsp;<i id="'+pvtoid+'" style="cursor:pointer;" class="hide hidable'+hid+' la la-crosshairs" onclick="var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + processLabel(objectValue) + '\', \''+datatype+'\', undefined, true, false); takeMainFocus(\'' + ctxId + '\', true, false); var pid2 = createId(); '+(showRecordRoles?'addPropertyFacet' :'addPropertyOfFacet')+'(pid2, \'' + propIRI + '\', \'' + propLabel + '\', undefined, undefined, undefined, undefined, true, false); takeMainFocus(pid2);"></i>');
                 }
             }
             row.append(col);
@@ -9702,7 +9730,7 @@ function loadDescribeResults(xml, opt) {
 
 
 
-
+if(!showRecordRoles){
     var libraryIRI = $('.libraryLink').attr('iri');
     var libraryLabel = $('.libraryLink').attr('irilabel');
     var onclick = 'onclick="javascript:setGraphFacet(\''+libraryIRI+'\', \''+libraryLabel+'\');"';
@@ -9715,6 +9743,8 @@ function loadDescribeResults(xml, opt) {
     }
     var lbid = createId();
     body.prepend('<tr onmouseover="$(\'.hidable' + lbid +'\').removeClass(\'hide\');" onmouseout="$(\'.hidable' + lbid + '\').addClass(\'hide\');"><td class="libraryRowCell">library</td><td  class="libraryRowCell" style="width:100%"><a id="libraryRowLink" '+buildTitle( libraryIRI )+' '+onclick+' class="link-field">'+libraryIRI+'</a>&nbsp;&nbsp;<i id="'+lbid+'" style="cursor:pointer;" class="libraryRowLinkOut hide hidable'+lbid+' link-field la la-external-link" '+onclickLinkOut+'></i></td></tr>');
+
+}
 
 /*
     var graph = $('.libraryLink').attr('iri');
@@ -10184,7 +10214,7 @@ content += '</section>';
             tabs += '<li class="nav-item"><a aria-controls="review" aria-expanded="false" class="nav-link" data-toggle="tab" href="#review" id="review-tab" role="tab">Reviews</a></li>';
         }
         if (comments.length > 0) {
-            tabs += '<li class="nav-item"><a aria-controls="comments" aria-expanded="false" class="nav-link" data-toggle="tab" href="#comments" id="menu-comments" role="tab">Comments</a></li>';
+            tabs += '<li class="nav-item"><a aria-controls="comments" aria-expanded="false" class="nav-link" data-toggle="tab" href="#comments" id="menu-comments" role="tab"><i class="fa fa-comment"></i>&nbsp;&nbsp;Comments</a></li>';
         }
         tabs += '<li id="recordPhotos" class="hide nav-item"><a aria-controls="photos" aria-expanded="false" class="nav-link" data-toggle="tab" href="#photos" id="photos-tab" role="tab">Photos</a></li>';
         tabs += '</ul></div>';
@@ -11570,7 +11600,7 @@ $('[data-toggle="tooltip"]').tooltip(); // activate facet tooltips
               var gal = graphAncestorLabels.split(',');
               var ancestors = '';
               for(i = 0; i < ga.length; i++){
-                ancestors += '<li><a href="#">'+gal[i]+'</a></li>';
+                ancestors += '<li><a href="javascript:" onclick="javascript:while(getQueryGraph() && getQueryGraph().length > 0 && getQueryGraph() != \''+ga[i].trim()+'\'){clearQueryGraph();} checkLibraries(); doQuery(getQueryText())">'+gal[i]+'</a></li>';
               }
               libraries.prepend(ancestors);
             }
