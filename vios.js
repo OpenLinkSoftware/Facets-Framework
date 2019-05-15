@@ -3133,7 +3133,7 @@ var sponger = localStorage.getItem('sponger');
 var referrerAddress = localStorage.getItem('user.referrerAddress');
 var groupbyAutoIRI = localStorage.getItem('groupby.iri');
 var groupbyAutoLabel = localStorage.getItem('groupby.label');
-
+var HIDE_PROPS_THRESHOLD = localStorage.getItem('ui.hidePropsThreshold') ;
 
 function init(){
     fct_init(); // this method must be the first method called by the implementation of the fct_ framework
@@ -3165,6 +3165,7 @@ function init(){
         localStorage.setItem('colSz.'+screenSz, colSz); // attempt to claim memory before cache uses it all
         localStorage.setItem('SIZE_RESULT_SET.'+screenSz, SIZE_RESULT_SET); // attempt to claim memory before cache uses it all
 
+        if(!HIDE_PROPS_THRESHOLD) HIDE_PROPS_THRESHOLD = 25;
 
         if(!sponger || sponger.length <= 0){
           sponger = 'linkeddata.uriburner.com';
@@ -3771,7 +3772,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
       gbcol += '</li>';
       gbcol += '<li class="nav-item dropdown active">';
         gbcol += '<a onclick="doTabs();" class="nav-link dropdown-toggle" data-target="#" id="viewDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
-          gbcol += 'Tabs';
+          gbcol += 'Launch';
         gbcol += '</a>';
 //        gbcol += '<div class="dropdown-menu" aria-labelledby="viewDropdown">';
 //          gbcol += '<a class="dropdown-item" data-target="#">Owner Profile</a>';
@@ -4099,7 +4100,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
       gbcol += '</li>';
       gbcol += '<li class="nav-item dropdown active">';
         gbcol += '<a onclick="doTabs();" class="nav-link dropdown-toggle" data-target="#" id="viewDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
-          gbcol += 'Tabs';
+          gbcol += 'Launch';
         gbcol += '</a>';
 //        gbcol += '<div class="dropdown-menu" aria-labelledby="viewDropdown">';
 //          gbcol += '<a class="dropdown-item" data-target="#">Owner Profile</a>';
@@ -4295,7 +4296,7 @@ gbcol += '<nav id="" class="recordNavBar navbar navbar-expand-lg navbar-light bg
       gbcol += '</li>';
       gbcol += '<li class="nav-item dropdown active">';
         gbcol += '<a onclick="doTabs();" class="nav-link dropdown-toggle" data-target="#" id="viewDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
-          gbcol += 'Tabs';
+          gbcol += 'Launch';
         gbcol += '</a>';
 //        gbcol += '<div class="dropdown-menu" aria-labelledby="viewDropdown">';
 //          gbcol += '<a class="dropdown-item" data-target="#">Owner Profile</a>';
@@ -9311,9 +9312,17 @@ var rowId = opts.parentId;
 var showRecordRoles = false;
 var filterRecordViewFields = true;
 var recordRDF;
+var showRecordProperty;
 
 function updateInfoTab(b){
   showRecordRoles = b;
+  showRecordProperty = undefined;
+  describe(undefined, $('#angular_recordViewer').attr('iri') );
+  updatePermalink();
+}
+
+function updateInfoTabProperty(prop){
+  showRecordProperty = prop;
   describe(undefined, $('#angular_recordViewer').attr('iri') );
   updatePermalink();
 }
@@ -9471,18 +9480,29 @@ function loadDescribeResults(xml, opt) {
     var libraryFetched;
     var ctGloss = 0;
 
+    var priceSpec;
+
 
     var rows = '';
 
     var field_len = 0;
     var hideFilterRecordFields = '';
+    var props = {};
     $('rdf\\:Description', xml).each(function(i) {
       field_len += $('*', this).length;
+      $('*', this).each(function(j) {
+        var pct = props[$(this).prop('nodeName').toLowerCase()];
+        if(!pct) pct = 0;
+        props[$(this).prop('nodeName').toLowerCase()] = pct + 1;
+      });
       //if(field_len > 60){
       //  filterRecordViewFields = true;
       //  return;
       //}
     });
+    var excludedProps = new Array(props.length);
+    var excludedRoles = new Array(props.length);
+    var epidx = 0, eridx = 0;
     if(field_len < 100) {
       filterRecordViewFields = false;
       hideFilterRecordFields = ' hide';
@@ -9495,12 +9515,31 @@ function loadDescribeResults(xml, opt) {
         if (getLabel(subject)) subLabel = getLabel(subject);
         $('*', this).each(function(j) {
 
+            var propLabel = $(this).prop('nodeName').toLowerCase();
             var objectIRI = $(this).attr('rdf:resource');
             if(!objectIRI) objectIRI = $(this).attr('rdf:nodeID');
             var objLabel = objectIRI;
+            var isRole = objectIRI == uri; //propLabel.trim().toLowerCase().endsWith('of') || 
+
+            if(showRecordProperty && showRecordProperty.length > 0){
+              if(propLabel != showRecordProperty) return;
+            }
+
+
+            else if(propLabel != 'rdf:type' && props[propLabel] > HIDE_PROPS_THRESHOLD) {
+              if(!isRole && excludedProps.indexOf(propLabel) < 0) {
+                excludedProps[epidx]=propLabel;
+                epidx++
+              }
+              else if(isRole && excludedRoles.indexOf(propLabel) < 0) {
+                excludedRoles[eridx]=propLabel;
+                eridx++;
+              }
+              if(propLabel.endsWith('description') || propLabel.endsWith('abstract') || propLabel.endsWith('comment') || propLabel != 'rdf:type') return;
+            }
+
             if (getLabel(objectIRI)) objLabel = getLabel(objectIRI);
             var objectValue = $(this).text();
-            var propLabel = $(this).prop('nodeName').toLowerCase();
             var qname = propLabel.substring(0, propLabel.indexOf(':'));
             var fragId = propLabel.substring(propLabel.indexOf(':') + 1);
             var propIRI = iris[qname+':'+fragId];
@@ -9513,7 +9552,6 @@ function loadDescribeResults(xml, opt) {
             var lang = ($(this).attr('lang') && $(this).attr('lang').length > 0) ? $(this).attr('lang') : undefined;
             if (lang && lang != 'en') return;
 
-            var isRole = objectIRI == uri; //propLabel.trim().toLowerCase().endsWith('of') || 
 
             var proplink = $.createElement('span');
             proplink.css('cursor', 'pointer');
@@ -9590,7 +9628,9 @@ function loadDescribeResults(xml, opt) {
               isEmailDelivery = objectValue == 'email';
             }
 
-
+            if(propIRI == 'http://schema.org/PriceSpecification') {
+              priceSpec = objectIRI;
+            }
 
             //if(objectIRI == uri && !propLabel.trim().toLowerCase().endsWith('of')) propLabel += ' of';
             if (propLabel == 'RDF:TYPE') propLabel = 'category';
@@ -9731,6 +9771,7 @@ function loadDescribeResults(xml, opt) {
 
 
 if(!showRecordRoles){
+    // library row
     var libraryIRI = $('.libraryLink').attr('iri');
     var libraryLabel = $('.libraryLink').attr('irilabel');
     var onclick = 'onclick="javascript:setGraphFacet(\''+libraryIRI+'\', \''+libraryLabel+'\');"';
@@ -9744,6 +9785,10 @@ if(!showRecordRoles){
     var lbid = createId();
     body.prepend('<tr onmouseover="$(\'.hidable' + lbid +'\').removeClass(\'hide\');" onmouseout="$(\'.hidable' + lbid + '\').addClass(\'hide\');"><td class="libraryRowCell">library</td><td  class="libraryRowCell" style="width:100%"><a id="libraryRowLink" '+buildTitle( libraryIRI )+' '+onclick+' class="link-field">'+libraryIRI+'</a>&nbsp;&nbsp;<i id="'+lbid+'" style="cursor:pointer;" class="libraryRowLinkOut hide hidable'+lbid+' link-field la la-external-link" '+onclickLinkOut+'></i></td></tr>');
 
+
+    // data server row
+    //var dsid = createId();
+    //body.prepend('<tr onmouseover="$(\'.hidable' + dsid +'\').removeClass(\'hide\');" onmouseout="$(\'.hidable' + dsid + '\').addClass(\'hide\');"><td class="dataserverRowCell">data servers&nbsp;&nbsp;<i id="'+dsid+'" style="cursor:pointer;" class="libraryRowLinkOut hide hidable'+dsid+' text-primary la la-plus" '+onclickLinkOut+'></i></td><td  class="dataserverRowCell" style="width:100%"><a id="dataserverRowLink" class="link-field">'+$('#dataSpaceLabel').text()+'</a></td></tr>');
 }
 
 /*
@@ -10203,12 +10248,31 @@ content += '</section>';
         var tabs = '<div class="clearfix"><ul class="nav nav-tabs float-left" id="infoTabButton" role="tablist"> ';
         //tabs += '<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button"> Dropdown <b class="caret"></b></a><div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 45px, 0px); top: 0px; left: 0px; will-change: transform;"><a aria-controls="dropdown1" aria-expanded="true" class="dropdown-item show" data-toggle="tab" href="#dropdown1" id="dropdown1-tab" role="tab" aria-selected="true">@fat</a><a aria-controls="dropdown2" aria-expanded="true" class="dropdown-item active show" data-toggle="tab" href="#dropdown2" id="dropdown2-tab" role="tab" aria-selected="true">@mdo</a></div></li>
         tabs += '<li class="nav-item dropdown">';
-        tabs += '<a aria-controls="info" aria-haspopup="true" aria-expanded="true" class="nav-link dropdown-toggle active" data-toggle="dropdown" href="#info" id="info-tab" role="button"> '+(showRecordRoles?'Roles':'Fields')+' <b class="caret"></b></a>';
+        var tabLabel = (showRecordRoles?'Roles':'Fields');
+        if(!showRecordRoles) tabLabel +=  ((epidx > 0)? '&nbsp;<span class="badge badge-default">'+epidx+'</span>' :'');
+        else tabLabel +=  ((eridx > 0)? '&nbsp;<span class="badge badge-default">'+eridx+'</span>' :'');
+
+        tabs += '<a aria-controls="info" aria-haspopup="true" aria-expanded="true" class="nav-link dropdown-toggle active" data-toggle="dropdown" href="#info" id="info-tab" role="button"> '+tabLabel+' <b class="caret"></b></a>';
         tabs += '<div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(0px, 45px, 0px); top: 0px; left: 0px; will-change: transform;">';
         tabs += '<a onclick="javascript:updateInfoTab(false);" onclick="$(\'#info-tab\').text(\' Info: Fields \'); showRecordRoles = false; updatePermalink();" aria-controls="fields" aria-expanded="false" class="dropdown-item show'+((showRecordRoles) ? '' : ' active')+'" data-toggle="tab" href="#fields" id="fields-tab" role="tab" aria-selected="'+((showRecordRoles) ? 'false' : 'true')+'">Fields</a>';
-        tabs += '<a onclick="javascript:updateInfoTab(true);" onclick="$(\'#info-tab\').text(\' Info: Roles \'); showRecordRoles = true; updatePermalink();" aria-controls="roles" aria-expanded="false" class="dropdown-item show'+((showRecordRoles) ? ' active' : '')+'" data-toggle="tab" href="#roles" id="roles-tab" role="tab" aria-selected="'+((showRecordRoles) ? 'true' : 'false')+'">Roles</a></div>';
-        tabs += '</li>';
-        tabs += '<li class="nav-item"><a aria-controls="tools" aria-expanded="false" class="nav-link" data-toggle="tab" href="#tools" id="tools-tab" role="tab"> Options </a></li>';
+        tabs += '<a onclick="javascript:updateInfoTab(true);" onclick="$(\'#info-tab\').text(\' Info: Roles \'); showRecordRoles = true; updatePermalink();" aria-controls="roles" aria-expanded="false" class="dropdown-item show'+((showRecordRoles) ? ' active' : '')+'" data-toggle="tab" href="#roles" id="roles-tab" role="tab" aria-selected="'+((showRecordRoles) ? 'true' : 'false')+'">Roles</a>';
+        if(!showRecordRoles && excludedProps.length > 0 && excludedProps[0]) tabs += '<div class="dropdown-divider"></div>';
+        if(showRecordRoles && excludedRoles.length > 0 && excludedRoles[0]) tabs += '<div class="dropdown-divider"></div>';
+        for(k = 0; !showRecordRoles && k < excludedProps.length && excludedProps[k]; k++){
+          tabs += '<a onclick="javascript:updateInfoTabProperty(\''+excludedProps[k]+'\');" onclick="$(\'#info-tab\').text(\' '+excludedProps[k]+' \'); updatePermalink();" aria-controls="fields" aria-expanded="false" class="dropdown-item show'+((excludedProps[k] == showRecordProperty) ? ' active' : '')+'" data-toggle="tab" href="#fields" id="fields-tab" role="tab" aria-selected="'+((excludedProps[k] == showRecordProperty) ? 'true' : 'false')+'">'+excludedProps[k]+ ' (' + props[excludedProps[k]] +')</a>';
+        }
+        for(k = 0; showRecordRoles && k < excludedRoles.length && excludedRoles[k]; k++){
+          tabs += '<a onclick="javascript:updateInfoTabProperty(\''+excludedRoles[k]+'\');" onclick="$(\'#info-tab\').text(\' '+excludedRoles[k]+' \'); updatePermalink();" aria-controls="roles" aria-expanded="false" class="dropdown-item show'+((excludedRoles[k] == showRecordProperty) ? ' active' : '')+'" data-toggle="tab" href="#'+((showRecordRoles) ? 'roles' : 'fields')+'" id="roles-tab" role="tab" aria-selected="'+((excludedRoles[k] == showRecordProperty) ? 'true' : 'false')+'">'+excludedRoles[k]+ ' (' + props[excludedRoles[k]] +')</a>';
+        }
+        tabs += '</div></li>';
+
+        var optionsLabel = ' Options ';
+        var optionsCt = 0;
+        if(isFastFood) optionsCt = 2;
+        if(email && isEmailDelivery) optionsCt++;
+        if(priceSpec) optionsCt++;
+        if(optionsCt > 0) optionsLabel += '&nbsp;<span class="badge badge-default">'+optionsCt+'</span>';
+        tabs += '<li class="nav-item"><a aria-controls="tools" aria-expanded="false" class="nav-link" data-toggle="tab" href="#tools" id="tools-tab" role="tab">'+optionsLabel+'</a></li>';
         if (isFastFood) {
             tabs += '<li class="nav-item"><a aria-controls="menu" aria-expanded="false" class="nav-link" data-toggle="tab" href="#menu" id="menu-tab" role="tab">Menu</a></li>';
             tabs += '<li class="nav-item"><a aria-controls="review" aria-expanded="false" class="nav-link" data-toggle="tab" href="#review" id="review-tab" role="tab">Reviews</a></li>';
@@ -10287,6 +10351,12 @@ content += '</section>';
                 recordToolBar += '<a class="btn btn-block btn-primary" href="' + email + '?subject=VIOS bounty: '+buttonLabel+'&body=This is in response to '+encodeURIComponent( emailSubject )+' %0A%0AHere is the permalink:%0A%0AHere is my VeChain address: ">';
                 recordToolBar += '  Submit permalink - ' + email.substring('mailto:'.length);
                 recordToolBar += '&nbsp;&nbsp;<i class="fa fa-envelope"></i>';
+                recordToolBar += '</a>';
+        }
+        if(priceSpec){
+                recordToolBar += '<a class="btn btn-block btn-primary" href="' + email + '?subject=VIOS bounty: '+buttonLabel+'&body=This is in response to '+encodeURIComponent( emailSubject )+' %0A%0AHere is the permalink:%0A%0AHere is my VeChain address: ">';
+                recordToolBar += '  Deposit Payment - ' + processLabel( priceSpec );
+                recordToolBar += '&nbsp;&nbsp;<i class="fa fa-shopping-cart"></i>';
                 recordToolBar += '</a>';
         }
         if (isFastFood) {
