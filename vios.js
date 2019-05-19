@@ -4220,11 +4220,11 @@ gbcol = '<div id="showMeColumn" class="hide col-xl-'+SIZE_SHOW_ME+' col-lg-3 col
 gbcol += '<header id="showMeHeader">';
         gbcol += '<h4 onmouseout="hideCTRLChoices()" onmouseover="showCTRLChoices();"><span id="showMeCount" class="badge badge-info">0/0</span>&nbsp;<span id="showMeMenuSelectLabel">Categories</span>';
 
-        gbcol += '&nbsp;<a '+buildTitle('Categories')+' onmouseover="$(\'#showMeMenuSelectLabel\').addClass(\'text-muted\')" onmouseout="$(\'#showMeMenuSelectLabel\').removeClass(\'text-muted\')" class="hide ctrl-select ctrl-select-c d-inline text-muted" onclick="selectMenuItem(\'showMeMenu\', VIEW_TYPE_CLASSES);">C&nbsp;</a>';
-        gbcol += '<a'+buildTitle('Fields')+' onmouseover="$(\'#showMeMenuSelectLabel\').addClass(\'text-muted\')" onmouseout="$(\'#showMeMenuSelectLabel\').removeClass(\'text-muted\')" class="hide ctrl-select ctrl-select-f d-inline text-muted" onclick="selectMenuItem(\'showMeMenu\', VIEW_TYPE_PROPERTIES);">F&nbsp;</a>';
-        gbcol += '<a'+buildTitle('Text')+' onmouseover="$(\'#showMeMenuSelectLabel\').addClass(\'text-muted\')" onmouseout="$(\'#showMeMenuSelectLabel\').removeClass(\'text-muted\')" class="hide ctrl-select ctrl-select-t d-inline text-muted" onclick="isExpandSearch = true;takeMainFocus(ID_QUERY);selectMenuItem(\'showMeMenu\', VIEW_TYPE_TEXT_PROPERTIES);selectMenuItem(\'groupByMenu\', GROUP_BY_TEXT_VALUE);">T&nbsp;</a>';
-        gbcol += '<a'+buildTitle('Roles')+' onmouseover="$(\'#showMeMenuSelectLabel\').addClass(\'text-muted\')" onmouseout="$(\'#showMeMenuSelectLabel\').removeClass(\'text-muted\')" class="hide ctrl-select ctrl-select-r d-inline text-muted" onclick="selectMenuItem(\'showMeMenu\', VIEW_TYPE_PROPERTIES_IN);">R&nbsp;</a>';
-        gbcol += '<a'+buildTitle('Libraries')+' onmouseover="$(\'#showMeMenuSelectLabel\').addClass(\'text-muted\')" onmouseout="$(\'#showMeMenuSelectLabel\').removeClass(\'text-muted\')" class="hide ctrl-select ctrl-select-l d-inline text-muted" onclick="selectMenuItem(\'showMeMenu\', VIEW_TYPE_GRAPHS);">L&nbsp;</a>';
+        gbcol += '&nbsp;<a '+buildTitle('Categories', 'top', '100', tooltipHideDelay)+' onmouseover="$(\'#showMeMenuSelectLabel\').addClass(\'text-muted\')" onmouseout="$(\'#showMeMenuSelectLabel\').removeClass(\'text-muted\')" class="hide ctrl-select ctrl-select-c d-inline text-muted" onclick="selectMenuItem(\'showMeMenu\', VIEW_TYPE_CLASSES);">C&nbsp;</a>';
+        gbcol += '<a'+buildTitle('Fields', 'top', '100', tooltipHideDelay)+' onmouseover="$(\'#showMeMenuSelectLabel\').addClass(\'text-muted\')" onmouseout="$(\'#showMeMenuSelectLabel\').removeClass(\'text-muted\')" class="hide ctrl-select ctrl-select-f d-inline text-muted" onclick="selectMenuItem(\'showMeMenu\', VIEW_TYPE_PROPERTIES);">F&nbsp;</a>';
+        gbcol += '<a'+buildTitle('Text', 'top', '100', tooltipHideDelay)+' onmouseover="$(\'#showMeMenuSelectLabel\').addClass(\'text-muted\')" onmouseout="$(\'#showMeMenuSelectLabel\').removeClass(\'text-muted\')" class="hide ctrl-select ctrl-select-t d-inline text-muted" onclick="isExpandSearch = true;takeMainFocus(ID_QUERY);selectMenuItem(\'showMeMenu\', VIEW_TYPE_TEXT_PROPERTIES);selectMenuItem(\'groupByMenu\', GROUP_BY_TEXT_VALUE);">T&nbsp;</a>';
+        gbcol += '<a'+buildTitle('Roles', 'top', '100', tooltipHideDelay)+' onmouseover="$(\'#showMeMenuSelectLabel\').addClass(\'text-muted\')" onmouseout="$(\'#showMeMenuSelectLabel\').removeClass(\'text-muted\')" class="hide ctrl-select ctrl-select-r d-inline text-muted" onclick="selectMenuItem(\'showMeMenu\', VIEW_TYPE_PROPERTIES_IN);">R&nbsp;</a>';
+        gbcol += '<a'+buildTitle('Libraries', 'top', '100', tooltipHideDelay)+' onmouseover="$(\'#showMeMenuSelectLabel\').addClass(\'text-muted\')" onmouseout="$(\'#showMeMenuSelectLabel\').removeClass(\'text-muted\')" class="hide ctrl-select ctrl-select-l d-inline text-muted" onclick="selectMenuItem(\'showMeMenu\', VIEW_TYPE_GRAPHS);">L&nbsp;</a>';
         gbcol += '</h4>';
 
 
@@ -9456,6 +9456,9 @@ function loadDescribeResults(xml, opt) {
     var isMovie = false;
     var isMusic = false;
     var isAlbum = false;
+    var starring = [];
+    var subjects = [];
+    var director, runtime;
     var wikiPage;
     var name;
     var title;
@@ -9487,21 +9490,27 @@ function loadDescribeResults(xml, opt) {
 
     var field_len = 0;
     var hideFilterRecordFields = '';
-    var props = {};
+    var fields = {};
+    var roles = {};
     $('rdf\\:Description', xml).each(function(i) {
       field_len += $('*', this).length;
       $('*', this).each(function(j) {
-        var pct = props[$(this).prop('nodeName').toLowerCase()];
+        var objectIRI = $(this).attr('rdf:resource');
+        if(!objectIRI) objectIRI = $(this).attr('rdf:nodeID');
+        var isRole = objectIRI == uri; //propLabel.trim().toLowerCase().endsWith('of') || 
+
+        var pct = (isRole) ? roles[$(this).prop('nodeName').toLowerCase()] : fields[$(this).prop('nodeName').toLowerCase()];
         if(!pct) pct = 0;
-        props[$(this).prop('nodeName').toLowerCase()] = pct + 1;
+        if(isRole) roles[$(this).prop('nodeName').toLowerCase()] = pct + 1;
+        else fields[$(this).prop('nodeName').toLowerCase()] = pct + 1;
       });
       //if(field_len > 60){
       //  filterRecordViewFields = true;
       //  return;
       //}
     });
-    var excludedProps = new Array(props.length);
-    var excludedRoles = new Array(props.length);
+    var excludedProps = new Array(fields.length);
+    var excludedRoles = new Array(roles.length);
     var epidx = 0, eridx = 0;
     if(field_len < 100) {
       filterRecordViewFields = false;
@@ -9526,7 +9535,9 @@ function loadDescribeResults(xml, opt) {
             }
 
 
-            else if(propLabel != 'rdf:type' && props[propLabel] > HIDE_PROPS_THRESHOLD) {
+            else if(propLabel != 'rdf:type' && 
+             ( (!isRole && fields[propLabel] > HIDE_PROPS_THRESHOLD ) || (isRole && roles[propLabel] > HIDE_PROPS_THRESHOLD ) )
+            ) {
               if(!isRole && excludedProps.indexOf(propLabel) < 0) {
                 excludedProps[epidx]=propLabel;
                 epidx++
@@ -9619,6 +9630,19 @@ function loadDescribeResults(xml, opt) {
 
             if (propIRI == 'http://www.w3.org/2000/01/rdf-schema#comment') comments.push(objectValue);
 
+
+
+
+            var facets = matchFocusProperties(propIRI, showRecordRoles);
+            var ctxId = (facets && facets.length > 0) ? facets.attr('class') : createId();
+
+            if(propIRI.endsWith('subject')) subjects.push(' <a class="link-field" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(objLabel) + '</a>');
+
+            if(propIRI == 'http://dbpedia.org/ontology/starring') starring.push(' <a class="link-field" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(objLabel) + '</a>');
+            if(propIRI == 'http://dbpedia.org/ontology/director') director = '<a class="link-field" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(objLabel) + '</a>';
+            if(propIRI.endsWith('runtime')) runtime = objectValue;
+
+
             if (propIRI == 'http://schema.org/seeks') {
               email = subject;
               emailSubject = objectIRI;
@@ -9649,8 +9673,6 @@ function loadDescribeResults(xml, opt) {
             if (isRole && !showRecordRoles) return;
             if (!isRole && showRecordRoles) return;
             //var propIRI = namespaces[qname] + fragId;
-            var facets = matchFocusProperties(propIRI, showRecordRoles);
-            var ctxId = (facets && facets.length > 0) ? facets.attr('class') : createId();
             if (facets && facets.length > 0) propIRI = facets.attr('iri');
             if (filterRecordViewFields && (!facets || facets.length <= 0)) return;
             if (propLabel == 'category') return;
@@ -9720,9 +9742,11 @@ function loadDescribeResults(xml, opt) {
             col = $.createElement('td');
             col.attr('id', colId);
             var gloss = getMainFocus().children('class[iri="http://dbpedia.org/class/yago/Glossary106420781"]');
+            var scripts = '';
 
             if(gloss && gloss.length > 0 && propIRI == 'http://dbpedia.org/property/content' && objectIRI && objectIRI.length > 0){
-              if(ctGloss < SIZE_RESULT_SET) fetchContentDesc(objectIRI, colId);
+              //if(ctGloss < SIZE_RESULT_SET) 
+              scripts +='<script>fetchContentDesc(\'' + sanitizeLabel( objectIRI ) + '\',\'' + colId + '\');</script>';
               ctGloss++;
             }
             var cid = 'copy_' + createId();
@@ -9761,6 +9785,7 @@ function loadDescribeResults(xml, opt) {
                     col.append('&nbsp;<i id="'+pvtoid+'" style="cursor:pointer;" class="hide hidable'+hid+' la la-crosshairs" onclick="var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + processLabel(objectValue) + '\', \''+datatype+'\', undefined, true, false); takeMainFocus(\'' + ctxId + '\', true, false); var pid2 = createId(); '+(showRecordRoles?'addPropertyFacet' :'addPropertyOfFacet')+'(pid2, \'' + propIRI + '\', \'' + propLabel + '\', undefined, undefined, undefined, undefined, true, false); takeMainFocus(pid2);"></i>');
                 }
             }
+            col.append(scripts);
             row.append(col);
 
             body.append(row);
@@ -10223,6 +10248,28 @@ content += '</section>';
         } else if (img) {
             $('#angular_recordViewer').append('<div style="padding-left:.55rem; padding-right:.55rem; ">' + img + '</div>');
         }
+        if(isMovie){
+          //$('#angular_recordViewer').append('<span style="padding-left:.55rem;" class="help-block">PG-13 | '+runtime+' min | Action, Adventure</span>');
+
+          var movieSub = '<span style="padding-left:.55rem;" class="help-block">PG-13 | '+runtime+' min';
+          for(m = 0; m<subjects.length; m++) {
+            if(m == 0) movieSub +=' | ';
+            if(m > 0) movieSub += ', ';
+            movieSub += subjects[m];
+          }
+          movieSub += '</span>';
+          $('#angular_recordViewer').append(movieSub);
+
+
+          movieSub = '<span style="padding-left:.55rem;" class="help-block">Director: '+director;
+          for(m = 0; m<starring.length; m++) {
+            if(m == 0) movieSub +=' | Starring: ';
+            if(m > 0) movieSub += ', ';
+            movieSub += starring[m];
+          }
+          movieSub += '</span><br />';
+          $('#angular_recordViewer').append(movieSub);
+        }
 
         if (long && lat) {
             if (!actions) actions = '';
@@ -10259,10 +10306,10 @@ content += '</section>';
         if(!showRecordRoles && excludedProps.length > 0 && excludedProps[0]) tabs += '<div class="dropdown-divider"></div>';
         if(showRecordRoles && excludedRoles.length > 0 && excludedRoles[0]) tabs += '<div class="dropdown-divider"></div>';
         for(k = 0; !showRecordRoles && k < excludedProps.length && excludedProps[k]; k++){
-          tabs += '<a onclick="javascript:updateInfoTabProperty(\''+excludedProps[k]+'\');" onclick="$(\'#info-tab\').text(\' '+excludedProps[k]+' \'); updatePermalink();" aria-controls="fields" aria-expanded="false" class="dropdown-item show'+((excludedProps[k] == showRecordProperty) ? ' active' : '')+'" data-toggle="tab" href="#fields" id="fields-tab" role="tab" aria-selected="'+((excludedProps[k] == showRecordProperty) ? 'true' : 'false')+'">'+excludedProps[k]+ ' (' + props[excludedProps[k]] +')</a>';
+          tabs += '<a onclick="javascript:updateInfoTabProperty(\''+excludedProps[k]+'\');" onclick="$(\'#info-tab\').text(\' '+excludedProps[k]+' \'); updatePermalink();" aria-controls="fields" aria-expanded="false" class="dropdown-item show'+((excludedProps[k] == showRecordProperty) ? ' active' : '')+'" data-toggle="tab" href="#fields" id="fields-tab" role="tab" aria-selected="'+((excludedProps[k] == showRecordProperty) ? 'true' : 'false')+'">'+excludedProps[k]+ ' (' + fields[excludedProps[k]] +')</a>';
         }
         for(k = 0; showRecordRoles && k < excludedRoles.length && excludedRoles[k]; k++){
-          tabs += '<a onclick="javascript:updateInfoTabProperty(\''+excludedRoles[k]+'\');" onclick="$(\'#info-tab\').text(\' '+excludedRoles[k]+' \'); updatePermalink();" aria-controls="roles" aria-expanded="false" class="dropdown-item show'+((excludedRoles[k] == showRecordProperty) ? ' active' : '')+'" data-toggle="tab" href="#'+((showRecordRoles) ? 'roles' : 'fields')+'" id="roles-tab" role="tab" aria-selected="'+((excludedRoles[k] == showRecordProperty) ? 'true' : 'false')+'">'+excludedRoles[k]+ ' (' + props[excludedRoles[k]] +')</a>';
+          tabs += '<a onclick="javascript:updateInfoTabProperty(\''+excludedRoles[k]+'\');" onclick="$(\'#info-tab\').text(\' '+excludedRoles[k]+' \'); updatePermalink();" aria-controls="roles" aria-expanded="false" class="dropdown-item show'+((excludedRoles[k] == showRecordProperty) ? ' active' : '')+'" data-toggle="tab" href="#'+((showRecordRoles) ? 'roles' : 'fields')+'" id="roles-tab" role="tab" aria-selected="'+((excludedRoles[k] == showRecordProperty) ? 'true' : 'false')+'">'+excludedRoles[k]+ ' (' + roles[excludedRoles[k]] +')</a>';
         }
         tabs += '</div></li>';
 
@@ -10615,7 +10662,7 @@ content += '</section>';
 
 
 
-    fetchPhotos(uri, getQueryText());
+   // fetchPhotos(uri, getQueryText());
 } //recordViewerColumn
 
 
@@ -11283,7 +11330,7 @@ function describe(id, src, isGGGRecord){
 
     var linkOutURI = src;    
     if(linkOutURI.startsWith('http://' + sponger) && false){
-      linkOutURI = linkOutURI.substring(linkOutURI.indexOf('http://'+sponger)+('http://'+sponger).length);
+      linkOutURI = linkOutURI.substring(linkOutURI.indexOf('http://'+sponger)+('/http://'+sponger).length);
       linkOutURI = linkOutURI.substring(linkOutURI.indexOf('http'));
       linkOutURI = linkOutURI.replace('https/', 'https://');
       linkOutURI = linkOutURI.replace('http/', 'http://');
@@ -11309,7 +11356,7 @@ function describe(id, src, isGGGRecord){
 
     var opt = new Object();
     opt.tar = 'record';
-    if(isGGGRecord) opt.srv = getRudiEndpoint( 'http://'+sponger+'sparql' );
+    if(isGGGRecord) opt.srv = getRudiEndpoint( 'http://'+sponger+'/sparql' );
     if(id) {
       opt.srcId = id;
       //if(id == 'recordNavBar') $('.'+id).addClass('loading');
@@ -11970,20 +12017,22 @@ if(false){
         return ret;
     }
 
-    function buildTitle(title, placement){
+    function buildTitle(title, placement, showDelay, hideDelay){
       if(!placement) placement = 'top';
-      return ' title="'+title+'" data-delay=\'{ "show": "'+tooltipShowDelay+'", "hide": "'+tooltipHideDelay+'" }\' data-toggle="tooltip" data-placement="'+placement+'" ';      
+      if(!showDelay) showDelay = tooltipShowDelay;
+      if(!hideDelay) hideDelay = tooltipHideDelay;
+      return ' title="'+title+'" data-delay=\'{ "show": "'+showDelay+'", "hide": "'+hideDelay+'" }\' data-toggle="tooltip" data-placement="'+placement+'" ';      
     }
 
     function setTitle(id, title, placement){
       if(!placement) placement = 'top';
       $('#'+id).attr('title', title);
-      if( !$('#'+id).attr('data-delay')  ){
+      if( !$('#'+id).attr('data-delay') ){
         $('#'+id).attr('data-delay', '{ "show": "'+tooltipShowDelay+'", "hide": "'+tooltipHideDelay+'" }');
         $('#'+id).attr('data-toggle', 'tooltip');
         $('#'+id).attr('data-placement', placement);
       }
-        $('#'+id).removeAttr('data-original-title');
+      $('#'+id).removeAttr('data-original-title');
       //$('#'+id).tooltip();
     }
 
