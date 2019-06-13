@@ -9382,6 +9382,7 @@ function loadDescribeResults(xml, opt) {
     uriLabel = processLabel(uriLabel).replace(/\b\w/g, function(l) {
         return l.toUpperCase()
     });
+    var uriLabelOld = uriLabel;
 
     //xml = xml.replaceAll('rdf\\:RDF', 'rdf');
     //showRecordRoles = $('#showMeMenu').val() == VIEW_TYPE_PROPERTIES_IN;
@@ -9694,7 +9695,7 @@ function loadDescribeResults(xml, opt) {
             //col.addClass('d-md-table-cell');
             proplink.on('click', function (e){
               var pid = createId();
-              setValue(getMainFocus().attr('class'), subject, processLabel(subLabel), 'uri', undefined);
+              setValue(getMainFocus().attr('class'), uri, processLabel(uriLabelOld), 'uri', undefined);
               if(showRecordRoles)addPropertyOfFacet(pid, propIRI, propLabel, undefined, undefined, undefined, undefined, true);
               else addPropertyFacet(pid, propIRI, propLabel, undefined, undefined, undefined, undefined, true);
               takeMainFocus(pid);
