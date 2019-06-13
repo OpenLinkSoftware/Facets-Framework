@@ -9607,9 +9607,9 @@ function loadDescribeResults(xml, opt) {
                 img = '<div class="pull-right"><img onclick="javascript:linkOut(\'' + objectIRI + '\');" style="cursor:pointer;width:200px; margin-left:.55em;" class="class="rounded img-thumbnail" src="' + objectIRI + '"/></div>';
                 imgIri = objectIRI;
             }
-            if (!desc && propIRI.endsWith('comment')) desc = objectValue;
-            if (propIRI.endsWith('abstract')) desc = objectValue;
-            if (propIRI.endsWith('description')) desc = objectValue; // foaf:description always overrides comments 
+            if (!desc && propLabel.endsWith('comment')) desc = objectValue;
+            if (propLabel.endsWith('abstract')) desc = objectValue;
+            if (propLabel.endsWith('description') || propIRI.endsWith('description')) desc = objectValue; // foaf:description always overrides comments 
             if (propLabel.endsWith(':long')) long = objectValue;
             if (propLabel.endsWith(':lat')) lat = objectValue;
             if (propLabel.endsWith(':name')) name = objectValue;
@@ -9675,7 +9675,7 @@ function loadDescribeResults(xml, opt) {
             //var propIRI = namespaces[qname] + fragId;
             if (facets && facets.length > 0) propIRI = facets.attr('iri');
             if (filterRecordViewFields && (!facets || facets.length <= 0)) return;
-            if (propLabel == 'category') return;
+            if (propLabel == 'category' && !showRecordRoles) return;
 
             if (getLabel(propIRI)) propLabel = getLabel(propIRI);
             proplink.append(processLabel(propLabel));
@@ -9694,6 +9694,7 @@ function loadDescribeResults(xml, opt) {
             //col.addClass('d-md-table-cell');
             proplink.on('click', function (e){
               var pid = createId();
+              setValue(getMainFocus().attr('class'), subject, processLabel(subLabel), 'uri', undefined);
               if(showRecordRoles)addPropertyOfFacet(pid, propIRI, propLabel, undefined, undefined, undefined, undefined, true);
               else addPropertyFacet(pid, propIRI, propLabel, undefined, undefined, undefined, undefined, true);
               takeMainFocus(pid);
@@ -9768,13 +9769,13 @@ function loadDescribeResults(xml, opt) {
                 if (subject) {
                     col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + subject + '\', \'' + processLabel(subLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(subLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right la la-thumbs-o-up fa-lg text-inverse"></span><span class="hide hidable'+hid+' record-action-nix pull-right la la-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(subject) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
                     col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field la la-external-link" onclick="linkOut(\''+subject+'\')"></i>');
-                    col.append('&nbsp;<i id="'+pvtoid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field la la-crosshairs" onclick="var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');"></i>');
+                    if(!showRecordRoles) col.append('&nbsp;<i id="'+pvtoid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field la la-crosshairs" onclick="var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');"></i>');
                 } else col.text(objectValue);
             } else {
                 if (objectIRI) {
                     col.html('<a class="link-field" style="text-decoration:none;" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\');">' + processLabel(objLabel) + '</a>&nbsp;</span><span class="hide hidable'+hid+' record-action-highlight pull-right la la-thumbs-o-up fa-lg text-inverse"></span><span class="hide hidable'+hid+' record-action-nix pull-right la la-thumbs-o-down fa-lg text-danger"></span><img style="cursor:pointer" class="pull-right" src="' + getFaviconUrl(objectIRI) + '" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\');"/>');
                     col.append('&nbsp;<i id="'+loid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field la la-external-link" onclick="linkOut(\''+objectIRI+'\')"></i>');
-                    col.append('&nbsp;<i id="'+pvtoid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field la la-crosshairs" onclick="var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\', true, false); var pid2 = createId(); '+(showRecordRoles?'addPropertyFacet' :'addPropertyOfFacet')+'(pid2, \'' + propIRI + '\', \'' + propLabel + '\', undefined, undefined, undefined, undefined, true, false); takeMainFocus(pid2);"></i>');
+                    if(!showRecordRoles) col.append('&nbsp;<i id="'+pvtoid+'" style="cursor:pointer;" class="hide hidable'+hid+' link-field la la-crosshairs" onclick="var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectIRI + '\', \'' + processLabel(objLabel) + '\', \'uri\', \'' + lang + '\'); takeMainFocus(\'' + ctxId + '\', true, false); var pid2 = createId(); '+(showRecordRoles?'addPropertyFacet' :'addPropertyOfFacet')+'(pid2, \'' + propIRI + '\', \'' + propLabel + '\', undefined, undefined, undefined, undefined, true, false); takeMainFocus(pid2);"></i>');
                 } else {
                     var literalClass = 'glyphicon glyphicon-tag';
                     if(propIRI == 'http://www.w3.org/2003/01/geo/wgs84_pos#lat' || propIRI == 'http://www.w3.org/2003/01/geo/wgs84_pos#long' || propIRI == 'http://www.w3.org/2003/01/geo/wgs84_pos#geometry' || propIRI == 'http://www.georss.org/georss/point')literalClass = 'fa fa-map-marker fa-lg';
@@ -9782,7 +9783,7 @@ function loadDescribeResults(xml, opt) {
                     col.html(objectValue); 
                     col.prepend('<span class="hide hidable'+hid+' record-action-nix pull-right la la-thumbs-o-down fa-lg text-danger"></span><span class="hide hidable'+hid+' record-action-highlight pull-right la la-thumbs-o-up fa-lg text-inverse"></span><span style="cursor:pointer" class="pull-right icon-literal '+literalClass+'" onclick="javascript: remove(\'' + facets.attr('class') + '\'); var pid = createId(); setPropertyValue(pid, \'' + NODE_TYPE_PROPERTY + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + sanitizeLabel(objectValue) + '\', \'uri\', \'' + lang + '\');"></span>' );
                     col.append('&nbsp;&nbsp;<i id="' + cid + '" onmouseout="$(\'#' + cid + '\').tooltip(\'hide\');$(\'#' + cid + '\').attr(\'data-original-title\', \'Copy to clipboard\');$(\'#' + cid + '\').tooltip();" ' + buildTitle('Copy to clipboard') + ' onclick="javascript:$(\'#' + cid + '\').tooltip(\'hide\');copy(\'' + sanitizeLabel(objectValue) + '\'); $(\'#' + hid + '\').attr(\'data-original-title\', \'Copied\');$(\'#' + cid + '\').tooltip(\'show\');" style="cursor:pointer;" class="hide hidable'+hid+' fa fa-copy fa-sm"></i>');
-                    col.append('&nbsp;<i id="'+pvtoid+'" style="cursor:pointer;" class="hide hidable'+hid+' la la-crosshairs" onclick="var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + processLabel(objectValue) + '\', \''+datatype+'\', undefined, true, false); takeMainFocus(\'' + ctxId + '\', true, false); var pid2 = createId(); '+(showRecordRoles?'addPropertyFacet' :'addPropertyOfFacet')+'(pid2, \'' + propIRI + '\', \'' + propLabel + '\', undefined, undefined, undefined, undefined, true, false); takeMainFocus(pid2);"></i>');
+                    if(!showRecordRoles) col.append('&nbsp;<i id="'+pvtoid+'" style="cursor:pointer;" class="hide hidable'+hid+' la la-crosshairs" onclick="var pid = createId(); setPropertyValue(pid, \'' + (showRecordRoles ? NODE_TYPE_PROPERTY_OF : NODE_TYPE_PROPERTY) + '\', \'' + ctxId + '\', \'' + propIRI + '\', \'' + propLabel + '\', \'' + objectValue + '\', \'' + processLabel(objectValue) + '\', \''+datatype+'\', undefined, true, false); takeMainFocus(\'' + ctxId + '\', true, false); var pid2 = createId(); '+(showRecordRoles?'addPropertyFacet' :'addPropertyOfFacet')+'(pid2, \'' + propIRI + '\', \'' + propLabel + '\', undefined, undefined, undefined, undefined, true, false); takeMainFocus(pid2);"></i>');
                 }
             }
             col.append(scripts);
@@ -10315,9 +10316,11 @@ content += '</section>';
 
         var optionsLabel = ' Options ';
         var optionsCt = 0;
-        if(isFastFood) optionsCt = 2;
+        //if(isFastFood) optionsCt = 2;
         if(email && isEmailDelivery) optionsCt++;
         if(priceSpec) optionsCt++;
+        if(isFastFood && phone) optionsCt++;
+        if(isFastFood && homepage) optionsCt++;
         if(optionsCt > 0) optionsLabel += '&nbsp;<span class="badge badge-default">'+optionsCt+'</span>';
         tabs += '<li class="nav-item"><a aria-controls="tools" aria-expanded="false" class="nav-link" data-toggle="tab" href="#tools" id="tools-tab" role="tab">'+optionsLabel+'</a></li>';
         if (isFastFood) {
